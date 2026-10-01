@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 200",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.66.0",
@@ -24,14 +26,21 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.13.4",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
+    "@typescript-eslint/parser": "^8.71.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
     "jsdom": "^26.0.0",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",

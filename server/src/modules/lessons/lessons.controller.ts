@@ -6,7 +6,9 @@ import { sendSuccess } from '../../utils/apiResponse.js';
 export class LessonsController {
   static async getLesson(req: Request, res: Response, next: NextFunction) {
     try {
-      const lesson = await LessonsService.getLessonById(req.params.id);
+      const parentId = req.user!.id;
+      const childId = req.query.childId as string | undefined;
+      const lesson = await LessonsService.getLessonById(req.params.id, parentId, childId);
       return sendSuccess(res, lesson);
     } catch (error) {
       next(error);

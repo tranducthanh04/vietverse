@@ -16,7 +16,7 @@ export interface ListenChooseActivityProps {
     correctAnswer: string;
     hints?: string[];
   };
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
@@ -28,7 +28,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
   const handleSelect = (id: string) => {
     setSelectedId(id);
     const isCorrect = id === activity.correctAnswer;
-    onComplete(isCorrect);
+    onComplete(isCorrect, id);
   };
 
   return (

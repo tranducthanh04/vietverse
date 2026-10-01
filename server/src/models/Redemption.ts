@@ -1,6 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-export type RedemptionStatus = 'pending' | 'shipped' | 'delivered';
+export type RedemptionStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface IRedemption extends Document {
   childId: Types.ObjectId;
@@ -38,7 +38,7 @@ const redemptionSchema = new Schema<IRedemption>(
     },
     status: {
       type: String,
-      enum: ['pending', 'shipped', 'delivered'],
+      enum: ['pending', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
       index: true,
     },

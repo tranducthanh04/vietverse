@@ -32,6 +32,6 @@ const explorationLogSchema = new Schema<IExplorationLog>(
   }
 );
 
-explorationLogSchema.index({ childId: 1, kind: 1, refId: 1 });
+explorationLogSchema.index({ childId: 1, kind: 1, refId: 1 }, { unique: true });
 
 export const ExplorationLog = model<IExplorationLog>('ExplorationLog', explorationLogSchema);

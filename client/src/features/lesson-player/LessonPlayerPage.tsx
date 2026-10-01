@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Heart, HelpCircle, X, Check, ArrowRight } from 'lucide-react';
 import { api } from '../../lib/api.js';
@@ -13,7 +13,9 @@ import { VI_LOCALES } from '../../locales/vi.js';
 
 export const LessonPlayerPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const isPreview = searchParams.get('preview') === 'true';
   const { activeChild, updatePointsLocally } = useChildStore();
   const {
     currentSession,
@@ -30,17 +32,23 @@ export const LessonPlayerPage: React.FC = () => {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [victoryData, setVictoryData] = useState<{
     stars: number;
     pointsEarned: number;
     totalPoints: number;
-  }>({ stars: 3, pointsEarned: 10, totalPoints: 0 });
+    isOfflinePending?: boolean;
+  }>({ stars: 3, pointsEarned: 10, totalPoints: 0, isOfflinePending: false });
 
   // Fetch lesson details
   const { data: lesson, isLoading, error } = useQuery({
-    queryKey: ['lesson', lessonId],
+    queryKey: ['lesson', lessonId, activeChild?._id],
     queryFn: async () => {
-      const res = await api.get(`/lessons/${lessonId}`);
+      const url = activeChild?._id
+        ? `/lessons/${lessonId}?childId=${activeChild._id}`
+        : `/lessons/${lessonId}`;
+      const res = await api.get(url);
       return res.data.data;
     },
     enabled: !!lessonId,
@@ -81,7 +89,7 @@ export const LessonPlayerPage: React.FC = () => {
   const currentActivity = activities[currentStep];
   const isLastStep = currentStep === activities.length - 1;
 
-  const handleActivityComplete = (isCorrect: boolean) => {
+  const handleActivityComplete = (isCorrect: boolean, userAnswer?: any) => {
     setLastAnswerCorrect(isCorrect);
     setStepAnswered(true);
 
@@ -92,6 +100,7 @@ export const LessonPlayerPage: React.FC = () => {
     const currentAnswer: ActivityAnswer = {
       activityId: currentActivity.id,
       isCorrect,
+      userAnswer,
     };
 
     const newAnswers = [...answers.filter((a) => a.activityId !== currentActivity.id), currentAnswer];
@@ -100,16 +109,40 @@ export const LessonPlayerPage: React.FC = () => {
   };
 
   const handleNextStep = async () => {
-    if (isLastStep) {
-      // Calculate results and finish lesson
-      const correctCount = answers.filter((a) => a.isCorrect).length;
-      const scorePercent = activities.length > 0 ? Math.round((correctCount / activities.length) * 100) : 100;
+    // If current activity is word_card, make sure it is saved in answers
+    let currentAnswers = [...answers];
+    if (
+      currentActivity?.type === 'word_card' &&
+      !currentAnswers.some((a) => a.activityId === currentActivity.id)
+    ) {
+      const wordCardAnswer: ActivityAnswer = {
+        activityId: currentActivity.id,
+        isCorrect: true,
+        userAnswer: true,
+      };
+      currentAnswers = [...currentAnswers, wordCardAnswer];
+      setAnswers(currentAnswers);
+      saveStepProgress(currentStep, wordCardAnswer);
+    }
 
+    if (isLastStep) {
+      if (isPreview) {
+        setVictoryData({
+          stars: 3,
+          pointsEarned: 0,
+          totalPoints: activeChild?.viviPoints || 0,
+          isOfflinePending: false,
+        });
+        setShowVictory(true);
+        return;
+      }
+      if (isSubmitting) return;
       try {
+        setIsSubmitting(true);
+        setSubmitError(null);
         const res = await api.post(`/lessons/${lesson._id}/complete`, {
           childId: activeChild?._id,
-          scorePercent,
-          answers,
+          answers: currentAnswers,
         });
 
         const { stars, pointsEarned, totalPoints } = res.data.data;
@@ -118,11 +151,39 @@ export const LessonPlayerPage: React.FC = () => {
           await clearSession(lesson._id, activeChild._id);
         }
 
-        setVictoryData({ stars, pointsEarned, totalPoints });
+        setVictoryData({ stars, pointsEarned, totalPoints, isOfflinePending: false });
         setShowVictory(true);
-      } catch (err) {
-        // Fallback for offline completion
-        setShowVictory(true);
+      } catch (err: any) {
+        const isNetworkError = !err.response || err.code === 'ERR_NETWORK';
+        if (isNetworkError) {
+          try {
+            const queue = JSON.parse(localStorage.getItem('vietverse_offline_completions') || '[]');
+            queue.push({
+              lessonId: lesson._id,
+              childId: activeChild?._id,
+              answers: currentAnswers,
+              savedAt: Date.now(),
+            });
+            localStorage.setItem('vietverse_offline_completions', JSON.stringify(queue));
+          } catch { /* localStorage unavailable — skip offline queuing */ }
+
+          if (activeChild) {
+            await clearSession(lesson._id, activeChild._id);
+          }
+
+          setVictoryData({
+            stars: 0,
+            pointsEarned: 0,
+            totalPoints: activeChild?.viviPoints || 0,
+            isOfflinePending: true,
+          });
+          setShowVictory(true);
+        } else {
+          const msg = err.response?.data?.error?.message || 'Có lỗi khi lưu kết quả bài học. Bé bấm thử nộp lại nhé!';
+          setSubmitError(msg);
+        }
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       const nextStep = currentStep + 1;
@@ -180,15 +241,32 @@ export const LessonPlayerPage: React.FC = () => {
 
       {/* Main Activity Area */}
       <main className="flex-1 flex flex-col justify-center items-center py-6 px-4">
-        {ActivityComponent && activeChild && (
+        {ActivityComponent && (activeChild || isPreview) && (
           <ActivityComponent
             activity={currentActivity}
-            childId={activeChild._id}
+            childId={activeChild?._id || 'preview_child'}
             lessonId={lesson._id}
             onComplete={handleActivityComplete}
           />
         )}
       </main>
+
+      {/* Error alert banner if submission failed */}
+      {submitError && (
+        <div className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fadeIn">
+          <span>⚠️ {submitError}</span>
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            onClick={handleNextStep}
+            disabled={isSubmitting}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded-xl ml-4"
+          >
+            {isSubmitting ? 'Đang gửi...' : 'Thử lại'}
+          </Button>
+        </div>
+      )}
 
       {/* Bottom Sticky Action Footer */}
       <footer className="p-4 bg-white border-t-2 border-cream-border sticky bottom-0 z-30">
@@ -214,10 +292,10 @@ export const LessonPlayerPage: React.FC = () => {
             variant={stepAnswered ? 'primary' : 'outline'}
             size="kid"
             onClick={handleNextStep}
-            disabled={!stepAnswered && currentActivity?.type !== 'word_card'}
+            disabled={isSubmitting || (!stepAnswered && currentActivity?.type !== 'word_card')}
             className="flex items-center space-x-2 px-8"
           >
-            <span>{isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
+            <span>{isSubmitting ? 'Đang lưu...' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
             <ArrowRight className="w-6 h-6" />
           </Button>
         </div>
@@ -229,6 +307,7 @@ export const LessonPlayerPage: React.FC = () => {
         stars={victoryData.stars}
         pointsEarned={victoryData.pointsEarned}
         totalPoints={victoryData.totalPoints}
+        isOfflinePending={victoryData.isOfflinePending}
         onBackToMap={() => navigate('/kham-pha')}
         onPlayAgain={() => {
           setShowVictory(false);

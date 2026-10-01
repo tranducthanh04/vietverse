@@ -12,6 +12,7 @@ export interface ChildProfile {
   currentStageId?: any;
   level: number;
   badges: string[];
+  ownedItemIds?: string[];
   screenTimeLimit: number;
 }
 

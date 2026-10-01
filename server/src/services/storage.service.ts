@@ -66,6 +66,16 @@ export class CloudinaryStorageService implements IStorageService {
  */
 export class FallbackDataUriStorageService implements IStorageService {
   async uploadAudio(buffer: Buffer, mimetype: string, filename = 'recording'): Promise<UploadResult> {
+    if (env.NODE_ENV === 'production') {
+      throw new Error(
+        'Cloudinary chưa được cấu hình. Môi trường production không cho phép lưu trữ âm thanh dạng Data URI vào MongoDB.'
+      );
+    }
+
+    if (buffer.length > 2 * 1024 * 1024) {
+      throw new Error('Dung lượng tập tin âm thanh vượt quá 2MB đối với bộ nhớ tạm Data URI');
+    }
+
     const base64Data = buffer.toString('base64');
     const safeMime = mimetype || 'audio/webm';
     const dataUri = `data:${safeMime};base64,${base64Data}`;

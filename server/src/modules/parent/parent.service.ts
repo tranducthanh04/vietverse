@@ -1,8 +1,12 @@
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { Child } from '../../models/Child.js';
 import { LessonProgress } from '../../models/LessonProgress.js';
 import { Recording } from '../../models/Recording.js';
 import { ExplorationLog } from '../../models/ExplorationLog.js';
 import { Lesson } from '../../models/Lesson.js';
+import { User } from '../../models/User.js';
+import { env } from '../../config/env.js';
 
 export interface CompetencyScore {
   key: string;
@@ -13,6 +17,92 @@ export interface CompetencyScore {
 }
 
 export class ParentService {
+  static generateGateChallenge(userId: string) {
+    const num1 = Math.floor(Math.random() * 6) + 4; // 4 to 9
+    const num2 = Math.floor(Math.random() * 6) + 4; // 4 to 9
+    const challengeToken = jwt.sign(
+      {
+        userId,
+        num1,
+        num2,
+        expected: num1 * num2,
+        purpose: 'parent_gate_challenge',
+      },
+      env.JWT_SECRET,
+      { expiresIn: '5m' }
+    );
+
+    return {
+      challengeToken,
+      question: `${num1} × ${num2} = ?`,
+      num1,
+      num2,
+    };
+  }
+
+  static async verifyGate(
+    userId: string,
+    data: { challengeToken?: string; answer?: number; pin?: string; password?: string }
+  ) {
+    let verified = false;
+
+    if (data.pin) {
+      const user = await User.findById(userId);
+      if (user && user.parentGatePin) {
+        const isHashed = user.parentGatePin.startsWith('$2a$') || user.parentGatePin.startsWith('$2b$');
+        if (isHashed) {
+          verified = await bcrypt.compare(data.pin, user.parentGatePin);
+        } else {
+          verified = user.parentGatePin === data.pin;
+          if (verified) {
+            user.parentGatePin = await bcrypt.hash(data.pin, 10);
+            await user.save();
+          }
+        }
+      }
+      if (!verified) {
+        throw { statusCode: 400, message: 'Mã PIN cổng phụ huynh không chính xác' };
+      }
+    } else if (data.password) {
+      const user = await User.findById(userId);
+      if (user && (await bcrypt.compare(data.password, user.passwordHash))) {
+        verified = true;
+      } else {
+        throw { statusCode: 400, message: 'Mật khẩu tài khoản không chính xác' };
+      }
+    } else if (data.challengeToken && data.answer !== undefined) {
+      try {
+        const decoded = jwt.verify(data.challengeToken, env.JWT_SECRET) as any;
+        if (decoded.purpose !== 'parent_gate_challenge' || decoded.userId !== userId) {
+          throw { statusCode: 400, message: 'Thử thách cổng phụ huynh không hợp lệ' };
+        }
+        if (Number(data.answer) !== decoded.expected) {
+          throw { statusCode: 400, message: 'Đáp án phép tính không chính xác, vui lòng thử lại' };
+        }
+        verified = true;
+      } catch (err: any) {
+        if (err.statusCode) throw err;
+        throw { statusCode: 400, message: 'Thử thách cổng phụ huynh đã hết hạn hoặc không hợp lệ' };
+      }
+    } else {
+      throw { statusCode: 400, message: 'Vui lòng cung cấp đáp án thử thách hoặc mã PIN để mở cổng phụ huynh' };
+    }
+
+    if (verified) {
+      const gateToken = jwt.sign(
+        { userId, purpose: 'parent_gate' },
+        env.JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+      return {
+        gateToken,
+        expiresIn: 900,
+      };
+    }
+
+    throw { statusCode: 400, message: 'Xác thực cổng phụ huynh thất bại' };
+  }
+
   static async getChildCompetencyProgress(childId: string, parentId: string) {
     const child = await Child.findOne({ _id: childId, parentId });
     if (!child) {
@@ -105,7 +195,7 @@ export class ParentService {
   }
 
   static async updateScreenTime(parentId: string, childId: string, limitMinutes: number) {
-    const validLimits = [0, 15, 20, 30, 45, 60];
+    const validLimits = [0, 15, 20, 30];
     if (!validLimits.includes(limitMinutes)) {
       throw { statusCode: 400, message: 'Thời gian giới hạn không hợp lệ (15, 20, 30 phút hoặc 0 không giới hạn)' };
     }

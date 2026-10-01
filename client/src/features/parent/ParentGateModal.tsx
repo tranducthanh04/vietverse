@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/ui/Modal.js';
 import { Button } from '../../components/ui/Button.js';
-import { ShieldCheck, AlertCircle } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { api } from '../../lib/api.js';
 
 export interface ParentGateModalProps {
   isOpen: boolean;
@@ -17,31 +18,63 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
 }) => {
   const [num1, setNum1] = useState(7);
   const [num2, setNum2] = useState(8);
+  const [challengeToken, setChallengeToken] = useState<string>('');
   const [userAnswer, setUserAnswer] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [loadingChallenge, setLoadingChallenge] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      // Generate random multiplication question (between 4 and 9)
+  const fetchChallenge = async () => {
+    try {
+      setLoadingChallenge(true);
+      setErrorMsg('');
+      const res = await api.get('/parent/gate/challenge');
+      setNum1(res.data.data.num1);
+      setNum2(res.data.data.num2);
+      setChallengeToken(res.data.data.challengeToken);
+      setUserAnswer('');
+    } catch {
+      // Fallback local numbers if offline
       const n1 = Math.floor(Math.random() * 6) + 4;
       const n2 = Math.floor(Math.random() * 6) + 4;
       setNum1(n1);
       setNum2(n2);
-      setUserAnswer('');
-      setErrorMsg('');
+    } finally {
+      setLoadingChallenge(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchChallenge();
     }
   }, [isOpen]);
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    const expected = num1 * num2;
-    if (parseInt(userAnswer.trim(), 10) === expected) {
-      // Store unlock timestamp for 15 minutes
+    if (!userAnswer.trim()) return;
+
+    try {
+      setIsSubmitting(true);
+      setErrorMsg('');
+
+      const res = await api.post('/parent/gate/verify', {
+        challengeToken,
+        answer: parseInt(userAnswer.trim(), 10),
+      });
+
+      if (res.data.data?.gateToken) {
+        sessionStorage.setItem('vietverse_parent_gate_token', res.data.data.gateToken);
+      }
       sessionStorage.setItem('vietverse_parent_gate_unlocked', (Date.now() + 15 * 60 * 1000).toString());
       onSuccess();
-    } else {
-      setErrorMsg(VI_LOCALES.parentGate.errorWrongAnswer);
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || VI_LOCALES.parentGate.errorWrongAnswer;
+      setErrorMsg(msg);
       setUserAnswer('');
+      fetchChallenge();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -74,18 +107,26 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
           <input
             type="number"
             autoFocus
+            disabled={loadingChallenge || isSubmitting}
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder={VI_LOCALES.parentGate.inputPlaceholder}
-            className="w-full text-center text-xl font-bold p-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none mb-6 min-h-[48px]"
+            placeholder={loadingChallenge ? 'Đang tạo phép tính...' : VI_LOCALES.parentGate.inputPlaceholder}
+            className="w-full text-center text-xl font-bold p-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none mb-6 min-h-[48px] disabled:opacity-50"
           />
 
           <div className="flex space-x-3">
-            <Button type="button" variant="ghost" onClick={onClose} className="flex-1">
+            <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting} className="flex-1">
               Đóng
             </Button>
-            <Button type="submit" variant="primary" className="flex-1">
-              {VI_LOCALES.parentGate.btnConfirm}
+            <Button type="submit" variant="primary" disabled={loadingChallenge || isSubmitting} className="flex-1 flex items-center justify-center">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <span>Đang kiểm tra...</span>
+                </>
+              ) : (
+                VI_LOCALES.parentGate.btnConfirm
+              )}
             </Button>
           </div>
         </form>

@@ -10,7 +10,8 @@ export type PointReason =
   | 'culture_quiz'
   | 'stage_complete'
   | 'treasure'
-  | 'redeem';
+  | 'redeem'
+  | 'refund';
 
 export const COMPETENCY_AREAS = [
   'listening', // Nghe

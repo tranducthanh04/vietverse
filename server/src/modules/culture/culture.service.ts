@@ -4,19 +4,24 @@ import { PointTransaction } from '../../models/PointTransaction.js';
 import { Child } from '../../models/Child.js';
 import { POINT_RULES } from '../../constants/points.js';
 
+function escapeRegex(text: string): string {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 export class CultureService {
   static async getArticles(filter: { category?: string; search?: string }) {
     const query: any = {};
     if (filter.category) {
       query.category = filter.category;
     }
-    if (filter.search) {
+    if (filter.search && filter.search.trim()) {
+      const safeSearch = escapeRegex(filter.search.trim().slice(0, 50));
       query.$or = [
-        { title: { $regex: filter.search, $options: 'i' } },
-        { intro: { $regex: filter.search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { intro: { $regex: safeSearch, $options: 'i' } },
       ];
     }
-    return CultureArticle.find(query).sort({ createdAt: -1 });
+    return CultureArticle.find(query).sort({ createdAt: -1 }).limit(100);
   }
 
   static async getArticleById(id: string) {
@@ -42,12 +47,16 @@ export class CultureService {
       throw { statusCode: 404, message: 'Không tìm thấy bài viết văn hóa' };
     }
 
-    // Log exploration
-    await ExplorationLog.findOneAndUpdate(
-      { childId: child._id, kind: 'culture', refId: article._id },
-      { $setOnInsert: { createdAt: new Date() } },
-      { upsert: true }
-    );
+    // Log exploration idempotently
+    try {
+      await ExplorationLog.findOneAndUpdate(
+        { childId: child._id, kind: 'culture', refId: article._id },
+        { $setOnInsert: { createdAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (err: any) {
+      if (err.code !== 11000) throw err;
+    }
 
     // Evaluate quiz
     let correctCount = 0;
@@ -64,23 +73,36 @@ export class CultureService {
     let pointsAwarded = 0;
 
     if (isAllCorrect) {
-      try {
-        await PointTransaction.create({
-          childId: child._id,
-          delta: POINT_RULES.CULTURE_QUIZ,
-          reason: 'culture_quiz',
-          refId: article._id.toString(),
-          description: `Trả lời đúng đố vui văn hóa: ${article.title}`,
-        });
+      // Check if child has already been awarded points for this culture quiz
+      const existingTxn = await PointTransaction.findOne({
+        childId: child._id,
+        reason: 'culture_quiz',
+        refId: article._id.toString(),
+      });
 
-        await Child.findByIdAndUpdate(child._id, {
-          $inc: { viviPoints: POINT_RULES.CULTURE_QUIZ },
-        });
+      if (!existingTxn) {
+        try {
+          const txn = await PointTransaction.create({
+            childId: child._id,
+            delta: POINT_RULES.CULTURE_QUIZ,
+            reason: 'culture_quiz',
+            refId: article._id.toString(),
+            description: `Trả lời đúng đố vui văn hóa: ${article.title}`,
+          });
 
-        pointsAwarded = POINT_RULES.CULTURE_QUIZ;
-      } catch (err: any) {
-        // Idempotency: points already awarded previously for this article
-        if (err.code !== 11000) throw err;
+          try {
+            await Child.findByIdAndUpdate(child._id, {
+              $inc: { viviPoints: POINT_RULES.CULTURE_QUIZ },
+            });
+            pointsAwarded = POINT_RULES.CULTURE_QUIZ;
+          } catch (childErr) {
+            await PointTransaction.findByIdAndDelete(txn._id);
+            throw childErr;
+          }
+        } catch (err: any) {
+          // Idempotency: duplicate key race condition protection
+          if (err.code !== 11000) throw err;
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Button } from '../../components/ui/Button.js';
@@ -9,6 +9,7 @@ import { VI_LOCALES } from '../../locales/vi.js';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuthStore();
   const { fetchChildren } = useChildStore();
 
@@ -23,11 +24,19 @@ export const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       await login({ email, password });
-      const children = await fetchChildren();
-      if (children.length === 0) {
-        navigate('/bat-dau');
+      const currentUser = useAuthStore.getState().user;
+      const redirectTo = searchParams.get('redirect');
+      if (redirectTo) {
+        navigate(redirectTo);
+      } else if (currentUser?.role === 'admin') {
+        navigate('/admin');
       } else {
-        navigate('/kham-pha');
+        const children = await fetchChildren();
+        if (children.length === 0) {
+          navigate('/bat-dau');
+        } else {
+          navigate('/kham-pha');
+        }
       }
     } catch (err: any) {
       setErrorMsg(err.response?.data?.error?.message || 'Email hoặc mật khẩu không chính xác.');
@@ -96,39 +105,40 @@ export const LoginPage: React.FC = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
-            
-          {/* Quick Demo Accounts for Testing */}
-          <div className="mt-6 pt-5 border-t-2 border-cream-border">
-            <p className="text-xs text-stone-500 font-bold text-center mb-3">
-              🎯 Đăng nhập nhanh tài khoản mẫu:
-            </p>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('phuhuynh@vietverse.edu.vn');
-                  setPassword('Password@123');
-                }}
-                className="p-2.5 text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center text-center"
-              >
-                <span>⭐ Phụ huynh Bé An</span>
-                <span className="text-[10px] text-amber-700 font-normal">Đã học Chặng 1 & 45 ViVi Pts</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('admin@vietverse.edu.vn');
-                  setPassword('Password@123');
-                }}
-                className="p-2.5 text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center text-center"
-              >
-                <span>🛡️ Quản trị Admin</span>
-                <span className="text-[10px] text-red-700 font-normal">Quản lý bài học & đơn quà</span>
-              </button>
+          {/* Quick Demo Accounts for Development / Testing Only */}
+          {import.meta.env.DEV && (
+            <div className="mt-6 pt-5 border-t-2 border-cream-border">
+              <p className="text-xs text-stone-500 font-bold text-center mb-3">
+                🎯 Tài khoản mẫu (Chỉ hiển thị ở chế độ Phát triển):
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('phuhuynh@vietverse.edu.vn');
+                    setPassword('ParentPass123!');
+                  }}
+                  className="p-2.5 min-h-[44px] text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
+                >
+                  <span>⭐ Phụ huynh Bé An</span>
+                  <span className="text-[10px] text-amber-700 font-normal">Chặng 1 • 45 ViVi Pts</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('admin@vietverse.edu.vn');
+                    setPassword('AdminPass123!');
+                  }}
+                  className="p-2.5 min-h-[44px] text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
+                >
+                  <span>🛡️ Quản trị Admin</span>
+                  <span className="text-[10px] text-red-700 font-normal">Quản lý bài học & đơn quà</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
+          <div className="mt-6 pt-4 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.noAccount} </span>
             <Link to="/dang-ky" className="font-bold text-primary hover:underline">
               {VI_LOCALES.auth.registerBtn}
@@ -139,3 +149,5 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+
+

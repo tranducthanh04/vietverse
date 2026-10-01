@@ -3,6 +3,24 @@ import { ParentService } from './parent.service.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
 
 export class ParentController {
+  static async getChallenge(req: Request, res: Response, next: NextFunction) {
+    try {
+      const challenge = ParentService.generateGateChallenge(req.user!.id);
+      return sendSuccess(res, challenge);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyGate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await ParentService.verifyGate(req.user!.id, req.body);
+      return sendSuccess(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getProgress(req: Request, res: Response, next: NextFunction) {
     try {
       const parentId = req.user!.id;

@@ -5,13 +5,19 @@ import { Sparkles, Compass } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const CulturePage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const { data: articles = [], isLoading } = useQuery({
+  const {
+    data: articles = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['culture', selectedCategory],
     queryFn: async () => {
       const res = await api.get('/culture', {
@@ -64,7 +70,9 @@ export const CulturePage: React.FC = () => {
       </div>
 
       {/* Articles Grid */}
-      {isLoading ? (
+      {error ? (
+        <QueryErrorState error={error} onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-culture border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="font-bold text-stone-600">Đang mở trang văn hóa...</p>

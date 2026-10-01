@@ -20,10 +20,14 @@ export function getApiAccessToken(): string | null {
   return inMemoryToken;
 }
 
-// Request interceptor: Attach access token to headers
+// Request interceptor: Attach access token and parent gate token to headers
 api.interceptors.request.use((config) => {
   if (inMemoryToken) {
     config.headers.Authorization = `Bearer ${inMemoryToken}`;
+  }
+  const gateToken = sessionStorage.getItem('vietverse_parent_gate_token');
+  if (gateToken) {
+    config.headers['X-Parent-Gate-Token'] = gateToken;
   }
   return config;
 });
@@ -90,6 +94,15 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    if (
+      error.response?.status === 403 &&
+      typeof (error.response?.data as any)?.error?.code === 'string' &&
+      (error.response?.data as any).error.code.startsWith('PARENT_GATE_')
+    ) {
+      sessionStorage.removeItem('vietverse_parent_gate_token');
+      sessionStorage.removeItem('vietverse_parent_gate_unlocked');
     }
 
     return Promise.reject(error);

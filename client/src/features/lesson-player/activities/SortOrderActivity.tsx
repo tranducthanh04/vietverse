@@ -9,7 +9,7 @@ export interface SortOrderActivityProps {
     orderedItems?: string[];
     correctAnswer?: string[];
   };
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
@@ -32,7 +32,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
 
     if (newSelected.length === targetOrder.length) {
       const isCorrect = newSelected.every((val, i) => val === targetOrder[i]);
-      onComplete(isCorrect);
+      onComplete(isCorrect, newSelected);
     }
   };
 

@@ -8,58 +8,65 @@ Base URL: `/api/v1`.
 | --- | --- | --- | --- |
 | POST | `/auth/register` | Public | Tạo parent + free subscription |
 | POST | `/auth/login` | Public | Nhận access token + refresh cookie |
-| POST | `/auth/refresh` | Refresh cookie/body | Cấp access token mới |
-| POST | `/auth/logout` | Public | Xóa refresh cookie |
+| POST | `/auth/refresh` | Refresh cookie/body | Cấp access token mới + xoay vòng (rotate) refresh token, phát hiện và ngăn chặn token reuse |
+| POST | `/auth/logout` | Public | Thu hồi phiên refresh token / token family trên server và xóa refresh cookie |
 | GET | `/auth/me` | Auth | Lấy user/subscription |
-| GET | `/auth/google` | Public | Placeholder, chưa phải OAuth flow |
+| GET | `/auth/google` | Public | Trả mã 501 `NOT_IMPLEMENTED` (tính năng đang phát triển) |
 
 ## Learning và child
 
 | Method | Path | Auth | Ownership/role |
 | --- | --- | --- | --- |
 | GET | `/children` | Auth | Chỉ children của user |
-| POST | `/children` | Auth | Kiểm tra subscription limit |
-| GET/PUT/DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` |
+| POST | `/children` | Auth | Kiểm tra subscription limit (free: 1, yearly: 3) |
+| GET/PUT | `/children/:id` | Auth | `child.parentId === req.user.id` |
+| DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
-| GET | `/stages?childId=` | Auth | Ownership khi có childId |
-| GET | `/lessons/:id` | Auth | Baseline chưa enforce unlock/plan |
-| POST | `/lessons/:id/complete` | Auth | Child ownership; cần server-side eligibility/chấm |
+| GET | `/stages?childId=` | Auth | Ownership khi có childId, trả trạng thái mở khóa theo điều kiện hoàn thành chặng trước + subscription |
+| GET | `/lessons/:id?childId=` | Auth | Trả bài học; kiểm tra unlock sequence nếu có childId |
+| POST | `/lessons/:id/complete` | Auth | Child ownership; kiểm tra mở khóa, server tự chấm answers (bỏ qua client score), ghi nhận sao và thưởng ViVi Points (+10) |
 
 ## Content và recording
 
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
-| GET | `/stories`, `/stories/:id` | Public | Đọc story |
-| POST | `/stories/:id/explored` | Auth | Ghi exploration cho child |
-| GET | `/culture`, `/culture/:id` | Public | Đọc bài văn hóa |
-| POST | `/culture/:id/quiz` | Auth | Chấm quiz và thưởng |
-| POST | `/recordings` | Auth + multipart | Upload audio/recording |
+| GET | `/stories`, `/stories/:id` | Public | Đọc story (query `type`, `search` được escape regex và cắt tối đa 50 ký tự; limit 100) |
+| POST | `/stories/:id/explored` | Auth | Ghi exploration cho child (idempotent qua unique index `{childId, kind, refId}`) |
+| GET | `/culture`, `/culture/:id` | Public | Đọc bài văn hóa (query `category`, `search` được escape regex; limit 100) |
+| POST | `/culture/:id/quiz` | Auth | Chấm quiz và thưởng (+5 points idempotent, rollback tự động nếu lỗi) |
+| POST | `/recordings` | Auth + multipart | Upload file âm thanh bé đọc (`audio/*`, `application/ogg`; max 5MB; duration capped 180s; Dev/Test fallback Base64 <= 2MB; Production bắt buộc Cloudinary) |
 | GET | `/recordings/children/:childId` | Auth | Parent ownership |
 
 ## Points, parent, admin
 
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
-| GET | `/points/shop/items` | Auth | Item active |
-| GET | `/points/children/:childId` | Auth | Số dư + history của child |
-| POST | `/points/shop/redeem` | Auth | Trừ điểm và tạo redemption |
-| GET | `/parent/progress/:childId` | Auth | Dashboard năng lực |
-| PATCH | `/parent/screen-time` | Auth | Lưu limit |
-| GET | `/admin/kpi` | Admin | KPI |
-| GET | `/admin/learners` | Admin | Danh sách học viên |
-| GET/PATCH | `/admin/redemptions`, `/admin/redemptions/:id` | Admin | Vận hành đơn |
-| GET/POST/PUT | `/admin/lessons...` | Admin | Quản trị bài |
+| GET | `/points/shop/items` | Auth | Item active (trả về cả `stock` tồn kho thực tế) |
+| GET | `/points/children/:childId` | Auth | Số dư + 100 giao dịch gần nhất của child |
+| POST | `/points/shop/redeem` | Auth | Trừ điểm nguyên tử, trừ stock quà vật lý, chặn mua lặp quà ảo, tạo redemption kèm rollback bù nếu thất bại |
+| GET | `/parent/gate/challenge` | Auth | Cấp thử thách phép toán + `challengeToken` ngắn hạn (5m) |
+| POST | `/parent/gate/verify` | Auth | Đối chiếu kết quả toán / PIN `1234`, cấp `gateToken` (15m) |
+| GET | `/parent/progress/:childId` | Auth + Gate Token | Dashboard 4 trụ cột năng lực (bắt buộc header `X-Parent-Gate-Token`) |
+| PATCH | `/parent/screen-time` | Auth + Gate Token | Cập nhật giới hạn phiên màn hình (15, 20, 30 phút hoặc 0) (bắt buộc `X-Parent-Gate-Token`) |
+| GET | `/admin/kpi` | Admin | Thống kê số lượng users, children, lessons completed, redemptions, v.v. |
+| GET | `/admin/learners` | Admin | Danh sách 100 học viên gần nhất |
+| GET | `/admin/redemptions` | Admin | Danh sách 100 đơn đổi quà gần nhất |
+| PATCH | `/admin/redemptions/:id` | Admin | Cập nhật đơn qua `updateRedemptionSchema` (`status`: 'pending'\|'shipped'\|'delivered', `trackingCode`, `carrier`, `notes`) |
+| GET | `/admin/lessons` | Admin | Danh sách tất cả bài học kèm populate stage |
+| POST | `/admin/lessons` | Admin | Tạo bài học mới qua `createLessonSchema` (validate ObjectId `stageId`, `order` 1–100, `activities.type` 7 loại chuẩn) |
+| PUT | `/admin/lessons/:id` | Admin | Cập nhật bài học qua `updateLessonSchema` (partial schema của createLesson) |
 
 ## Response và lỗi
 
 - Success dùng wrapper `sendSuccess`; lỗi dùng `sendError`/central error handler.
-- Mã thường dùng: `400` dữ liệu không hợp lệ, `401` chưa xác thực, `403` không quyền, `404` không tồn tại, `409` trùng.
-- Zod error cần được chuẩn hóa thành lỗi người dùng hiểu được, không làm lộ stack hoặc dữ liệu nội bộ.
+- Mã thường dùng: `400` dữ liệu không hợp lệ (Zod `VALIDATION_ERROR`), `401` chưa xác thực, `403` không quyền (`PARENT_GATE_REQUIRED` / role), `404` không tồn tại, `409` trùng lặp (`DUPLICATE_KEY`), `501` tính năng chưa phát hành (`NOT_IMPLEMENTED`).
+- Zod error được format trả về mảng `{ field, message }` thân thiện và an toàn.
 
 ## Contract cần giữ ổn định
 
-- `childId` luôn phải được kiểm tra ownership.
+- `childId` luôn phải được kiểm tra ownership thuộc về phụ huynh đang đăng nhập.
 - Giao dịch điểm phải có `reason`, `delta`, `refId` và mô tả truy vết được.
-- Với mutation có thể retry, client cần nhận kết quả idempotent thay vì tạo record mới.
+- Với mutation có thể retry, server luôn đảm bảo tính idempotent.
 - Không trả `passwordHash`, secret, refresh token hoặc dữ liệu admin nội bộ cho client.
+
 

@@ -42,7 +42,7 @@ const userSchema = new Schema<IUser>(
     },
     parentGatePin: {
       type: String,
-      default: '1234',
+      default: '$2b$10$KiZdSzb3z0OTqdOXw7BtSu04G1/HvWAbUxuGZ6Fjd39kX5uSeC1xO', // Bcrypt hash of '1234'
     },
   },
   {

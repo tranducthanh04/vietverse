@@ -24,7 +24,7 @@ const pointTransactionSchema = new Schema<IPointTransaction>(
     },
     reason: {
       type: String,
-      enum: ['lesson', 'culture_quiz', 'stage_complete', 'treasure', 'redeem'],
+      enum: ['lesson', 'culture_quiz', 'stage_complete', 'treasure', 'redeem', 'refund'],
       required: true,
       index: true,
     },
@@ -47,7 +47,7 @@ pointTransactionSchema.index(
     unique: true,
     partialFilterExpression: {
       refId: { $type: 'string' },
-      reason: { $ne: 'redeem' }, // Redemptions may have same itemId multiple times
+      reason: { $nin: ['redeem', 'refund'] }, // Redemptions & Refunds can happen multiple times
     },
   }
 );

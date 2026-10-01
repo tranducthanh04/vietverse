@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -11,11 +11,14 @@ import {
   Pause,
   PartyPopper,
   BookOpen,
+  LogIn,
+  AlertCircle,
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const CultureDetailPage: React.FC = () => {
@@ -27,10 +30,19 @@ export const CultureDetailPage: React.FC = () => {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [pointsResult, setPointsResult] = useState<number | null>(null);
   const [isPlayingNarration, setIsPlayingNarration] = useState(false);
+  const [narrationMode, setNarrationMode] = useState<'asset' | 'tts'>('asset');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const { data: article, isLoading } = useQuery({
+  const {
+    data: article,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['cultureArticle', id],
     queryFn: async () => {
       const res = await api.get(`/culture/${id}`);
@@ -44,18 +56,47 @@ export const CultureDetailPage: React.FC = () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
   }, []);
 
   const handleToggleNarration = () => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !article) {
-      alert('Trình duyệt không hỗ trợ phát giọng đọc tự động.');
+    // 1. If currently playing, stop whichever engine is active
+    if (isPlayingNarration) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingNarration(false);
       return;
     }
 
-    if (isPlayingNarration) {
-      window.speechSynthesis.cancel();
-      setIsPlayingNarration(false);
+    // 2. Try real audio asset first if available
+    if (article?.audioUrl && audioRef.current && narrationMode === 'asset') {
+      audioRef.current
+        .play()
+        .then(() => {
+          setIsPlayingNarration(true);
+        })
+        .catch(() => {
+          // If asset 404 or fails, fall back to Speech Synthesis
+          setNarrationMode('tts');
+          playTTS();
+        });
+      return;
+    }
+
+    // 3. Fallback to Speech Synthesis
+    playTTS();
+  };
+
+  const playTTS = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !article) {
+      alert('Trình duyệt không hỗ trợ phát giọng đọc tự động.');
       return;
     }
 
@@ -81,10 +122,29 @@ export const CultureDetailPage: React.FC = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  if (error) {
+    return (
+      <div className="py-12 px-4 max-w-xl mx-auto">
+        <QueryErrorState
+          error={error}
+          onRetry={() => refetch()}
+          title="Không thể tải bài văn hóa"
+          message="Bài viết văn hóa này hiện chưa sẵn sàng. Bạn vui lòng thử lại nhé!"
+        />
+        <div className="text-center mt-4">
+          <Button variant="outline" size="md" onClick={() => navigate('/van-hoa')}>
+            Quay lại Góc Văn Hóa
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading || !article) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center p-4">
-        <div className="w-12 h-12 border-4 border-culture border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-culture border-t-transparent rounded-full animate-spin mb-3" />
+        <span className="text-stone-600 font-bold text-sm">Đang mở trang văn hóa...</span>
       </div>
     );
   }
@@ -94,8 +154,13 @@ export const CultureDetailPage: React.FC = () => {
     setSelectedAnswers((prev) => ({ ...prev, [questionIdx]: optionIdx }));
   };
 
+
   const handleSubmitQuiz = async () => {
-    if (!activeChild?._id) return;
+    if (!activeChild?._id) {
+      navigate(`/dang-nhap?redirect=/van-hoa/${id}`);
+      return;
+    }
+    if (isSubmitting) return;
 
     const formattedAnswers = Object.entries(selectedAnswers).map(([k, v]) => ({
       questionIndex: Number(k),
@@ -103,6 +168,8 @@ export const CultureDetailPage: React.FC = () => {
     }));
 
     try {
+      setIsSubmitting(true);
+      setSubmitError(null);
       const res = await api.post(`/culture/${id}/quiz`, {
         childId: activeChild._id,
         answers: formattedAnswers,
@@ -114,13 +181,31 @@ export const CultureDetailPage: React.FC = () => {
       if (pointsAwarded > 0) {
         updatePointsLocally(totalPoints);
       }
-    } catch (err) {
-      setQuizSubmitted(true);
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error?.message ||
+        'Có lỗi kết nối khi gửi câu trả lời. Bé hãy thử bấm gửi lại nhé!';
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="py-6 px-4 max-w-4xl mx-auto">
+      {/* Real Audio Player element */}
+      {article.audioUrl && (
+        <audio
+          ref={audioRef}
+          src={article.audioUrl}
+          preload="auto"
+          onEnded={() => setIsPlayingNarration(false)}
+          onError={() => {
+            setNarrationMode('tts');
+          }}
+        />
+      )}
+
       {/* Top action row */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <button
@@ -131,27 +216,34 @@ export const CultureDetailPage: React.FC = () => {
           <span>Quay lại Góc Văn Hóa</span>
         </button>
 
-        {/* Audio Narration Button for Kids */}
-        <button
-          onClick={handleToggleNarration}
-          className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all min-h-[44px] ${
-            isPlayingNarration
-              ? 'bg-amber-500 text-white animate-pulse shadow-amber-300'
-              : 'bg-gradient-to-r from-culture-dark to-culture text-white hover:brightness-105'
-          }`}
-        >
-          {isPlayingNarration ? (
-            <>
-              <Pause className="w-4 h-4 fill-white" />
-              <span>Dừng đọc chuyện</span>
-            </>
-          ) : (
-            <>
-              <Volume2 className="w-4 h-4" />
-              <span>Sao Lí Lắc kể chuyện bé nghe 🎧</span>
-            </>
+        {/* Audio Narration Button */}
+        <div className="flex items-center space-x-2">
+          {narrationMode === 'tts' && (
+            <span className="text-[11px] font-bold text-stone-400 hidden sm:inline">
+              (Giọng đọc trợ năng TTS)
+            </span>
           )}
-        </button>
+          <button
+            onClick={handleToggleNarration}
+            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all min-h-[44px] ${
+              isPlayingNarration
+                ? 'bg-amber-500 text-white animate-pulse shadow-amber-300'
+                : 'bg-gradient-to-r from-culture-dark to-culture text-white hover:brightness-105'
+            }`}
+          >
+            {isPlayingNarration ? (
+              <>
+                <Pause className="w-4 h-4 fill-white" />
+                <span>Dừng đọc chuyện</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4" />
+                <span>Sao Lí Lắc kể chuyện 🎧</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Hero Banner */}
@@ -164,7 +256,11 @@ export const CultureDetailPage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-8 text-white">
           <div className="flex items-center space-x-2 mb-2">
             <span className="bg-accent text-stone-900 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">
-              {article.category === 'am_thuc' ? 'Ẩm thực truyền thống' : article.category === 'le_hoi' ? 'Lễ hội dân gian' : 'Di sản văn hóa'}
+              {article.category === 'am_thuc'
+                ? 'Ẩm thực truyền thống'
+                : article.category === 'le_hoi'
+                ? 'Lễ hội dân gian'
+                : 'Di sản văn hóa'}
             </span>
             {pointsResult !== null && (
               <span className="bg-emerald-500 text-white px-3 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1">
@@ -173,129 +269,158 @@ export const CultureDetailPage: React.FC = () => {
               </span>
             )}
           </div>
-          <h1 className="text-kid-xl md:text-kid-2xl font-black font-display leading-tight drop-shadow-sm">
+          <h1 className="text-2xl md:text-3xl font-black font-display drop-shadow-md">
             {article.title}
           </h1>
-          <p className="text-white/95 text-kid-sm mt-2 max-w-2xl leading-relaxed">
-            {article.intro}
-          </p>
         </div>
       </div>
 
-      {/* 4 Fun Facts Cards */}
-      <div className="mb-10">
-        <div className="flex items-center space-x-2 text-culture font-bold text-kid-lg mb-4">
-          <Lightbulb className="w-6 h-6 text-accent" />
-          <span>{VI_LOCALES.culture.funFactsTitle}</span>
+      {/* Intro section */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-cream-border mb-8 shadow-sm">
+        <div className="flex items-center space-x-2 text-culture font-bold text-sm mb-3 uppercase tracking-wider">
+          <BookOpen className="w-4 h-4" />
+          <span>Giới thiệu sự tích</span>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {article.funFacts?.map((fact: string, idx: number) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl p-5 border-2 border-cream-border shadow-sm flex items-start space-x-3 hover:border-culture transition-all"
-            >
-              <span className="w-8 h-8 rounded-full bg-culture-light text-culture-dark font-black flex items-center justify-center flex-shrink-0 text-sm">
-                {idx + 1}
-              </span>
-              <p className="text-stone-700 text-sm md:text-base font-semibold leading-relaxed">
-                {fact}
-              </p>
-            </div>
-          ))}
-        </div>
+        <p className="text-stone-700 leading-relaxed text-base md:text-lg font-medium">
+          {article.intro}
+        </p>
       </div>
 
-      {/* Culture Quiz with Celebration */}
+      {/* Fun Facts Section */}
+      {article.funFacts && article.funFacts.length > 0 && (
+        <div className="mb-10">
+          <h3 className="text-xl font-bold font-display text-stone-800 mb-4 flex items-center space-x-2">
+            <Lightbulb className="w-6 h-6 text-amber-500" />
+            <span>Có thể bé chưa biết?</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {article.funFacts.map((fact: string, idx: number) => (
+              <div
+                key={idx}
+                className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start space-x-3"
+              >
+                <div className="w-7 h-7 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  {idx + 1}
+                </div>
+                <p className="text-stone-700 text-sm leading-relaxed">{fact}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Culture Quiz Section */}
       {article.quiz && article.quiz.length > 0 && (
-        <Card variant="kid" className="p-8 bg-white border-3 border-accent relative overflow-hidden">
+        <div className="bg-gradient-to-br from-cream to-white border-3 border-culture/30 rounded-3xl p-6 md:p-8 shadow-kid relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2 text-primary font-bold text-kid-lg">
-              <Sparkles className="w-6 h-6 text-accent" />
-              <span>Đố vui Văn hóa có thưởng</span>
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-6 h-6 text-culture" />
+              <h3 className="text-xl font-black font-display text-stone-800">
+                Thử Tài Khám Phá Văn Hóa
+              </h3>
             </div>
-            <div className="bg-accent/30 text-stone-800 font-bold px-3 py-1 rounded-full text-xs flex items-center space-x-1">
-              <Award className="w-4 h-4 text-accent-dark" />
-              <span>+5 ViVi Points</span>
-            </div>
+            <span className="text-xs font-bold bg-culture-light/50 text-culture-dark px-3 py-1 rounded-full">
+              Thưởng +5 ViVi Points
+            </span>
           </div>
 
           <p className="text-stone-600 text-sm mb-6">
-            {VI_LOCALES.culture.quizPrompt}
+            Cùng trả lời các câu đố vui để kiểm tra sự am hiểu và rinh thêm điểm thưởng nhé!
           </p>
 
-          <div className="space-y-6 mb-6">
+          <div className="space-y-6">
             {article.quiz.map((q: any, qIdx: number) => (
-              <div key={qIdx} className="bg-cream-muted p-5 rounded-2xl border border-cream-border">
-                <h4 className="font-bold text-stone-800 text-base mb-3 flex items-start space-x-2">
-                  <span className="bg-accent/40 w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                    {qIdx + 1}
-                  </span>
-                  <span>{q.question}</span>
+              <div key={qIdx} className="bg-white rounded-2xl p-5 border border-cream-border">
+                <h4 className="font-bold text-stone-800 mb-3 text-base">
+                  Câu {qIdx + 1}: {q.question}
                 </h4>
-
                 <div className="space-y-2">
                   {q.options.map((opt: string, optIdx: number) => {
                     const isSelected = selectedAnswers[qIdx] === optIdx;
-                    const isCorrect = quizSubmitted && optIdx === q.correctAnswer;
-                    const isWrong = quizSubmitted && isSelected && optIdx !== q.correctAnswer;
-
                     return (
                       <button
                         key={optIdx}
                         onClick={() => handleSelectOption(qIdx, optIdx)}
                         disabled={quizSubmitted}
-                        className={`w-full p-3.5 rounded-xl font-bold text-left text-sm border-2 transition-all flex items-center justify-between min-h-[48px] ${
-                          isCorrect
-                            ? 'bg-emerald-100 border-emerald-500 text-emerald-900 shadow-sm'
-                            : isWrong
-                            ? 'bg-red-100 border-red-500 text-red-800'
-                            : isSelected
-                            ? 'bg-accent/40 border-accent text-stone-900'
-                            : 'bg-white border-cream-border hover:border-accent text-stone-700'
+                        className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
+                          isSelected
+                            ? 'bg-culture/10 border-culture text-culture-dark font-bold'
+                            : 'bg-stone-50 border-transparent hover:border-stone-200 text-stone-700'
                         }`}
                       >
                         <span>{opt}</span>
-                        {isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-culture" />}
                       </button>
                     );
                   })}
                 </div>
-
-                {quizSubmitted && q.explanation && (
-                  <div className="mt-3 p-3 bg-white rounded-xl text-xs text-stone-600 border border-emerald-200 flex items-start space-x-2">
-                    <BookOpen className="w-4 h-4 text-culture flex-shrink-0 mt-0.5" />
-                    <span><strong>Giải nghĩa:</strong> {q.explanation}</span>
-                  </div>
-                )}
               </div>
             ))}
           </div>
 
-          {!quizSubmitted ? (
-            <Button
-              variant="culture"
-              size="lg"
-              onClick={handleSubmitQuiz}
-              disabled={Object.keys(selectedAnswers).length < article.quiz.length}
-              className="w-full text-base font-bold shadow-md"
-            >
-              Gửi câu trả lời
-            </Button>
-          ) : (
-            <div className="text-center p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-300 rounded-3xl">
-              <PartyPopper className="w-10 h-10 text-emerald-600 mx-auto mb-2 animate-bounce" />
-              <span className="text-emerald-800 font-black text-lg block font-display">
-                {pointsResult && pointsResult > 0
-                  ? `🎉 Bé quá xuất sắc! Nhận được +${pointsResult} ViVi Points!`
-                  : '🎉 Chúc mừng bé đã hoàn thành tìm hiểu di sản văn hóa!'}
-              </span>
-              <p className="text-emerald-700 text-xs mt-1">
-                Điểm thưởng đã được cộng vào tài khoản của bé để đổi quà tại Tiệm ViVi!
-              </p>
+          {submitError && (
+            <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+              <span>{submitError}</span>
             </div>
           )}
-        </Card>
+
+          {/* Submission action */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {!quizSubmitted ? (
+              <>
+                <span className="text-xs text-stone-400">
+                  {activeChild
+                    ? `Bé đang trả lời: ${Object.keys(selectedAnswers).length}/${article.quiz.length} câu`
+                    : 'Đăng nhập tài khoản để nhận điểm thưởng vào kho báu'}
+                </span>
+
+                {activeChild ? (
+                  <Button
+                    variant="primary"
+                    size="kid"
+                    onClick={handleSubmitQuiz}
+                    disabled={
+                      Object.keys(selectedAnswers).length < article.quiz.length || isSubmitting
+                    }
+                    isLoading={isSubmitting}
+                  >
+                    <span>Gửi đáp án & Nhận điểm</span>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => navigate(`/dang-nhap?redirect=/van-hoa/${id}`)}
+                    className="flex items-center space-x-2"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Đăng nhập để nhận điểm</span>
+                  </Button>
+                )}
+              </>
+            ) : (
+              <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <PartyPopper className="w-8 h-8 text-emerald-600" />
+                  <div>
+                    <h4 className="font-bold text-emerald-800 text-base">
+                      Tuyệt vời! Bé đã hoàn thành phần khám phá
+                    </h4>
+                    <p className="text-xs text-emerald-600">
+                      {pointsResult && pointsResult > 0
+                        ? `Bé nhận được +${pointsResult} ViVi Points!`
+                        : 'Bé đã từng nhận thưởng cho câu đố này trước đây.'}
+                    </p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => navigate('/van-hoa')}>
+                  Khám phá thêm
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

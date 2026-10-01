@@ -8,7 +8,7 @@ export interface DragMatchActivityProps {
     prompt: string;
     pairs?: Array<{ left: string; right: string }>;
   };
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
@@ -35,7 +35,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
       setSelectedLeft(null);
 
       if (Object.keys(newMatches).length === pairs.length) {
-        onComplete(true);
+        onComplete(true, newMatches);
       }
     } else {
       // Wrong match: brief shake or reset

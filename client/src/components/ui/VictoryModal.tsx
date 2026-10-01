@@ -9,6 +9,7 @@ export interface VictoryModalProps {
   stars: number;
   pointsEarned: number;
   totalPoints: number;
+  isOfflinePending?: boolean;
   onNextLesson?: () => void;
   onBackToMap: () => void;
   onPlayAgain?: () => void;
@@ -19,6 +20,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   stars,
   pointsEarned,
   totalPoints,
+  isOfflinePending,
   onNextLesson,
   onBackToMap,
   onPlayAgain,
@@ -87,16 +89,22 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
         })}
       </div>
 
-      {/* Points & Badges Won */}
-      <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">
-        <div className="flex items-center justify-center gap-2 text-secondary font-display font-extrabold text-2xl">
-          <Award className="w-8 h-8 text-secondary-container" />
-          <span>+{pointsEarned} ViVi Points</span>
+      {/* Points & Badges Won or Offline Pending Status */}
+      {isOfflinePending ? (
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 my-4 text-amber-900 text-xs sm:text-sm font-bold text-center leading-relaxed">
+          📶 Đang lưu bài học trên thiết bị! Khi có mạng Internet, điểm ViVi Points sẽ tự động được đồng bộ vào kho báu của bé.
         </div>
-        <p className="text-xs text-on-secondary-fixed font-bold mt-1">
-          Tổng kho báu hiện tại: <span className="text-primary font-black text-sm">{totalPoints} điểm</span>
-        </p>
-      </div>
+      ) : (
+        <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">
+          <div className="flex items-center justify-center gap-2 text-secondary font-display font-extrabold text-2xl">
+            <Award className="w-8 h-8 text-secondary-container" />
+            <span>+{pointsEarned} ViVi Points</span>
+          </div>
+          <p className="text-xs text-on-secondary-fixed font-bold mt-1">
+            Tổng kho báu hiện tại: <span className="text-primary font-black text-sm">{totalPoints} điểm</span>
+          </p>
+        </div>
+      )}
 
       {/* 3D Action Buttons */}
       <div className="flex flex-col gap-3 mt-6">

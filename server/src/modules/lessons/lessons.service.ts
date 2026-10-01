@@ -4,41 +4,88 @@ import { Child } from '../../models/Child.js';
 import { Stage } from '../../models/Stage.js';
 import { PointTransaction } from '../../models/PointTransaction.js';
 import { POINT_RULES } from '../../constants/points.js';
-import { Types } from 'mongoose';
+import { assertLessonUnlocked } from './lessons.policy.js';
+import { gradeActivity, ActivitySubmission } from './lessons.grading.js';
 
 export class LessonsService {
-  static async getLessonById(lessonId: string) {
+  static async getLessonById(lessonId: string, parentId?: string, childId?: string) {
     const lesson = await Lesson.findById(lessonId).populate('stageId');
     if (!lesson) {
       throw { statusCode: 404, message: 'Không tìm thấy bài học' };
     }
+
+    if (parentId && childId) {
+      await assertLessonUnlocked(childId, lessonId, parentId);
+    }
+
     return lesson;
   }
 
   static async completeLesson(
     lessonId: string,
     parentId: string,
-    data: { childId: string; scorePercent: number; durationSec?: number; answers?: any[] }
+    data: {
+      childId: string;
+      scorePercent?: number;
+      durationSec?: number;
+      answers?: ActivitySubmission[];
+    }
   ) {
-    const child = await Child.findOne({ _id: data.childId, parentId });
-    if (!child) {
-      throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé hoặc không có quyền sở hữu' };
+    // 1. Enforce unlock & ownership
+    const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId);
+
+    // 2. Validate activity IDs belong to this lesson
+    const lessonActivityIds = new Set(lesson.activities.map((a: any) => a.id));
+    if (data.answers && data.answers.length > 0) {
+      for (const ans of data.answers) {
+        if (!lessonActivityIds.has(ans.activityId)) {
+          throw {
+            statusCode: 400,
+            message: `Hoạt động '${ans.activityId}' không thuộc bài học này.`,
+          };
+        }
+      }
     }
 
-    const lesson = await Lesson.findById(lessonId);
-    if (!lesson) {
-      throw { statusCode: 404, message: 'Không tìm thấy bài học' };
+    // 3. Server-side grading of activities
+    let correctActivitiesCount = 0;
+    const totalActivities = lesson.activities.length;
+    let computedScorePercent = 0;
+
+    if (totalActivities === 0) {
+      computedScorePercent = 100;
+    } else {
+      if (!data.answers || data.answers.length === 0) {
+        throw {
+          statusCode: 400,
+          message: 'Thiếu câu trả lời cho các hoạt động trong bài học.',
+        };
+      }
+
+      for (const activity of lesson.activities) {
+        const submission = data.answers.find((a) => a.activityId === activity.id);
+        if (gradeActivity(activity, submission)) {
+          correctActivitiesCount++;
+        }
+      }
+
+      computedScorePercent = Math.round((correctActivitiesCount / totalActivities) * 100);
     }
+
+    // Must reach at least 50% to pass and complete
+    const passed = computedScorePercent >= 50;
 
     // Calculate stars
-    let stars = 1;
-    if (data.scorePercent >= 90) {
+    let stars = 0;
+    if (computedScorePercent >= 90) {
       stars = 3;
-    } else if (data.scorePercent >= 70) {
+    } else if (computedScorePercent >= 70) {
       stars = 2;
+    } else if (passed) {
+      stars = 1;
     }
 
-    // Upsert LessonProgress
+    // Check existing progress
     const existingProgress = await LessonProgress.findOne({
       childId: child._id,
       lessonId: lesson._id,
@@ -46,14 +93,16 @@ export class LessonsService {
 
     const isFirstTimeCompleted = !existingProgress || existingProgress.status !== 'completed';
 
+    // Upsert LessonProgress
+    const newStatus = passed ? 'completed' : existingProgress?.status || 'in_progress';
     const progress = await LessonProgress.findOneAndUpdate(
       { childId: child._id, lessonId: lesson._id },
       {
         $set: {
-          status: 'completed',
-          scorePercent: Math.max(existingProgress?.scorePercent || 0, data.scorePercent),
+          status: newStatus,
+          scorePercent: Math.max(existingProgress?.scorePercent || 0, computedScorePercent),
           stars: Math.max(existingProgress?.stars || 0, stars),
-          completedAt: new Date(),
+          ...(passed ? { completedAt: new Date() } : {}),
         },
         $inc: { attempts: 1 },
       },
@@ -62,87 +111,90 @@ export class LessonsService {
 
     let pointsEarned = 0;
 
-    // Idempotent point awarding for completing this lesson
-    const existingLessonTx = await PointTransaction.findOne({
-      childId: child._id,
-      reason: 'lesson',
-      refId: lesson._id.toString(),
-    });
-
-    if (!existingLessonTx) {
-      try {
-        await PointTransaction.create({
-          childId: child._id,
-          delta: POINT_RULES.LESSON_COMPLETE,
-          reason: 'lesson',
-          refId: lesson._id.toString(),
-          description: `Hoàn thành bài học: ${lesson.title}`,
-        });
-
-        pointsEarned += POINT_RULES.LESSON_COMPLETE;
-      } catch (err: any) {
-        if (err.code !== 11000) throw err;
-      }
-    }
-
-    // Check Stage completion bonus (+20 points)
-    const allStageLessons = await Lesson.find({ stageId: lesson.stageId });
-    const allStageLessonIds = allStageLessons.map((l) => l._id.toString());
-    const completedProgresses = await LessonProgress.find({
-      childId: child._id,
-      lessonId: { $in: allStageLessonIds },
-      status: 'completed',
-    });
-
-    const isStageFullyDone =
-      allStageLessons.length > 0 &&
-      allStageLessons.every((l) =>
-        completedProgresses.some((p) => p.lessonId.toString() === l._id.toString())
-      );
-
-    if (isStageFullyDone) {
-      const existingStageTx = await PointTransaction.findOne({
+    // Only award points if passed and first time completed
+    if (passed && isFirstTimeCompleted) {
+      // Idempotent point awarding for completing this lesson (+10 points)
+      const existingLessonTx = await PointTransaction.findOne({
         childId: child._id,
-        reason: 'stage_complete',
-        refId: lesson.stageId.toString(),
+        reason: 'lesson',
+        refId: lesson._id.toString(),
       });
 
-      if (!existingStageTx) {
+      if (!existingLessonTx) {
         try {
           await PointTransaction.create({
             childId: child._id,
-            delta: POINT_RULES.STAGE_COMPLETE,
-            reason: 'stage_complete',
-            refId: lesson.stageId.toString(),
-            description: `Hoàn thành toàn bộ chặng học!`,
+            delta: POINT_RULES.LESSON_COMPLETE,
+            reason: 'lesson',
+            refId: lesson._id.toString(),
+            description: `Hoàn thành bài học: ${lesson.title}`,
           });
-          pointsEarned += POINT_RULES.STAGE_COMPLETE;
+
+          pointsEarned += POINT_RULES.LESSON_COMPLETE;
         } catch (err: any) {
           if (err.code !== 11000) throw err;
         }
       }
-    }
 
-    // Check Lesson 20 Treasure bonus (+50 points)
-    if (lesson.order === 20) {
-      const existingTreasureTx = await PointTransaction.findOne({
+      // Check Stage completion bonus (+20 points)
+      const allStageLessons = await Lesson.find({ stageId: lesson.stageId });
+      const allStageLessonIds = allStageLessons.map((l) => l._id.toString());
+      const completedProgresses = await LessonProgress.find({
         childId: child._id,
-        reason: 'treasure',
-        refId: `treasure_lesson_${lesson._id.toString()}`,
+        lessonId: { $in: allStageLessonIds },
+        status: 'completed',
       });
 
-      if (!existingTreasureTx) {
-        try {
-          await PointTransaction.create({
-            childId: child._id,
-            delta: POINT_RULES.LESSON_20_TREASURE,
-            reason: 'treasure',
-            refId: `treasure_lesson_${lesson._id.toString()}`,
-            description: `Mở khóa Báu vật Nước Nam (Bài 20)!`,
-          });
-          pointsEarned += POINT_RULES.LESSON_20_TREASURE;
-        } catch (err: any) {
-          if (err.code !== 11000) throw err;
+      const isStageFullyDone =
+        allStageLessons.length > 0 &&
+        allStageLessons.every((l) =>
+          completedProgresses.some((p) => p.lessonId.toString() === l._id.toString())
+        );
+
+      if (isStageFullyDone) {
+        const existingStageTx = await PointTransaction.findOne({
+          childId: child._id,
+          reason: 'stage_complete',
+          refId: lesson.stageId.toString(),
+        });
+
+        if (!existingStageTx) {
+          try {
+            await PointTransaction.create({
+              childId: child._id,
+              delta: POINT_RULES.STAGE_COMPLETE,
+              reason: 'stage_complete',
+              refId: lesson.stageId.toString(),
+              description: `Hoàn thành toàn bộ chặng học!`,
+            });
+            pointsEarned += POINT_RULES.STAGE_COMPLETE;
+          } catch (err: any) {
+            if (err.code !== 11000) throw err;
+          }
+        }
+      }
+
+      // Check Lesson 20 Treasure bonus (+50 points)
+      if (lesson.order === 20) {
+        const existingTreasureTx = await PointTransaction.findOne({
+          childId: child._id,
+          reason: 'treasure',
+          refId: `treasure_lesson_${lesson._id.toString()}`,
+        });
+
+        if (!existingTreasureTx) {
+          try {
+            await PointTransaction.create({
+              childId: child._id,
+              delta: POINT_RULES.LESSON_20_TREASURE,
+              reason: 'treasure',
+              refId: `treasure_lesson_${lesson._id.toString()}`,
+              description: `Mở khóa Báu vật Nước Nam (Bài 20)!`,
+            });
+            pointsEarned += POINT_RULES.LESSON_20_TREASURE;
+          } catch (err: any) {
+            if (err.code !== 11000) throw err;
+          }
         }
       }
     }
@@ -162,9 +214,11 @@ export class LessonsService {
     return {
       progress,
       stars,
+      scorePercent: computedScorePercent,
       pointsEarned,
       totalPoints: updatedChild.viviPoints,
       isFirstTimeCompleted,
+      passed,
     };
   }
 }

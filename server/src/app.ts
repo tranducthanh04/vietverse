@@ -44,8 +44,10 @@ app.use(
       // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
+      } else if (env.NODE_ENV === 'development') {
+        callback(null, true); // Permissive only in local development
       } else {
-        callback(null, true); // Permissive in dev/proxy setup
+        callback(new Error(`CORS blocked: Origin '${origin}' không được phép truy cập API.`));
       }
     },
     credentials: true,

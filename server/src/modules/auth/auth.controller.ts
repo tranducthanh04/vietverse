@@ -74,6 +74,10 @@ export class AuthController {
   }
 
   static async logout(req: Request, res: Response) {
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    const userId = req.user?.id;
+    await AuthService.logout(refreshToken, userId);
+
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
@@ -95,9 +99,12 @@ export class AuthController {
     }
   }
 
-  static async googleAuthPlaceholder(req: Request, res: Response) {
-    return sendSuccess(res, {
-      message: 'Google SSO interface ready for production OAuth client credentials integration',
-    });
+  static async googleAuthPlaceholder(_req: Request, res: Response) {
+    return sendError(
+      res,
+      'Tính năng đăng nhập qua Google OAuth đang trong giai đoạn phát triển và chưa được kích hoạt',
+      501,
+      'NOT_IMPLEMENTED'
+    );
   }
 }

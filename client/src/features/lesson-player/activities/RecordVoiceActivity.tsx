@@ -15,7 +15,7 @@ export interface RecordVoiceActivityProps {
   };
   childId: string;
   lessonId: string;
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
@@ -39,23 +39,24 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!audioBlob) return;
     try {
       setIsUploading(true);
-      await uploadRecording({
+      setUploadError(null);
+      const res = await uploadRecording({
         childId,
         lessonId,
         activityId: activity.id,
         wordOrPrompt: activity.targetWord || activity.prompt,
       });
       setIsSubmitted(true);
-      onComplete(true);
-    } catch (err) {
-      // In offline or local fallback, still complete the activity
-      setIsSubmitted(true);
-      onComplete(true);
+      onComplete(true, res?.id || activity.targetWord || true);
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
+      setUploadError(msg);
     } finally {
       setIsUploading(false);
     }
@@ -120,18 +121,6 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
               <span className="text-stone-600 font-bold text-kid-base">
                 {VI_LOCALES.lesson.recordPrompt}
               </span>
-
-              {/* Demo voice option for devices/environments without physical mic */}
-              <button
-                type="button"
-                onClick={() => {
-                  onComplete(true);
-                  setIsSubmitted(true);
-                }}
-                className="text-xs text-stone-400 hover:text-stone-600 underline font-semibold mt-2"
-              >
-                (Thử giọng mẫu / Bỏ qua thu âm)
-              </button>
             </div>
           )
         ) : (
@@ -164,6 +153,15 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
               </Button>
             </div>
 
+            {uploadError && (
+              <div className="flex flex-col items-center space-y-2 bg-red-50 text-red-700 border border-red-200 rounded-2xl p-4 text-sm w-full">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                  <span className="font-medium">{uploadError}</span>
+                </div>
+              </div>
+            )}
+
             {!isSubmitted ? (
               <Button
                 variant="primary"
@@ -172,7 +170,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 onClick={handleSubmit}
                 className="w-full max-w-xs"
               >
-                Gửi giọng đọc của bé
+                {uploadError ? 'Thử gửi lại giọng đọc' : 'Gửi giọng đọc của bé'}
               </Button>
             ) : (
               <div className="text-emerald-600 font-bold flex items-center space-x-1">

@@ -6,7 +6,6 @@ export interface User {
   email: string;
   displayName: string;
   role: 'parent' | 'admin';
-  parentGatePin?: string;
 }
 
 export interface Subscription {

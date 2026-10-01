@@ -9,7 +9,7 @@ describe('Client Utilities', () => {
   });
 
   it('should merge tailwind class names properly', () => {
-    const result = cn('bg-red-500 text-white', 'p-4', false && 'hidden', 'bg-blue-500');
+    const result = cn('bg-red-500 text-white', 'p-4', undefined, 'bg-blue-500');
     expect(result).toContain('bg-blue-500');
     expect(result).not.toContain('bg-red-500');
   });

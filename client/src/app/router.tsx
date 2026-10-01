@@ -7,6 +7,9 @@ import { KidsLayout } from './layouts/KidsLayout.js';
 import { ParentLayout } from './layouts/ParentLayout.js';
 import { AdminLayout } from './layouts/AdminLayout.js';
 
+// Guard
+import { ProtectedRoute } from '../components/ui/ProtectedRoute.js';
+
 // Pages
 import { LandingPage } from '../features/public/LandingPage.js';
 import { PricingPage } from '../features/public/PricingPage.js';
@@ -30,6 +33,8 @@ import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
 
+import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
+
 export const router = createBrowserRouter([
   // Public Landing & Pricing
   {
@@ -43,36 +48,59 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Onboarding Wizard
+  // Public Stories & Culture (Open to visitors and children alike without login barrier)
   {
-    path: '/bat-dau',
-    element: <OnboardingWizard />,
-  },
-
-  // Standalone Lesson Player (Full Screen Experience)
-  {
-    path: '/hoc/:lessonId',
-    element: <LessonPlayerPage />,
-  },
-
-  // Kids World (Quest Map, Stories, Culture, Rewards)
-  {
-    element: <KidsLayout />,
+    element: <AdaptiveContentLayout />,
     children: [
-      { path: 'kham-pha', element: <QuestMapPage /> },
       { path: 'kho-truyen', element: <StoriesPage /> },
       { path: 'kho-truyen/:id', element: <StoryDetailPage /> },
       { path: 'van-hoa', element: <CulturePage /> },
       { path: 'van-hoa/:id', element: <CultureDetailPage /> },
+    ],
+  },
+
+  // Onboarding Wizard (protected — must be logged in to add a child)
+  {
+    path: '/bat-dau',
+    element: (
+      <ProtectedRoute>
+        <OnboardingWizard />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Standalone Lesson Player (protected)
+  {
+    path: '/hoc/:lessonId',
+    element: (
+      <ProtectedRoute>
+        <LessonPlayerPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Kids World (protected — requires login)
+  {
+    element: (
+      <ProtectedRoute>
+        <KidsLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: 'kham-pha', element: <QuestMapPage /> },
       { path: 'diem-thuong', element: <PointsShopPage /> },
       { path: 'phong-bau-vat', element: <TreasureRoomPage /> },
     ],
   },
 
-  // Parent Portal
+  // Parent Portal (protected)
   {
     path: '/phu-huynh',
-    element: <ParentLayout />,
+    element: (
+      <ProtectedRoute>
+        <ParentLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Navigate to="/phu-huynh/tien-do" replace /> },
       { path: 'tien-do', element: <ParentDashboardPage /> },
@@ -81,10 +109,14 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Admin Portal
+  // Admin Portal (protected)
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: 'bai-hoc', element: <AdminLessonsPage /> },

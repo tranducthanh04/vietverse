@@ -5,6 +5,7 @@ import { BookOpen, Search, Music, Clock } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const StoriesPage: React.FC = () => {
@@ -12,7 +13,12 @@ export const StoriesPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: stories = [], isLoading } = useQuery({
+  const {
+    data: stories = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['stories', selectedType, searchQuery],
     queryFn: async () => {
       const res = await api.get('/stories', {
@@ -78,7 +84,9 @@ export const StoriesPage: React.FC = () => {
       </div>
 
       {/* Stories Grid */}
-      {isLoading ? (
+      {error ? (
+        <QueryErrorState error={error} onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="font-bold text-stone-600">Đang mở trang sách...</p>

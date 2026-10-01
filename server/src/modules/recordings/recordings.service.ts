@@ -33,7 +33,7 @@ export class RecordingsService {
       activityId: data.activityId,
       url: uploadRes.url,
       publicId: uploadRes.publicId,
-      durationSec: data.durationSec || 0,
+      durationSec: data.durationSec ? Math.max(0, Math.min(180, Number(data.durationSec))) : 0,
       wordOrPrompt: data.wordOrPrompt || '',
     });
 

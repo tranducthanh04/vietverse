@@ -9,10 +9,10 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith('audio/') || file.mimetype === 'video/mp4' || file.mimetype === 'video/webm') {
+    if (file.mimetype.startsWith('audio/') || file.mimetype === 'application/ogg') {
       cb(null, true);
     } else {
-      cb(new Error('Chỉ chấp nhận tập tin âm thanh (audio/webm, audio/mp4, mp3, wav)'));
+      cb(new Error('Chỉ chấp nhận tập tin âm thanh hợp lệ (audio/webm, audio/mp4, mp3, wav, ogg)'));
     }
   },
 });

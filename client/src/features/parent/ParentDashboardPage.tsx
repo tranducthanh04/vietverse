@@ -4,12 +4,18 @@ import { CheckCircle2, Clock, Mic, BookOpen, HeartHandshake, Compass } from 'luc
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const ParentDashboardPage: React.FC = () => {
   const { activeChild } = useChildStore();
 
-  const { data: progressData, isLoading } = useQuery({
+  const {
+    data: progressData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['parentProgress', activeChild?._id],
     queryFn: async () => {
       const res = await api.get(`/parent/progress/${activeChild?._id}`);
@@ -17,6 +23,19 @@ export const ParentDashboardPage: React.FC = () => {
     },
     enabled: !!activeChild?._id,
   });
+
+  if (error) {
+    return (
+      <div className="py-8">
+        <QueryErrorState
+          error={error}
+          onRetry={() => refetch()}
+          title="Không thể tải báo cáo tiến độ"
+          message="Hệ thống chưa thể lấy dữ liệu phân tích học tập của bé lúc này. Phụ huynh hãy bấm thử lại nhé!"
+        />
+      </div>
+    );
+  }
 
   if (isLoading || !progressData) {
     return (

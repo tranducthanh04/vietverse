@@ -6,6 +6,7 @@ import { Lesson } from '../models/Lesson.js';
 import { ShopItem } from '../models/ShopItem.js';
 import { Story } from '../models/Story.js';
 import { CultureArticle } from '../models/CultureArticle.js';
+import { ExplorationLog } from '../models/ExplorationLog.js';
 
 describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
   it('executes full 11-step end-to-end user journey across all features and button actions', async () => {
@@ -183,7 +184,10 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
       .set('Authorization', `Bearer ${parentToken}`)
       .send({
         childId,
-        scorePercent: 100,
+        answers: [
+          { activityId: 'act-1', userAnswer: 'A' },
+          { activityId: 'act-2', isCorrect: true, userAnswer: true },
+        ],
         durationSec: 120,
       });
 
@@ -201,7 +205,10 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
       .set('Authorization', `Bearer ${parentToken}`)
       .send({
         childId,
-        scorePercent: 100,
+        answers: [
+          { activityId: 'act-1', userAnswer: 'A' },
+          { activityId: 'act-2', isCorrect: true, userAnswer: true },
+        ],
         durationSec: 90,
       });
 
@@ -225,12 +232,36 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     expect(cultureRes.body.data.pointsAwarded).toBe(5);
     expect(cultureRes.body.data.totalPoints).toBe(15);
 
+    // Verify Culture Quiz Idempotency: Retrying does not double award points
+    const retryCultureRes = await request(app)
+      .post(`/api/v1/culture/${cultureId}/quiz`)
+      .set('Authorization', `Bearer ${parentToken}`)
+      .send({
+        childId,
+        answers: [{ questionIndex: 0, selectedAnswer: 1 }],
+      });
+
+    expect(retryCultureRes.status).toBe(200);
+    expect(retryCultureRes.body.data.pointsAwarded).toBe(0); // 0 points on retry!
+    expect(retryCultureRes.body.data.totalPoints).toBe(15); // balance still 15!
+
+    const expLogs = await ExplorationLog.find({ childId, kind: 'culture', refId: cultureId });
+    expect(expLogs.length).toBe(1); // exactly 1 log!
+
     // ==========================================
-    // STEP 8: Parent Portal - Check Child 4 Competency Progress without Ranking Numbers
+    // STEP 8: Parent Portal - Pass Parent Gate & Check Child 4 Competency Progress
     // ==========================================
+    const gateRes = await request(app)
+      .post('/api/v1/parent/gate/verify')
+      .set('Authorization', `Bearer ${parentToken}`)
+      .send({ pin: '1234' });
+    expect(gateRes.status).toBe(200);
+    const gateToken = gateRes.body.data.gateToken;
+
     const parentRes = await request(app)
       .get(`/api/v1/parent/progress/${childId}`)
-      .set('Authorization', `Bearer ${parentToken}`);
+      .set('Authorization', `Bearer ${parentToken}`)
+      .set('X-Parent-Gate-Token', gateToken);
 
     expect(parentRes.status).toBe(200);
     expect(parentRes.body.success).toBe(true);

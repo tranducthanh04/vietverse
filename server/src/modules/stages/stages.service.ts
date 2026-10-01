@@ -3,12 +3,13 @@ import { Lesson } from '../../models/Lesson.js';
 import { LessonProgress } from '../../models/LessonProgress.js';
 import { Subscription } from '../../models/Subscription.js';
 import { Child } from '../../models/Child.js';
+import { isSubscriptionPaid } from '../lessons/lessons.policy.js';
 
 export class StagesService {
   static async getStagesForChild(parentId: string, childId?: string) {
     const stages = await Stage.find().sort({ order: 1 });
     const subscription = await Subscription.findOne({ userId: parentId });
-    const isPaid = Boolean(subscription && (subscription.plan === 'monthly' || subscription.plan === 'yearly'));
+    const isPaid = isSubscriptionPaid(subscription);
 
     if (!childId) {
       // Just return stage overview

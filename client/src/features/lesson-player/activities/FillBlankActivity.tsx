@@ -9,7 +9,7 @@ export interface FillBlankActivityProps {
     options?: Array<{ id: string; text: string }>;
     correctAnswer: string;
   };
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
@@ -24,7 +24,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
     const isCorrect =
       letter.toLowerCase() === blank.missing.toLowerCase() ||
       optionId.toLowerCase() === activity.correctAnswer.toLowerCase();
-    onComplete(isCorrect);
+    onComplete(isCorrect, letter);
   };
 
   const sentenceParts = blank.sentence.split('__');

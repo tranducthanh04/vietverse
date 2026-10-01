@@ -4,6 +4,7 @@ import { Award, Gift, Check, AlertCircle, Sparkles, History, ShoppingBag, Truck,
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const PointsShopPage: React.FC = () => {
@@ -19,7 +20,12 @@ export const PointsShopPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resultMsg, setResultMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const { data: items = [], isLoading, refetch } = useQuery({
+  const {
+    data: items = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['shopItems'],
     queryFn: async () => {
       const res = await api.get('/points/shop/items');
@@ -236,7 +242,9 @@ export const PointsShopPage: React.FC = () => {
           </div>
 
           {/* Grid quà tặng */}
-          {isLoading ? (
+          {error ? (
+            <QueryErrorState error={error} onRetry={() => refetch()} />
+          ) : isLoading ? (
             <div className="text-center py-16">
               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="font-bold text-on-surface-variant">Đang mở tủ quà tặng...</p>
@@ -245,6 +253,15 @@ export const PointsShopPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               {filteredItems.map((item: any) => {
                 const canAfford = currentPoints >= item.costPoints;
+                const isOwned =
+                  item.type === 'virtual' &&
+                  Boolean(
+                    activeChild?.ownedItemIds?.some(
+                      (id: any) => (id._id || id).toString() === item._id.toString()
+                    )
+                  );
+                const isOutOfStock =
+                  item.type === 'physical' && item.stock !== undefined && item.stock <= 0;
 
                 return (
                   <div
@@ -273,9 +290,21 @@ export const PointsShopPage: React.FC = () => {
                       <h3 className="font-display text-base font-bold text-on-surface mb-1">
                         {item.name}
                       </h3>
-                      <p className="text-xs text-on-surface-variant mb-4">
+                      <p className="text-xs text-on-surface-variant mb-2">
                         {item.description || 'Món quà ý nghĩa khích lệ tinh thần học tập tiếng Việt của bé.'}
                       </p>
+
+                      {item.type === 'physical' && (
+                        <div className="mb-3 text-[11px] font-bold">
+                          {item.stock !== undefined && item.stock > 0 ? (
+                            <span className={item.stock <= 5 ? 'text-amber-600' : 'text-stone-500'}>
+                              📦 Còn lại: {item.stock} món
+                            </span>
+                          ) : (
+                            <span className="text-red-500">⚠️ Tạm thời hết hàng</span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between">
@@ -284,17 +313,30 @@ export const PointsShopPage: React.FC = () => {
                         <span>{item.costPoints} ViVi</span>
                       </div>
 
-                      <button
-                        onClick={() => setSelectedItem(item)}
-                        disabled={!canAfford}
-                        className={`px-4 py-2 rounded-full font-bold text-xs select-none cursor-pointer ${
-                          canAfford
-                            ? 'btn-3d-accent'
-                            : 'bg-surface-container text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30'
-                        }`}
-                      >
-                        {canAfford ? 'Đổi Quà' : 'Chưa đủ điểm'}
-                      </button>
+                      {isOwned ? (
+                        <span className="px-3.5 py-1.5 rounded-full font-bold text-xs bg-emerald-100 text-emerald-700 border border-emerald-300 flex items-center gap-1">
+                          <Check className="w-3.5 h-3.5" /> Đã sở hữu
+                        </span>
+                      ) : isOutOfStock ? (
+                        <button
+                          disabled
+                          className="px-4 py-2 rounded-full font-bold text-xs bg-stone-200 text-stone-500 border border-stone-300 cursor-not-allowed"
+                        >
+                          Hết hàng
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedItem(item)}
+                          disabled={!canAfford}
+                          className={`px-4 py-2 rounded-full font-bold text-xs select-none cursor-pointer ${
+                            canAfford
+                              ? 'btn-3d-accent'
+                              : 'bg-surface-container text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30'
+                          }`}
+                        >
+                          {canAfford ? 'Đổi Quà' : 'Chưa đủ điểm'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

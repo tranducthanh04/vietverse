@@ -11,7 +11,7 @@ export interface ActivityRendererProps {
   activity: any;
   childId: string;
   lessonId: string;
-  onComplete: (isCorrect: boolean) => void;
+  onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
 export type ActivityComponent = React.FC<any>;

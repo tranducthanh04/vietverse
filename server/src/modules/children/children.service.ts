@@ -1,6 +1,11 @@
 import { Child, IChild } from '../../models/Child.js';
 import { Stage } from '../../models/Stage.js';
 import { Subscription } from '../../models/Subscription.js';
+import { LessonProgress } from '../../models/LessonProgress.js';
+import { Recording } from '../../models/Recording.js';
+import { ExplorationLog } from '../../models/ExplorationLog.js';
+import { PointTransaction } from '../../models/PointTransaction.js';
+import { Redemption } from '../../models/Redemption.js';
 import { Types } from 'mongoose';
 
 export class ChildrenService {
@@ -60,11 +65,22 @@ export class ChildrenService {
   }
 
   static async deleteChild(childId: string, parentId: string) {
-    const deleted = await Child.findOneAndDelete({ _id: childId, parentId });
-    if (!deleted) {
+    const child = await Child.findOne({ _id: childId, parentId });
+    if (!child) {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
     }
-    return deleted;
+
+    // Cascade delete child's learning data, points, and recordings for privacy compliance
+    await Promise.all([
+      Child.findByIdAndDelete(child._id),
+      LessonProgress.deleteMany({ childId: child._id }),
+      Recording.deleteMany({ childId: child._id }),
+      ExplorationLog.deleteMany({ childId: child._id }),
+      PointTransaction.deleteMany({ childId: child._id }),
+      Redemption.deleteMany({ childId: child._id }),
+    ]);
+
+    return child;
   }
 
   static async selectChild(childId: string, parentId: string) {
