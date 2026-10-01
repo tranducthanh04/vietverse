@@ -46,6 +46,8 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 ## Deploy và môi trường
 
 - Client: Vercel/Vite, proxy `/api`.
+- Vercel project dùng `client` làm Root Directory, build bằng `npm run build` và phát hành thư mục `dist`.
+- GitHub integration tự động deploy: push vào `main` tạo production deployment; push các branch khác hoặc mở Pull Request tạo preview deployment và bình luận vào PR.
 - Server: Render, health `/health`.
 - Database: MongoDB local hoặc Atlas.
 - Env được validate bằng Zod nhưng có default secret; production phải bắt buộc secret ngoài default.
