@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import helmet from 'helmet';
+import * as helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { pinoHttp } from 'pino-http';
@@ -25,7 +25,10 @@ export const app = express();
 
 // Security and utility middlewares
 app.use(
-  helmet({
+  helmet.default ? helmet.default({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }) : (helmet as any)({
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
