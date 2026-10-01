@@ -4,9 +4,11 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.use(authMiddleware);
+// Publicly readable for all learners and guests
 router.get('/', CultureController.getArticles);
 router.get('/:id', CultureController.getArticle);
-router.post('/:id/quiz', CultureController.submitQuiz);
+
+// Submitting quiz requires parent/child auth
+router.post('/:id/quiz', authMiddleware, CultureController.submitQuiz);
 
 export default router;

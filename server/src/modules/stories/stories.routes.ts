@@ -4,9 +4,11 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.use(authMiddleware);
+// Publicly readable for all learners and guests
 router.get('/', StoriesController.getStories);
 router.get('/:id', StoriesController.getStory);
-router.post('/:id/explored', StoriesController.markExplored);
+
+// Tracking exploration requires parent/child auth
+router.post('/:id/explored', authMiddleware, StoriesController.markExplored);
 
 export default router;

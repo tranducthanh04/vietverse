@@ -864,6 +864,54 @@ export async function runSeed() {
     },
   ];
 
+  
+  cultureData.push(
+    {
+      category: 'le_hoi',
+      title: 'Tết Trung Thu - Rước Đèn Phá Cỗ',
+      intro: 'Tết Trung Thu là ngày hội trăng tròn rực rỡ nhất trong năm dành cho thiếu nhi Việt Nam.',
+      coverImage: 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=400',
+      audioUrl: '/audio/culture/trung-thu.mp3',
+      funFacts: [
+        'Vào đêm rằm tháng Tám, các bé cùng nhau rước đèn ông sao lấp lánh và xem múa lân sư rồng.',
+        'Mâm cỗ Trung Thu có quả bưởi tạo hình chú cún con xinh xắn, hồng đỏ và bánh nướng, bánh dẻo.',
+        'Sự tích Chú Cuội ngồi gốc cây đa và Chị Hằng Nga xinh đẹp luôn gắn liền với ánh trăng rằm.',
+        'Đèn lồng truyền thống được làm thủ công từ nan tre vót nhẵn dán giấy bóng kính rực rỡ sắc màu.',
+      ],
+      quiz: [
+        {
+          question: 'Đèn lồng truyền thống quen thuộc nhất trong đêm Trung Thu có hình gì?',
+          options: ['Hình ông sao 5 cánh', 'Hình chiếc xe ô tô', 'Hình tam giác'],
+          correctAnswer: 0,
+          explanation: 'Đèn ông sao 5 cánh rực rỡ là biểu tượng tuổi thơ thân thương của mọi thế hệ trẻ em Việt Nam.',
+        },
+      ],
+      tags: ['Trung Thu', 'Lễ hội', 'Dân gian'],
+    },
+    {
+      category: 'di_san',
+      title: 'Trống Đồng Đông Sơn - Hào Khí Ngàn Năm',
+      intro: 'Trống Đồng Đông Sơn là bảo vật quốc gia thiêng liêng, biểu tượng cho nền văn minh rực rỡ của tổ tiên Nước Nam.',
+      coverImage: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400',
+      audioUrl: '/audio/culture/trong-dong.mp3',
+      funFacts: [
+        'Ở chính giữa mặt trống đồng là hình tượng Ngôi sao Mặt trời tỏa rạng ánh hào quang.',
+        'Xung quanh mặt trống chạm khắc những đàn chim Lạc bay lượn và cảnh người dân giã gạo, chèo thuyền.',
+        'Trống đồng được đúc bằng hợp kim đồng vô cùng tinh xảo từ hơn 2000 năm trước thời các Vua Hùng.',
+        'Tiếng trống đồng âm vang hào hùng nhắc nhở chúng ta luôn tự hào là con Rồng cháu Tiên.',
+      ],
+      quiz: [
+        {
+          question: 'Hình tượng nào nằm ở chính giữa mặt Trống Đồng Đông Sơn?',
+          options: ['Ngôi sao Mặt trời', 'Bông hoa hồng', 'Vầng trăng khuyết'],
+          correctAnswer: 0,
+          explanation: 'Ngôi sao Mặt trời ở trung tâm tượng trưng cho nguồn sáng và sự sống bất diệt.',
+        },
+      ],
+      tags: ['Di sản', 'Lịch sử', 'Đông Sơn'],
+    }
+  );
+
   await CultureArticle.insertMany(cultureData);
   logger.info(`✅ Seeded ${cultureData.length} culture articles`);
 
