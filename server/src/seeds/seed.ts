@@ -333,7 +333,262 @@ export async function runSeed() {
     },
   ];
 
-  // Lessons 5 to 20 (Skeletons across stages 2 to 5)
+  
+  // 2.2 Seed Stage 2 Lessons (Lessons 5-8 with full interactive pedagogical activities)
+  const fullLessonsStage2 = [
+    {
+      stageId: stage2Id,
+      order: 5,
+      title: 'Bài 5: Ghép âm Ba - Má thân thương',
+      description: 'Cùng Sao Lí Lắc chèo thuyền ghép các phụ âm B, M với nguyên âm A để gọi Ba, Má thân thương.',
+      freeInStarterPlan: false,
+      totalActivities: 5,
+      vocabulary: [
+        { word: 'Ba', meaning: 'Người cha yêu quý che chở cho bé', audioUrl: '/audio/ba.mp3' },
+        { word: 'Má', meaning: 'Người mẹ dịu hiền chăm sóc bé', audioUrl: '/audio/ma.mp3' },
+        { word: 'Bà', meaning: 'Bà nội, bà ngoại hiền từ kể chuyện cổ tích', audioUrl: '/audio/ba-huyen.mp3' },
+      ],
+      activities: [
+        {
+          id: 'act-5-1',
+          type: 'word_card' as const,
+          prompt: 'Bé chạm vào từng chữ để nghe tiếng ghép âm kỳ diệu:',
+          subPrompt: 'Bờ (B) ghép với A tạo thành "BA". Mờ (M) ghép với A thêm dấu Sắc thành "MÁ"!',
+          targetWord: 'B + A = BA',
+          targetPhonetic: 'ba',
+          audioUrl: '/audio/ba.mp3',
+          hints: ['B đứng trước, A đứng sau tạo thành tiếng Ba'],
+        },
+        {
+          id: 'act-5-2',
+          type: 'listen_choose' as const,
+          prompt: 'Bé hãy lắng nghe âm thanh và chọn đúng hình ảnh:',
+          audioUrl: '/audio/prompt_ba_ma.mp3',
+          options: [
+            { id: 'opt-ba', text: 'Ba và Bé dạo chơi', imageUrl: 'https://images.unsplash.com/photo-1490902931801-d6f80ca94fe4?w=300' },
+            { id: 'opt-but', text: 'Bút chì màu', imageUrl: 'https://images.unsplash.com/photo-1585336261026-77cc789a3854?w=300' },
+          ],
+          correctAnswer: 'opt-ba',
+          hints: ['Ba dắt tay bé đi trên cánh đồng cỏ xanh'],
+        },
+        {
+          id: 'act-5-3',
+          type: 'drag_match' as const,
+          prompt: 'Bé hãy ghép đúng âm đầu với từ hoàn chỉnh nhé:',
+          pairs: [
+            { left: 'Âm B + A', right: 'Ba' },
+            { left: 'Âm M + A + Sắc', right: 'Má' },
+            { left: 'Âm B + A + Huyền', right: 'Bà' },
+          ],
+          correctAnswer: ['Ba', 'Má', 'Bà'],
+        },
+        {
+          id: 'act-5-4',
+          type: 'record_voice' as const,
+          prompt: 'Bé hãy đọc to câu yêu thương: "Con yêu Ba, con yêu Má!" nhé!',
+          targetWord: 'Ba Má',
+          subPrompt: 'Bấm micro màu đỏ và nói thật to rõ ràng nhé!',
+          hints: ['Ba Má sẽ rất vui khi nghe giọng đọc đáng yêu của bé đấy!'],
+        },
+        {
+          id: 'act-5-5',
+          type: 'review' as const,
+          prompt: 'Thử thách cuối chặng nhỏ: Tiếng "MÁ" có chứa thanh điệu nào?',
+          options: [
+            { id: 'opt-sac', text: 'Thanh Sắc (/)' },
+            { id: 'opt-huyen', text: 'Thanh Huyền (\\)' },
+            { id: 'opt-nang', text: 'Thanh Nặng (.)' },
+          ],
+          correctAnswer: 'opt-sac',
+          hints: ['Dấu sắc vút lên trên đầu chữ A'],
+        },
+      ],
+    },
+    {
+      stageId: stage2Id,
+      order: 6,
+      title: 'Bài 6: Bé chèo thuyền trên sông - Vần O và dấu Huyền',
+      description: 'Khám phá thế giới ven sông hiền hòa: Con Đò, Con Cò và Con Cá.',
+      freeInStarterPlan: false,
+      totalActivities: 5,
+      vocabulary: [
+        { word: 'Con Đò', meaning: 'Thuyền nhỏ chở khách qua sông', audioUrl: '/audio/con-do.mp3' },
+        { word: 'Con Cò', meaning: 'Loài chim lông trắng bay lả trên đồng', audioUrl: '/audio/con-co.mp3' },
+        { word: 'Lá Sen', meaning: 'Lá cây xòe to xanh ngát trên mặt hồ', audioUrl: '/audio/la-sen.mp3' },
+      ],
+      activities: [
+        {
+          id: 'act-6-1',
+          type: 'word_card' as const,
+          prompt: 'Làm quen nguyên âm tròn xoe O: Đ + O + Huyền = ĐÒ!',
+          targetWord: 'Con Đò - Con Cò',
+          hints: ['Chữ O tròn như quả trứng gà'],
+        },
+        {
+          id: 'act-6-2',
+          type: 'listen_choose' as const,
+          prompt: 'Đâu là hình ảnh bạn Cò lông trắng bay lả bay la?',
+          options: [
+            { id: 'opt-co', text: 'Con Cò', imageUrl: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=300' },
+            { id: 'opt-ca', text: 'Con Cá vàng', imageUrl: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=300' },
+          ],
+          correctAnswer: 'opt-co',
+        },
+        {
+          id: 'act-6-3',
+          type: 'fill_blank' as const,
+          prompt: 'Bé điền chữ cái còn thiếu: C_n Đ_',
+          options: [
+            { id: 'opt-o', text: 'o' },
+            { id: 'opt-a', text: 'a' },
+            { id: 'opt-e', text: 'e' },
+          ],
+          correctAnswer: 'o',
+          hints: ['Chữ cái tròn xoe như quả bóng'],
+        },
+        {
+          id: 'act-6-4',
+          type: 'record_voice' as const,
+          prompt: 'Bé hãy đọc bài đồng dao ngắn: "Con cò bay lả bay la"!',
+          targetWord: 'Con cò bay lả',
+          hints: ['Đọc nhịp nhàng theo nhịp điệu nhé'],
+        },
+        {
+          id: 'act-6-5',
+          type: 'review' as const,
+          prompt: 'Tiếng "ĐÒ" và "CÒ" có chung nguyên âm nào?',
+          options: [
+            { id: 'opt-o', text: 'Nguyên âm O' },
+            { id: 'opt-a', text: 'Nguyên âm A' },
+            { id: 'opt-u', text: 'Nguyên âm U' },
+          ],
+          correctAnswer: 'opt-o',
+        },
+      ],
+    },
+    {
+      stageId: stage2Id,
+      order: 7,
+      title: 'Bài 7: Vần AN - Lan can và Đàn chim',
+      description: 'Làm quen cách ghép vần có phụ âm cuối N: A + N = AN.',
+      freeInStarterPlan: false,
+      totalActivities: 5,
+      vocabulary: [
+        { word: 'Lan Can', meaning: 'Hàng rào chắn bảo vệ ở ban công', audioUrl: '/audio/lan-can.mp3' },
+        { word: 'Đàn Chim', meaning: 'Nhiều chú chim cùng bay lượn trên bầu trời', audioUrl: '/audio/dan-chim.mp3' },
+        { word: 'Cái Bàn', meaning: 'Bàn gỗ bé ngồi học bài ngoan', audioUrl: '/audio/cai-ban.mp3' },
+      ],
+      activities: [
+        {
+          id: 'act-7-1',
+          type: 'word_card' as const,
+          prompt: 'Bé nghe và lặp lại: A... N... AN!',
+          targetWord: 'A + N = AN',
+          hints: ['Vần AN ngân dài êm ái'],
+        },
+        {
+          id: 'act-7-2',
+          type: 'listen_choose' as const,
+          prompt: 'Từ nào dưới đây có vần AN?',
+          options: [
+            { id: 'opt-ban', text: 'Cái Bàn học' },
+            { id: 'opt-bep', text: 'Cái Bếp nhỏ' },
+          ],
+          correctAnswer: 'opt-ban',
+        },
+        {
+          id: 'act-7-3',
+          type: 'drag_match' as const,
+          prompt: 'Nối chữ cái để tạo thành từ có nghĩa:',
+          pairs: [
+            { left: 'B + AN + Huyền', right: 'Bàn (Cái bàn)' },
+            { left: 'Đ + AN + Huyền', right: 'Đàn (Đàn chim)' },
+            { left: 'L + AN', right: 'Lan (Hoa lan)' },
+          ],
+          correctAnswer: ['Bàn (Cái bàn)', 'Đàn (Đàn chim)', 'Lan (Hoa lan)'],
+        },
+        {
+          id: 'act-7-4',
+          type: 'record_voice' as const,
+          prompt: 'Bé đọc to rõ ràng: "Đàn chim én bay về mùa xuân"!',
+          targetWord: 'Đàn chim én',
+        },
+        {
+          id: 'act-7-5',
+          type: 'review' as const,
+          prompt: 'Vần "AN" được tạo bởi những chữ cái nào?',
+          options: [
+            { id: 'opt-an', text: 'Chữ A và chữ N' },
+            { id: 'opt-am', text: 'Chữ A và chữ M' },
+          ],
+          correctAnswer: 'opt-an',
+        },
+      ],
+    },
+    {
+      stageId: stage2Id,
+      order: 8,
+      title: 'Bài 8: Trọn bộ 5 Dấu Thanh - Đêm Rằm Trăng Sáng',
+      description: 'Tổng kết Chặng 2: Khám phá trọn vẹn 5 thanh điệu tiếng Việt (Huyền, Sắc, Hỏi, Ngã, Nặng) và Thanh Ngang.',
+      freeInStarterPlan: false,
+      totalActivities: 5,
+      vocabulary: [
+        { word: 'Em Bé', meaning: 'Bé yêu đáng yêu trong gia đình' },
+        { word: 'Đêm Rằm', meaning: 'Đêm trăng tròn sáng tỏ rực rỡ' },
+        { word: 'Ngôi Sao', meaning: 'Vì sao lấp lánh như Sao Lí Lắc' },
+      ],
+      activities: [
+        {
+          id: 'act-8-1',
+          type: 'word_card' as const,
+          prompt: 'Cùng Sao Lí Lắc du hành qua 5 dấu thanh diệu kỳ:',
+          subPrompt: 'Ngang (Ma) - Huyền (Mà) - Sắc (Má) - Hỏi (Mả) - Ngã (Mã) - Nặng (Mạ)!',
+          targetWord: 'Ma - Mà - Má - Mả - Mã - Mạ',
+        },
+        {
+          id: 'act-8-2',
+          type: 'listen_choose' as const,
+          prompt: 'Từ nào có mang dấu HỎI (?)?',
+          options: [
+            { id: 'opt-hoi', text: 'Quả Bưởi' },
+            { id: 'opt-sac', text: 'Cây Chuối' },
+            { id: 'opt-nang', text: 'Củ Khoai Lạc' },
+          ],
+          correctAnswer: 'opt-hoi',
+          hints: ['Dấu hỏi uốn cong như móc câu'],
+        },
+        {
+          id: 'act-8-3',
+          type: 'sort_order' as const,
+          prompt: 'Bé hãy sắp xếp các từ để tạo thành câu hoàn chỉnh:',
+          options: [
+            { id: 'w-1', text: 'Em' },
+            { id: 'w-2', text: 'yêu' },
+            { id: 'w-3', text: 'tiếng Việt' },
+          ],
+          correctAnswer: ['Em', 'yêu', 'tiếng Việt'],
+        },
+        {
+          id: 'act-8-4',
+          type: 'record_voice' as const,
+          prompt: 'Bé hãy đọc to lời chúc tốt đẹp: "Em tự hào nói tiếng Việt!"',
+          targetWord: 'Em tự hào nói tiếng Việt',
+        },
+        {
+          id: 'act-8-5',
+          type: 'review' as const,
+          prompt: 'Chúc mừng bé hoàn thành Chặng 2! Tiếng Việt có bao nhiêu dấu thanh chính?',
+          options: [
+            { id: 'opt-5', text: '5 dấu thanh (Huyền, Sắc, Hỏi, Ngã, Nặng)' },
+            { id: 'opt-2', text: 'Chỉ có 2 dấu thanh' },
+          ],
+          correctAnswer: 'opt-5',
+        },
+      ],
+    },
+  ];
+
+  // Lessons 9 to 20 (Skeletons across stages 3 to 5)
   const remainingLessons = [];
   const lessonTitles: Record<number, { title: string; stageIdx: number }> = {
     5: { title: 'Bài 5: Ghép âm Ba - Má thân thương', stageIdx: 1 },
@@ -354,7 +609,7 @@ export async function runSeed() {
     20: { title: 'Bài 20: Báu vật Nước Nam', stageIdx: 4 }, // Finale Treasure Lesson!
   };
 
-  for (let order = 5; order <= 20; order++) {
+  for (let order = 9; order <= 20; order++) {
     const meta = lessonTitles[order];
     const targetStageId = createdStages[meta.stageIdx]._id;
 
@@ -396,9 +651,9 @@ export async function runSeed() {
     });
   }
 
-  const allLessons = [...fullLessonsStage1, ...remainingLessons];
+  const allLessons = [...fullLessonsStage1, ...fullLessonsStage2, ...remainingLessons];
   await Lesson.insertMany(allLessons);
-  logger.info(`✅ Seeded ${allLessons.length} lessons (Lessons 1-4 fully enriched, 5-20 frames)`);
+  logger.info(`✅ Seeded ${allLessons.length} lessons (Lessons 1-8 fully enriched (Stages 1 & 2), 5-20 frames)`);
 
   // 3. Seed 5 Sample Stories with karaoke lyrics & quiz
   const sampleStories = [

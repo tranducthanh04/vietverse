@@ -21,11 +21,13 @@ export const CulturePage: React.FC = () => {
     },
   });
 
-  const categories = [
+    const categories = [
     { id: '', label: 'Tất cả chủ đề' },
     { id: 'am_thuc', label: 'Ẩm thực Việt' },
     { id: 'trang_phuc', label: 'Trang phục cổ truyền' },
-    { id: 'vat_dung', label: 'Vật dụng thân thương' },
+    { id: 'le_hoi', label: 'Lễ hội dân gian' },
+    { id: 'di_san', label: 'Di sản & Lịch sử' },
+    { id: 'vat_dung', label: 'Vật dụng dân gian' },
   ];
 
   return (
