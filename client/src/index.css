@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #FFFDF7;
+    color: #292524;
+    font-family: 'Nunito', 'Baloo 2', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Make sure all interactive buttons meet the minimum touch target for kids */
+  button, a {
+    touch-action: manipulation;
+  }
+}
