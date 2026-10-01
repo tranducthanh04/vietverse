@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Lock, Star, Play, CheckCircle2, ChevronRight, Award, Sparkles } from 'lucide-react';
+import { Lock, Star, Play, CheckCircle2, Award, Sparkles, MapPin, Compass } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
-import { Card } from '../../components/ui/Card.js';
-import { Button } from '../../components/ui/Button.js';
-import { Mascot } from '../../components/ui/Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const QuestMapPage: React.FC = () => {
@@ -28,42 +25,54 @@ export const QuestMapPage: React.FC = () => {
   const activeStage = stages.find((s: any) => s.order === selectedStageOrder) || stages[0];
 
   return (
-    <div className="py-6 px-4 max-w-5xl mx-auto">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-primary to-primary-hover text-white rounded-kid-lg p-6 md:p-8 shadow-kid-card mb-8">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="py-6 px-4 max-w-6xl mx-auto space-y-8">
+      {/* Header Banner: Stitch Folk Play Styling */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-primary-container to-secondary-container text-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-outline-variant/30">
+        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full bg-secondary/20 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full w-fit mb-3 text-sm font-bold">
-              <Sparkles className="w-4 h-4 text-accent" />
-              <span>Hành trình phiêu lưu tiếng Việt</span>
+            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full w-fit mb-3 text-xs uppercase font-extrabold tracking-wider">
+              <Sparkles className="w-4 h-4 text-secondary-fixed" />
+              <span>BẢN ĐỒ KHO BÁU 5 CHẶNG</span>
             </div>
-            <h1 className="text-kid-xl md:text-kid-2xl font-black font-display tracking-wide">
+            <h1 className="text-3xl md:text-4xl font-display font-extrabold tracking-tight">
               {VI_LOCALES.map.title}
             </h1>
-            <p className="text-white/90 text-kid-sm mt-1 max-w-xl">
-              {VI_LOCALES.map.subtitle}
+            <p className="text-white/90 text-sm md:text-base mt-2 max-w-xl font-medium leading-relaxed">
+              Cùng Sao Lí Lắc vượt qua 5 chặng thử thách, thu thập điểm ViVi Points và mở khóa Báu vật Nước Nam!
             </p>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 flex items-center space-x-3">
-              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-stone-900 shadow-md">
-                <Award className="w-7 h-7 text-stone-900" />
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="bg-surface/95 backdrop-blur-md rounded-2xl p-4 border border-outline-variant/40 flex items-center space-x-3 text-on-surface shadow-md">
+              <div className="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container shadow-md">
+                <span className="material-symbols-outlined text-2xl font-bold">stars</span>
               </div>
               <div>
-                <span className="text-xs text-white/80 block uppercase font-bold">ViVi Points</span>
-                <span className="text-2xl font-black font-display text-accent">
-                  {activeChild?.viviPoints || 0}
+                <span className="text-[11px] text-on-surface-variant block uppercase font-bold tracking-wider">
+                  ViVi Points của bé
+                </span>
+                <span className="text-2xl font-black font-display text-secondary">
+                  {activeChild?.viviPoints || 0} Điểm
                 </span>
               </div>
             </div>
-            <Mascot mood="happy" size="md" className="hidden sm:inline-block" />
+
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-secondary-fixed ring-4 ring-white/50 shadow-md hidden sm:block">
+              <img
+                alt="Sao Lí Lắc"
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuACRIKtBgTG9wCgUeSYdyWpma7WYksVA2By9zjzUZxgvQNqG-5quighNiQxXB0OJzqvLPYs54owlcewfvrgMPHqCmKQfGTls5UmT_2_wSa6MDuQLq5Qzq9BivE3mfi9KCo01y07vYxdjaA8a6K1hDT51Ijl_7_DyuP-H3k7GkCh7uJ9b1bbTcHiKa1Y-12L4zuFM7GDTy_VoL8TxCtbXPDUWzH5YKOSDPyw3Jx2BPMrrNlLEM42-wID"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stage Selector Tabs */}
-      <div className="flex items-center space-x-3 overflow-x-auto pb-4 mb-8 scrollbar-none">
+      {/* Stage Selector Tabs (5 Chặng Nổi Bật) */}
+      <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-none">
         {stages.map((stage: any) => {
           const isSelected = stage.order === selectedStageOrder;
           const isLocked = !stage.isUnlocked;
@@ -72,22 +81,22 @@ export const QuestMapPage: React.FC = () => {
             <button
               key={stage._id}
               onClick={() => setSelectedStageOrder(stage.order)}
-              className={`flex-shrink-0 px-5 py-3 rounded-2xl font-bold font-display text-base transition-all flex items-center space-x-2 border-2 ${
+              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-all flex items-center space-x-2.5 cursor-pointer ${
                 isSelected
-                  ? 'bg-primary text-white border-primary shadow-kid-primary scale-105'
+                  ? 'btn-3d-primary ring-2 ring-primary/40 scale-105'
                   : isLocked
-                  ? 'bg-stone-100 text-stone-400 border-stone-200'
-                  : 'bg-white text-stone-800 border-cream-border hover:border-accent'
+                  ? 'bg-surface-container-high text-on-surface-variant/60 border border-outline-variant/30 cursor-not-allowed'
+                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border border-outline-variant/40 shadow-sm'
               }`}
             >
               {isLocked ? (
-                <Lock className="w-4 h-4" />
+                <Lock className="w-4 h-4 opacity-70" />
               ) : stage.isCompleted ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <CheckCircle2 className="w-4 h-4 text-tertiary-fixed-dim" />
               ) : (
-                <span className="w-3 h-3 rounded-full bg-accent" />
+                <Compass className="w-4 h-4 text-secondary-container" />
               )}
-              <span>Chặng {stage.order}</span>
+              <span>Chặng {stage.order}: {stage.title}</span>
             </button>
           );
         })}
@@ -95,40 +104,43 @@ export const QuestMapPage: React.FC = () => {
 
       {/* Active Stage Overview Card */}
       {activeStage && (
-        <Card variant="kid" className="mb-8 p-6 bg-gradient-to-br from-cream to-white border-3 border-accent">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-md border-2 border-secondary-container/30 relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                Mục tiêu Chặng {activeStage.order}
-              </span>
-              <h2 className="text-kid-xl font-black font-display text-stone-800 mt-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase mb-2">
+                <MapPin className="w-3.5 h-3.5 text-secondary" />
+                <span>MỤC TIÊU CHẶNG {activeStage.order}</span>
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl text-on-surface font-extrabold">
                 {activeStage.title}
               </h2>
-              <p className="text-stone-600 text-kid-sm mt-2 max-w-2xl">
+              <p className="text-on-surface-variant text-sm sm:text-base mt-2 max-w-2xl font-medium leading-relaxed">
                 {activeStage.goal}
               </p>
             </div>
 
-            <div className="flex items-center space-x-4 bg-cream-muted rounded-2xl px-5 py-3 border border-cream-border">
+            <div className="flex items-center gap-4 bg-surface-container rounded-2xl px-6 py-4 border border-outline-variant/30 shrink-0">
               <div className="text-center">
-                <span className="text-xs text-stone-500 font-bold block">Hoàn thành</span>
-                <span className="text-xl font-bold font-display text-primary">
+                <span className="text-xs text-on-surface-variant font-bold block uppercase tracking-wider">
+                  Tiến độ bài học
+                </span>
+                <span className="text-2xl font-black font-display text-primary">
                   {activeStage.completedCount || 0} / {activeStage.totalLessons || 4}
                 </span>
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Lessons List on this Stage */}
+      {/* Lessons Grid on this Stage */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang tải bản đồ bài học...</p>
+        <div className="text-center py-16">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-bold text-on-surface-variant">Đang tải bản đồ phiêu lưu...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {activeStage?.lessons?.map((lesson: any) => {
             const isUnlocked = lesson.isUnlocked;
             const isCompleted = lesson.status === 'completed';
@@ -136,15 +148,15 @@ export const QuestMapPage: React.FC = () => {
             return (
               <div
                 key={lesson._id}
-                className={`bg-white rounded-3xl p-5 border-3 transition-all flex flex-col justify-between ${
+                className={`rounded-3xl p-6 transition-all flex flex-col justify-between border-2 ${
                   isUnlocked
-                    ? 'border-cream-border shadow-kid hover:border-primary/80 hover:-translate-y-1'
-                    : 'border-stone-200 bg-stone-50/70 opacity-60'
+                    ? 'bg-surface-container-lowest border-outline-variant/40 shadow-md hover:shadow-xl hover:-translate-y-1'
+                    : 'bg-surface-container-low/70 border-outline-variant/20 opacity-60'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-accent/30 text-stone-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed">
                       Bài {lesson.order}
                     </span>
 
@@ -155,40 +167,42 @@ export const QuestMapPage: React.FC = () => {
                           key={s}
                           className={`w-5 h-5 ${
                             s <= (lesson.stars || 0)
-                              ? 'fill-accent text-accent'
-                              : 'text-stone-200'
+                              ? 'fill-secondary text-secondary'
+                              : 'text-outline-variant/40'
                           }`}
                         />
                       ))}
                     </div>
                   </div>
 
-                  <h3 className="text-kid-base font-bold font-display text-stone-800 mb-1">
+                  <h3 className="font-display text-xl text-on-surface font-extrabold mb-2">
                     {lesson.title}
                   </h3>
-                  <p className="text-stone-500 text-sm line-clamp-2 mb-4">
-                    {lesson.description || 'Bài học tương tác đa dạng các hoạt động phát âm, nhận diện từ.'}
+                  <p className="text-on-surface-variant text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
+                    {lesson.description || 'Bài học tương tác phong phú gồm phát âm chuẩn, thẻ chữ, nối từ và thu âm giọng nói.'}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-cream-border">
-                  <div className="flex items-center space-x-1 text-sm text-stone-600">
-                    <Award className="w-4 h-4 text-accent" />
+                <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
+                  <div className="flex items-center space-x-1.5 text-xs font-bold text-secondary">
+                    <Award className="w-4 h-4 text-secondary-container" />
                     <span>+10 ViVi Points</span>
                   </div>
 
                   {isUnlocked ? (
-                    <Button
-                      variant={isCompleted ? 'accent' : 'primary'}
-                      size="sm"
+                    <button
                       onClick={() => navigate(`/hoc/${lesson._id}`)}
-                      className="flex items-center space-x-1"
+                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm cursor-pointer select-none ${
+                        isCompleted
+                          ? 'btn-3d-accent'
+                          : 'btn-3d-primary'
+                      }`}
                     >
                       <Play className="w-4 h-4 fill-current" />
                       <span>{isCompleted ? VI_LOCALES.map.reviewLesson : VI_LOCALES.map.startLesson}</span>
-                    </Button>
+                    </button>
                   ) : (
-                    <div className="flex items-center space-x-1 text-stone-400 text-sm font-semibold">
+                    <div className="flex items-center space-x-1.5 text-on-surface-variant/60 text-sm font-semibold">
                       <Lock className="w-4 h-4" />
                       <span>Chưa mở</span>
                     </div>

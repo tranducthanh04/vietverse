@@ -10,3 +10,6 @@ npm-debug.log*
 .vercel
 coverage/
 uploads/
+stitch_*/
+*.zip
+

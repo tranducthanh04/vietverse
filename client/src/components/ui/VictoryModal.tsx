@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Star, Award, ArrowRight, RotateCcw, Map } from 'lucide-react';
+import { Star, Award, ArrowRight, RotateCcw, MapPin, Sparkles } from 'lucide-react';
 import { Modal } from './Modal.js';
-import { Button } from './Button.js';
-import { Mascot } from './Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export interface VictoryModalProps {
@@ -27,13 +25,12 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 }) => {
   useEffect(() => {
     if (isOpen) {
-      // Fire festive kid confetti burst
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#E04836', '#FBBF24', '#10B981', '#38BDF8', '#A855F7'],
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.55 },
+          colors: ['#b02518', '#fea619', '#00855b', '#0284c7', '#ffdad4'],
         });
       } catch (err) {
         // Safe fallback in headless or non-canvas env
@@ -44,32 +41,45 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn className="max-w-md text-center p-8">
-      <div className="flex justify-center -mt-16 mb-2">
-        <Mascot mood="cheering" size="lg" />
+    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn className="max-w-lg text-center p-8 bg-surface-container-lowest border-4 border-secondary-container/40 rounded-3xl shadow-2xl">
+      {/* Celebration Mascot Badge */}
+      <div className="flex justify-center -mt-20 mb-3">
+        <div className="relative w-32 h-32 rounded-full overflow-hidden bg-secondary-fixed ring-8 ring-secondary-container/30 shadow-xl flex items-center justify-center">
+          <img
+            alt="Sao Lí Lắc"
+            className="w-full h-full object-cover animate-bounce-subtle"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuACRIKtBgTG9wCgUeSYdyWpma7WYksVA2By9zjzUZxgvQNqG-5quighNiQxXB0OJzqvLPYs54owlcewfvrgMPHqCmKQfGTls5UmT_2_wSa6MDuQLq5Qzq9BivE3mfi9KCo01y07vYxdjaA8a6K1hDT51Ijl_7_DyuP-H3k7GkCh7uJ9b1bbTcHiKa1Y-12L4zuFM7GDTy_VoL8TxCtbXPDUWzH5YKOSDPyw3Jx2BPMrrNlLEM42-wID"
+          />
+        </div>
       </div>
 
-      <h2 className="text-kid-xl font-display font-extrabold text-primary mb-2 animate-bounce-subtle">
+      <div className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase tracking-wider mb-2">
+        <Sparkles className="w-3.5 h-3.5 text-secondary" />
+        <span>HOÀN THÀNH XUẤT SẮC!</span>
+      </div>
+
+      <h2 className="text-3xl font-display font-black text-primary mb-2">
         {VI_LOCALES.victory.congrats}
       </h2>
+      <p className="text-sm text-on-surface-variant max-w-sm mx-auto mb-4 font-medium">
+        Bé đã rất nỗ lực vượt qua các hoạt động bài học hôm nay!
+      </p>
 
       {/* 3 Bouncing Stars */}
-      <div className="flex justify-center items-center space-x-3 my-6">
+      <div className="flex justify-center items-center gap-3 my-4">
         {[1, 2, 3].map((starIdx) => {
           const isFilled = starIdx <= stars;
           return (
             <div
               key={starIdx}
-              className="transform transition-all duration-500"
-              style={{
-                animationDelay: `${starIdx * 150}ms`,
-              }}
+              className="transform transition-all duration-500 scale-110"
+              style={{ animationDelay: `${starIdx * 150}ms` }}
             >
               <Star
                 className={`w-14 h-14 ${
                   isFilled
-                    ? 'fill-accent text-accent animate-pop drop-shadow-md'
-                    : 'text-stone-300'
+                    ? 'fill-secondary text-secondary animate-pop drop-shadow-md'
+                    : 'text-outline-variant/40'
                 }`}
               />
             </div>
@@ -78,52 +88,46 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
       </div>
 
       {/* Points & Badges Won */}
-      <div className="bg-accent-light/50 border-2 border-accent rounded-2xl p-4 my-4">
-        <div className="flex items-center justify-center space-x-2 text-stone-800 font-bold text-kid-base">
-          <Award className="w-7 h-7 text-accent" />
+      <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">
+        <div className="flex items-center justify-center gap-2 text-secondary font-display font-extrabold text-2xl">
+          <Award className="w-8 h-8 text-secondary-container" />
           <span>+{pointsEarned} ViVi Points</span>
         </div>
-        <p className="text-stone-600 text-sm mt-1">
-          Tổng kho báu hiện tại: <span className="font-bold text-primary">{totalPoints} điểm</span>
+        <p className="text-xs text-on-secondary-fixed font-bold mt-1">
+          Tổng kho báu hiện tại: <span className="text-primary font-black text-sm">{totalPoints} điểm</span>
         </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col space-y-3 mt-6">
+      {/* 3D Action Buttons */}
+      <div className="flex flex-col gap-3 mt-6">
         {onNextLesson && (
-          <Button
-            variant="primary"
-            size="kid"
+          <button
             onClick={onNextLesson}
-            className="w-full flex items-center justify-center space-x-2"
+            className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             <span>{VI_LOCALES.victory.btnNextLesson}</span>
-            <ArrowRight className="w-6 h-6" />
-          </Button>
+            <ArrowRight className="w-5 h-5" />
+          </button>
         )}
 
-        <div className="flex space-x-2">
+        <div className="flex gap-3">
           {onPlayAgain && (
-            <Button
-              variant="outline"
-              size="md"
+            <button
               onClick={onPlayAgain}
-              className="flex-1 flex items-center justify-center space-x-1"
+              className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4" />
               <span>{VI_LOCALES.victory.btnPlayAgain}</span>
-            </Button>
+            </button>
           )}
 
-          <Button
-            variant="accent"
-            size="md"
+          <button
             onClick={onBackToMap}
-            className="flex-1 flex items-center justify-center space-x-1"
+            className="btn-3d-accent flex-1 h-12 rounded-full font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
           >
-            <Map className="w-5 h-5" />
+            <MapPin className="w-4 h-4" />
             <span>{VI_LOCALES.victory.btnBackMap}</span>
-          </Button>
+          </button>
         </div>
       </div>
     </Modal>

@@ -6,9 +6,9 @@
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #FFFDF7;
-    color: #292524;
-    font-family: 'Nunito', 'Baloo 2', system-ui, -apple-system, sans-serif;
+    background-color: #fff8f6;
+    color: #1e1b1a;
+    font-family: 'Be Vietnam Pro', 'Nunito', 'Baloo 2', system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -16,4 +16,50 @@
   button, a {
     touch-action: manipulation;
   }
+}
+
+/* Tactile Folk Modernism: 3D Toy Press Buttons */
+.btn-3d-primary {
+  background-color: #b02518;
+  color: #ffffff;
+  box-shadow: 0 4px 0 0 #910a04;
+  transition: all 0.15s ease;
+}
+.btn-3d-primary:hover {
+  box-shadow: 0 2px 0 0 #910a04;
+  transform: translateY(2px);
+}
+.btn-3d-primary:active {
+  box-shadow: 0 0 0 0 #910a04;
+  transform: translateY(4px);
+}
+
+.btn-3d-accent {
+  background-color: #fea619;
+  color: #684000;
+  box-shadow: 0 4px 0 0 #855300;
+  transition: all 0.15s ease;
+}
+.btn-3d-accent:hover {
+  box-shadow: 0 2px 0 0 #855300;
+  transform: translateY(2px);
+}
+.btn-3d-accent:active {
+  box-shadow: 0 0 0 0 #855300;
+  transform: translateY(4px);
+}
+
+.btn-3d-tertiary {
+  background-color: #00855b;
+  color: #ffffff;
+  box-shadow: 0 4px 0 0 #005236;
+  transition: all 0.15s ease;
+}
+.btn-3d-tertiary:hover {
+  box-shadow: 0 2px 0 0 #005236;
+  transform: translateY(2px);
+}
+.btn-3d-tertiary:active {
+  box-shadow: 0 0 0 0 #005236;
+  transform: translateY(4px);
 }
