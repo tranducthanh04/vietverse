@@ -19,6 +19,9 @@ const envSchema = z.object({
   SEED_ADMIN_PASSWORD: z.string().default('AdminPass123!'),
   SEED_PARENT_EMAIL: z.string().email().default('phuhuynh@vietverse.edu.vn'),
   SEED_PARENT_PASSWORD: z.string().default('ParentPass123!'),
+  PAYOS_CLIENT_ID: z.string().optional().default(''),
+  PAYOS_API_KEY: z.string().optional().default(''),
+  PAYOS_CHECKSUM_KEY: z.string().optional().default(''),
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV === 'production') {
     if (data.JWT_SECRET === 'vietverse_jwt_access_secret_super_key_2026') {
