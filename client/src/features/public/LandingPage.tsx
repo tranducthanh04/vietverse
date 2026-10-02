@@ -39,12 +39,12 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-[54px] text-primary tracking-tight font-extrabold leading-[1.15]">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-[54px] text-primary tracking-[-0.01em] font-extrabold leading-[1.22] lg:leading-[1.18] [font-kerning:normal]">
                 CÙNG CON MỞ KHO BÁU,<br />
                 <span className="relative inline-block text-secondary mt-1">
                   TIẾNG VIỆT THÊM NHIỆM MÀU
                   <svg
-                    className="absolute -bottom-2 left-0 w-full h-3 text-secondary-container"
+                    className="absolute -bottom-3 left-0 w-full h-3 text-secondary-container"
                     fill="none"
                     preserveAspectRatio="none"
                     viewBox="0 0 300 12"
@@ -404,7 +404,7 @@ export const LandingPage: React.FC = () => {
                 <span className="text-xs uppercase font-bold tracking-wide">Cùng Nhau Vun Đắp Tương Lai</span>
               </div>
 
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 leading-tight">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.01em] mb-6 leading-[1.18] lg:leading-[1.14] [font-kerning:normal]">
                 BẮT ĐẦU HÀNH TRÌNH KHÁM PHÁ TIẾNG VIỆT NHIỆM MÀU
               </h2>
 
