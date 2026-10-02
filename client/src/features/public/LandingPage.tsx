@@ -29,9 +29,9 @@ export const LandingPage: React.FC = () => {
         <div className="absolute top-1/2 -right-20 w-80 h-80 rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-6 items-center">
             {/* Cột trái: Văn bản & Kêu gọi hành động */}
-            <div className="lg:col-span-7 flex flex-col items-start space-y-6">
+            <div className="lg:col-span-8 flex flex-col items-start space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed shadow-sm">
                 <Sparkles className="w-4 h-4 text-secondary fill-secondary" />
                 <span className="text-xs uppercase font-bold tracking-wide">
@@ -39,9 +39,9 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-[54px] text-primary tracking-[-0.01em] font-extrabold leading-[1.22] lg:leading-[1.18] [font-kerning:normal]">
-                CÙNG CON MỞ KHO BÁU,<br />
-                <span className="relative inline-block text-secondary mt-1">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-[48px] xl:text-[54px] text-primary tracking-[-0.01em] font-extrabold leading-[1.3] lg:leading-[1.24] text-balance [font-kerning:normal]">
+                <span className="block lg:whitespace-nowrap">CÙNG CON MỞ KHO BÁU,</span>
+                <span className="relative inline-block text-secondary mt-1 lg:whitespace-nowrap">
                   TIẾNG VIỆT THÊM NHIỆM MÀU
                   <svg
                     className="absolute -bottom-3 left-0 w-full h-3 text-secondary-container"
@@ -102,7 +102,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Cột phải: Minh họa linh vật Sao Lí Lắc */}
-            <div className="lg:col-span-5 relative flex justify-center">
+            <div className="lg:col-span-4 relative flex justify-center">
               <div className="relative w-full max-w-md lg:max-w-none">
                 <div className="absolute inset-0 bg-gradient-to-tr from-secondary-fixed/40 via-primary-fixed/30 to-tertiary-fixed/30 rounded-3xl blur-2xl transform -rotate-2 scale-95" />
                 
@@ -404,7 +404,7 @@ export const LandingPage: React.FC = () => {
                 <span className="text-xs uppercase font-bold tracking-wide">Cùng Nhau Vun Đắp Tương Lai</span>
               </div>
 
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.01em] mb-6 leading-[1.18] lg:leading-[1.14] [font-kerning:normal]">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.01em] mb-6 leading-[1.3] lg:leading-[1.22] text-balance [font-kerning:normal]">
                 BẮT ĐẦU HÀNH TRÌNH KHÁM PHÁ TIẾNG VIỆT NHIỆM MÀU
               </h2>
 
