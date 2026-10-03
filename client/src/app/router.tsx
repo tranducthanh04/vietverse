@@ -28,6 +28,7 @@ import { TreasureRoomPage } from '../features/points/TreasureRoomPage.js';
 import { ParentDashboardPage } from '../features/parent/ParentDashboardPage.js';
 import { ParentRecordingsPage } from '../features/parent/ParentRecordingsPage.js';
 import { ParentSettingsPage } from '../features/parent/ParentSettingsPage.js';
+import { PaymentResultPage } from '../features/parent/PaymentResultPage.js';
 import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
@@ -57,6 +58,16 @@ export const router = createBrowserRouter([
       { path: 'van-hoa', element: <CulturePage /> },
       { path: 'van-hoa/:id', element: <CultureDetailPage /> },
     ],
+  },
+
+  // Onboarding Wizard (protected — must be logged in to add a child)
+  {
+    path: '/thanh-toan',
+    element: (
+      <ProtectedRoute>
+        <PaymentResultPage />
+      </ProtectedRoute>
+    ),
   },
 
   // Onboarding Wizard (protected — must be logged in to add a child)

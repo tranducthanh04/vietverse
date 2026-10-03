@@ -1,18 +1,15 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { beforeAll, afterAll, afterEach } from 'vitest';
 
-let mongoServer: MongoMemoryServer | null = null;
+let mongoServer: MongoMemoryReplSet | null = null;
+process.env.PAYOS_CLIENT_ID = 'test-client-id';
+process.env.PAYOS_API_KEY = 'test-api-key';
+process.env.PAYOS_CHECKSUM_KEY = 'test-checksum-key';
 
 beforeAll(async () => {
-  const localUri = process.env.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/vietverse_test';
-  try {
-    await mongoose.connect(localUri, { serverSelectionTimeoutMS: 2000 });
-  } catch {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
-  }
+  mongoServer = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
+  await mongoose.connect(mongoServer.getUri());
 }, 60000);
 
 afterEach(async () => {

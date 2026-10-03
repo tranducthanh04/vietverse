@@ -38,6 +38,37 @@ const envSchema = z.object({
         path: ['JWT_REFRESH_SECRET'],
       });
     }
+    for (const key of ['PAYOS_CLIENT_ID', 'PAYOS_API_KEY', 'PAYOS_CHECKSUM_KEY'] as const) {
+      if (!data[key]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${key} bắt buộc khi chạy production.`,
+          path: [key],
+        });
+      }
+    }
+    if (!data.CLIENT_ORIGIN.startsWith('https://')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'CLIENT_ORIGIN phải dùng HTTPS khi chạy production.',
+        path: ['CLIENT_ORIGIN'],
+      });
+    }
+  }
+  const payosKeys = [data.PAYOS_CLIENT_ID, data.PAYOS_API_KEY, data.PAYOS_CHECKSUM_KEY];
+  if (payosKeys.some(Boolean) && !payosKeys.every(Boolean)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Cần cấu hình đầy đủ PAYOS_CLIENT_ID, PAYOS_API_KEY và PAYOS_CHECKSUM_KEY.',
+      path: ['PAYOS_CLIENT_ID'],
+    });
+  }
+  if (payosKeys.some((key) => key.toLowerCase().includes('your_payos'))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Không được dùng giá trị placeholder cho thông tin PayOS.',
+      path: ['PAYOS_CLIENT_ID'],
+    });
   }
 });
 

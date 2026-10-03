@@ -18,7 +18,7 @@ Base URL: `/api/v1`.
 | Method | Path | Auth | Ownership/role |
 | --- | --- | --- | --- |
 | GET | `/children` | Auth | Chỉ children của user |
-| POST | `/children` | Auth | Kiểm tra subscription limit (free: 1, yearly: 3) |
+| POST | `/children` | Auth | Kiểm tra subscription limit (free/monthly: 1, yearly: 3) |
 | GET/PUT | `/children/:id` | Auth | `child.parentId === req.user.id` |
 | DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
@@ -36,6 +36,17 @@ Base URL: `/api/v1`.
 | POST | `/culture/:id/quiz` | Auth | Chấm quiz và thưởng (+5 points idempotent, rollback tự động nếu lỗi) |
 | POST | `/recordings` | Auth + multipart | Upload file âm thanh bé đọc (`audio/*`, `application/ogg`; max 5MB; duration capped 180s; Dev/Test fallback Base64 <= 2MB; Production bắt buộc Cloudinary) |
 | GET | `/recordings/children/:childId` | Auth | Parent ownership |
+
+## Subscription và thanh toán
+
+| Method | Path | Auth | Mục đích / ràng buộc |
+| --- | --- | --- | --- |
+| POST | `/payments/create-checkout` | Auth | Body `{ planType: 'monthly' | 'yearly' }`; server chọn giá 149.000đ/990.000đ và trả `orderCode`, `checkoutUrl`; không cấu hình PayOS thì trả 503 |
+| POST | `/payments/webhook` | Public, PayOS signature required | Nhận nguyên payload webhook PayOS (`code`, `desc`, `success`, `data`, `signature`); xác minh bằng SDK, so khớp số tiền; đơn và subscription cập nhật idempotent trong MongoDB transaction |
+| GET | `/payments/history` | Auth | Lịch sử tối đa 50 đơn của tài khoản hiện tại |
+| GET | `/payments/orders/:orderCode` | Auth | Chỉ trả đơn thuộc tài khoản hiện tại; UI dùng để đọc kết quả sau khi quay về từ PayOS, không dùng return URL làm chứng cứ đã thanh toán |
+
+Production cần cấu hình đủ `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `CLIENT_ORIGIN` HTTPS, MongoDB replica set, và khai báo webhook URL `https://<api-domain>/api/v1/payments/webhook` tại kênh thanh toán PayOS.
 
 ## Points, parent, admin
 

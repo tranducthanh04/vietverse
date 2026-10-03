@@ -8,12 +8,15 @@ export const createCheckoutSchema = z.object({
 });
 
 export const webhookSchema = z.object({
-  orderCode: z.string({
-    required_error: 'Mã đơn hàng orderCode là bắt buộc',
-  }),
-  status: z.enum(['completed', 'failed', 'cancelled'], {
-    required_error: 'Trạng thái status không hợp lệ',
-  }),
-  transactionRef: z.string().optional(),
-  checksum: z.string().optional(),
-});
+  code: z.string(),
+  desc: z.string(),
+  success: z.boolean(),
+  data: z.object({
+    orderCode: z.number().int().positive(),
+    amount: z.number().int().nonnegative(),
+    code: z.string(),
+    desc: z.string(),
+    reference: z.string(),
+  }).passthrough(),
+  signature: z.string().min(1),
+}).passthrough();

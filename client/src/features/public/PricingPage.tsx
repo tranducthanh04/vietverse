@@ -1,11 +1,37 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, Star, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
+import { api } from '../../lib/api.js';
+import { useAuthStore } from '../../store/authStore.js';
 
 export const PricingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const user = useAuthStore((state) => state.user);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const choosePlan = async (planId: string) => {
+    setErrorMsg('');
+    if (planId === 'free') {
+      navigate(user ? '/bat-dau' : '/dang-ky');
+      return;
+    }
+    if (!user) {
+      navigate(`/dang-ky?plan=${planId}`);
+      return;
+    }
+    try {
+      setLoadingPlan(planId);
+      const response = await api.post('/payments/create-checkout', { planType: planId });
+      window.location.assign(response.data.data.checkoutUrl);
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.error?.message || 'Không thể tạo giao dịch. Vui lòng thử lại.');
+      setLoadingPlan(null);
+    }
+  };
 
   const plans = [
     {
@@ -61,12 +87,20 @@ export const PricingPage: React.FC = () => {
 
   return (
     <div className="py-12 px-4 max-w-5xl mx-auto space-y-12">
+      {(searchParams.get('checkoutError') || errorMsg) && (
+        <div role="alert" className="max-w-2xl mx-auto rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm font-semibold text-red-700">
+          {errorMsg || 'Tài khoản đã được tạo nhưng chưa thể khởi tạo thanh toán. Hãy chọn gói để thử lại.'}
+        </div>
+      )}
       <div className="text-center">
         <h1 className="text-3xl md:text-5xl font-black font-display text-primary mb-3">
           Bảng Giá Đầu Tư Tương Lai Tiếng Việt Của Bé
         </h1>
         <p className="text-stone-600 text-lg max-w-xl mx-auto">
           Chọn gói học phù hợp để mở khóa toàn bộ kho tàng ngôn ngữ và văn hóa dân tộc
+        </p>
+        <p className="mt-3 text-sm font-semibold text-stone-500">
+          Thanh toán một lần cho thời hạn đã chọn; gói không tự động gia hạn.
         </p>
       </div>
 
@@ -107,7 +141,9 @@ export const PricingPage: React.FC = () => {
             <Button
               variant={p.variant}
               size="lg"
-              onClick={() => navigate('/dang-ky')}
+              isLoading={loadingPlan === p.id}
+              disabled={loadingPlan !== null}
+              onClick={() => void choosePlan(p.id)}
               className="w-full text-base font-bold"
             >
               {p.btnText}

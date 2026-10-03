@@ -32,7 +32,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (!user) {
     return (
       <Navigate
-        to={`${redirectTo}?redirect=${encodeURIComponent(location.pathname)}`}
+        to={`${redirectTo}?redirect=${encodeURIComponent(`${location.pathname}${location.search}`)}`}
         replace
       />
     );

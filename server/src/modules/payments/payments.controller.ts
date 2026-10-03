@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PaymentsService } from './payments.service.js';
 import { createCheckoutSchema, webhookSchema } from './payments.validation.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
+import type { Webhook } from '@payos/node';
 
 export class PaymentsController {
   static async createCheckout(req: Request, res: Response, next: NextFunction) {
@@ -17,7 +18,7 @@ export class PaymentsController {
 
   static async handleWebhook(req: Request, res: Response, next: NextFunction) {
     try {
-      const parsed = webhookSchema.parse(req.body);
+      const parsed = webhookSchema.parse(req.body) as Webhook;
       const result = await PaymentsService.handleWebhook(parsed);
       return sendSuccess(res, result, 200);
     } catch (error) {

@@ -1,42 +1,43 @@
-import PayOS from '@payos/node';
-import { PaymentOrder, PlanType, PaymentStatus } from '../../models/PaymentOrder.js';
+import { randomInt } from 'node:crypto';
+import { PayOS, type Webhook } from '@payos/node';
+import { PaymentOrder, type PaidPlanType } from '../../models/PaymentOrder.js';
 import { Subscription } from '../../models/Subscription.js';
 import { User } from '../../models/User.js';
 import { env } from '../../config/env.js';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
-const PLAN_PRICES = {
-  monthly: 99000,   // 99,000 VND
-  yearly: 899000,   // 899,000 VND (Tiết kiệm ~25%)
+const PLAN_PRICES: Record<PaidPlanType, number> = {
+  monthly: 149000,
+  yearly: 990000,
 };
 
-const PLAN_MAX_CHILDREN = {
-  monthly: 3,
-  yearly: 5,
+const PLAN_MAX_CHILDREN: Record<PaidPlanType, number> = {
+  monthly: 1,
+  yearly: 3,
 };
 
-// Khởi tạo SDK PayOS nếu có cấu hình API Key thực từ cổng payos.vn
-let payos: PayOS | null = null;
-if (
-  env.PAYOS_CLIENT_ID &&
-  env.PAYOS_API_KEY &&
-  env.PAYOS_CHECKSUM_KEY &&
-  !env.PAYOS_CLIENT_ID.includes('your_payos')
-) {
-  payos = new PayOS(env.PAYOS_CLIENT_ID, env.PAYOS_API_KEY, env.PAYOS_CHECKSUM_KEY);
-}
+const payos = env.PAYOS_CLIENT_ID
+  ? new PayOS({
+      clientId: env.PAYOS_CLIENT_ID,
+      apiKey: env.PAYOS_API_KEY,
+      checksumKey: env.PAYOS_CHECKSUM_KEY,
+    })
+  : null;
 
 export class PaymentsService {
   /**
-   * Khởi tạo đơn hàng và link checkout trực tiếp từ Cổng thanh toán PayOS / VietQR
+   * Tạo đơn nội bộ trước, sau đó yêu cầu PayOS tạo payment link.
    */
   static async createCheckout(
     userId: string,
-    data: { planType: PlanType; paymentMethod?: string }
+    data: { planType: PaidPlanType; paymentMethod?: string }
   ) {
     const user = await User.findById(userId);
     if (!user) {
       throw { statusCode: 404, message: 'Không tìm thấy thông tin tài khoản phụ huynh' };
+    }
+    if (user.role !== 'parent') {
+      throw { statusCode: 403, message: 'Chỉ tài khoản phụ huynh mới được mua gói học' };
     }
 
     const amount = PLAN_PRICES[data.planType];
@@ -44,40 +45,39 @@ export class PaymentsService {
       throw { statusCode: 400, message: 'Gói thanh toán không hợp lệ' };
     }
 
-    // PayOS yêu cầu mã orderCode số (Ví dụ: 172839102)
-    const numericOrderCode = Number(`${Date.now().toString().slice(-7)}${Math.floor(Math.random() * 100)}`);
-    const orderCodeStr = `VV${numericOrderCode}`;
-
-    let checkoutUrl = '';
-
-    // Nếu đã điền API Key PayOS thật ➔ Gọi Cổng thanh toán PayOS thật
-    if (payos) {
-      try {
-        const paymentLinkRes = await payos.createPaymentLink({
-          orderCode: numericOrderCode,
-          amount,
-          description: `Vietverse Goi ${data.planType === 'yearly' ? 'Nam' : 'Thang'}`,
-          cancelUrl: `${env.CLIENT_ORIGIN}/phu-huynh/cai-dat?payment=cancelled`,
-          returnUrl: `${env.CLIENT_ORIGIN}/phu-huynh/cai-dat?payment=success`,
-        });
-        checkoutUrl = paymentLinkRes.checkoutUrl;
-      } catch (err: any) {
-        throw { statusCode: 502, message: `Lỗi kết nối Cổng thanh toán PayOS: ${err.message}` };
-      }
-    } else {
-      // Môi trường Dev/Test chưa điền API Key ➔ Sinh link VietQR Sandbox trực quan
-      checkoutUrl = `https://img.vietqr.io/image/MB-0331000123456-compact2.png?amount=${amount}&addInfo=${orderCodeStr}&accountName=VIETVERSE%20EDU`;
+    if (!payos) {
+      throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
     }
 
+    const numericOrderCode = randomInt(100_000_000, 1_000_000_000);
+    const orderCode = `VV${numericOrderCode}`;
     const order = await PaymentOrder.create({
       userId: new Types.ObjectId(userId),
-      orderCode: orderCodeStr,
+      orderCode,
       planType: data.planType,
       amount,
       status: 'pending',
-      paymentMethod: payos ? 'payos_gateway' : 'vietqr_sandbox',
-      checkoutUrl,
+      paymentMethod: 'payos',
     });
+
+    try {
+      const paymentLink = await payos.paymentRequests.create({
+        orderCode: numericOrderCode,
+        amount,
+        description: `Vietverse ${data.planType === 'yearly' ? 'goi nam' : 'goi thang'}`,
+        items: [{ name: `Vietverse ${data.planType === 'yearly' ? 'Gói năm' : 'Gói tháng'}`, quantity: 1, price: amount }],
+        cancelUrl: `${env.CLIENT_ORIGIN}/thanh-toan?payment=returned`,
+        returnUrl: `${env.CLIENT_ORIGIN}/thanh-toan?payment=returned`,
+      });
+      order.checkoutUrl = paymentLink.checkoutUrl;
+      order.paymentLinkId = paymentLink.paymentLinkId;
+      await order.save();
+    } catch (err) {
+      order.status = 'failed';
+      await order.save();
+      const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+      throw { statusCode: 502, message: `Không thể tạo liên kết PayOS: ${message}` };
+    }
 
     return {
       orderCode: order.orderCode,
@@ -85,91 +85,92 @@ export class PaymentsService {
       planType: order.planType,
       status: order.status,
       checkoutUrl: order.checkoutUrl,
-      isRealGateway: !!payos,
+      isRealGateway: true,
       createdAt: order.createdAt,
     };
   }
 
   /**
-   * Xử lý Webhook callback bất đồng bộ từ Cổng thanh toán thật (PayOS / Gateway Webhook)
-   * Xác thực chữ ký mã hóaChecksum & Nâng cấp Subscription nguyên tử
+   * Xác minh payload PayOS rồi cập nhật đơn và subscription trong một transaction.
    */
-  static async handleWebhook(data: {
-    orderCode: string;
-    status: PaymentStatus;
-    transactionRef?: string;
-    signature?: string;
-  }) {
-    // Nếu có SDK PayOS ➔ Xác thực chữ ký Checksum an toàn chống giả mạo request
-    if (payos && data.checksum) {
-      try {
-        const verifiedData = payos.verifyPaymentWebhookData({ ...data, signature: data.checksum } as any);
-        data.orderCode = `VV${verifiedData.orderCode}`;
-        data.status = verifiedData.code === '00' ? 'completed' : 'failed';
-        data.transactionRef = verifiedData.reference;
-      } catch {
-        throw { statusCode: 400, message: 'Chữ ký Webhook (Checksum) không hợp lệ từ Cổng thanh toán' };
-      }
-
+  static async handleWebhook(payload: Webhook) {
+    if (!payos) {
+      throw { statusCode: 503, message: 'PayOS chưa được cấu hình; từ chối webhook' };
     }
 
-    const order = await PaymentOrder.findOne({ orderCode: data.orderCode });
+    let verifiedData: Awaited<ReturnType<PayOS['webhooks']['verify']>>;
+    try {
+      verifiedData = await payos.webhooks.verify(payload);
+    } catch {
+      throw { statusCode: 400, message: 'Chữ ký webhook PayOS không hợp lệ' };
+    }
+
+    const orderCode = `VV${verifiedData.orderCode}`;
+    const order = await PaymentOrder.findOne({ orderCode });
     if (!order) {
-      throw { statusCode: 404, message: `Không tìm thấy đơn hàng mã ${data.orderCode}` };
+      throw { statusCode: 404, message: `Không tìm thấy đơn hàng mã ${orderCode}` };
     }
 
-    // Idempotency Check: Nếu đơn hàng đã hoàn tất trước đó, trả về kết quả thành công không bị lặp
-    if (order.status === 'completed' && data.status === 'completed') {
-      const existingSub = await Subscription.findOne({ userId: order.userId });
-      return { order, subscription: existingSub, idempotencyHandled: true };
+    if (verifiedData.amount !== order.amount) {
+      throw { statusCode: 400, message: 'Số tiền webhook không khớp với đơn hàng' };
     }
 
-    // Cập nhật trạng thái đơn hàng
-    order.status = data.status;
-    if (data.status === 'completed') {
-      order.paidAt = new Date();
-    }
-    if (data.transactionRef) {
-      order.transactionRef = data.transactionRef;
-    }
-    await order.save();
+    const isPaid = verifiedData.code === '00';
+    const session = await mongoose.startSession();
+    let result: { order: typeof order; subscription: unknown; idempotencyHandled: boolean } | null = null;
+    try {
+      await session.withTransaction(async () => {
+        const currentOrder = await PaymentOrder.findOne({ orderCode }).session(session);
+        if (!currentOrder) throw { statusCode: 404, message: `Không tìm thấy đơn hàng mã ${orderCode}` };
+        if (currentOrder.status === 'completed') {
+          const existingSub = await Subscription.findOne({ userId: currentOrder.userId }).session(session);
+          result = { order: currentOrder, subscription: existingSub, idempotencyHandled: true };
+          return;
+        }
+        if (currentOrder.status !== 'pending') {
+          result = { order: currentOrder, subscription: null, idempotencyHandled: true };
+          return;
+        }
 
-    let updatedSubscription = null;
+        if (!isPaid) {
+          currentOrder.status = 'failed';
+          await currentOrder.save({ session });
+          result = { order: currentOrder, subscription: null, idempotencyHandled: false };
+          return;
+        }
 
-    // Nếu thanh toán thành công ➔ Nâng cấp / Gia hạn gói Subscription
-    if (data.status === 'completed') {
-      const currentSub = await Subscription.findOne({ userId: order.userId });
-
-      const now = new Date();
-      let baseDate = now;
-      if (currentSub?.expiresAt && new Date(currentSub.expiresAt) > now) {
-        baseDate = new Date(currentSub.expiresAt);
-      }
-
-      const durationMonths = order.planType === 'yearly' ? 12 : 1;
-      const newExpiresAt = new Date(baseDate.setMonth(baseDate.getMonth() + durationMonths));
-      const maxAllowed = PLAN_MAX_CHILDREN[order.planType];
-
-      updatedSubscription = await Subscription.findOneAndUpdate(
-        { userId: order.userId },
-        {
-          $set: {
-            userId: order.userId,
-            plan: order.planType,
-            active: true,
-            maxChildren: maxAllowed,
-            expiresAt: newExpiresAt,
+        const currentSub = await Subscription.findOne({ userId: currentOrder.userId }).session(session);
+        const now = new Date();
+        const baseDate = currentSub?.expiresAt && currentSub.expiresAt > now ? currentSub.expiresAt : now;
+        const newExpiresAt = new Date(baseDate);
+        newExpiresAt.setMonth(newExpiresAt.getMonth() + (currentOrder.planType === 'yearly' ? 12 : 1));
+        const updatedSubscription = await Subscription.findOneAndUpdate(
+          { userId: currentOrder.userId },
+          {
+            $set: {
+              userId: currentOrder.userId,
+              plan: currentOrder.planType,
+              active: true,
+              maxChildren: PLAN_MAX_CHILDREN[currentOrder.planType],
+              expiresAt: newExpiresAt,
+              paymentRef: currentOrder.orderCode,
+            },
           },
-        },
-        { new: true, upsert: true }
-      );
+          { new: true, upsert: true, session }
+        );
+
+        currentOrder.status = 'completed';
+        currentOrder.paidAt = new Date();
+        currentOrder.transactionRef = verifiedData.reference;
+        await currentOrder.save({ session });
+        result = { order: currentOrder, subscription: updatedSubscription, idempotencyHandled: false };
+      });
+    } finally {
+      await session.endSession();
     }
 
-    return {
-      order,
-      subscription: updatedSubscription,
-      idempotencyHandled: false,
-    };
+    if (!result) throw { statusCode: 500, message: 'Không thể ghi nhận kết quả thanh toán' };
+    return result;
   }
 
   /**

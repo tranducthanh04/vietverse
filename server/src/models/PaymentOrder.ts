@@ -1,16 +1,18 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import type { PlanType } from './Subscription.js';
 
-export type PlanType = 'monthly' | 'yearly';
+export type PaidPlanType = Exclude<PlanType, 'free'>;
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
 
 export interface IPaymentOrder extends Document {
   userId: Types.ObjectId;
   orderCode: string;
-  planType: PlanType;
+  planType: PaidPlanType;
   amount: number;
   status: PaymentStatus;
   paymentMethod: string;
   checkoutUrl?: string;
+  paymentLinkId?: string;
   paidAt?: Date;
   transactionRef?: string;
   createdAt: Date;
@@ -52,6 +54,9 @@ const paymentOrderSchema = new Schema<IPaymentOrder>(
       default: 'payos',
     },
     checkoutUrl: {
+      type: String,
+    },
+    paymentLinkId: {
       type: String,
     },
     paidAt: {
