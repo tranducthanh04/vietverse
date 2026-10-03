@@ -38,15 +38,6 @@ const envSchema = z.object({
         path: ['JWT_REFRESH_SECRET'],
       });
     }
-    for (const key of ['PAYOS_CLIENT_ID', 'PAYOS_API_KEY', 'PAYOS_CHECKSUM_KEY'] as const) {
-      if (!data[key]) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `${key} bắt buộc khi chạy production.`,
-          path: [key],
-        });
-      }
-    }
     if (!data.CLIENT_ORIGIN.startsWith('https://')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

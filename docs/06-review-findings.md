@@ -237,6 +237,6 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 
 - Đã sửa các chặn ở code: FE tạo checkout theo gói, PayOS SDK v2 tạo link, webhook dùng payload chuẩn + xác minh chữ ký, so khớp số tiền, chỉ parent được tạo checkout, và đơn/subscription được ghi trong transaction.
 - Đã thống nhất giá/quyền lợi với bảng giá: tháng 149.000đ/1 bé, năm 990.000đ/3 bé. Đã bỏ QR ngân hàng mẫu; thiếu cấu hình trả lỗi thay vì tạo đơn giả.
-- Đã thêm kiểm tra fail-fast cấu hình PayOS/HTTPS trong production, biến môi trường Render, trang kết quả thanh toán và kiểm thử payload giả lập chữ ký đúng/sai.
+- Đã thêm kiểm tra HTTPS cho `CLIENT_ORIGIN`, kiểm tra cấu hình PayOS nếu có khai báo phải đủ bộ, biến môi trường Render, trang kết quả thanh toán và kiểm thử chữ ký đúng/sai. Thiếu PayOS không được làm sập auth/API; riêng checkout trả 503 cho đến khi credentials được cấu hình.
 - Chưa thể xác nhận phát hành production: cần thêm credentials thật trong Render, dùng MongoDB replica set, đăng ký webhook URL trong PayOS Merchant Portal, chạy giao dịch sandbox thật, rồi nghiệm thu giao dịch nhỏ ở production.
 - Follow-up vận hành: dọn/đánh dấu đơn pending hết hạn, job đối soát webhook bị trễ, và cảnh báo đơn tiền đã vào nhưng transaction DB thất bại. Không có webhook thật thì app không tự bật subscription.

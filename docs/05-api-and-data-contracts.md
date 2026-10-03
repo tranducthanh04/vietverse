@@ -46,7 +46,7 @@ Base URL: `/api/v1`.
 | GET | `/payments/history` | Auth | Lịch sử tối đa 50 đơn của tài khoản hiện tại |
 | GET | `/payments/orders/:orderCode` | Auth | Chỉ trả đơn thuộc tài khoản hiện tại; UI dùng để đọc kết quả sau khi quay về từ PayOS, không dùng return URL làm chứng cứ đã thanh toán |
 
-Production cần cấu hình đủ `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `CLIENT_ORIGIN` HTTPS, MongoDB replica set, và khai báo webhook URL `https://<api-domain>/api/v1/payments/webhook` tại kênh thanh toán PayOS.
+Để bật PayOS production cần cấu hình đủ `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `CLIENT_ORIGIN` HTTPS, MongoDB replica set, và khai báo webhook URL `https://<api-domain>/api/v1/payments/webhook` tại kênh thanh toán PayOS. Nếu chưa cấu hình PayOS, backend vẫn khởi động cho các API khác; riêng tạo checkout trả 503.
 
 ## Points, parent, admin
 
