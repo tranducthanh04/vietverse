@@ -24,6 +24,10 @@ import paymentsRouter from './modules/payments/payments.routes.js';
 
 export const app = express();
 
+// The app sits behind Render's reverse proxy. Trust the immediate proxy so
+// express-rate-limit can identify the originating client via X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // Security and utility middlewares
 app.use(
   helmet({
@@ -37,6 +41,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://vietverse.vercel.app',
+  'https://vietverse-nine.vercel.app',
 ];
 
 app.use(
