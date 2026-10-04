@@ -26,10 +26,25 @@ const payos = env.PAYOS_CLIENT_ID
   : null;
 
 export class PaymentsService {
-  /** Creates a fixed-value, admin-only production gateway test; it never changes a subscription. */
-  static async createTestCheckout(adminId: string) {
+  /** Creates a fixed-value production gateway test for an authenticated parent/admin; no subscription is changed. */
+  static async createTestCheckout(userId: string) {
     if (!payos) {
       throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
+    }
+
+    const pendingOrder = await PaymentTestOrder.findOne({
+      userId: new Types.ObjectId(userId),
+      status: 'pending',
+      checkoutUrl: { $exists: true, $ne: '' },
+    }).sort({ createdAt: -1 });
+    if (pendingOrder) {
+      return {
+        orderCode: pendingOrder.orderCode,
+        amount: pendingOrder.amount,
+        status: pendingOrder.status,
+        checkoutUrl: pendingOrder.checkoutUrl,
+        createdAt: pendingOrder.createdAt,
+      };
     }
 
     let numericOrderCode: number;
@@ -42,20 +57,20 @@ export class PaymentsService {
       await PaymentOrder.exists({ orderCode: `VV${numericOrderCode}` })
     );
     const order = await PaymentTestOrder.create({
-      userId: new Types.ObjectId(adminId),
+      userId: new Types.ObjectId(userId),
       orderCode,
-      amount: 2000,
+      amount: 10000,
       status: 'pending',
     });
 
     try {
       const paymentLink = await payos.paymentRequests.create({
         orderCode: numericOrderCode,
-        amount: 2000,
-        description: 'Vietverse test 2000',
-        items: [{ name: 'Giao dich test Vietverse', quantity: 1, price: 2000 }],
-        cancelUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
-        returnUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
+        amount: 10000,
+        description: 'Vietverse test 10000',
+        items: [{ name: 'Thanh toan thu Vietverse', quantity: 1, price: 10000 }],
+        cancelUrl: `${env.CLIENT_ORIGIN}/thanh-toan-thu?orderCode=${orderCode}&payment=returned`,
+        returnUrl: `${env.CLIENT_ORIGIN}/thanh-toan-thu?orderCode=${orderCode}&payment=returned`,
       });
       order.checkoutUrl = paymentLink.checkoutUrl;
       order.paymentLinkId = paymentLink.paymentLinkId;
@@ -76,8 +91,8 @@ export class PaymentsService {
     };
   }
 
-  static async getTestOrderDetails(orderCode: string, adminId: string) {
-    const order = await PaymentTestOrder.findOne({ orderCode, userId: new Types.ObjectId(adminId) })
+  static async getTestOrderDetails(orderCode: string, userId: string) {
+    const order = await PaymentTestOrder.findOne({ orderCode, userId: new Types.ObjectId(userId) })
       .select('orderCode amount status checkoutUrl paidAt transactionRef createdAt updatedAt');
     if (!order) throw { statusCode: 404, message: 'Không tìm thấy giao dịch test' };
     return order;

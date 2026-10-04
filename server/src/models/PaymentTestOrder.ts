@@ -19,7 +19,7 @@ const paymentTestOrderSchema = new Schema<IPaymentTestOrder>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     orderCode: { type: String, required: true, unique: true, index: true },
-    amount: { type: Number, required: true, immutable: true, default: 2000 },
+    amount: { type: Number, required: true, immutable: true, default: 10000 },
     status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending', index: true },
     checkoutUrl: String,
     paymentLinkId: String,

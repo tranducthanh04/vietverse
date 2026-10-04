@@ -33,7 +33,7 @@ import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
-import { AdminPaymentTestPage } from '../features/admin/AdminPaymentTestPage.js';
+import { PaymentTestPage } from '../features/parent/PaymentTestPage.js';
 
 import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
 
@@ -67,6 +67,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <PaymentResultPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/thanh-toan-thu',
+    element: (
+      <ProtectedRoute>
+        <PaymentTestPage />
       </ProtectedRoute>
     ),
   },
@@ -118,6 +126,7 @@ export const router = createBrowserRouter([
       { path: 'tien-do', element: <ParentDashboardPage /> },
       { path: 'ban-thu-am', element: <ParentRecordingsPage /> },
       { path: 'cai-dat', element: <ParentSettingsPage /> },
+      { path: 'thanh-toan-thu', element: <PaymentTestPage /> },
     ],
   },
 
@@ -134,7 +143,7 @@ export const router = createBrowserRouter([
       { path: 'bai-hoc', element: <AdminLessonsPage /> },
       { path: 'hoc-vien', element: <AdminLearnersPage /> },
       { path: 'doi-qua', element: <AdminRedemptionsPage /> },
-      { path: 'test-thanh-toan', element: <AdminPaymentTestPage /> },
+      { path: 'test-thanh-toan', element: <PaymentTestPage /> },
     ],
   },
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, Mic, Clock, LogOut } from 'lucide-react';
+import { ArrowLeft, BarChart2, Mic, Clock, LogOut, Wallet } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
@@ -23,6 +23,7 @@ export const ParentLayout: React.FC = () => {
     { to: '/phu-huynh/tien-do', label: VI_LOCALES.parentPortal.tabProgress, icon: <BarChart2 className="w-5 h-5" /> },
     { to: '/phu-huynh/ban-thu-am', label: VI_LOCALES.parentPortal.tabRecordings, icon: <Mic className="w-5 h-5" /> },
     { to: '/phu-huynh/cai-dat', label: VI_LOCALES.parentPortal.tabSettings, icon: <Clock className="w-5 h-5" /> },
+    { to: '/phu-huynh/thanh-toan-thu', label: 'Thanh toán thử', icon: <Wallet className="w-5 h-5" /> },
   ];
 
   return (

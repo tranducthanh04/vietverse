@@ -14,7 +14,7 @@ type TestOrder = {
   transactionRef?: string;
 };
 
-export const AdminPaymentTestPage: React.FC = () => {
+export const PaymentTestPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const orderCode = searchParams.get('orderCode');
   const [creating, setCreating] = useState(false);
@@ -30,11 +30,19 @@ export const AdminPaymentTestPage: React.FC = () => {
   const createPayment = async () => {
     setCreating(true);
     setError('');
+    const paymentWindow = window.open('about:blank', '_blank');
     try {
       const response = await api.post('/payments/test-checkout');
       const created = response.data.data as TestOrder;
       setSearchParams({ orderCode: created.orderCode });
+      if (created.checkoutUrl && paymentWindow) {
+        paymentWindow.opener = null;
+        paymentWindow.location.href = created.checkoutUrl;
+      } else if (paymentWindow) {
+        paymentWindow.close();
+      }
     } catch (err: any) {
+      paymentWindow?.close();
       setError(err?.response?.data?.error?.message || 'Không tạo được link PayOS. Hãy kiểm tra cấu hình credentials trên server.');
     } finally {
       setCreating(false);
@@ -47,7 +55,7 @@ export const AdminPaymentTestPage: React.FC = () => {
         <h1 className="flex items-center gap-2 text-2xl font-black text-stone-800">
           <Wallet className="h-7 w-7 text-primary" /> Test thanh toán PayOS
         </h1>
-        <p className="mt-2 text-sm text-stone-600">Luồng kiểm tra giao dịch thật dành riêng cho quản trị viên. Không mua hoặc kích hoạt gói học.</p>
+        <p className="mt-2 text-sm text-stone-600">Phụ huynh có thể kiểm tra luồng chuyển khoản PayOS tại đây. Giao dịch thử không mua hoặc kích hoạt gói học.</p>
       </header>
 
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
@@ -55,7 +63,7 @@ export const AdminPaymentTestPage: React.FC = () => {
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <div>
             <p className="font-black">Đây là thanh toán production bằng tiền thật</p>
-            <p className="mt-1">PayOS hiện không có sandbox. Nếu bạn tiếp tục, hãy tự quét mã và chuyển đúng <strong>2.000đ</strong>. Không chia sẻ link này cho người khác.</p>
+            <p className="mt-1">PayOS hiện không có sandbox. Nếu tiếp tục, bạn sẽ chuyển khoản thật <strong>10.000đ</strong>. Khoản này không tự động hoàn lại và không kích hoạt gói học.</p>
           </div>
         </div>
       </div>
@@ -63,7 +71,7 @@ export const AdminPaymentTestPage: React.FC = () => {
       <Card className="space-y-4 border border-stone-200 bg-white p-5">
         <div>
           <p className="text-sm font-bold text-stone-500">Số tiền cố định</p>
-          <p className="mt-1 text-3xl font-black text-stone-900">2.000đ</p>
+          <p className="mt-1 text-3xl font-black text-stone-900">10.000đ</p>
           <p className="mt-1 text-sm text-stone-600">Server cố định số tiền; trang này không nhận số tiền do trình duyệt gửi.</p>
         </div>
         <button
@@ -72,7 +80,7 @@ export const AdminPaymentTestPage: React.FC = () => {
           onClick={createPayment}
           className="min-h-12 rounded-xl bg-primary px-5 py-3 font-bold text-white transition hover:brightness-95 disabled:cursor-wait disabled:opacity-60"
         >
-          {creating ? 'Đang tạo link…' : 'Tạo giao dịch test 2.000đ'}
+          {creating ? 'Đang tạo giao dịch…' : 'Thanh toán thử 10.000đ'}
         </button>
         {error && <p role="alert" className="text-sm font-semibold text-red-700">{error}</p>}
       </Card>
@@ -96,7 +104,7 @@ export const AdminPaymentTestPage: React.FC = () => {
           {order?.status === 'completed' && (
             <div className="rounded-xl bg-green-50 p-4 text-sm text-green-900">
               <p className="flex items-center gap-2 font-black"><CheckCircle2 className="h-5 w-5" /> PayOS đã xác nhận giao dịch thật</p>
-              <p className="mt-1">Số tiền: 2.000đ{order.transactionRef ? ` · Mã ngân hàng: ${order.transactionRef}` : ''}</p>
+              <p className="mt-1">Số tiền: {order.amount.toLocaleString('vi-VN')}đ{order.transactionRef ? ` · Mã ngân hàng: ${order.transactionRef}` : ''}</p>
               <p className="mt-1">Đơn test chỉ lưu kết quả giao dịch; subscription và quyền học không thay đổi.</p>
             </div>
           )}
