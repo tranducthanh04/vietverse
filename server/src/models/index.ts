@@ -13,4 +13,5 @@ export * from './Redemption.js';
 export * from './Subscription.js';
 export * from './RefreshToken.js';
 export * from './PaymentOrder.js';
+export * from './PaymentTestOrder.js';
 

@@ -238,5 +238,12 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - Đã sửa các chặn ở code: FE tạo checkout theo gói, PayOS SDK v2 tạo link, webhook dùng payload chuẩn + xác minh chữ ký, so khớp số tiền, chỉ parent được tạo checkout, và đơn/subscription được ghi trong transaction.
 - Đã thống nhất giá/quyền lợi với bảng giá: tháng 149.000đ/1 bé, năm 990.000đ/3 bé. Đã bỏ QR ngân hàng mẫu; thiếu cấu hình trả lỗi thay vì tạo đơn giả.
 - Đã thêm kiểm tra HTTPS cho `CLIENT_ORIGIN`, kiểm tra cấu hình PayOS nếu có khai báo phải đủ bộ, biến môi trường Render, trang kết quả thanh toán và kiểm thử chữ ký đúng/sai. Thiếu PayOS không được làm sập auth/API; riêng checkout trả 503 cho đến khi credentials được cấu hình.
-- Chưa thể xác nhận phát hành production: cần thêm credentials thật trong Render, dùng MongoDB replica set, đăng ký webhook URL trong PayOS Merchant Portal, chạy giao dịch sandbox thật, rồi nghiệm thu giao dịch nhỏ ở production.
+- Chưa thể xác nhận phát hành production: cần credentials thật trong Render, MongoDB replica set, webhook URL đã đăng ký tại PayOS Merchant Portal, và nghiệm thu giao dịch nhỏ bằng tiền thật (PayOS không có sandbox).
 - Follow-up vận hành: dọn/đánh dấu đơn pending hết hạn, job đối soát webhook bị trễ, và cảnh báo đơn tiền đã vào nhưng transaction DB thất bại. Không có webhook thật thì app không tự bật subscription.
+
+## Trang nghiệm thu giao dịch PayOS — 2026-10-04
+
+- Đã bổ sung `/admin/test-thanh-toan` và hai API admin-only để tạo/tra cứu đơn test cố định 2.000đ.
+- Đơn được lưu ở collection `PaymentTestOrder`, riêng với đơn mua gói. Webhook vẫn phải qua PayOS SDK verify chữ ký và kiểm tra đúng số tiền; xử lý đơn test không gọi `Subscription`.
+- Trang ghi rõ đây là khoản production bằng tiền thật; trạng thái thành công chỉ xuất hiện sau webhook hợp lệ, không dựa trên `returnUrl`.
+- Chưa nghiệm thu chuyển khoản thực tế: cần deploy code, cấu hình PayOS credentials và webhook production, sau đó admin chủ động chuyển 2.000đ. PayOS không cung cấp sandbox.

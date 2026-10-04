@@ -1,8 +1,13 @@
 import { Router } from 'express';
 import { PaymentsController } from './payments.controller.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { requireRole } from '../../middlewares/role.middleware.js';
+import { ROLES } from '../../constants/roles.js';
 
 const router = Router();
+
+router.post('/test-checkout', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.createTestCheckout);
+router.get('/test-orders/:orderCode', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.getTestOrderDetails);
 
 /**
  * @route   POST /api/v1/payments/create-checkout

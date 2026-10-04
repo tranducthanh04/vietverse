@@ -6,6 +6,7 @@
 | Auth | Refresh/logout | Có Axios interceptor | Có rotation theo family + revoke DB | RefreshToken | Hoàn thiện (P1.1) |
 | Auth | Google SSO | Nút UI | Trả 501 NOT_IMPLEMENTED | User.googleId | Đang phát triển |
 | Subscription | Xem gói và tạo checkout | Bảng giá gọi checkout; trang cài đặt hiển thị gói hiện tại/trạng thái quay về | Tạo payment link PayOS; xác minh chữ ký + amount trên webhook; cập nhật subscription trong transaction | PaymentOrder, Subscription | Đã triển khai code; cần cấu hình credentials/webhook URL và kiểm thử giao dịch PayOS trước khi mở production |
+| Admin | Test thanh toán thật PayOS | `/admin/test-thanh-toan`, admin tạo link cố định 2.000đ và theo dõi trạng thái webhook | API admin-only; ghi riêng `PaymentTestOrder`; webhook xác minh chữ ký và amount, không tác động subscription | PaymentTestOrder | Đã có luồng code; khoản tiền là thật trên production, chỉ xác nhận end-to-end sau khi admin tự chuyển khoản |
 | Onboarding | Tạo hồ sơ bé | Có wizard 4 bước | `POST /children` | Child | Hoàn thiện |
 | Child | Chuyển/Xóa hồ sơ | Có dropdown & nút xóa | `PATCH /children/:id/select`, `DELETE /children/:id` | Child, Progress, Recording | Hoàn thiện (P1.6 cascade delete) |
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |

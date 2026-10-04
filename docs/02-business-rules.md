@@ -10,6 +10,7 @@
 - PayOS hiện xử lý thanh toán một lần cho thời hạn tháng/năm; không tự động trừ tiền định kỳ.
 - Chỉ kích hoạt/gia hạn subscription sau webhook PayOS hợp lệ: chữ ký phải được SDK xác minh và số tiền webhook phải khớp đơn hàng. `returnUrl` chỉ phục vụ trải nghiệm UI, không được dùng để xác nhận đã trả tiền.
 - Mỗi đơn chỉ có thể chuyển từ `pending` sang `completed` một lần. Cập nhật đơn và subscription phải nằm trong cùng MongoDB transaction; môi trường production phải dùng MongoDB replica set hỗ trợ transaction.
+- *Quyết định vận hành (2026-10-04)*: Trang `/admin/test-thanh-toan` chỉ dành cho admin, tạo giao dịch PayOS production cố định 2.000đ để nghiệm thu chuyển khoản thật. Đơn được lưu riêng trong `PaymentTestOrder`; webhook hợp lệ chỉ cập nhật đơn test, tuyệt đối không tạo/cập nhật subscription hay quyền học. PayOS hiện không có sandbox nên admin phải chủ động xác nhận trước khi chuyển tiền.
 - *Quyết định nghiệp vụ*: Hàm kiểm tra quyền học trả phí `isSubscriptionPaid` bắt buộc kiểm tra đồng thời: (1) `subscription.active === true`, (2) `subscription.plan` thuộc `['monthly', 'yearly']`, và (3) `subscription.expiresAt` còn hạn (lớn hơn thời điểm hiện tại).
 - Giới hạn tạo bé được kiểm tra nghiêm ngặt tại server (`ChildrenService.createChild`).
 

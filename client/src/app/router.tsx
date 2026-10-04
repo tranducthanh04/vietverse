@@ -33,6 +33,7 @@ import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
+import { AdminPaymentTestPage } from '../features/admin/AdminPaymentTestPage.js';
 
 import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
 
@@ -133,6 +134,7 @@ export const router = createBrowserRouter([
       { path: 'bai-hoc', element: <AdminLessonsPage /> },
       { path: 'hoc-vien', element: <AdminLearnersPage /> },
       { path: 'doi-qua', element: <AdminRedemptionsPage /> },
+      { path: 'test-thanh-toan', element: <AdminPaymentTestPage /> },
     ],
   },
 

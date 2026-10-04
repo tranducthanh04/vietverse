@@ -1,6 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { PayOS, type Webhook } from '@payos/node';
 import { PaymentOrder, type PaidPlanType } from '../../models/PaymentOrder.js';
+import { PaymentTestOrder } from '../../models/PaymentTestOrder.js';
 import { Subscription } from '../../models/Subscription.js';
 import { User } from '../../models/User.js';
 import { env } from '../../config/env.js';
@@ -25,6 +26,63 @@ const payos = env.PAYOS_CLIENT_ID
   : null;
 
 export class PaymentsService {
+  /** Creates a fixed-value, admin-only production gateway test; it never changes a subscription. */
+  static async createTestCheckout(adminId: string) {
+    if (!payos) {
+      throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
+    }
+
+    let numericOrderCode: number;
+    let orderCode: string;
+    do {
+      numericOrderCode = randomInt(100_000_000, 1_000_000_000);
+      orderCode = `VT${numericOrderCode}`;
+    } while (
+      await PaymentTestOrder.exists({ orderCode }) ||
+      await PaymentOrder.exists({ orderCode: `VV${numericOrderCode}` })
+    );
+    const order = await PaymentTestOrder.create({
+      userId: new Types.ObjectId(adminId),
+      orderCode,
+      amount: 2000,
+      status: 'pending',
+    });
+
+    try {
+      const paymentLink = await payos.paymentRequests.create({
+        orderCode: numericOrderCode,
+        amount: 2000,
+        description: 'Vietverse test 2000',
+        items: [{ name: 'Giao dich test Vietverse', quantity: 1, price: 2000 }],
+        cancelUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
+        returnUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
+      });
+      order.checkoutUrl = paymentLink.checkoutUrl;
+      order.paymentLinkId = paymentLink.paymentLinkId;
+      await order.save();
+    } catch (err) {
+      order.status = 'failed';
+      await order.save();
+      const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+      throw { statusCode: 502, message: `Không thể tạo liên kết PayOS: ${message}` };
+    }
+
+    return {
+      orderCode: order.orderCode,
+      amount: order.amount,
+      status: order.status,
+      checkoutUrl: order.checkoutUrl,
+      createdAt: order.createdAt,
+    };
+  }
+
+  static async getTestOrderDetails(orderCode: string, adminId: string) {
+    const order = await PaymentTestOrder.findOne({ orderCode, userId: new Types.ObjectId(adminId) })
+      .select('orderCode amount status checkoutUrl paidAt transactionRef createdAt updatedAt');
+    if (!order) throw { statusCode: 404, message: 'Không tìm thấy giao dịch test' };
+    return order;
+  }
+
   /**
    * Tạo đơn nội bộ trước, sau đó yêu cầu PayOS tạo payment link.
    */
@@ -106,6 +164,41 @@ export class PaymentsService {
     }
 
     const orderCode = `VV${verifiedData.orderCode}`;
+    const testOrderCode = `VT${verifiedData.orderCode}`;
+    const testOrder = await PaymentTestOrder.findOne({ orderCode: testOrderCode });
+    if (testOrder) {
+      if (verifiedData.amount !== testOrder.amount) {
+        throw { statusCode: 400, message: 'Số tiền webhook không khớp với giao dịch test' };
+      }
+
+      const session = await mongoose.startSession();
+      let result: { order: typeof testOrder; subscription: null; idempotencyHandled: boolean } | null = null;
+      try {
+        await session.withTransaction(async () => {
+          const currentTestOrder = await PaymentTestOrder.findOne({ orderCode: testOrderCode }).session(session);
+          if (!currentTestOrder) throw { statusCode: 404, message: `Không tìm thấy giao dịch ${testOrderCode}` };
+          if (currentTestOrder.status !== 'pending') {
+            result = { order: currentTestOrder, subscription: null, idempotencyHandled: true };
+            return;
+          }
+
+          if (verifiedData.code === '00') {
+            currentTestOrder.status = 'completed';
+            currentTestOrder.paidAt = new Date();
+            currentTestOrder.transactionRef = verifiedData.reference;
+          } else {
+            currentTestOrder.status = 'failed';
+          }
+          await currentTestOrder.save({ session });
+          result = { order: currentTestOrder, subscription: null, idempotencyHandled: false };
+        });
+      } finally {
+        await session.endSession();
+      }
+      if (!result) throw { statusCode: 500, message: 'Không thể ghi nhận giao dịch test' };
+      return result;
+    }
+
     const order = await PaymentOrder.findOne({ orderCode });
     if (!order) {
       throw { statusCode: 404, message: `Không tìm thấy đơn hàng mã ${orderCode}` };

@@ -5,6 +5,24 @@ import { sendSuccess } from '../../utils/apiResponse.js';
 import type { Webhook } from '@payos/node';
 
 export class PaymentsController {
+  static async createTestCheckout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await PaymentsService.createTestCheckout(req.user!.id);
+      return sendSuccess(res, result, 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getTestOrderDetails(req: Request, res: Response, next: NextFunction) {
+    try {
+      const order = await PaymentsService.getTestOrderDetails(req.params.orderCode, req.user!.id);
+      return sendSuccess(res, order);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async createCheckout(req: Request, res: Response, next: NextFunction) {
     try {
       const parsed = createCheckoutSchema.parse(req.body);

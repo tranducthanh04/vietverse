@@ -45,8 +45,10 @@ Base URL: `/api/v1`.
 | POST | `/payments/webhook` | Public, PayOS signature required | Nhận nguyên payload webhook PayOS (`code`, `desc`, `success`, `data`, `signature`); xác minh bằng SDK, so khớp số tiền; đơn và subscription cập nhật idempotent trong MongoDB transaction |
 | GET | `/payments/history` | Auth | Lịch sử tối đa 50 đơn của tài khoản hiện tại |
 | GET | `/payments/orders/:orderCode` | Auth | Chỉ trả đơn thuộc tài khoản hiện tại; UI dùng để đọc kết quả sau khi quay về từ PayOS, không dùng return URL làm chứng cứ đã thanh toán |
+| POST | `/payments/test-checkout` | Admin | Tạo đơn test PayOS production cố định 2.000đ; không nhận amount từ client; lưu riêng `PaymentTestOrder`, không đăng ký gói |
+| GET | `/payments/test-orders/:orderCode` | Admin | Chỉ admin tạo đơn được xem trạng thái; chỉ webhook PayOS hợp lệ mới đổi trạng thái sang `completed` |
 
-Để bật PayOS production cần cấu hình đủ `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `CLIENT_ORIGIN` HTTPS, MongoDB replica set, và khai báo webhook URL `https://<api-domain>/api/v1/payments/webhook` tại kênh thanh toán PayOS. Nếu chưa cấu hình PayOS, backend vẫn khởi động cho các API khác; riêng tạo checkout trả 503.
+Để bật PayOS production cần cấu hình đủ `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `CLIENT_ORIGIN` HTTPS, MongoDB replica set, và khai báo webhook URL `https://<api-domain>/api/v1/payments/webhook` tại kênh thanh toán PayOS. Nếu chưa cấu hình PayOS, backend vẫn khởi động cho các API khác; riêng tạo checkout trả 503. PayOS không có sandbox; endpoint test tạo giao dịch thật 2.000đ, dành riêng cho admin, và webhook của loại đơn này không được phép sửa subscription.
 
 ## Points, parent, admin
 
