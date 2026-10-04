@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://vietverse-api.onrender.com/api/:path*"
+      "destination": "https://vietverse.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
