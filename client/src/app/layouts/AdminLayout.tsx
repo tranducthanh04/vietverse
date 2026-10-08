@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Users, Gift, ArrowLeft, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Gift, ArrowLeft, LogOut, Wallet } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
@@ -19,6 +19,7 @@ export const AdminLayout: React.FC = () => {
     { to: '/admin/bai-hoc', label: VI_LOCALES.admin.tabLessons, icon: <BookOpen className="w-5 h-5" /> },
     { to: '/admin/hoc-vien', label: VI_LOCALES.admin.tabLearners, icon: <Users className="w-5 h-5" /> },
     { to: '/admin/doi-qua', label: VI_LOCALES.admin.tabRedemptions, icon: <Gift className="w-5 h-5" /> },
+    { to: '/admin/test-thanh-toan', label: 'Test thanh toán', icon: <Wallet className="w-5 h-5" /> },
   ];
 
   return (

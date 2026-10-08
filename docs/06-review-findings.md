@@ -239,3 +239,19 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - **Kiểm thử tự động**: Backend 39/39 tests pass (8 suites); Frontend 9/9 tests pass (4 suites); `npm run lint` 0 errors.
 - **Luồng Admin**: Đăng nhập → redirect đúng `/admin` → Dashboard KPI hiển thị data thực ✅.
 - **Việc còn lại quan trọng nhất**: (1) Code-splitting lazy-load theo route để giảm JS bundle < 300KB, (2) Playwright E2E smoke test cho luồng login/lesson/redemption, (3) axe accessibility scan.
+
+## Thanh toán PayOS — rà soát và triển khai 2026-10-03
+
+- Đã sửa các chặn ở code: FE tạo checkout theo gói, PayOS SDK v2 tạo link, webhook dùng payload chuẩn + xác minh chữ ký, so khớp số tiền, chỉ parent được tạo checkout, và đơn/subscription được ghi trong transaction.
+- Đã thống nhất giá/quyền lợi với bảng giá: tháng 149.000đ/1 bé, năm 990.000đ/3 bé. Đã bỏ QR ngân hàng mẫu; thiếu cấu hình trả lỗi thay vì tạo đơn giả.
+- Đã thêm kiểm tra HTTPS cho `CLIENT_ORIGIN`, kiểm tra cấu hình PayOS nếu có khai báo phải đủ bộ, biến môi trường Render, trang kết quả thanh toán và kiểm thử chữ ký đúng/sai. Thiếu PayOS không được làm sập auth/API; riêng checkout trả 503 cho đến khi credentials được cấu hình.
+- Chưa thể xác nhận phát hành production: cần credentials thật trong Render, MongoDB replica set, webhook URL đã đăng ký tại PayOS Merchant Portal, và nghiệm thu giao dịch nhỏ bằng tiền thật (PayOS không có sandbox).
+- Follow-up vận hành: dọn/đánh dấu đơn pending hết hạn, job đối soát webhook bị trễ, và cảnh báo đơn tiền đã vào nhưng transaction DB thất bại. Không có webhook thật thì app không tự bật subscription.
+
+## Trang nghiệm thu giao dịch PayOS — 2026-10-05
+
+- Phụ huynh/admin đã đăng nhập có thể mở trang thanh toán thử; nút tạo giao dịch 10.000đ mở thẳng link PayOS, còn trang theo dõi trạng thái riêng.
+- Hai API tạo/tra cứu yêu cầu role parent/admin; truy vấn đơn giới hạn đúng người tạo.
+- Đơn được lưu ở collection `PaymentTestOrder`, riêng với đơn mua gói. Webhook vẫn phải qua PayOS SDK verify chữ ký và kiểm tra đúng số tiền; xử lý đơn test không gọi `Subscription`.
+- Trang ghi rõ đây là khoản production bằng tiền thật; trạng thái thành công chỉ xuất hiện sau webhook hợp lệ, không dựa trên `returnUrl`.
+- Chưa nghiệm thu chuyển khoản thực tế: cần deploy code, cấu hình PayOS credentials và webhook production, sau đó phụ huynh chủ động chuyển 10.000đ. PayOS không cung cấp sandbox.

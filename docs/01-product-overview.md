@@ -60,7 +60,7 @@ Vietverse là nền tảng học tiếng Việt tương tác cho trẻ 5–8 tu�
 
 ## Ngoài phạm vi hoặc chưa hoàn thiện trong baseline
 
-- Thanh toán subscription chưa có provider hoặc webhook.
+- Thanh toán subscription qua PayOS: xem trạng thái phát hành và cấu hình production tại `03-feature-inventory.md` và `05-api-and-data-contracts.md`.
 - Google SSO mới là placeholder.
 - Screen time đã chặn phiên học ở client; việc kiểm thử thiết bị thật vẫn chưa nằm trong đợt này.
 - Database cũ giữ nguyên lesson khung và nội dung đã biên tập; thay thế chúng cần migration được duyệt riêng.

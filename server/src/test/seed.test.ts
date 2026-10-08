@@ -1,18 +1,10 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import mongoose from 'mongoose';
 import { runSeed } from '../seeds/seed.js';
 import { Stage, Lesson, Story, CultureArticle, User, Child, ShopItem, Subscription, LessonProgress, PointTransaction, Redemption } from '../models/index.js';
 import { gradeActivity } from '../modules/lessons/lessons.grading.js';
 
 describe('safe catalog seed', () => {
-  beforeAll(async () => {
-    // This suite uses a persistent local test URI; start from a known empty catalog.
-    for (const model of [Stage, Lesson, Story, CultureArticle, User, Child, ShopItem, Subscription, LessonProgress, PointTransaction, Redemption]) {
-      await model.deleteMany({});
-    }
-    await mongoose.connection.db?.collection('seed_locks').deleteMany({});
-  });
-
   it('previews missing catalog records without writing or creating demo accounts', async () => {
     const before = await Promise.all([Stage.countDocuments(), Lesson.countDocuments(), User.countDocuments()]);
     const result = await runSeed({ dryRun: true });

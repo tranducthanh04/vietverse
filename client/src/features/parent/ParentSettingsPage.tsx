@@ -1,18 +1,55 @@
-import React, { useState } from 'react';
-import { Clock, Check } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { useAuthStore } from '../../store/authStore.js';
 
 export const ParentSettingsPage: React.FC = () => {
   const { activeChild, selectChild } = useChildStore();
+  const [searchParams] = useSearchParams();
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+  const subscription = useAuthStore((state) => state.subscription);
   const [selectedLimit, setSelectedLimit] = useState<number>(
     activeChild?.screenTimeLimit ?? 20
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
+
+  useEffect(() => {
+    const requestedOrderCode = searchParams.get('orderCode');
+    if (!requestedOrderCode) return;
+    let cancelled = false;
+    let attempts = 0;
+    const orderCode = requestedOrderCode.startsWith('VV') ? requestedOrderCode : `VV${requestedOrderCode}`;
+    const checkPayment = async () => {
+      try {
+        const response = await api.get(`/payments/orders/${encodeURIComponent(orderCode)}`);
+        const status = response.data.data.status;
+        if (cancelled) return;
+        if (status === 'completed') {
+          setPaymentMessage('Thanh toán thành công. Gói học đã được kích hoạt.');
+          await fetchMe();
+          return;
+        }
+        if (status === 'failed' || status === 'cancelled') {
+          setPaymentMessage('Giao dịch chưa hoàn tất. Bạn có thể chọn gói và thử lại.');
+          return;
+        }
+        attempts += 1;
+        if (attempts < 30) window.setTimeout(checkPayment, 2000);
+        else setPaymentMessage('Đang chờ PayOS xác nhận. Hãy tải lại trang sau ít phút để kiểm tra trạng thái.');
+      } catch {
+        if (!cancelled) setPaymentMessage('Không thể tra cứu giao dịch lúc này. Vui lòng tải lại trang sau ít phút.');
+      }
+    };
+    void checkPayment();
+    return () => { cancelled = true; };
+  }, [fetchMe, searchParams]);
 
   const options = [
     { value: 15, label: '15 phút', desc: 'Phù hợp cho bé mới bắt đầu tập trung' },
@@ -39,6 +76,17 @@ export const ParentSettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Card className="p-6 bg-white border border-cream-border">
+        <h2 className="text-xl font-bold font-display text-stone-800">Gói học và thanh toán</h2>
+        <p className="mt-2 text-sm text-stone-600">
+          Gói hiện tại: <strong>{subscription?.plan || 'free'}</strong> · Tối đa {subscription?.maxChildren ?? 1} hồ sơ bé.
+        </p>
+        {paymentMessage && <p role="status" className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{paymentMessage}</p>}
+        <Link to="/gia" className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-primary px-5 py-3 font-bold text-white">
+          Xem gói và thanh toán
+        </Link>
+      </Card>
+
       <div>
         <h2 className="text-xl font-bold font-display text-stone-800">
           {VI_LOCALES.parentPortal.screenTimeTitle}

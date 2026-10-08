@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { api } from '../../lib/api.js';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +25,16 @@ export const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       await login({ email, password });
+      const selectedPlan = searchParams.get('plan');
+      if (selectedPlan === 'monthly' || selectedPlan === 'yearly') {
+        try {
+          const response = await api.post('/payments/create-checkout', { planType: selectedPlan });
+          window.location.assign(response.data.data.checkoutUrl);
+        } catch (err: any) {
+          setErrorMsg(err.response?.data?.error?.message || 'Đăng nhập thành công nhưng chưa thể tạo giao dịch. Hãy thử lại ở bảng giá.');
+        }
+        return;
+      }
       const currentUser = useAuthStore.getState().user;
       const redirectTo = searchParams.get('redirect');
       if (redirectTo) {
@@ -140,7 +151,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="mt-6 pt-4 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.noAccount} </span>
-            <Link to="/dang-ky" className="font-bold text-primary hover:underline">
+            <Link to={searchParams.get('plan') ? `/dang-ky?plan=${searchParams.get('plan')}` : '/dang-ky'} className="font-bold text-primary hover:underline">
               {VI_LOCALES.auth.registerBtn}
             </Link>
           </div>

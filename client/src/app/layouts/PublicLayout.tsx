@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Star, Sparkles } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore.js';
-import { Button } from '../../components/ui/Button.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const PublicLayout: React.FC = () => {
@@ -30,7 +29,7 @@ export const PublicLayout: React.FC = () => {
       <header className="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(180,83,9,0.08)] border-b border-outline-variant/30">
         <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 shrink-0 min-h-[44px]">
+          <Link to="/" className="flex items-center gap-3 shrink-0 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-display text-2xl lg:text-3xl text-primary tracking-tight font-extrabold select-none">
@@ -54,7 +53,7 @@ export const PublicLayout: React.FC = () => {
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `relative min-h-[44px] px-3.5 py-2 inline-flex items-center text-sm font-bold transition-all duration-200 border-b-2 rounded-t-lg ${
+                  `relative min-h-[44px] px-3.5 py-2 inline-flex items-center text-sm font-bold transition-all duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
                     isActive
                       ? 'text-primary border-primary bg-primary/5 font-black'
                       : 'text-on-surface-variant hover:text-primary border-transparent hover:bg-surface-container/60'
@@ -71,7 +70,7 @@ export const PublicLayout: React.FC = () => {
             {user ? (
               <button
                 onClick={() => navigate('/kham-pha')}
-                className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm"
+                className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
               >
                 Vào học ngay
               </button>
@@ -79,13 +78,13 @@ export const PublicLayout: React.FC = () => {
               <div className="hidden sm:flex items-center gap-2">
                 <button
                   onClick={() => navigate('/dang-nhap')}
-                  className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                  className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
                   {VI_LOCALES.nav.login}
                 </button>
                 <button
                   onClick={() => navigate('/dang-ky')}
-                  className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm"
+                  className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
                   {VI_LOCALES.nav.register}
                 </button>
@@ -115,7 +114,7 @@ export const PublicLayout: React.FC = () => {
                   to={link.to}
                   end={link.end}
                   className={({ isActive }) =>
-                    `min-h-[44px] px-4 py-2.5 rounded-xl text-base font-bold flex items-center justify-between transition-colors ${
+                    `min-h-[44px] px-4 py-2.5 rounded-xl text-base font-bold flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset ${
                       isActive
                         ? 'bg-primary/10 text-primary font-black border-l-4 border-primary'
                         : 'text-stone-700 hover:bg-stone-50 hover:text-primary'
@@ -141,13 +140,13 @@ export const PublicLayout: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => navigate('/dang-nhap')}
-                    className="min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-stone-200 font-bold text-sm text-stone-700 hover:bg-stone-100 text-center flex items-center justify-center transition-colors"
+                    className="min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-stone-200 font-bold text-sm text-stone-700 hover:bg-stone-100 text-center flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
                     {VI_LOCALES.nav.login}
                   </button>
                   <button
                     onClick={() => navigate('/dang-ky')}
-                    className="btn-3d-primary min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"
+                    className="btn-3d-primary min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
                     {VI_LOCALES.nav.register}
                   </button>

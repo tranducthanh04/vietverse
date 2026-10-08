@@ -49,7 +49,8 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - Đăng ký Google OAuth và ngôn ngữ đồng hành chọn nhiều (hiện model lưu một ngôn ngữ).
 - Dashboard phụ huynh đầy đủ chặng hiện tại, tiến độ 5 chặng, hoạt động gần đây và điều hướng điểm thưởng. Công thức năng lực hiện tại vẫn là benchmark MVP, chưa phải đánh giá chuyên môn toàn khóa.
 - CMS biên tập đủ activities/vocabulary, truyện và văn hóa; admin hiện chủ yếu chỉnh metadata bài học.
-- Pagination toàn bộ lịch sử điểm (API hiện giới hạn 100 bản ghi), thanh toán subscription, chính sách hoàn quà ảo/đơn đã giao.
+- Pagination toàn bộ lịch sử điểm (API hiện giới hạn 100 bản ghi), chính sách hoàn quà ảo/đơn đã giao.
+- Khi hợp nhất `origin/main`, giữ nguyên module thanh toán PayOS đã được phát triển độc lập. Code checkout/webhook đã có; kiểm thử giao dịch production vẫn cần cấu hình và người dùng xác nhận theo `03-feature-inventory.md`. Đợt này không tạo giao dịch thật.
 - Kiểm thử trình duyệt thật, mobile, accessibility và audio/media production; giảm bundle bằng lazy routes.
 
 ## Tiêu chí kiểm tra trước push
@@ -58,3 +59,10 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - UI: reload phụ huynh tải hồ sơ; có empty/error/retry; lesson bị chặn khi hết giờ; gia hạn không bị timer cũ khóa lại; thiếu challenge không submit; city nhập được; thiếu audio không báo phát giả.
 - Seed: preview không ghi; chạy lại không thay đổi tài khoản/ledger/stock/progress/nội dung; dữ liệu đúng schema và đáp án chấm được; báo xung đột định danh trước ghi.
 - Chạy test toàn repo, typecheck, build và lint FE. Lint toàn repo đang thiếu script phía server; không báo toàn repo lint sạch.
+
+## Kết quả kiểm chứng sau hợp nhất — 2026-10-09
+
+- `npm.cmd test`: backend 58/58, frontend 30/30; backend dùng MongoDB replica set tạm do test setup của nhánh remote tạo. Không gọi cổng thanh toán thật.
+- `npm.cmd run typecheck` và `npm.cmd run build`: đạt. Bundle client khoảng 598 KB chưa nén, còn cảnh báo chunk lớn.
+- `npm.cmd run lint -w client`: 0 lỗi, 123 warning. Chưa chạy nghiệm thu trình duyệt/mobile/accessibility.
+- Cài dependency theo lockfile bằng `npm.cmd install --ignore-scripts` báo 17 advisory (5 moderate, 7 high, 5 critical). Chưa đánh giá khả năng khai thác từng advisory và chưa tự nâng dependency; cần đợt xử lý riêng.

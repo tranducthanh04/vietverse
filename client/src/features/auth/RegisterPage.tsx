@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.js';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { api } from '../../lib/api.js';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register } = useAuthStore();
+  const selectedPlan = searchParams.get('plan');
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +25,16 @@ export const RegisterPage: React.FC = () => {
     try {
       setIsLoading(true);
       await register({ displayName, email, password });
+      if (selectedPlan === 'monthly' || selectedPlan === 'yearly') {
+        try {
+          const response = await api.post('/payments/create-checkout', { planType: selectedPlan });
+          window.location.assign(response.data.data.checkoutUrl);
+          return;
+        } catch {
+          navigate('/gia?checkoutError=1');
+          return;
+        }
+      }
       // Go directly to onboarding wizard to create the child's profile
       navigate('/bat-dau');
     } catch (err: any) {
@@ -107,7 +120,7 @@ export const RegisterPage: React.FC = () => {
 
           <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.hasAccount} </span>
-            <Link to="/dang-nhap" className="font-bold text-primary hover:underline">
+            <Link to={selectedPlan ? `/dang-nhap?plan=${selectedPlan}` : '/dang-nhap'} className="font-bold text-primary hover:underline">
               {VI_LOCALES.auth.loginBtn}
             </Link>
           </div>

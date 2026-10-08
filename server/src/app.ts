@@ -20,8 +20,13 @@ import cultureRouter from './modules/culture/culture.routes.js';
 import pointsRouter from './modules/points/points.routes.js';
 import parentRouter from './modules/parent/parent.routes.js';
 import adminRouter from './modules/admin/admin.routes.js';
+import paymentsRouter from './modules/payments/payments.routes.js';
 
 export const app = express();
+
+// The app sits behind Render's reverse proxy. Trust the immediate proxy so
+// express-rate-limit can identify the originating client via X-Forwarded-For.
+app.set('trust proxy', 1);
 
 // Security and utility middlewares
 app.use(
@@ -36,6 +41,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://vietverse.vercel.app',
+  'https://vietverse-nine.vercel.app',
 ];
 
 app.use(
@@ -93,6 +99,7 @@ app.use('/api/v1/culture', cultureRouter);
 app.use('/api/v1/points', pointsRouter);
 app.use('/api/v1/parent', parentRouter);
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/payments', paymentsRouter);
 
 // 404 Handler in Vietnamese
 app.use((req: Request, res: Response) => {
