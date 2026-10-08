@@ -8,13 +8,20 @@ export const updateRedemptionSchema = z
     notes: z.string().trim().max(500).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
-    message: 'Cần cung cấp ít nhất một trường thông tin để cập nhật đơn đổi quà',
+    message:
+      'Cần cung cấp ít nhất một trường thông tin để cập nhật đơn đổi quà',
   });
 
 export const updateInventorySchema = z
   .object({
     stock: z.number().int().min(0).optional(),
-    stockDelta: z.number().int().min(-100000).max(100000).refine((value) => value !== 0).optional(),
+    stockDelta: z
+      .number()
+      .int()
+      .min(-100000)
+      .max(100000)
+      .refine((value) => value !== 0)
+      .optional(),
     costPoints: z.number().int().min(1).optional(),
     active: z.boolean().optional(),
     name: z.string().trim().min(1).optional(),
@@ -54,15 +61,23 @@ export const activitySchema = z.object({
   targetWord: z.string().optional(),
   targetPhonetic: z.string().optional(),
   pairs: z.array(z.object({ left: z.string(), right: z.string() })).optional(),
-  blanks: z.array(z.object({ sentence: z.string(), missing: z.string() })).optional(),
+  blanks: z
+    .array(z.object({ sentence: z.string(), missing: z.string() }))
+    .optional(),
   orderedItems: z.array(z.string()).optional(),
   pointsWeight: z.number().int().min(1).optional(),
 });
 
 export const createLessonSchema = z.object({
-  stageId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'stageId phải là MongoDB ObjectId hợp lệ'),
+  stageId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'stageId phải là MongoDB ObjectId hợp lệ'),
   order: z.number().int().min(1).max(100),
-  title: z.string().trim().min(1, 'Tiêu đề bài học không được để trống').max(200),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Tiêu đề bài học không được để trống')
+    .max(200),
   description: z.string().trim().max(1000).optional(),
   vocabulary: z
     .array(

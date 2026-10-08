@@ -52,12 +52,18 @@ Vietverse là nền tảng học tiếng Việt tương tác cho trẻ 5–8 tu�
 3. Server kiểm tra số dư và tạo giao dịch trừ điểm.
 4. Quà ảo chuyển sang đã giao; quà vật lý tạo đơn chờ xử lý.
 
+## Cập nhật đối chiếu khách hàng — 2026-10-08
+
+- Luồng học của bé dùng một phiên hồ sơ chung giữa bản đồ, bài học và nội dung khám phá; giới hạn screen time được chặn ở client sau khi server lưu cấu hình.
+- Seed hiện có catalog mẫu 5 chặng × 4 bài, 21 bài đọc biên tập và 8 nhóm văn hóa. Đây là dữ liệu thử nghiệm, chưa phải nội dung nguyên tác đã được duyệt.
+- Phụ huynh được khôi phục hồ sơ sau reload và các API nhạy cảm tiếp tục yêu cầu Parent Gate server-side. Admin hủy đơn/điều chỉnh kho có khóa và cơ chế bù trừ.
+
 ## Ngoài phạm vi hoặc chưa hoàn thiện trong baseline
 
 - Thanh toán subscription chưa có provider hoặc webhook.
 - Google SSO mới là placeholder.
-- Screen time mới lưu cấu hình, chưa chặn phiên học.
-- Các bài 9–20 trong seed vẫn là nội dung khung; mức độ hoàn thiện không đồng đều.
+- Screen time đã chặn phiên học ở client; việc kiểm thử thiết bị thật vẫn chưa nằm trong đợt này.
+- Database cũ giữ nguyên lesson khung và nội dung đã biên tập; thay thế chúng cần migration được duyệt riêng.
 - Chưa có luồng fulfillment kho/stock hoàn chỉnh cho quà vật lý.
 
 ## Tiêu chí thành công

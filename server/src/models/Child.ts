@@ -15,6 +15,7 @@ export interface IChild extends Document {
   ownedItemIds: Types.ObjectId[];
   badges: string[];
   screenTimeLimit: number; // minutes per session: 15, 20, 30, 0 (unlimited)
+  refundLock?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,6 +74,7 @@ const childSchema = new Schema<IChild>(
       type: Number,
       default: 20,
     },
+    refundLock: { type: String, select: false },
   },
   {
     timestamps: true,

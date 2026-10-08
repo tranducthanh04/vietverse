@@ -88,6 +88,7 @@ export class PointsService {
         {
           _id: item._id,
           active: true,
+          refundLock: { $exists: false },
           stock: { $gte: 1 },
         },
         {
@@ -97,6 +98,9 @@ export class PointsService {
       );
 
       if (!updatedStockItem) {
+        if (await ShopItem.exists({ _id: item._id, refundLock: { $exists: true } })) {
+          throw { statusCode: 409, message: 'Kho quà đang đối soát hoàn điểm. Vui lòng thử lại.' };
+        }
         throw { statusCode: 400, message: 'Vật phẩm đã hết hàng trong kho.' };
       }
       stockDecremented = true;
@@ -106,6 +110,7 @@ export class PointsService {
     const updatedChild = await Child.findOneAndUpdate(
       {
         _id: child._id,
+        refundLock: { $exists: false },
         viviPoints: { $gte: item.costPoints },
       },
       {
@@ -119,6 +124,9 @@ export class PointsService {
       // Revert stock decrement if physical item
       if (stockDecremented) {
         await ShopItem.findByIdAndUpdate(item._id, { $inc: { stock: 1 } });
+      }
+      if (await Child.exists({ _id: child._id, refundLock: { $exists: true } })) {
+        throw { statusCode: 409, message: 'Điểm của bé đang được đối soát. Vui lòng thử lại.' };
       }
       throw {
         statusCode: 400,

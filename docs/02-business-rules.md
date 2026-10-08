@@ -19,11 +19,12 @@
 
 ## 3. Chặng và bài học
 
-- Có 5 chặng, 20 bài theo seed (Chặng 1 bài 1–8 đầy đủ nội dung, bài 9–20 khung bài học).
+- Có 5 chặng, 20 bài theo seed (4 bài/chặng). Seed mới tạo nội dung mẫu theo 5 mục tiêu khách hàng; database cũ không bị thay thế lesson đã có.
 - Stage 1 mở cho tài khoản hợp lệ.
 - Stage sau cần hoàn tất toàn bộ bài của stage trước và subscription trả phí hợp lệ.
 - Trong một stage, bài sau chỉ mở khi bài ngay trước đã completed.
 - Trạng thái bài: `not_started`, `in_progress`, `completed`.
+- *Quyết định triển khai*: phiên học của bé dùng cùng hồ sơ được chọn giữa bản đồ, bài học và nội dung khám phá; khi đạt `screenTimeLimit` (15/20/30 phút), client khóa nội dung cho tới khi Parent Gate gia hạn hoặc bé nghỉ.
 - Sao: 1 sao mặc định (khi scorePercent từ 50% đến 69%), 2 sao từ 70%, 3 sao từ 90% theo `scorePercent` do server tự chấm.
 - Điểm đỗ bài học: bé cần đạt `scorePercent >= 50%` để được tính `completed` và nhận thưởng. Điểm dưới 50% lưu `status: 'in_progress'`, 0 sao và 0 điểm thưởng.
 - `freeInStarterPlan` là cờ nội dung cho phép học thử.
@@ -63,6 +64,7 @@ Nguyên tắc bắt buộc:
   - **Quà ảo (Virtual)**: Cấm mua lặp nếu bé đã sở hữu vật phẩm trong `Child.ownedItemIds` (400 "Bé đã sở hữu vật phẩm ảo này rồi"). Sau khi đổi thành công, ID vật phẩm được ghi nhận vào `ownedItemIds`.
   - **Trừ điểm Atomic & Bù trừ (Compensation)**: Trừ điểm kiểm tra số dư `{ viviPoints: { $gte: costPoints } }`. Nếu trừ điểm thất bại, tồn kho quà vật lý được rollback ngay lập tức. Mọi lỗi phát sinh khi ghi `PointTransaction` hoặc `Redemption` đều kích hoạt rollback compensation tự động: hoàn điểm, hoàn stock và hủy record dở dang, đảm bảo số dư và sổ cái luôn nhất quán.
 - Trạng thái đơn: `pending` (chờ xử lý quà vật lý), `shipped` (đang giao), `delivered` (hoàn tất, tự động gán cho quà ảo).
+- *Quyết định triển khai*: hủy đơn chỉ hoàn điểm/tồn kho một lần; đơn `cancelled` không mở lại, nhưng vẫn sửa được ghi chú. Đợt này giữ các trạng thái nguồn mà API hiện chấp nhận; chính sách hoàn quà ảo/đơn đã giao cần chốt riêng. Khóa bù trừ bị kẹt phải được đối soát thủ công theo `docs/08-customer-alignment.md`.
 
 ## 7. Parent portal và parent gate
 
@@ -79,7 +81,7 @@ Nguyên tắc bắt buộc:
 - Chỉ role `admin` được xem KPI, learners, redemptions và thao tác quản trị bài học / đơn hàng.
 - Tất cả mutation của admin (`createLesson`, `updateLesson`, `updateRedemption`) bắt buộc qua Zod schema validation:
   - `createLessonSchema`: validate ObjectId `stageId`, `order` nguyên dương 1–100, `title`, `activities` thuộc 7 loại hợp lệ.
-  - `updateRedemptionSchema`: yêu cầu ít nhất 1 trường thay đổi, validate `status` thuộc `['pending', 'shipped', 'delivered']`, trackingCode, carrier.
+  - `updateRedemptionSchema`: yêu cầu ít nhất 1 trường thay đổi, validate `status` thuộc `['pending', 'shipped', 'delivered', 'cancelled']`, trackingCode, carrier.
 - Các API truy vấn danh sách (`getLearners`, `getRedemptions`) áp dụng giới hạn tối đa 100 bản ghi mỗi yêu cầu.
 
 

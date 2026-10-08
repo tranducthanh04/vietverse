@@ -21,7 +21,8 @@ export interface IStory extends Document {
   description: string;
   coverImage?: string;
   lyrics: ILyricLine[];
-  audioUrl: string;
+  /** Empty when production audio has not yet been supplied. */
+  audioUrl?: string;
   durationSec: number;
   ageGroups: string[];
   vocab: string[];
@@ -57,7 +58,7 @@ const storySchema = new Schema<IStory>(
     ],
     audioUrl: {
       type: String,
-      required: true,
+      default: '',
     },
     durationSec: {
       type: Number,

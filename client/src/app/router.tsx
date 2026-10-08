@@ -34,6 +34,7 @@ import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
 
 import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
+import { ChildSessionGuard } from '../components/ChildSessionGuard.js';
 
 export const router = createBrowserRouter([
   // Public Landing & Pricing
@@ -74,7 +75,7 @@ export const router = createBrowserRouter([
     path: '/hoc/:lessonId',
     element: (
       <ProtectedRoute>
-        <LessonPlayerPage />
+        <ChildSessionGuard><LessonPlayerPage /></ChildSessionGuard>
       </ProtectedRoute>
     ),
   },
@@ -83,7 +84,7 @@ export const router = createBrowserRouter([
   {
     element: (
       <ProtectedRoute>
-        <KidsLayout />
+        <ChildSessionGuard><KidsLayout /></ChildSessionGuard>
       </ProtectedRoute>
     ),
     children: [
@@ -98,7 +99,7 @@ export const router = createBrowserRouter([
     path: '/phu-huynh',
     element: (
       <ProtectedRoute>
-        <ParentLayout />
+        <ChildSessionGuard screenTime={false}><ParentLayout /></ChildSessionGuard>
       </ProtectedRoute>
     ),
     children: [

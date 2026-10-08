@@ -223,6 +223,13 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 
 ---
 
+## Bổ sung đối chiếu khách hàng (2026-10-08)
+
+- Đã kiểm tra lại luồng Bé/Phụ huynh/Admin: guard hồ sơ và screen time, Parent Gate challenge lỗi/retry, khôi phục child sau reload, đổi quà/địa chỉ, audio thiếu và hủy đơn cạnh tranh.
+- Đã thêm test UI/API/seed cho các ranh giới trên. Đây là quyết định triển khai theo phạm vi khách hàng; chưa thay thế nghiệm thu browser/mobile/accessibility.
+- Seed mẫu và bài đọc là dữ liệu minh họa. Nội dung nguyên tác, attribution, quyền sử dụng và audio cần content team xác nhận trước production.
+- Còn rủi ro vận hành đã biết: lock tài nguyên sau crash hoặc bù trừ lỗi cần đối soát thủ công, không tự động timeout.
+
 ## Tổng kết tình trạng Review Findings (2026-10-01, cập nhật lần 2)
 
 - **P0 (Rủi ro chặn phát hành)**: 4/4 mục ĐÃ HOÀN TẤT VÀ KIỂM THỬ.

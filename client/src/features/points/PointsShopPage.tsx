@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Award, Gift, Check, AlertCircle, Sparkles, History, ShoppingBag, Truck, MapPin } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Award, Check, Sparkles, History, ShoppingBag } from 'lucide-react';
 import { api } from '../../lib/api.js';
-import { useChildStore } from '../../store/childStore.js';
+import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const PointsShopPage: React.FC = () => {
-  const { activeChild, updatePointsLocally } = useChildStore();
+  const { activeChild, fetchChildren } = useChildStore();
+  const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [shippingAddress, setShippingAddress] = useState({
     recipientName: '',
     phone: '',
     street: '',
-    city: 'Hà Nội',
+    city: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resultMsg, setResultMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -50,23 +51,48 @@ export const PointsShopPage: React.FC = () => {
   const handleRedeem = async () => {
     if (!selectedItem || !activeChild?._id) return;
     setResultMsg(null);
+    const address = {
+      recipientName: shippingAddress.recipientName.trim(),
+      phone: shippingAddress.phone.trim(),
+      street: shippingAddress.street.trim(),
+      city: shippingAddress.city.trim(),
+    };
+    if (selectedItem.type === 'physical' && Object.values(address).some((value) => !value)) {
+      setResultMsg({ type: 'error', text: 'Vui lòng nhập đầy đủ thông tin nhận quà.' });
+      return;
+    }
+    const childId = activeChild._id;
 
     try {
       setIsSubmitting(true);
       const res = await api.post('/points/shop/redeem', {
         childId: activeChild._id,
         itemId: selectedItem._id,
-        shippingAddress: selectedItem.type === 'physical' ? shippingAddress : undefined,
+        shippingAddress: selectedItem.type === 'physical' ? address : undefined,
       });
 
       const { remainingPoints } = res.data.data;
-      updatePointsLocally(remainingPoints);
+      useChildStore.setState((state) => {
+        const update = (profile: ChildProfile): ChildProfile => ({
+          ...profile,
+          viviPoints: remainingPoints,
+          ownedItemIds: selectedItem.type === 'virtual'
+            ? [...new Set([...(profile.ownedItemIds || []), selectedItem._id])]
+            : profile.ownedItemIds,
+        });
+        return {
+          activeChild: state.activeChild?._id === childId ? update(state.activeChild) : state.activeChild,
+          children: state.children.map((profile) => profile._id === childId ? update(profile) : profile),
+        };
+      });
       setResultMsg({ type: 'success', text: VI_LOCALES.shop.redeemSuccess });
       setTimeout(() => {
         setSelectedItem(null);
         setResultMsg(null);
       }, 2000);
-      refetch();
+      void queryClient.invalidateQueries({ queryKey: ['shopItems'] });
+      void queryClient.invalidateQueries({ queryKey: ['childPoints', childId] });
+      void fetchChildren().catch(() => { /* Keep the confirmed redemption result if profile refresh is offline. */ });
     } catch (err: any) {
       setResultMsg({
         type: 'error',
@@ -369,6 +395,7 @@ export const PointsShopPage: React.FC = () => {
                 </span>
                 <input
                   type="text"
+                  aria-label="Tên người nhận (Phụ huynh)"
                   placeholder="Tên người nhận (Phụ huynh)"
                   value={shippingAddress.recipientName}
                   onChange={(e) =>
@@ -378,6 +405,7 @@ export const PointsShopPage: React.FC = () => {
                 />
                 <input
                   type="tel"
+                  aria-label="Số điện thoại nhận hàng"
                   placeholder="Số điện thoại nhận hàng"
                   value={shippingAddress.phone}
                   onChange={(e) =>
@@ -387,6 +415,7 @@ export const PointsShopPage: React.FC = () => {
                 />
                 <input
                   type="text"
+                  aria-label="Địa chỉ số nhà, tên đường, phường/xã"
                   placeholder="Địa chỉ số nhà, tên đường, phường/xã"
                   value={shippingAddress.street}
                   onChange={(e) =>
@@ -394,11 +423,16 @@ export const PointsShopPage: React.FC = () => {
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
+                <label className="block text-sm font-bold" htmlFor="shipping-city">Tỉnh / Thành phố</label>
+                <input id="shipping-city" type="text" value={shippingAddress.city}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm" />
               </div>
             )}
 
             {resultMsg && (
               <div
+                role={resultMsg.type === 'error' ? 'alert' : 'status'}
                 className={`p-3 rounded-xl text-xs font-bold text-center ${
                   resultMsg.type === 'success'
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'

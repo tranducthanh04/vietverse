@@ -37,5 +37,7 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 
 ## Trạng thái baseline
 
+Đợt đối chiếu khách hàng và sửa luồng ngày 2026-10-08 được ghi tại [`08-customer-alignment.md`](./08-customer-alignment.md). Đọc bổ sung tài liệu này khi làm việc với seed, session bé và admin đổi quà; các giới hạn nghiệm thu được nêu riêng, không suy ra từ nhãn “hoàn thiện” trong baseline.
+
 Review này phản ánh code tại ngày 2026-10-01 trên nhánh `main`. Tại thời điểm review có thay đổi chưa commit ở `client/src/app/router.tsx`, `client/src/features/auth/LoginPage.tsx` và file mới `client/src/components/ui/ProtectedRoute.tsx`; tài liệu không giả định các thay đổi đó đã được phát hành.
 

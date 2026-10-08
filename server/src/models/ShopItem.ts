@@ -11,6 +11,7 @@ export interface IShopItem extends Document {
   badgeCode?: string; // If virtual badge
   stock?: number; // For physical items
   active: boolean;
+  refundLock?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +48,7 @@ const shopItemSchema = new Schema<IShopItem>(
       type: Boolean,
       default: true,
     },
+    refundLock: { type: String, select: false },
   },
   {
     timestamps: true,

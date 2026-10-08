@@ -129,10 +129,9 @@ export const AdminRedemptionsPage: React.FC = () => {
   };
 
   const handleQuickAdjustStock = (item: any, delta: number) => {
-    const newStock = Math.max(0, (item.stock || 0) + delta);
     updateInventoryMutation.mutate({
       id: item._id,
-      data: { stock: newStock },
+      data: { stockDelta: delta },
     });
   };
 
@@ -495,6 +494,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as any)}
+                  disabled={redemptions.find((order: { _id: string; status: string }) => order._id === editingId)?.status === 'cancelled'}
                   className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="pending">Chờ đóng gói (Pending)</option>
@@ -550,10 +550,11 @@ export const AdminRedemptionsPage: React.FC = () => {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label htmlFor="redemption-notes" className="block text-xs font-bold text-stone-700 mb-1">
                   Ghi chú nội bộ / Lý do hủy
                 </label>
                 <textarea
+                  id="redemption-notes"
                   rows={2}
                   placeholder="Ghi chú vận hành (ví dụ: đã bàn giao bưu tá, hoặc lý do hủy đơn)..."
                   value={notes}

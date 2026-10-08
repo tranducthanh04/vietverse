@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   HelpCircle,
   Volume2,
-  Sparkles,
   LogIn,
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
@@ -31,7 +30,6 @@ export const StoryDetailPage: React.FC = () => {
   const [isFallbackMode, setIsFallbackMode] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timerRef = useRef<any>(null);
 
   const {
     data: story,
@@ -54,31 +52,14 @@ export const StoryDetailPage: React.FC = () => {
     }
   }, [id, activeChild]);
 
-  // Fallback timer when real audio asset is missing or 404
   useEffect(() => {
-    if (isFallbackMode && isPlaying) {
-      timerRef.current = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (story && prev >= story.durationSec) {
-            setIsPlaying(false);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying, isFallbackMode, story]);
+    setIsFallbackMode(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+  }, [id]);
 
   const handlePlayToggle = () => {
-    if (isFallbackMode) {
-      setIsPlaying(!isPlaying);
-      return;
-    }
+    if (isFallbackMode || !story?.audioUrl) return;
 
     if (audioRef.current) {
       if (isPlaying) {
@@ -91,13 +72,10 @@ export const StoryDetailPage: React.FC = () => {
             setIsPlaying(true);
           })
           .catch(() => {
-            // If browser autoplay policy or audio 404, fallback to rhythm simulation
             setIsFallbackMode(true);
-            setIsPlaying(true);
+            setIsPlaying(false);
           });
       }
-    } else {
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -146,6 +124,7 @@ export const StoryDetailPage: React.FC = () => {
   }
 
   const currentLineIndex = story.lyrics.findLastIndex((l: any) => currentTime >= l.timeSec);
+  const audioUnavailable = !story.audioUrl || isFallbackMode;
   const currentQuiz = story.quiz?.[0];
 
   return (
@@ -167,6 +146,8 @@ export const StoryDetailPage: React.FC = () => {
           }}
           onError={() => {
             setIsFallbackMode(true);
+            setIsPlaying(false);
+            setCurrentTime(0);
           }}
         />
       )}
@@ -199,9 +180,9 @@ export const StoryDetailPage: React.FC = () => {
 
           {/* Audio Mode Badge */}
           <div className="mb-4">
-            {isFallbackMode ? (
+            {audioUnavailable ? (
               <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full inline-flex items-center space-x-1">
-                <span>🎵 Nhịp điệu tương tác</span>
+                <span>Chế độ đọc: chưa có âm thanh khả dụng</span>
               </span>
             ) : (
               <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full inline-flex items-center space-x-1">
@@ -216,6 +197,7 @@ export const StoryDetailPage: React.FC = () => {
             <div className="flex items-center justify-center space-x-4 w-full">
               <button
                 onClick={handlePlayToggle}
+                disabled={audioUnavailable}
                 className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:scale-105 active:scale-95 transition-transform min-h-[56px] min-w-[56px]"
                 aria-label={isPlaying ? 'Tạm dừng' : 'Bắt đầu nghe'}
               >
@@ -224,6 +206,7 @@ export const StoryDetailPage: React.FC = () => {
 
               <button
                 onClick={handleReset}
+                disabled={audioUnavailable}
                 className="p-3 text-stone-500 hover:text-stone-800 rounded-full hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px]"
                 aria-label="Nghe lại từ đầu"
               >
@@ -235,6 +218,7 @@ export const StoryDetailPage: React.FC = () => {
             <div className="w-full space-y-1">
               <input
                 type="range"
+                disabled={audioUnavailable}
                 min={0}
                 max={story.durationSec || 45}
                 value={currentTime}
@@ -277,7 +261,7 @@ export const StoryDetailPage: React.FC = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-accent-dark">
-                {VI_LOCALES.stories.karaokeMode}
+                {audioUnavailable ? 'Cùng đọc truyện' : VI_LOCALES.stories.karaokeMode}
               </span>
               {isPlaying && (
                 <span className="flex items-center space-x-1 text-xs font-bold text-primary animate-pulse">

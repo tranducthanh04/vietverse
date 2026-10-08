@@ -27,13 +27,17 @@ export const CulturePage: React.FC = () => {
     },
   });
 
-    const categories = [
+  const categories = [
     { id: '', label: 'Tất cả chủ đề' },
+    { id: 'tet', label: 'Tết' },
     { id: 'am_thuc', label: 'Ẩm thực Việt' },
     { id: 'trang_phuc', label: 'Trang phục cổ truyền' },
+    { id: 'phong_tuc', label: 'Phong tục' },
     { id: 'le_hoi', label: 'Lễ hội dân gian' },
     { id: 'di_san', label: 'Di sản & Lịch sử' },
     { id: 'vat_dung', label: 'Vật dụng dân gian' },
+    { id: 'thien_nhien', label: 'Thiên nhiên Việt Nam' },
+    { id: 'tro_choi_dan_gian', label: 'Trò chơi dân gian' },
   ];
 
   return (
@@ -53,7 +57,7 @@ export const CulturePage: React.FC = () => {
       </div>
 
       {/* Category selector */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-8 justify-center scrollbar-none">
+      <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
         {categories.map((cat) => (
           <button
             key={cat.id}

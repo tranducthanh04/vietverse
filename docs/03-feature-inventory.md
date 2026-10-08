@@ -27,19 +27,20 @@
 | Admin | Redemptions | Có | GET/PATCH admin | Redemption | Hoàn thiện (P1.7 Zod validation, P2.5 limit 100) |
 | Platform | Health/deploy | Có config Render/Vercel | `/health`, `render.yaml` | Env | Hoàn thiện (P0.3 CORS allowlist, P2.6 secret check) |
 
-## Mức hoàn thiện nội dung seed
+## Mức hoàn thiện nội dung seed (đối chiếu 2026-10-08)
 
-- Thống nhất toàn bộ tài liệu: Chặng 1 bài 1–8 nạp đầy đủ nội dung từ vựng và 5 hoạt động tương tác mẫu; các bài 9–20 tạo khung chuẩn bị giáo án.
-- Stories seed 5 câu chuyện / đồng dao có karaoke lyrics.
-- Culture seed 3 bài văn hóa và danh thắng tiêu biểu kèm bộ câu hỏi đố vui.
-- Shop seed 5 item (3 virtual, 2 physical với số lượng tồn kho thực).
+- Seed insert-only tạo 5 chặng × 4 bài, 6 hoạt động/bài thông thường và 5 hoạt động ở bài 20.
+- Stories seed 21 bài đọc biên tập có thể thiếu audio; không khẳng định là lời nguyên tác hoặc đã có quyền sử dụng.
+- Culture seed 8 nhóm chủ đề, mỗi nhóm có dữ liệu minh họa và quiz mẫu.
+- Shop seed 5 item; item physical mới mặc định inactive/stock 0 để không phát hành tồn kho giả.
+- Database hiện có được giữ nguyên lesson, tài khoản, tiến độ, ledger, redemption và stock; migration nội dung là công việc riêng.
 
 ## Tình trạng khoảng trống kỹ thuật & UX đã khắc phục
 
 - [x] Lỗi mạng khi complete lesson/culture quiz: Đã phân biệt lỗi mạng lưu vào offline queue `vietverse_offline_completions` và hiển thị trạng thái chờ đồng bộ, lỗi server hiển thị nút Thử lại (P1.5).
 - [x] Admin route: Bảo vệ hoàn toàn bằng middleware RBAC server-side và Zod validation (P1.7).
 - [x] Parent gate: Phiên step-up auth 15 phút với mã toán ký server-side và PIN bảo vệ qua header `X-Parent-Gate-Token` (P0.4).
-- [x] Screen time: Bộ đếm thời gian thực `KidsLayout` kết hợp `ScreenTimeLimitModal` chặn màn hình khi hết giờ học, yêu cầu phụ huynh gia hạn hoặc cho mắt nghỉ ngơi (P1.4).
+- [x] Screen time: `ChildSessionGuard` và `ScreenTimeGuard` dùng chung cho bản đồ, lesson trực tiếp và khám phá đã đăng nhập. Hết giờ thì unmount nội dung; gia hạn sau Parent Gate cập nhật timer đang chạy. Parent portal vẫn truy cập được khi hết giờ học.
 - [x] Responsive navigation & Touch targets: Menu hamburger di động cho PublicLayout, thanh tab chuyển phân hệ di động cho AdminLayout, chuẩn hóa toàn bộ nút header đạt tối thiểu 44px và giữ nhãn chữ Góc Phụ Huynh trên mọi kích cỡ màn hình (P1-FE.5, P2-FE.1).
 - [x] Loại bỏ demo credentials khỏi production: Gated bằng `import.meta.env.DEV` tại LoginPage (P1-FE.6).
 

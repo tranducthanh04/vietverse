@@ -64,6 +64,14 @@ Base URL: `/api/v1`.
 
 ## Contract cần giữ ổn định
 
+### Bổ sung ngày 2026-10-08
+
+- `PATCH /admin/redemptions/:id`: đơn đã `cancelled` không được mở lại (409); request cạnh tranh cùng đơn nhận 409. Retry cùng trạng thái hủy sau khi request trước hoàn tất không thưởng thêm. Khóa vận hành `mutationInProgress` không xuất ra response.
+- `PATCH /admin/inventory/:id`: thêm `stockDelta` là số nguyên khác 0 trong [-100000, 100000], chỉ áp dụng quà hiện vật và không giảm quá stock. Không nhận đồng thời `stock` và `stockDelta` (400); không đủ tồn kho nhận 409. Giữ các field `stock`, `costPoints`, `active`, `name` cũ.
+- `Story.audioUrl` có thể rỗng hoặc vắng mặt nếu chưa cung cấp audio; client phải hỗ trợ chế độ đọc, không dùng timer thay âm thanh.
+- `POST /points/shop/redeem` và `PATCH /admin/inventory/:id` có thể trả 409 khi số dư hoặc kho đang bị khóa để hoàn điểm. `Child.refundLock`, `ShopItem.refundLock` chỉ dùng vận hành, không xuất ra API; client cần tải lại và retry, không coi request 409 là thành công.
+- Chính sách seed, dữ liệu mẫu và giới hạn rollback xem [đối chiếu khách hàng](./08-customer-alignment.md).
+
 - `childId` luôn phải được kiểm tra ownership thuộc về phụ huynh đang đăng nhập.
 - Giao dịch điểm phải có `reason`, `delta`, `refId` và mô tả truy vết được.
 - Với mutation có thể retry, server luôn đảm bảo tính idempotent.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '../../store/authStore.js';
-import { useChildStore } from '../../store/childStore.js';
+import { ChildSessionGuard } from '../../components/ChildSessionGuard.js';
 import { KidsLayout } from './KidsLayout.js';
 import { PublicLayout } from './PublicLayout.js';
 
@@ -12,10 +12,8 @@ import { PublicLayout } from './PublicLayout.js';
  */
 export const AdaptiveContentLayout: React.FC = () => {
   const { user } = useAuthStore();
-  const { activeChild } = useChildStore();
-
-  if (user && activeChild) {
-    return <KidsLayout />;
+  if (user) {
+    return <ChildSessionGuard><KidsLayout /></ChildSessionGuard>;
   }
 
   return <PublicLayout />;

@@ -1,63 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Map, BookOpen, Compass, Gift, Award, Lock, LogOut, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Map, BookOpen, Compass, Gift, Award, Lock, Shield } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
-import { ScreenTimeLimitModal } from '../../features/parent/ScreenTimeLimitModal.js';
-import { VI_LOCALES } from '../../locales/vi.js';
 
 export const KidsLayout: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, logout } = useAuthStore();
-  const { activeChild, children, selectChild, fetchChildren } = useChildStore();
+  const { user } = useAuthStore();
+  const { activeChild, children, selectChild } = useChildStore();
 
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [showChildPicker, setShowChildPicker] = useState(false);
-  const [isScreenTimeExceeded, setIsScreenTimeExceeded] = useState(false);
-
-  useEffect(() => {
-    fetchChildren();
-  }, []);
-
-  // Monitor screen time session for active child
-  useEffect(() => {
-    if (!activeChild?._id) return;
-    const limit = activeChild.screenTimeLimit ?? 20;
-    if (limit <= 0) {
-      setIsScreenTimeExceeded(false);
-      return;
-    }
-
-    const sessionKey = `vietverse_session_start_${activeChild._id}`;
-    let sessionStart = Number(sessionStorage.getItem(sessionKey));
-    if (!sessionStart || isNaN(sessionStart)) {
-      sessionStart = Date.now();
-      sessionStorage.setItem(sessionKey, sessionStart.toString());
-    }
-
-    const checkLimit = () => {
-      const elapsedMinutes = (Date.now() - sessionStart) / 60000;
-      if (elapsedMinutes >= limit) {
-        setIsScreenTimeExceeded(true);
-      } else {
-        setIsScreenTimeExceeded(false);
-      }
-    };
-
-    checkLimit();
-    const interval = setInterval(checkLimit, 10000);
-    return () => clearInterval(interval);
-  }, [activeChild?._id, activeChild?.screenTimeLimit]);
-
-  const handleExtendSession = () => {
-    if (activeChild?._id) {
-      const sessionKey = `vietverse_session_start_${activeChild._id}`;
-      sessionStorage.setItem(sessionKey, Date.now().toString());
-      setIsScreenTimeExceeded(false);
-    }
-  };
 
   const handleOpenParent = () => {
     // Check if parent gate was already unlocked recently in this session (15 mins)
@@ -209,16 +163,6 @@ export const KidsLayout: React.FC = () => {
         onClose={() => setIsGateOpen(false)}
       />
 
-      {/* Screen time break reminder modal */}
-      <ScreenTimeLimitModal
-        isOpen={isScreenTimeExceeded}
-        childName={activeChild?.name || 'Bé'}
-        limitMinutes={activeChild?.screenTimeLimit ?? 20}
-        onExtendSession={handleExtendSession}
-        onRest={() => {
-          navigate('/kham-pha');
-        }}
-      />
     </div>
   );
 };
