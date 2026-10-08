@@ -100,16 +100,32 @@ export class AdminService {
     if (!current) {
       throw { statusCode: 404, message: 'Không tìm thấy đơn đổi quà' };
     }
+    if (current.status === 'cancelled' && data.status && data.status !== 'cancelled') {
+      throw { statusCode: 409, message: 'Không thể mở lại đơn đã hủy và hoàn điểm.' };
+    }
 
-    // Business rule: If transitioning to 'cancelled' and wasn't cancelled before, refund points and stock
+    const locked = await Redemption.findOneAndUpdate(
+      { _id: id, status: current.status, mutationInProgress: { $ne: true } },
+      { $set: { mutationInProgress: true } }
+    );
+    if (!locked) {
+      throw { statusCode: 409, message: 'Đơn đang được cập nhật. Vui lòng tải lại và thử lại.' };
+    }
+
+    let refunded = false;
+    let stockRestored = false;
+    let refundTransaction;
+    const item = current.itemId as any;
+    try {
     if (data.status === 'cancelled' && current.status !== 'cancelled') {
-      // 1. Refund ViVi points to child
-      await Child.findByIdAndUpdate(current.childId, {
+      const child = await Child.findByIdAndUpdate(current.childId, {
         $inc: { viviPoints: current.pointsSpent },
       });
+      if (!child) throw { statusCode: 409, message: 'Hồ sơ bé không còn tồn tại.' };
+      refunded = true;
 
       // 2. Audit ledger transaction for refund
-      await PointTransaction.create({
+      refundTransaction = await PointTransaction.create({
         childId: current.childId,
         delta: current.pointsSpent,
         reason: 'refund',
@@ -118,11 +134,11 @@ export class AdminService {
       });
 
       // 3. If item was physical, restore stock (+1)
-      const item = current.itemId as any;
       if (item && item.type === 'physical') {
         await ShopItem.findByIdAndUpdate(item._id, {
           $inc: { stock: 1 },
         });
+        stockRestored = true;
       }
     }
 
@@ -141,6 +157,8 @@ export class AdminService {
       .populate('childId', 'name')
       .populate('itemId', 'name type costPoints stock');
 
+    await Redemption.updateOne({ _id: id }, { $set: { mutationInProgress: false } });
+
     if (adminId) {
       await AdminAuditLog.create({
         adminId,
@@ -152,6 +170,14 @@ export class AdminService {
     }
 
     return updated;
+    } catch (error) {
+      // Keep the lock if compensation fails: retrying must not refund twice.
+      if (stockRestored) await ShopItem.updateOne({ _id: item._id }, { $inc: { stock: -1 } });
+      if (refunded) await Child.updateOne({ _id: current.childId }, { $inc: { viviPoints: -current.pointsSpent } });
+      if (refundTransaction) await PointTransaction.deleteOne({ _id: refundTransaction._id });
+      await Redemption.updateOne({ _id: id }, { $set: { status: current.status, mutationInProgress: false } });
+      throw error;
+    }
   }
 
   static async getAllLessons() {
@@ -193,8 +219,16 @@ export class AdminService {
   }
 
   static async updateInventory(id: string, data: any, adminId?: string) {
-    const updated = await ShopItem.findByIdAndUpdate(id, { $set: data }, { new: true });
-    if (!updated) throw { statusCode: 404, message: 'Không tìm thấy vật phẩm' };
+    const { stockDelta, ...fields } = data;
+    const updated = await ShopItem.findOneAndUpdate(
+      { _id: id, ...(stockDelta !== undefined ? { type: 'physical', stock: { $gte: Math.max(0, -stockDelta) } } : {}) },
+      { $set: fields, ...(stockDelta !== undefined ? { $inc: { stock: stockDelta } } : {}) },
+      { new: true, runValidators: true }
+    );
+    if (!updated) {
+      if (!(await ShopItem.exists({ _id: id }))) throw { statusCode: 404, message: 'Không tìm thấy vật phẩm' };
+      throw { statusCode: 409, message: 'Chỉ điều chỉnh quà hiện vật và không được giảm quá tồn kho.' };
+    }
 
     if (adminId) {
       await AdminAuditLog.create({

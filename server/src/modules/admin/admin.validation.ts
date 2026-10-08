@@ -14,12 +14,16 @@ export const updateRedemptionSchema = z
 export const updateInventorySchema = z
   .object({
     stock: z.number().int().min(0).optional(),
+    stockDelta: z.number().int().min(-100000).max(100000).refine((value) => value !== 0).optional(),
     costPoints: z.number().int().min(1).optional(),
     active: z.boolean().optional(),
     name: z.string().trim().min(1).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'Cần cung cấp ít nhất một trường thông tin để cập nhật vật phẩm',
+  })
+  .refine((data) => data.stock === undefined || data.stockDelta === undefined, {
+    message: 'Chỉ gửi stock hoặc stockDelta, không gửi đồng thời cả hai',
   });
 
 export const activityOptionSchema = z.object({

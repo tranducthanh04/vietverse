@@ -246,6 +246,23 @@ describe('Admin API & Schema Validation (P1.7)', () => {
       expect(item?.stock).toBe(11);
     });
 
+    it('refunds an order only once when cancellation requests arrive together', async () => {
+      const responses = await Promise.all(Array.from({ length: 5 }, () => request(app)
+        .patch(`/api/v1/admin/redemptions/${redemptionId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ status: 'cancelled' })));
+      expect(responses.some((response) => response.status === 200)).toBe(true);
+      const learners = await request(app).get('/api/v1/admin/learners')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(learners.body.data[0].viviPoints).toBe(50);
+      const inventory = await request(app).get('/api/v1/admin/inventory')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(inventory.body.data[0].stock).toBe(11);
+      const detail = await request(app).get(`/api/v1/admin/learners/${learners.body.data[0]._id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(detail.body.data.transactions.filter((tx: { reason: string }) => tx.reason === 'refund')).toHaveLength(1);
+    });
+
     it('returns 404 if redemption ID does not exist', async () => {
       const nonExistentId = new mongoose.Types.ObjectId().toString();
       const res = await request(app)
@@ -258,9 +275,34 @@ describe('Admin API & Schema Validation (P1.7)', () => {
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
     });
+
+    it('does not reopen a cancelled order for another refund', async () => {
+      await request(app).patch(`/api/v1/admin/redemptions/${redemptionId}`)
+        .set('Authorization', `Bearer ${adminToken}`).send({ status: 'cancelled' }).expect(200);
+      await request(app).patch(`/api/v1/admin/redemptions/${redemptionId}`)
+        .set('Authorization', `Bearer ${adminToken}`).send({ status: 'pending' }).expect(409);
+      await request(app).patch(`/api/v1/admin/redemptions/${redemptionId}`)
+        .set('Authorization', `Bearer ${adminToken}`).send({ status: 'cancelled' }).expect(200);
+      const learners = await request(app).get('/api/v1/admin/learners')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(learners.body.data[0].viviPoints).toBe(50);
+    });
   });
 
   describe('Inventory & Learner Details API', () => {
+    it('applies simultaneous stock adjustments without losing either update', async () => {
+      const inventory = await request(app).get('/api/v1/admin/inventory')
+        .set('Authorization', `Bearer ${adminToken}`);
+      const itemId = inventory.body.data[0]._id;
+      const responses = await Promise.all([1, -1, 5].map((stockDelta) => request(app)
+        .patch(`/api/v1/admin/inventory/${itemId}`)
+        .set('Authorization', `Bearer ${adminToken}`).send({ stockDelta })));
+      expect(responses.map((response) => response.status)).toEqual([200, 200, 200]);
+      const updated = await request(app).get('/api/v1/admin/inventory')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(updated.body.data[0].stock).toBe(15);
+    });
+
     it('GET /api/v1/admin/inventory returns shop items list', async () => {
       const res = await request(app)
         .get('/api/v1/admin/inventory')

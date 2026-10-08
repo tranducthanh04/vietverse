@@ -18,6 +18,7 @@ export interface IRedemption extends Document {
   trackingCode?: string;
   carrier?: string;
   notes?: string;
+  mutationInProgress?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +58,8 @@ const redemptionSchema = new Schema<IRedemption>(
     trackingCode: String,
     carrier: String,
     notes: String,
+    // Durable per-order lock; never expose operational state in API responses.
+    mutationInProgress: { type: Boolean, default: false, select: false },
   },
   {
     timestamps: true,

@@ -13,3 +13,4 @@ uploads/
 stitch_*/
 *.zip
 
+client/eslint-*.txt
