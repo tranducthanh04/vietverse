@@ -31,7 +31,13 @@
   min-width: 0;
   font-size: 0.9rem;
 }
-.cms-field > span {
+.cms-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cms-field > span,
+.cms-field-label > span {
   font-weight: 600;
 }
 .cms input:not([type="checkbox"]),
@@ -105,15 +111,20 @@
 .cms [role="dialog"] {
   position: fixed;
   z-index: 60;
-  top: 20%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  margin: 0;
+  max-height: 85vh;
+  overflow-y: auto;
   width: min(92vw, 520px);
   padding: 1.5rem;
   border: 2px solid #78716c;
   border-radius: 1rem;
   background: white;
-  box-shadow: 0 0 0 100vmax #0008;
+}
+.cms dialog::backdrop {
+  background: #0008;
 }
 .cms table {
   width: 100%;

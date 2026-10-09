@@ -7,6 +7,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -322,11 +323,103 @@ it("validates the saved version and requires explicit confirmation before publis
     requests.find((request) => request.url.endsWith("/publish"))?.body,
   ).toEqual({ expectedDraftVersion: 1, baseContentVersion: 0 });
 });
-it('locks editing during validation so confirmation cannot publish behind new unsaved typing', async () => {
+it("locks editing during validation so confirmation cannot publish behind new unsaved typing", async () => {
   let finish!: (value: unknown) => void;
-  respond = (_method, url) => url.endsWith('/validate') ? new Promise(resolve => { finish = resolve; }) : { live: null, draft: draft() };
-  show(); fireEvent.click(await screen.findByRole('button', { name: 'Xuất bản' }));
-  await waitFor(() => expect(finish).toBeTypeOf('function'));
-  expect(screen.getByLabelText('Tiêu đề')).toBeDisabled();
+  respond = (_method, url) =>
+    url.endsWith("/validate")
+      ? new Promise((resolve) => {
+          finish = resolve;
+        })
+      : { live: null, draft: draft() };
+  show();
+  fireEvent.click(await screen.findByRole("button", { name: "Xuất bản" }));
+  await waitFor(() => expect(finish).toBeTypeOf("function"));
+  expect(screen.getByLabelText("Tiêu đề")).toBeDisabled();
   await act(async () => finish({ issues: [], draftVersion: 1 }));
+});
+
+it("keeps keyboard focus in confirmation and Escape cancels without a mutation", async () => {
+  show();
+  const opener = await screen.findByRole("button", { name: "Bỏ nháp" });
+  opener.focus();
+  fireEvent.click(opener);
+  const dialog = await screen.findByRole("dialog", {
+    name: "Xác nhận thay đổi",
+  });
+  const cancel = within(dialog).getByRole("button", { name: "Hủy" });
+  const confirm = within(dialog).getByRole("button", { name: "Xác nhận" });
+  expect(cancel).toHaveFocus();
+  fireEvent.keyDown(cancel, { key: "Tab", shiftKey: true });
+  expect(confirm).toHaveFocus();
+  fireEvent.keyDown(confirm, { key: "Tab" });
+  expect(cancel).toHaveFocus();
+  fireEvent.keyDown(cancel, { key: "Escape" });
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+  );
+  expect(opener).toHaveFocus();
+  expect(requests.every((request) => request.method === "get")).toBe(true);
+});
+
+it("Escape dismisses the unsaved navigation dialog and preserves local typing", async () => {
+  show();
+  const title = await screen.findByLabelText("Tiêu đề");
+  fireEvent.change(title, { target: { value: "Chưa lưu" } });
+  const opener = screen.getByRole("link", { name: "Về danh sách" });
+  opener.focus();
+  fireEvent.click(opener);
+  const dialog = await screen.findByRole("dialog", {
+    name: "Rời trang chưa lưu?",
+  });
+  fireEvent.keyDown(within(dialog).getByRole("button", { name: "Ở lại" }), {
+    key: "Escape",
+  });
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+  );
+  expect(title).toHaveValue("Chưa lưu");
+  expect(opener).toHaveFocus();
+});
+
+it("associates source notes with fields and empty activity/vocabulary groups without changing label names", async () => {
+  respond = () => ({
+    live: null,
+    draft: {
+      ...draft(),
+      editorialNotes: [
+        {
+          field: "payload.description",
+          reason: "normalization",
+          message: "Đối chiếu mô tả nguồn",
+        },
+        {
+          field: "activities",
+          reason: "unsupported_activity",
+          message: "Cần hoạt động phù hợp",
+        },
+        {
+          field: "vocabulary",
+          reason: "missing_source",
+          message: "Cần nghĩa từ nguồn",
+        },
+      ],
+    },
+  });
+  show();
+  const description = await screen.findByRole("textbox", {
+    name: "Mô tả",
+  });
+  expect(description).toHaveAccessibleDescription(/Đối chiếu mô tả nguồn/);
+  expect(
+    within(screen.getByRole("group", { name: "Hoạt động (0)" })).getByRole(
+      "note",
+      { name: "Ghi chú nguồn: activities" },
+    ),
+  ).toHaveTextContent("Cần hoạt động phù hợp");
+  expect(
+    within(screen.getByRole("group", { name: "Từ vựng" })).getByRole("note", {
+      name: "Ghi chú nguồn: vocabulary",
+    }),
+  ).toHaveTextContent("Cần nghĩa từ nguồn");
+  expect(requests.every((request) => request.method === "get")).toBe(true);
 });

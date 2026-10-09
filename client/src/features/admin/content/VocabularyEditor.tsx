@@ -2,6 +2,7 @@ import React from "react";
 import type { Vocabulary } from "./content.types.js";
 import { TextField } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
+import { FieldNotes } from "./EditorialNotes.js";
 export function VocabularyEditor({
   value,
   onChange,
@@ -16,6 +17,7 @@ export function VocabularyEditor({
   return (
     <fieldset>
       <legend>Từ vựng</legend>
+      <FieldNotes field="vocabulary" />
       {value.map((word, i) => (
         <fieldset key={i}>
           <legend>Từ vựng {i + 1}</legend>

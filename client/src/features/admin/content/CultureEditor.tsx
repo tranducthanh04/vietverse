@@ -3,6 +3,7 @@ import { categories, type CultureContent } from "./content.types.js";
 import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
+import { FieldNotes } from "./EditorialNotes.js";
 export function CultureEditor({
   value,
   onChange,
@@ -34,6 +35,7 @@ export function CultureEditor({
           ))}
         </select>
       </label>
+      <FieldNotes field="category" />
       {legacy && (
         <p role="alert">
           Chủ đề cũ chưa hợp lệ. Chọn một trong tám chủ đề trước xuất bản.
@@ -59,6 +61,7 @@ export function CultureEditor({
         onChange={(tags) => patch({ tags })}
       />
       <MediaFields
+        imageName="coverImage"
         value={{ audioUrl: value.audioUrl, imageUrl: value.coverImage }}
         onChange={(change) =>
           patch({

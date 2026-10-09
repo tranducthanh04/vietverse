@@ -61,10 +61,12 @@ export function MediaFields({
   value,
   onChange,
   prefix = "",
+  imageName = `${prefix}imageUrl`,
 }: {
   value: { audioUrl?: string; imageUrl?: string };
   onChange: (patch: { audioUrl?: string; imageUrl?: string }) => void;
   prefix?: string;
+  imageName?: string;
 }) {
   return (
     <div>
@@ -79,7 +81,7 @@ export function MediaFields({
         <>
           <TextField
             label={`URL ảnh${prefix ? ` ${prefix}` : ""}`}
-            name={`${prefix}imageUrl`}
+            name={imageName}
             value={value.imageUrl ?? ""}
             onChange={(imageUrl) => onChange({ imageUrl })}
           />

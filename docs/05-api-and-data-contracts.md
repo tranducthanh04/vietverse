@@ -32,6 +32,7 @@ Quyết định bảo vệ phiên học khi xuất bản:
 - Seed story dùng `story-01`…`story-21`, culture dùng `culture-<category>`; tra key trước tiêu đề. `npm run cms:metadata -w server` mặc định dry-run; `-- --apply` bổ sung key trong transaction và index unique sparse, không sửa payload/timestamps. Tiêu đề legacy khớp duy nhất sau chuẩn hóa NFC/case mới được ánh xạ; xung đột phải xử lý thủ công. Chưa chạy migration trên production.
 - Seed tôn trọng seedKey của draft-only ở mọi trạng thái, không tự tạo live cho nội dung đang nhập nháp; key trùng nhưng ID khác báo conflict trước ghi. Import apply và seed dùng chung khóa writer, có thể dry-run khi khóa đang tồn tại. Khóa sau crash cần đối soát thủ công, không tự timeout.
 - Activity `fill_blank` chỉ có một ô trống: mỗi chuỗi từ hai dấu `_` liền nhau được validator và renderer coi là một marker, không cắt mất phần câu phía sau.
+- Hoàn thiện UX CMS: dialog xác nhận/rời trang dùng native modal, nền không tương tác; focus ban đầu vào hủy/ở lại, Tab/Shift+Tab vòng trong các nút đang dùng được, Escape chỉ hủy, khi đóng trả focus về nút mở nếu còn tồn tại. Ghi chú nguồn hiển thị cạnh field/nhóm kể cả mảng trống; text/number field nối `aria-describedby`, giữ tên label. Tổng hợp đầy đủ vẫn còn phía trên để không làm mất ghi chú chưa ánh xạ; không đổi payload/API/source.
 
 ## Auth
 

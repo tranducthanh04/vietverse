@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { LessonEditor } from "../features/admin/content/LessonEditor.js";
 import { MediaFields } from "../features/admin/content/MediaFields.js";
 import type { LessonContent } from "../features/admin/content/content.types.js";
+import { EditorialNotesContext } from "../features/admin/content/editorialNotesContext.js";
 afterEach(cleanup);
 const initial: LessonContent = {
   title: "Bài một",
@@ -103,4 +104,39 @@ it("distinguishes unsafe media syntax from an asset load failure", () => {
   );
   fireEvent.error(screen.getByLabelText("Nghe thử audio"));
   expect(screen.getByText(/Không tải được audio/)).toBeInTheDocument();
+});
+it("describes legacy answer conversion beside its existing activity select", () => {
+  const value: LessonContent = {
+    ...initial,
+    activities: [
+      {
+        id: "quiz",
+        type: "review",
+        prompt: "Chọn từ",
+        audioUrl: "",
+        imageUrl: "",
+        correctAnswer: "",
+        options: [
+          { id: "a", text: "Mẹ", audioUrl: "", imageUrl: "" },
+          { id: "b", text: "Bà", audioUrl: "", imageUrl: "" },
+        ],
+      },
+    ],
+  };
+  render(
+    <EditorialNotesContext.Provider
+      value={[
+        {
+          field: "activities.0.correctAnswer",
+          reason: "normalization",
+          message: "Đáp án legacy chưa rõ, cần chọn lại",
+        },
+      ]}
+    >
+      <LessonEditor value={value} onChange={() => {}} />
+    </EditorialNotesContext.Provider>,
+  );
+  expect(
+    screen.getByRole("combobox", { name: "Đáp án 1" }),
+  ).toHaveAccessibleDescription(/Đáp án legacy chưa rõ/);
 });

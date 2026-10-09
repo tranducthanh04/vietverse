@@ -2,6 +2,8 @@ import React from "react";
 import type { Activity } from "./content.types.js";
 import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
+import { FieldNotes } from "./EditorialNotes.js";
+import { useNoteDescription } from "./editorialNotesContext.js";
 export function ActivityEditor({
   value,
   onChange,
@@ -12,6 +14,7 @@ export function ActivityEditor({
   index: number;
 }) {
   const path = `activities.${index}`;
+  const answerNoteId = useNoteDescription(`${path}.correctAnswer`);
   const n = index + 1;
   const patch = (change: Partial<Activity>) =>
     onChange({ ...value, ...change });
@@ -117,6 +120,7 @@ export function ActivityEditor({
             <span>Đáp án {n}</span>
             <select
               name={`${path}.correctAnswer`}
+              aria-describedby={answerNoteId}
               value={
                 typeof value.correctAnswer === "string"
                   ? value.correctAnswer
@@ -132,6 +136,7 @@ export function ActivityEditor({
               ))}
             </select>
           </label>
+          <FieldNotes field={`${path}.correctAnswer`} id={answerNoteId} />
         </fieldset>
       )}
       {value.type === "fill_blank" && (

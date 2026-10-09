@@ -3,6 +3,7 @@ import type { ActivityType, LessonContent } from "./content.types.js";
 import { TextField } from "./FormFields.js";
 import { VocabularyEditor } from "./VocabularyEditor.js";
 import { ActivityEditor } from "./ActivityEditor.js";
+import { FieldNotes } from "./EditorialNotes.js";
 export function LessonEditor({
   value,
   onChange,
@@ -53,6 +54,8 @@ export function LessonEditor({
           onChange={(vocabulary) => onChange({ ...value, vocabulary })}
         />
         <legend>Hoạt động ({value.activities.length})</legend>
+        <FieldNotes field="activities" />
+        <FieldNotes field="audioUrl" />
         {value.activities.map((activity, i) => (
           <fieldset key={activity.id || `new-${i}`}>
             <legend>Hoạt động {i + 1}</legend>

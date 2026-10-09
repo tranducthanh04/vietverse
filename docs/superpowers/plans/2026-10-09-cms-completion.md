@@ -40,8 +40,11 @@ The following are the complete chronological decisions from the implementation l
 
 ## Deferred minors
 
-- Final: minor (deferred): source editorial notes are visible above the editor, not adjacent to each field; no source text is hidden or rewritten.
-- Final: minor (deferred): CMS confirmation dialogs have dialog semantics and initial focus but no full focus trap/Escape behavior; real-device/axe acceptance remains outstanding.
+- At the original handoff: source notes were only above the editor, and dialogs lacked full focus trap/Escape behavior. User continuation authorized completing both on 2026-10-09.
+- Both now implemented: exact-field/group source notes including empty groups and accessible descriptions; native modal confirmations and navigation blocker, cancel-first focus, Tab/Shift+Tab wrapping, Escape cancellation and focus restoration. Original source/payloads remain unchanged.
+- Browser acceptance: actual Chrome at 1366px/390px proves native `:modal`, inert background, keyboard wrapping, Escape and opener focus, source descriptions and unsaved text retained without mutation; no pageerror. Safari/real devices/axe remain outside this local proof.
+- Follow-up reviewer: no Critical/Important. Minor missing adjacent legacy `activities.N.correctAnswer` notes fixed with its own RED -> GREEN regression. Whole frontend suite 92/92; backend 171/171 unchanged, typecheck/build pass, lint remains 0 errors/101 warnings.
+- Follow-up rulings: native dialog targets modern supported browsers; Safari/physical devices/screen readers/axe still need separate acceptance (cost if unsupported: modal requires a browser upgrade or reviewed polyfill). Production import/configuration/media rights/assets stay outside this UI-only change (cost: content still cannot be declared published/ready). Arbitrary hidden/custom dialog children are not introduced; current callers only have visible action buttons (cost if expanded later: revisit focus selector). Reviewer does not certify executor test counts; command output and actual browser runs are the evidence (cost: verification must be rerun after later code changes).
 
 ## Release boundary
 

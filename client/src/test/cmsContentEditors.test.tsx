@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { afterEach, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { StoryEditor } from "../features/admin/content/StoryEditor.js";
 import { CultureEditor } from "../features/admin/content/CultureEditor.js";
 import { QuizEditor } from "../features/admin/content/QuizEditor.js";
@@ -15,6 +21,7 @@ import { ContentPreviewPage } from "../features/admin/content/ContentPreviewPage
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { api } from "../lib/api.js";
+import { EditorialNotesContext } from "../features/admin/content/editorialNotesContext.js";
 afterEach(cleanup);
 const story: StoryContent = {
   title: "Rồng rắn lên mây",
@@ -110,6 +117,53 @@ it("shows legacy categories without silently rewriting them and allows correctio
   expect(JSON.parse(screen.getByRole("status").textContent!).category).toBe(
     "tet",
   );
+});
+it("places culture notes beside empty groups and uses the coverImage source path for media", () => {
+  const notes = [
+    { field: "intro", reason: "missing_source", message: "Thiếu toàn văn" },
+    {
+      field: "funFacts",
+      reason: "missing_source",
+      message: "Thiếu thông tin cụ thể",
+    },
+    { field: "quiz", reason: "missing_source", message: "Thiếu bộ câu hỏi" },
+    {
+      field: "coverImage",
+      reason: "attribution",
+      message: "Kiểm tra quyền ảnh",
+    },
+  ];
+  render(
+    <EditorialNotesContext.Provider value={notes}>
+      <CultureEditor
+        value={{
+          title: "Văn hóa",
+          category: "tet",
+          intro: "",
+          coverImage: "",
+          audioUrl: "",
+          tags: [],
+          funFacts: [],
+          quiz: [],
+        }}
+        onChange={() => {}}
+      />
+    </EditorialNotesContext.Provider>,
+  );
+  expect(
+    screen.getByRole("textbox", { name: "Mở đầu" }),
+  ).toHaveAccessibleDescription(/Thiếu toàn văn/);
+  expect(
+    screen.getByRole("textbox", { name: "URL ảnh" }),
+  ).toHaveAccessibleDescription(/Kiểm tra quyền ảnh/);
+  expect(
+    within(screen.getByRole("group", { name: "Thông tin thú vị" })).getByRole(
+      "note",
+    ),
+  ).toHaveTextContent("Thiếu thông tin cụ thể");
+  expect(
+    within(screen.getByRole("group", { name: "Quiz" })).getByRole("note"),
+  ).toHaveTextContent("Thiếu bộ câu hỏi");
 });
 it("retries draft creation with the same request identity and opens the editor", async () => {
   const original = api.defaults.adapter;
@@ -221,7 +275,9 @@ it("shows imported variant/source notes and opens only the saved draft version i
     expect(await screen.findByLabelText("Dòng lời 2")).toHaveValue(
       "Có cây xúc sắc",
     );
-    expect(screen.getByText(/Chọn dị bản đầu tiên/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("note", { name: "Ghi chú nguồn: lyrics" }),
+    ).toHaveTextContent("Chọn dị bản đầu tiên");
     expect(
       screen.getByRole("link", { name: "Nguồn khách hàng" }),
     ).toHaveAttribute("href", expect.stringContaining("tab=tab-one"));

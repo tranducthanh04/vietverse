@@ -2,6 +2,7 @@
 
 ## Bổ sung CMS — 2026-10-09
 
+- Đã xử lý hai follow-up UX CMS: ghi chú nguồn cạnh field/nhóm biên tập và dialog native có focus/Tab/Escape/return-focus, nền inert. Có test hồi quy editor và Chrome desktop/mobile; không đổi nghiệp vụ/điểm hoặc bật publish. Nghiệm thu Safari/thiết bị thật/axe vẫn riêng.
 - Review cuối đã tái hiện và sửa seed tạo live trùng seedKey với nháp khách hàng chưa xuất bản: giữ chỗ mọi trạng thái nháp, phát hiện live/draft khác ID trước ghi, khóa chung seed/import. Test bao phủ import -> seed -> publish, nháp discarded và writer đang chạy.
 - Đã sửa renderer điền khuyết để một chuỗi từ hai dấu gạch dưới liên tiếp là một ô trống, khớp validator CMS; test learner/preview giữ đầy đủ vế sau câu với `__`, `___`, `______`.
 - Đã thêm draft/CAS/publish transaction và whitelist reader phiên bản; preview admin không có mutation học tập. Recording answer phải là ID bản ghi đúng hồ sơ/nội dung/version, không nhận boolean hoàn thành giả.

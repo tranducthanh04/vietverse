@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { TextField } from "./FormFields.js";
 import type { Quiz } from "./content.types.js";
+import { FieldNotes } from "./EditorialNotes.js";
 function QuestionEditor({
   value,
   onChange,
@@ -120,6 +121,7 @@ export function QuizEditor({
   return (
     <fieldset>
       <legend>Quiz</legend>
+      <FieldNotes field="quiz" />
       {value.map((question, i) => (
         <fieldset key={i}>
           <legend>Câu {i + 1}</legend>

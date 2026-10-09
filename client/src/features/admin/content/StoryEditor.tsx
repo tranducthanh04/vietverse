@@ -3,6 +3,7 @@ import type { StoryContent } from "./content.types.js";
 import { TextField, NumberField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
+import { FieldNotes } from "./EditorialNotes.js";
 export function StoryEditor({
   value,
   onChange,
@@ -35,6 +36,7 @@ export function StoryEditor({
           ))}
         </select>
       </label>
+      <FieldNotes field="type" />
       <TextField
         label="Tác giả / ghi công"
         name="author"
@@ -49,6 +51,7 @@ export function StoryEditor({
         multiline
       />
       <MediaFields
+        imageName="coverImage"
         value={{ audioUrl: value.audioUrl, imageUrl: value.coverImage }}
         onChange={(change) =>
           patch({
@@ -69,6 +72,7 @@ export function StoryEditor({
       />
       <fieldset>
         <legend>Nhóm tuổi</legend>
+        <FieldNotes field="ageGroups" />
         {(["5-6", "6-8"] as const).map((age) => (
           <label className="cms-row" key={age}>
             <input
@@ -94,6 +98,7 @@ export function StoryEditor({
       />
       <fieldset>
         <legend>Lời / dòng đọc</legend>
+        <FieldNotes field="lyrics" />
         {!value.audioUrl && (
           <p>
             Không có audio: đọc theo thứ tự dòng; mốc 0 không giả thời gian

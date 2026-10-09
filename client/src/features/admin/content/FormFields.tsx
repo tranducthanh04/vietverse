@@ -1,5 +1,7 @@
 import React from "react";
 import "./content.css";
+import { FieldNotes } from "./EditorialNotes.js";
+import { useNoteDescription } from "./editorialNotesContext.js";
 export function TextField({
   label,
   name,
@@ -15,8 +17,10 @@ export function TextField({
   multiline?: boolean;
   readOnly?: boolean;
 }) {
+  const noteId = useNoteDescription(name);
   const props = {
     name,
+    "aria-describedby": noteId,
     value,
     readOnly,
     onChange: (
@@ -24,10 +28,13 @@ export function TextField({
     ) => onChange?.(event.target.value),
   };
   return (
-    <label className="cms-field">
-      <span>{label}</span>
-      {multiline ? <textarea {...props} rows={3} /> : <input {...props} />}
-    </label>
+    <div className="cms-field">
+      <label className="cms-field-label">
+        <span>{label}</span>
+        {multiline ? <textarea {...props} rows={3} /> : <input {...props} />}
+      </label>
+      <FieldNotes field={name} id={noteId} />
+    </div>
   );
 }
 export function NumberField({
@@ -41,18 +48,23 @@ export function NumberField({
   value: number;
   onChange: (value: number) => void;
 }) {
+  const noteId = useNoteDescription(name);
   return (
-    <label className="cms-field">
-      <span>{label}</span>
-      <input
-        name={name}
-        type="number"
-        min="0"
-        step="any"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-    </label>
+    <div className="cms-field">
+      <label className="cms-field-label">
+        <span>{label}</span>
+        <input
+          name={name}
+          aria-describedby={noteId}
+          type="number"
+          min="0"
+          step="any"
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+        />
+      </label>
+      <FieldNotes field={name} id={noteId} />
+    </div>
   );
 }
 export function StringRows({
@@ -69,6 +81,7 @@ export function StringRows({
   return (
     <fieldset>
       <legend>{label}</legend>
+      <FieldNotes field={name} />
       {value.map((text, i) => (
         <div key={i} className="cms-row">
           <TextField

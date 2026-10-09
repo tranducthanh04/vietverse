@@ -19,6 +19,8 @@ import { LessonEditor } from "./LessonEditor.js";
 import { StoryEditor } from "./StoryEditor.js";
 import { CultureEditor } from "./CultureEditor.js";
 import { useUnsavedChanges } from "./useUnsavedChanges.js";
+import { ConfirmationDialog } from "./ConfirmationDialog.js";
+import { EditorialNotesContext } from "./editorialNotesContext.js";
 
 export function ContentEditorPage({ kind }: { kind: ContentKind }) {
   const { id = "" } = useParams();
@@ -276,34 +278,39 @@ function Editor({
       )}
       {editing && value ? (
         <>
-          <fieldset
-            ref={form}
-            disabled={Boolean(confirmation) || (busy && !allowTyping)}
-          >
-            <legend>Nội dung nháp</legend>
-            <TextField
-              label="Tiêu đề"
-              name="title"
-              value={value.title}
-              onChange={(title) => setValue({ ...value, title })}
-            />
-            {kind === "lesson" && (
-              <LessonEditor
-                value={value as LessonContent}
-                onChange={setValue}
-                busy={busy}
+          <EditorialNotesContext.Provider value={loaded.editorialNotes}>
+            <fieldset
+              ref={form}
+              disabled={Boolean(confirmation) || (busy && !allowTyping)}
+            >
+              <legend>Nội dung nháp</legend>
+              <TextField
+                label="Tiêu đề"
+                name="title"
+                value={value.title}
+                onChange={(title) => setValue({ ...value, title })}
               />
-            )}
-            {kind === "story" && (
-              <StoryEditor value={value as StoryContent} onChange={setValue} />
-            )}
-            {kind === "culture" && (
-              <CultureEditor
-                value={value as CultureContent}
-                onChange={setValue}
-              />
-            )}
-          </fieldset>
+              {kind === "lesson" && (
+                <LessonEditor
+                  value={value as LessonContent}
+                  onChange={setValue}
+                  busy={busy}
+                />
+              )}
+              {kind === "story" && (
+                <StoryEditor
+                  value={value as StoryContent}
+                  onChange={setValue}
+                />
+              )}
+              {kind === "culture" && (
+                <CultureEditor
+                  value={value as CultureContent}
+                  onChange={setValue}
+                />
+              )}
+            </fieldset>
+          </EditorialNotesContext.Provider>
           <div className="cms-actions">
             <button
               className="cms-primary"
@@ -366,8 +373,10 @@ function Editor({
         </button>
       )}
       {confirmation && (
-        <div role="dialog" aria-modal="true" aria-label="Xác nhận thay đổi">
-          <h2>Xác nhận thay đổi</h2>
+        <ConfirmationDialog
+          title="Xác nhận thay đổi"
+          onCancel={() => setConfirmation(null)}
+        >
           <p>
             {confirmation === "publish"
               ? `Xuất bản đúng nháp ${loaded?.draftVersion}, dựa trên live ${loaded?.baseContentVersion ?? "mới"}. Nội dung mới sẽ hiển thị với bé; tiến độ và điểm giữ nguyên.`
@@ -378,30 +387,28 @@ function Editor({
                   : "Đổi hiển thị nội dung và tăng phiên bản? Nháp hiện có sẽ cần mở lại từ bản mới."}
           </p>
           <div className="cms-actions">
-            <button autoFocus onClick={() => setConfirmation(null)}>
-              Hủy
-            </button>
+            <button onClick={() => setConfirmation(null)}>Hủy</button>
             <button onClick={() => void run(confirm)}>Xác nhận</button>
           </div>
-        </div>
+        </ConfirmationDialog>
       )}
       {blocker.state === "blocked" && (
-        <div role="dialog" aria-modal="true" aria-label="Rời trang chưa lưu?">
-          <h2>Rời trang chưa lưu?</h2>
+        <ConfirmationDialog
+          title="Rời trang chưa lưu?"
+          onCancel={() => blocker.reset()}
+        >
           <p>
             {busy
               ? "Đang gửi yêu cầu. Hãy đợi kết quả để tránh mất trạng thái."
               : "Thay đổi chưa lưu sẽ mất nếu rời trang."}
           </p>
           <div className="cms-actions">
-            <button autoFocus onClick={() => blocker.reset()}>
-              Ở lại
-            </button>
+            <button onClick={() => blocker.reset()}>Ở lại</button>
             <button disabled={busy} onClick={() => blocker.proceed()}>
               Rời trang
             </button>
           </div>
-        </div>
+        </ConfirmationDialog>
       )}
     </div>
   );
