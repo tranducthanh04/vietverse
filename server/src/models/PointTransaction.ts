@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { PointReason } from '../constants/points.js';
+import { PointReason, POINT_REASONS, ONE_TIME_AWARD_REASONS } from '../constants/points.js';
 
 export interface IPointTransaction extends Document {
   childId: Types.ObjectId;
@@ -24,7 +24,7 @@ const pointTransactionSchema = new Schema<IPointTransaction>(
     },
     reason: {
       type: String,
-      enum: ['lesson', 'culture_quiz', 'stage_complete', 'treasure', 'redeem', 'refund'],
+      enum: [...POINT_REASONS],
       required: true,
       index: true,
     },
@@ -47,10 +47,16 @@ pointTransactionSchema.index(
     unique: true,
     partialFilterExpression: {
       refId: { $type: 'string' },
-      reason: { $nin: ['redeem', 'refund'] }, // Redemptions & Refunds can happen multiple times
+      // Only one-time earning reasons; redeem/refund/use_reward may repeat for the same refId.
+      // MongoDB rejects $nin/$not in partial indexes (the former $nin filter never built),
+      // so the filter lists the award reasons with $in (requires MongoDB >= 6.0).
+      reason: { $in: [...ONE_TIME_AWARD_REASONS] },
     },
   }
 );
+
+// Serves newest-first history pagination per child.
+pointTransactionSchema.index({ childId: 1, createdAt: -1 });
 
 export const PointTransaction = model<IPointTransaction>(
   'PointTransaction',
