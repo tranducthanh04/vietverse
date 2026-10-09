@@ -6,6 +6,7 @@ import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
+import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const CulturePage: React.FC = () => {
@@ -92,11 +93,16 @@ export const CulturePage: React.FC = () => {
             >
               <div>
                 <div className="relative h-48 rounded-2xl overflow-hidden mb-4 bg-stone-100">
-                  <img
-                    src={article.coverImage || 'https://images.unsplash.com/photo-1528127269322-539801943592?w=400'}
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  {article.coverImage ? (
+                    <img
+                      src={article.coverImage}
+                      alt={article.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <CoverPlaceholder kind="culture" variant={article.category} className="w-full h-full" />
+                  )}
                   <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-culture flex items-center space-x-1 shadow-sm">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>+5 ViVi Points Đố vui</span>
