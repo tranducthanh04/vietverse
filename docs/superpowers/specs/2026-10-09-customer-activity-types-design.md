@@ -1,6 +1,6 @@
 # Thiết kế bốn dạng hoạt động học theo nguồn khách hàng
 
-Ngày: 2026-10-09 (Asia/Saigon). Trạng thái: **thiết kế trong chat đã được người dùng đồng ý; bản spec này chờ duyệt trước implementation plan/code**. Chưa triển khai các activity mới, chưa thay dữ liệu DB hoặc publish.
+Ngày: 2026-10-09 (Asia/Saigon). Trạng thái: **người dùng đã duyệt bản spec bằng “ok tiếp tục làm đi”; implementation plan đang chờ review trước code**. Chưa triển khai các activity mới, chưa thay dữ liệu DB hoặc publish.
 
 ## 1. Mục tiêu và phạm vi được duyệt
 
@@ -89,7 +89,7 @@ Grader dùng canonical payload snapshot đúng version, không dùng DTO đã lo
 
 Mỗi activity mới đạt/không đạt toàn bộ, đóng góp vào số activity đúng như hiện tại. Giữ scorePercent theo toàn bài, mốc đỗ 50%, sao 70%/90%, reward một lần theo child/content ID, replay/idempotency và quyền subscription/unlock/ownership. Không reset progress/ledger khi thêm type hoặc xuất bản phiên bản mới.
 
-**Quyết định hiển thị mới (chờ duyệt bản spec):** không gửi `correctAnswer` của multi/group hoặc `acceptedAnswers` của fill xuống API dành cho bé; CMS admin và canonical snapshot vẫn có chúng. GET lesson tạo learner projection riêng, không dùng projection đó trong grader/publish hoặc sửa snapshot.
+**Quyết định hiển thị mới (đã duyệt):** không gửi `correctAnswer` của multi/group hoặc `acceptedAnswers` của fill xuống API dành cho bé; CMS admin và canonical snapshot vẫn có chúng. GET lesson tạo learner projection riêng, không dùng projection đó trong grader/publish hoặc sửa snapshot.
 
 Ba dạng câu hỏi mới phản hồi sau thao tác bằng “Đã ghi câu trả lời”, cho phép tiếp tục; không khẳng định đúng hoặc trừ tim dựa trên dữ liệu không có đáp án. Kết quả toàn bài/sao/điểm chỉ từ response server sau nộp. Không thêm endpoint chấm từng câu trong phạm vi này. Bảy loại cũ giữ phản hồi hiện tại; hardening đáp án của chúng là đợt riêng, không làm hỏng contract cũ.
 
@@ -168,12 +168,12 @@ Rollback trước publish type mới: có thể revert feature code sau kiểm t
 - Full `npm test`, `npm run typecheck`, `npm run build`, lint frontend và whitespace check; báo warnings thật, không che đỏ bằng cách giảm assertions.
 - Browser 390px/1366px keyboard/touch/focus/overflow, console/pageerror; không gọi production payment/DB/micro. Nếu browser automation còn lỗi, báo limitation và không coi unit tests là chứng nhận mobile/Safari/axe.
 
-## 12. Những quyết định/giả định cần người dùng duyệt bản viết
+## 12. Những quyết định đã duyệt và giả định triển khai
 
 Đã duyệt trong chat: bốn type mới, server chấm chính thức, compatible types cũ, không đổi điểm/unlock và follow_steps tự báo cáo.
 
-Chi tiết được đề xuất trong bản spec này: exact type/field names và bounds; template slot tường minh thay underscore; grade đúng toàn activity; chấm ở cuối bài và phản hồi trung tính cho loại mới để không lộ đáp án; GET capability bảo vệ client cũ; persistence partial input; chỉ ánh xạ nguồn đầy đủ cho lần nhập mới, không tự update drafts đã nhập.
+Chi tiết đã được duyệt trong bản spec này: exact type/field names và bounds; template slot tường minh thay underscore; grade đúng toàn activity; chấm ở cuối bài và phản hồi trung tính cho loại mới để không lộ đáp án; GET capability bảo vệ client cũ; persistence partial input; chỉ ánh xạ nguồn đầy đủ cho lần nhập mới, không tự update drafts đã nhập.
 
 Giả định: content owner duyệt acceptedAnswers/dị bản/ngữ liệu còn thiếu; thiết bị có trình duyệt hỗ trợ giao diện hiện tại nhưng không giả định audio/TTS luôn khả dụng; DB production vẫn do deploy owner xử lý theo runbook riêng.
 
-Chỉ sau khi người dùng duyệt file này mới viết implementation plan và bắt đầu TDD. Nếu muốn phản hồi đúng/sai từng câu mới ngay lập tức, cần thiết kế endpoint chấm từng activity có ownership/version/rate limit và phân tích offline riêng; không tự thêm vào phạm vi này.
+Bản spec đã được duyệt; bước tiếp theo là review [implementation plan](../plans/2026-10-09-customer-activity-types.md), rồi thực hiện TDD theo cách chạy người dùng chọn. Nếu muốn phản hồi đúng/sai từng câu mới ngay lập tức, cần thiết kế endpoint chấm từng activity có ownership/version/rate limit và phân tích offline riêng; không tự thêm vào phạm vi này.
