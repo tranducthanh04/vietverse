@@ -2,6 +2,17 @@
 
 Base URL: `/api/v1`.
 
+## Hoạt động bổ sung — triển khai theo giai đoạn 2026-10-09
+
+Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`, không đổi bảy loại cũ hoặc công thức điểm. Contract canonical/model và kiểm draft/publish đã bổ sung; chưa coi màn bé/CMS mới là sẵn phát hành cho tới khi hoàn tất [plan](./superpowers/plans/2026-10-09-customer-activity-types.md).
+
+- `multi_select`: options 2–12, text được trùng; correctAnswer là mảng ID duy nhất, userAnswer phải khớp đúng tập ID, không phụ thuộc thứ tự.
+- `group_sort`: groups 2–6, options 2–12; correctAnswer và userAnswer là map đúng mọi item ID tới group ID; cho phép nhiều item cùng nhóm, không nhận khóa thừa/kế thừa/prototype.
+- `fill_blanks`: template tối đa 5000 ký tự dùng marker `{{slot-id}}`; 2–6 blankSlots, mỗi marker/slot đúng một lần, 1–4 acceptedAnswers/slot, mỗi đáp án tối đa 200 ký tự. userAnswer map slot→text đối chiếu NFC/trim/lowercase vi, giữ dấu, khoảng trắng nội bộ và dấu câu.
+- `follow_steps`: 1–3 steps `{id,text}` có thứ tự, text tối đa 500 ký tự; userAnswer là đầy đủ step ID theo thứ tự. Chỉ ghi nhận bé tự báo cáo, không xác minh hành động ngoài đời.
+- ID con mới 1–64 ASCII chữ/số/`_`/`-`, cấm `__proto__`, `prototype`, `constructor`; không áp giới hạn mới lên legacy. Nháp thiếu ngữ liệu/đáp án vẫn biên tập được nhưng publish bị chặn bằng field issues.
+- Grader mới dùng đáp án canonical, malformed/missing userAnswer không đạt và không fallback `isCorrect`. Mỗi activity đạt toàn bộ hoặc không đạt, không chia trọng số từng slot/item. Không rewrite source/snapshot/live cũ hay import DB thật trong bước này.
+
 ## CMS — lớp dữ liệu đang triển khai (2026-10-09)
 
 - Model nội dung bổ sung `contentVersion`, `publishedAt`, `publishedBy`; bản legacy thiếu version được hiểu là 0. Story/culture có `seedKey` và `visibility` tùy chọn, chưa đổi hành vi API đọc trong bước này.

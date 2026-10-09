@@ -1,4 +1,5 @@
 import { IActivity } from '../../models/Lesson.js';
+import { gradeNewActivity } from './newActivity.grading.js';
 
 export interface ActivitySubmission {
   activityId: string;
@@ -14,6 +15,11 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
   if (!submission) return false;
 
   switch (activity.type) {
+    case 'multi_select':
+    case 'group_sort':
+    case 'fill_blanks':
+    case 'follow_steps':
+      return gradeNewActivity(activity, submission.userAnswer);
     case 'word_card':
       // Word cards are introductory visual/audio flashcards.
       // Completing/viewing the card is considered successful.

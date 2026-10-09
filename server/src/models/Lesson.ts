@@ -8,7 +8,11 @@ export type ActivityType =
   | 'fill_blank'
   | 'sort_order'
   | 'record_voice'
-  | 'review';
+  | 'review'
+  | 'multi_select'
+  | 'group_sort'
+  | 'fill_blanks'
+  | 'follow_steps';
 
 export interface IActivityOption {
   id: string;
@@ -32,6 +36,10 @@ export interface IActivity {
   pairs?: { left: string; right: string }[];
   blanks?: { sentence: string; missing: string }[];
   orderedItems?: string[];
+  groups?: { id: string; label: string }[];
+  template?: string;
+  blankSlots?: { id: string; label: string; acceptedAnswers: string[] }[];
+  steps?: { id: string; text: string }[];
   pointsWeight?: number;
 }
 
@@ -66,6 +74,7 @@ const activitySchema = new Schema<IActivity>(
         'sort_order',
         'record_voice',
         'review',
+        'multi_select', 'group_sort', 'fill_blanks', 'follow_steps',
       ],
     },
     prompt: { type: String, required: true },
@@ -97,6 +106,10 @@ const activitySchema = new Schema<IActivity>(
       },
     ],
     orderedItems: [String],
+    groups: { type: [{ _id: false, id: String, label: String }], default: undefined },
+    template: String,
+    blankSlots: { type: [{ _id: false, id: String, label: String, acceptedAnswers: [String] }], default: undefined },
+    steps: { type: [{ _id: false, id: String, text: String }], default: undefined },
     pointsWeight: { type: Number, default: 1 },
   },
   { _id: false }

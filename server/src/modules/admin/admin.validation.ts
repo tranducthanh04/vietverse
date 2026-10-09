@@ -50,6 +50,7 @@ export const activitySchema = z.object({
     'sort_order',
     'record_voice',
     'review',
+    'multi_select', 'group_sort', 'fill_blanks', 'follow_steps',
   ]),
   prompt: z.string().min(1, 'Câu hỏi/prompt không được để trống'),
   subPrompt: z.string().optional(),
@@ -65,6 +66,10 @@ export const activitySchema = z.object({
     .array(z.object({ sentence: z.string(), missing: z.string() }))
     .optional(),
   orderedItems: z.array(z.string()).optional(),
+  groups: z.array(z.object({ id: z.string(), label: z.string() })).optional(),
+  template: z.string().optional(),
+  blankSlots: z.array(z.object({ id: z.string(), label: z.string(), acceptedAnswers: z.array(z.string()) })).optional(),
+  steps: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
   pointsWeight: z.number().int().min(1).optional(),
 });
 

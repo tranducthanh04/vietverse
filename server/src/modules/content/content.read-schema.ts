@@ -7,7 +7,7 @@ const optionalText = text.optional();
 const media = text.default('');
 const strings = z.array(text);
 const activity = z.object({
-  id: text.default(''), type: z.enum(['listen_choose', 'word_card', 'drag_match', 'fill_blank', 'sort_order', 'record_voice', 'review']),
+  id: text.default(''), type: z.enum(['listen_choose', 'word_card', 'drag_match', 'fill_blank', 'sort_order', 'record_voice', 'review', 'multi_select', 'group_sort', 'fill_blanks', 'follow_steps']),
   prompt: text.default(''), subPrompt: optionalText, audioUrl: media, imageUrl: media,
   options: z.array(z.object({ id: text, text: optionalText, imageUrl: media, audioUrl: media })).optional(),
   correctAnswer: z.union([text, strings, z.number(), z.boolean(), z.record(text)]).optional(),
@@ -15,6 +15,10 @@ const activity = z.object({
   pairs: z.array(z.object({ left: text, right: text })).optional(),
   blanks: z.array(z.object({ sentence: text, missing: text })).optional(),
   orderedItems: strings.optional(), pointsWeight: z.number().optional(),
+  groups: z.array(z.object({ id: text, label: text })).optional(),
+  template: optionalText,
+  blankSlots: z.array(z.object({ id: text, label: text, acceptedAnswers: strings })).optional(),
+  steps: z.array(z.object({ id: text, text })).optional(),
 });
 const quiz = z.array(z.object({ question: text, options: strings, correctAnswer: z.number(), explanation: optionalText })).default([]);
 export const readSchemas = {

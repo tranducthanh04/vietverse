@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ContentKind, ContentPayloadMap, FieldIssue } from './content.types.js';
+import { isNewActivityType, isSafeActivityItemId, isPlainAnswerMap, hasExactKeys, templateSlotIds } from './newActivity.contract.js';
 
 export const contentKinds = ['lesson', 'story', 'culture'] as const;
 export const cultureCategories = ['tet', 'am_thuc', 'trang_phuc', 'phong_tuc', 'le_hoi', 'vat_dung', 'thien_nhien', 'tro_choi_dan_gian'] as const;
@@ -20,16 +21,41 @@ const id = z.string().max(100);
 const objectId = z.string().regex(/^[a-f\d]{24}$/i);
 const answer = z.union([text, z.array(text).max(12), z.number().finite(), z.boolean(), z.record(text)]).optional();
 const optionSchema = z.object({ id, text: text.optional(), imageUrl: media, audioUrl: media });
-export const activityDraftSchema = z.object({
+const newId = z.string().refine(isSafeActivityItemId, 'Use a unique safe ASCII item ID (1–64 characters)');
+// Check the original map before z.record strips dangerous keys or inherited properties.
+const rawActivity = z.unknown().superRefine((value, ctx) => {
+  if (!value || typeof value !== 'object' || !('type' in value) || typeof value.type !== 'string' || !isNewActivityType(value.type)) return;
+  if ('correctAnswer' in value && value.correctAnswer && typeof value.correctAnswer === 'object' &&
+    !Array.isArray(value.correctAnswer) && !isPlainAnswerMap(value.correctAnswer)) {
+    ctx.addIssue({ code: 'custom', path: ['correctAnswer'], message: 'Unsafe answer map' });
+  }
+});
+export const activityDraftSchema = rawActivity.pipe(z.object({
   id: id.default(''),
-  type: z.enum(['listen_choose', 'word_card', 'drag_match', 'fill_blank', 'sort_order', 'record_voice', 'review']),
+  type: z.enum(['listen_choose', 'word_card', 'drag_match', 'fill_blank', 'sort_order', 'record_voice', 'review', 'multi_select', 'group_sort', 'fill_blanks', 'follow_steps']),
   prompt: text.default(''), subPrompt: text.optional(), audioUrl: media, imageUrl: media,
-  options: z.array(optionSchema).max(8).optional(), correctAnswer: answer,
+  options: z.array(optionSchema).max(12).optional(), correctAnswer: answer,
   hints: z.array(text).max(20).optional(), targetWord: text.optional(), targetPhonetic: text.optional(),
   pairs: z.array(z.object({ left: text, right: text })).max(12).optional(),
   blanks: z.array(z.object({ sentence: text, missing: text })).max(1).optional(),
   orderedItems: z.array(text).max(12).optional(), pointsWeight: z.number().finite().nonnegative().optional(),
-});
+  groups: z.array(z.object({ id: newId, label: short })).max(6).optional(),
+  template: text.optional(),
+  blankSlots: z.array(z.object({ id: newId, label: short, acceptedAnswers: z.array(short).max(4) })).max(6).optional(),
+  steps: z.array(z.object({ id: newId, text: z.string().max(500) })).max(3).optional(),
+}).superRefine((a, ctx) => {
+  const report = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message });
+  if (!isNewActivityType(a.type) && (a.options?.length ?? 0) > 8) report(['options'], 'At most 8 options for legacy types');
+  if (!isNewActivityType(a.type)) return;
+  (a.options ?? []).forEach((option, i) => { if (!isSafeActivityItemId(option.id)) report(['options', i, 'id'], 'Invalid item ID'); });
+  for (const key of ['groups', 'blankSlots', 'steps'] as const) {
+    const seen = new Set<string>();
+    (a[key] ?? []).forEach((item, i) => {
+      if (seen.has(item.id)) report([key, i, 'id'], 'Duplicate ID');
+      seen.add(item.id);
+    });
+  }
+}));
 const vocabularySchema = z.object({ word: text.default(''), meaning: text.default(''), phonetic: text.optional(), audioUrl: media, imageUrl: media });
 const quizSchema = z.object({ question: text.default(''), options: z.array(text).max(8).default([]), correctAnswer: z.number().int().default(-1), explanation: text.optional() });
 export const lessonDraftSchema = z.object({
@@ -132,6 +158,49 @@ export function validatePublish<K extends ContentKind>(kind: K, input: ContentPa
         (a.orderedItems ?? []).forEach((item, j) => requireText(item, `${path}.orderedItems.${j}`));
         duplicateIssues(a.orderedItems ?? [], `${path}.orderedItems`, issues);
         if (!Array.isArray(a.correctAnswer) || JSON.stringify(a.correctAnswer) !== JSON.stringify(a.orderedItems)) issues.push({ field: `${path}.correctAnswer`, message: 'Answer must match ordered items' });
+      }
+      if (a.type === 'multi_select' || a.type === 'group_sort') {
+        minimum(a.options, 2, `${path}.options`);
+        (a.options ?? []).forEach((option, j) => requireText(option.text || option.imageUrl, `${path}.options.${j}.text`));
+      }
+      if (a.type === 'multi_select') {
+        const expected = a.correctAnswer;
+        const optionIds = (a.options ?? []).map(option => option.id);
+        if (!Array.isArray(expected) || !expected.length || new Set(expected).size !== expected.length ||
+          expected.some(id => typeof id !== 'string' || !optionIds.includes(id))) {
+          issues.push({ field: `${path}.correctAnswer`, message: 'Choose unique existing option IDs' });
+        }
+      }
+      if (a.type === 'group_sort') {
+        minimum(a.groups, 2, `${path}.groups`);
+        (a.groups ?? []).forEach((group, j) => requireText(group.label, `${path}.groups.${j}.label`));
+        duplicateIssues((a.groups ?? []).map(group => group.label), `${path}.groups`, issues);
+        const groups = (a.groups ?? []).map(group => group.id);
+        const ids = (a.options ?? []).map(option => option.id);
+        const expected = a.correctAnswer;
+        if (!isPlainAnswerMap(expected) || !hasExactKeys(expected, ids) ||
+          ids.some(id => typeof expected[id] !== 'string' || !groups.includes(expected[id] as string))) {
+          issues.push({ field: `${path}.correctAnswer`, message: 'Assign exactly every item to an existing group' });
+        }
+      }
+      if (a.type === 'fill_blanks') {
+        minimum(a.blankSlots, 2, `${path}.blankSlots`);
+        requireText(a.template, `${path}.template`);
+        const ids = (a.blankSlots ?? []).map(slot => slot.id);
+        const markers = templateSlotIds(a.template ?? '');
+        if (!markers || markers.length !== ids.length || new Set(markers).size !== markers.length || ids.some(id => !markers.includes(id))) {
+          issues.push({ field: `${path}.template`, message: 'Each slot must have exactly one explicit {{slot-id}} marker' });
+        }
+        (a.blankSlots ?? []).forEach((slot, j) => {
+          requireText(slot.label, `${path}.blankSlots.${j}.label`);
+          minimum(slot.acceptedAnswers, 1, `${path}.blankSlots.${j}.acceptedAnswers`);
+          slot.acceptedAnswers.forEach((answer, k) => requireText(answer, `${path}.blankSlots.${j}.acceptedAnswers.${k}`));
+          duplicateIssues(slot.acceptedAnswers, `${path}.blankSlots.${j}.acceptedAnswers`, issues);
+        });
+      }
+      if (a.type === 'follow_steps') {
+        minimum(a.steps, 1, `${path}.steps`);
+        (a.steps ?? []).forEach((step, j) => requireText(step.text, `${path}.steps.${j}.text`));
       }
     });
   } else {
