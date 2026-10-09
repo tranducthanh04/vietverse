@@ -25,8 +25,8 @@ import paymentsRouter from './modules/payments/payments.routes.js';
 
 export const app = express();
 
-// The app sits behind Render's reverse proxy. Trust the immediate proxy so
-// express-rate-limit can identify the originating client via X-Forwarded-For.
+// Render uses the immediate proxy; Vercel limiter keys use its normalized header.
+// Arbitrary XFF is never used for limiter keys outside those runtimes.
 app.set('trust proxy', 1);
 
 // Security and utility middlewares
