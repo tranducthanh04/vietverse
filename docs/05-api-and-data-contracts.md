@@ -76,6 +76,22 @@ Quyết định bảo vệ phiên học khi xuất bản:
 
 ## Content và recording
 
+### Signed recording upload — triển khai local 2026-10-09, chưa cutover
+
+Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudinary trực tiếp để không đưa file qua giới hạn function Vercel4,5MB. Không đổi ownership, contentVersion/unlock hoặc điểm.
+
+- POST `/recordings/upload-intent` (JWT): JSON strict `{requestId: UUID, childId, lessonId?, activityId?, contentVersion?:number, wordOrPrompt?:string<=5000, byteLength:1..5242880, mimeType, durationSec:0..180}`. Lesson/activity phải có cùng nhau; standalone không có version. MIME chấp nhận audio/webm/mp4/ogg/mpeg/wav/x-wav và application/ogg; bỏ tham số codec trước kiểm tra. Client metadata chỉ kiểm sớm, không là bằng chứng audio thực.
+- Trả201 wrapper `{intentId, expiresAt:ISO, upload:{url,fields}}`. URL cố định HTTPS Cloudinary account/video/upload; fields gồm public_id ngẫu nhiên, timestamp, overwrite=false, upload_preset signed, api_key public, signature. Không trả secret/JWT hoặc tên/ID bé trong public_id. Browser dùng fetch riêng với credentials=omit, không gửi app headers.
+- Unique `{parentId,requestId}`: retry đúng context/file declaration trả cùng intent; khác payload409 `UPLOAD_INTENT_CONFLICT`; pending hết hạn409 `UPLOAD_INTENT_EXPIRED`. Không tự cấp mới khi finalize lỗi; chủ động thu/gửi lượt mới khi hết hạn.
+- POST `/recordings/finalize` (JWT): JSON strict **chỉ** `{intentId:ObjectId}`. Server recheck owner/unlock/snapshot, SDK inspect đúng public_id ngoài transaction; không tin URL/bytes/duration từ browser. Audio metadata phải có codec, không có video metadata populated, format cho phép webm/mp4/m4a/ogg/mp3/wav, secure_url HTTPS đúng Cloudinary account. Bytes thực `(0,5242880]`, duration thực `(0,180]`; thiếu metadata bị từ chối. Đây là siết kiểm chứng; multipart cũ vẫn clamp duration client và không chứng minh audio bằng metadata.
+- Trả201 Recording receipt `{id,_id,childId,lessonId?,activityId?,contentVersion?,url,publicId?,durationSec,wordOrPrompt?,createdAt}`. Không xuất uploadIntentId/state/fingerprint. Receipt và Recording cùng transaction, unique sparse `Recording.uploadIntentId`; retry/concurrent trả cùng ID, completed hết hạn vẫn trả receipt. Sau intent TTL, receipt tra từ Recording và kiểm ownership bé. Chỉ receipt mới được dùng làm answer.
+- Lỗi: schema/context400; auth401; không sở hữu/context không tồn tại404; asset chưa có404 `UPLOAD_ASSET_NOT_FOUND` (chỉ mã này cho phép reupload sau upload response không rõ); intent conflict/expired409; asset quá size413 `UPLOAD_TOO_LARGE`; metadata/video/duration422 `UPLOAD_AUDIO_INVALID`; storage503 `UPLOAD_STORAGE_UNAVAILABLE`; DB503 `DATABASE_UNAVAILABLE`. Không lỗi nào cấp điểm hoặc hoàn thành activity.
+- `RecordingUploadIntent`: parent/request/fingerprint, context, publicId/timestamp, pending/completed, recordingId, expiresAt10 phút, deleteAt7 ngày; TTL deleteAt và unique parent/request. `RateLimitBucket`: string `_id=scope:digestIP`, hits, resetAt; TTL resetAt, reset atomic không chờ TTL. `Recording.uploadIntentId` unique sparse/select:false cho bản direct, legacy không có field.
+- DELETE bé: Child và các collections phụ thuộc, thêm RecordingUploadIntent, được cascade tuần tự trong Mongo transaction; finalize/legacy ghi Child.__v để tranh chấp với delete. Failure503 rollback DB. Không xóa Cloudinary trong transaction; xem debt retention/runbook. Không mở quyền đọc audio.
+- `/health`200 liveness; `/ready`200 ping DB hoặc503 `DATABASE_UNAVAILABLE`. API production rate limit shared Mongo auth30/15m/API120/m, store lỗi503 `RATE_LIMIT_UNAVAILABLE`.
+
+Giả định môi trường chưa xác minh: preset/metadata provider thực, IP qua rewrite, replica set/network/transaction, native build, cookie auth và webhook. Multipart legacy chỉ dùng local/Render/client cũ; không hứa file5MiB qua endpoint này trên Vercel.
+
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
 | GET | `/stories`, `/stories/:id` | Public | Đọc story (query `type`, `search` được escape regex và cắt tối đa 50 ký tự; limit 100) |

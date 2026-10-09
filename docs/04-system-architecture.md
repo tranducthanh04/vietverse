@@ -4,7 +4,7 @@
 
 ```text
 client/  React 18 + Vite + TypeScript + Tailwind + React Query + Zustand
-server/  Node 20 + Express + TypeScript + Mongoose + Zod + JWT + Pino
+server/  Node 22 + Express + TypeScript + Mongoose + Zod + JWT + Pino
 MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redemption...
 ```
 
@@ -40,6 +40,10 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Storage audio
 
+- Quyết định triển khai Vercel (2026-10-09): BE cấp intent có chữ ký, browser gửi file thẳng Cloudinary bằng HTTP client riêng không có JWT/cookie/Parent Gate; BE đọc metadata rồi finalize transaction. Upload provider riêng lẻ không hoàn thành bài/cấp điểm.
+- Giới hạn 5 MiB và 180s được kiểm chứng từ provider; metadata thiếu/video bị từ chối. Intent pending cho phép finalize 10 phút, TTL 7 ngày; receipt Recording đọc được sau TTL với ownership.
+- Finalize/legacy persist và xóa bé cùng write boundary trên Child; cascade DB và receipt atomic trên replica set. Intent cũng bị cascade. Không gọi Cloudinary trong transaction; xóa DB chưa đồng nghĩa xóa vật lý mọi asset audio.
+
 - Có abstraction `IStorageService`.
 - Production có thể dùng Cloudinary.
 - Local/dev fallback lưu Data URI trực tiếp trong MongoDB.
@@ -51,6 +55,10 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Vercel project dùng `client` làm Root Directory, build bằng `npm run build` và phát hành thư mục `dist`.
 - GitHub integration tự động deploy: push vào `main` tạo production deployment; push các branch khác hoặc mở Pull Request tạo preview deployment và bình luận vào PR.
 - Server: Render, health `/health`.
+- Đã thêm cấu hình BE Vercel riêng, Root Directory `server`, native Express default export `src/index.ts`; chưa xác nhận production/cutover. `src/server.ts` giữ listener local/Render. Không có legacy builds hoặc seed khi deploy.
+- Mongo connection warm/in-flight được cache (pool max5/min0, selection5s). `/ready` connect+ping, không chứng minh transaction/storage/PayOS. API cold connect lỗi trả503; không disconnect theo request.
+- Production rate limit MongoDB chung: auth30/15 phút, API120/phút, window từ request đầu và reset atomic theo DB clock; store lỗi503. Vercel chỉ đọc single provider-normalized `x-vercel-forwarded-for` khi `VERCEL=1`; Render `RENDER=true` dùng immediate proxy. Không tin XFF ở host khác; chuẩn hóa/băm IP. Qua FE rewrite và giả header vẫn cần staging thật.
+- Node BE chọn22.x để khớp local verification. Native bcrypt/bundle trên Vercel là gate riêng. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
 - Database: MongoDB local hoặc Atlas.
 - Env qua Zod; production từ chối secret mặc định. `CMS_PUBLISH_ENABLED` mặc định false, chỉ bật sau khi reader/client phiên bản và MongoDB transaction được kiểm chứng. Xem `cms-operations.md`.
 

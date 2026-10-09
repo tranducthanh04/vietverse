@@ -33,3 +33,7 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: CLOUDINARY_RECORDING_UPLOAD_PRESET
+        sync: false
+      - key: CMS_PUBLISH_ENABLED
+        value: "false"

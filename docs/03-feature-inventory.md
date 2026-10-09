@@ -12,7 +12,7 @@
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |
 | Lesson | Lesson player | 7 loại cũ + multi_select/group_sort/fill_blanks/follow_steps | `GET /lessons/:id?activityContract=2`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Triển khai local 2026-10-09; loại mới ghi nhận trung tính, chấm server; chưa xác nhận deploy/content production |
 | Lesson | Tim/gợi ý/offline session | Có | IndexedDB + Offline Sync Queue localStorage | lesson session, queue | Hoàn thiện (P1.5) |
-| Recording | Thu âm | Có MediaRecorder | `POST /recordings` | Recording, StorageService | Hoàn thiện (P2.3 audio only + 180s cap, P2.4 safe storage) |
+| Recording | Thu âm | MediaRecorder dừng 180s, upload trực tiếp production, guard phiên và retry finalize | Multipart legacy; `/recordings/upload-intent`, `/recordings/finalize` | Recording, RecordingUploadIntent, Cloudinary | Triển khai local 2026-10-09; metadata/preset thật và rollout production chưa nghiệm thu |
 | Stories | Kho truyện/đồng dao | Có | GET public, mark explored auth | Story, ExplorationLog | Hoàn thiện (P1.3 idempotency, P2.5 safe search) |
 | Culture | Bài văn hóa/narration | Có | GET public, quiz auth | CultureArticle, ExplorationLog | Hoàn thiện (P2.5 safe search) |
 | Culture | Quiz +5 điểm | Có | `POST /culture/:id/quiz` | PointTransaction, Child | Hoàn thiện (P1.3 idempotency & compensation) |
@@ -30,7 +30,7 @@
 | Admin | Learners | Có | `GET /admin/learners` | Child/User | Hoàn thiện (Limit 100) |
 | Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, publish/ẩn có xác nhận | `/admin/content/:kind` | ContentDraft, ContentRevision, live, AdminAuditLog | Đã triển khai local 2026-10-09; publish mặc định tắt, chưa import production |
 | Admin | Redemptions | Có | GET/PATCH admin | Redemption | Hoàn thiện (P1.7 Zod validation, P2.5 limit 100) |
-| Platform | Health/deploy | Có config Render/Vercel | `/health`, `render.yaml` | Env | Hoàn thiện (P0.3 CORS allowlist, P2.6 secret check) |
+| Platform | Health/deploy | FE Vercel giữ proxy hiện hữu; BE có native Express config | `/health`, `/ready`, Mongo rate limit chung; Render giữ rollback | Env, RateLimitBucket | Triển khai local 2026-10-09; chưa chuyển traffic production. Xem runbook Vercel |
 
 ## Mức hoàn thiện nội dung seed (đối chiếu 2026-10-08)
 

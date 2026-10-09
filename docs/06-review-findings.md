@@ -1,5 +1,14 @@
 # 06 — Kết quả review senior BA/code
 
+## BE Vercel/signed audio — triển khai local 2026-10-09
+
+- Đã thêm cached pool, default Express entrypoint không listener/exit, readiness riêng và production limiter Mongo atomic/fail-closed. Không coi test local là chứng minh client IP qua FE rewrite.
+- Luồng direct có intent ownership/version/unlock, signed destination cố định và server inspect metadata; receipt/Recording transactional và unique sparse, receipt sau TTL giữ được. Finalize/legacy persist phối hợp delete bé bằng Child write; cascade DB atomic bao gồm intents.
+- FE direct production tách HTTP provider khỏi Axios auth, retry cùng intent/receipt, dừng180s và đóng tracks; đổi tài khoản/bé/bài/version hoặc unmount không complete response cũ. Regression đã tái hiện response muộn và Blob tái dùng khi đổi phiên trước sửa.
+- **Debt/gate còn lại:** Cloudinary metadata/preset/size/overwrite/signature TTL cần nghiệm thu thật; TTL DB không xóa asset. Cascade DB chưa xóa vật lý asset Cloudinary, audio URL hiện hữu vẫn giữ semantics cũ. Đối soát orphan thủ công, không cleanup hàng loạt trong function.
+- Mongo transaction/readiness/native bcrypt, auth qua rewrite, IP giả/hai mạng, production webhook và rollback chưa được chứng minh bằng deployment. Chưa đổi proxy, seed/import/điểm/CMS publish/tiền thật. Xem [runbook](./vercel-deployment.md).
+- Lưu ý bảo mật của phiên kiểm thử: assertion mock trước khi sửa đã hiển thị Atlas URI từ env local; người dùng đã được nhắc rotate credential. Test DB dùng URI giả/DB memory, không gọi DB thật; không ghi secret vào docs.
+
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 
 - **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).

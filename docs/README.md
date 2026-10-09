@@ -34,6 +34,7 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 | `06-review-findings.md` | Ưu tiên xử lý và bằng chứng review |
 | `07-change-workflow.md` | Checklist BA/dev/reviewer trước và sau khi code |
 | `cms-operations.md` | Quy tắc vận hành CMS, import nháp và publish riêng |
+| `vercel-deployment.md` | Rollout BE Vercel, signed upload, indexes additive, các gate môi trường và rollback Render |
 | `content-image-credits.md` | Ghi công/giấy phép ảnh bìa demo story/culture và script gán ảnh |
 | `superpowers/plans/2026-10-09-customer-data-deployment.md` | Bàn giao deploy: staging → backup/restore → dry-run → import → đối soát → production |
 | `superpowers/plans/2026-10-09-customer-activity-types.md` | Kế hoạch đã duyệt bốn loại hoạt động mới: server, màn bé, session/offline, CMS và catalog; trạng thái QA local ở `08-customer-alignment.md`, không import DB thật |
