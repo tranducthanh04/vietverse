@@ -103,7 +103,9 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
 | GET | `/points/shop/items` | Auth | Item active (trả về cả `stock` tồn kho thực tế) |
-| GET | `/points/children/:childId` | Auth | Số dư + 100 giao dịch gần nhất của child |
+| GET | `/points/children/:childId` | Auth | Số dư `viviPoints`, `totalEarned` (tổng delta > 0, không tính `refund`), `history` và `nextCursor`. Phân trang `?before=<ISO createdAt>&limit=1..50` (mặc định 20; trước 2026-10-09 là 100). Giao dịch trùng timestamp ở biên trang được trả chung trang. Sai tham số trả 400 `VALIDATION_ERROR` |
+| GET | `/points/children/:childId/collection` | Auth + ownership | `ownedItems[]` (kể cả món đã ẩn khỏi shop), `equippedAvatarItemId`, `profileDecorationId` |
+| PATCH | `/points/children/:childId/equip` | Auth + ownership | Body `{ slot, itemId }`: `slot` là `avatar` hoặc `profile_decoration`, `itemId` là ObjectId hoặc `null` (bỏ dùng). 404 bé/item không tồn tại, 403 `ITEM_NOT_OWNED`, 400 `ITEM_CATEGORY_MISMATCH`. Response giống `/collection` |
 | POST | `/points/shop/redeem` | Auth | Trừ điểm nguyên tử, trừ stock quà vật lý, chặn mua lặp quà ảo, tạo redemption kèm rollback bù nếu thất bại |
 | GET | `/parent/gate/challenge` | Auth | Cấp thử thách phép toán + `challengeToken` ngắn hạn (5m) |
 | POST | `/parent/gate/verify` | Auth | Đối chiếu kết quả toán / PIN `1234`, cấp `gateToken` (15m) |
@@ -113,9 +115,22 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | GET | `/admin/learners` | Admin | Danh sách 100 học viên gần nhất |
 | GET | `/admin/redemptions` | Admin | Danh sách 100 đơn đổi quà gần nhất |
 | PATCH | `/admin/redemptions/:id` | Admin | Cập nhật đơn qua `updateRedemptionSchema` (`status`: 'pending'\|'shipped'\|'delivered', `trackingCode`, `carrier`, `notes`) |
+| GET | `/admin/inventory` | Admin | Danh sách vật phẩm, gồm `category` |
+| POST | `/admin/inventory` | Admin | Tạo vật phẩm `{ name, type, category?, costPoints, assetUrl, description?, badgeCode?, stock?, active? }`; vật phẩm ảo bắt buộc `category`, không nhận `stock`; quà hiện vật mặc định stock 0. `assetUrl` chỉ nhận HTTPS, path `/...` hoặc `data:image/...` (≤ 20000 ký tự). Trả 201, audit `create_inventory` |
+| PATCH | `/admin/inventory/:id` | Admin | Sửa tồn kho/trạng thái và `category`, `description`, `assetUrl`; audit `update_inventory` |
+| GET | `/admin/point-rules` | Admin | 5 quy tắc `LESSON_COMPLETE, ACTIVITY_COMPLETE, CULTURE_QUIZ, STAGE_COMPLETE, LESSON_20_TREASURE` với `{ key, amount, active, defaultAmount, customized, updatedAt }` |
+| PATCH | `/admin/point-rules/:key` | Admin | Body strict `{ amount?: 0..1000, active?: boolean }` (ít nhất 1 trường). 404 `POINT_RULE_NOT_FOUND`, 400 dữ liệu sai; audit `update_point_rule` (previous/next) |
 | GET | `/admin/lessons` | Admin | Danh sách tất cả bài học kèm populate stage |
 | POST | `/admin/lessons` | Admin | Ngừng ghi live; payload hợp lệ trả 409 `CONTENT_CMS_REQUIRED` |
 | PUT | `/admin/lessons/:id` | Admin | Ngừng ghi live; dùng luồng draft/publish CMS |
+
+### Data ViVi Points và vật phẩm — 2026-10-09
+
+- `PointTransaction.reason` thêm `activity` (`refId = <lessonId>:<activityId>`) và `use_reward` (dành sẵn, chưa có luồng ghi). `POST` nộp bài trả `pointsEarned` gồm cả điểm hoạt động.
+- Partial unique index `{ childId, reason, refId }` đổi sang `reason: { $in: [lesson, activity, culture_quiz, stage_complete, treasure] }`. Bản cũ dùng `$nin` nên MongoDB chưa bao giờ tạo được index (xem 06). Yêu cầu MongoDB ≥ 6.0. Thêm index `{ childId: 1, createdAt: -1 }`.
+- `PointRule { key (unique, 5 giá trị), amount 0..1000, active, timestamps }`; thiếu bản ghi thì dùng mặc định trong `POINT_RULES`.
+- `ShopItem.category`: `badge | avatar | profile_decoration | collectible`, bắt buộc với vật phẩm ảo. Lệnh `npm run migrate:shop-category -w server` (dry-run mặc định, `-- --apply` để ghi): ảo có `badgeCode` → `badge`, còn lại → `collectible`, không ghi đè loại đã có.
+- `Child.equippedAvatarItemId`, `Child.profileDecorationId` (ref ShopItem); `avatarId` onboarding giữ nguyên.
 
 ## Response và lỗi
 

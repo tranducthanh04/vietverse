@@ -1,5 +1,14 @@
 # 06 — Kết quả review senior BA/code
 
+## ViVi Points theo tài liệu khách hàng — 2026-10-09
+
+- **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).
+- Nộp bài giờ gom điểm bài/hoạt động/chặng/bài 20 rồi chèn bằng `insertMany({ ordered: false })`, chỉ cộng số dư theo bản ghi thực chèn; nếu `$inc` thất bại thì xóa các giao dịch vừa tạo (trước đây luồng bài học chưa có compensation này).
+- **Rủi ro còn lại**: các loại hoạt động cũ không có `correctAnswer` vẫn tin `isCorrect` của client trong `gradeActivity`; điểm hoạt động +1 thừa hưởng điểm yếu này.
+- **Rủi ro còn lại**: `offlineSync.ts` không invalidate `childPoints` sau khi đồng bộ outbox; trang điểm tự tải lại khi mở.
+- **Môi trường test**: Node ≥ 25 có `localStorage` toàn cục che bản jsdom; `client/vite.config.ts` thêm `--no-experimental-webstorage` cho Node ≥ 22. Trên Node 26 còn 2 test `cmsContentEditors` lỗi `AbortSignal` (undici của Node và jsdom), không xảy ra trên Node 20 của CI.
+- Pha deploy/hiệu năng (cold start Render free, code splitting, nén response, rate limit sau proxy) đã lập plan tại `plans/261009-1952-perf-and-vivi-points-completion/plan.md` nhưng tạm hoãn.
+
 ## Bốn activity mới — review cuối 2026-10-09
 
 - Reviewer độc lập kiểm tra range `90472f1..53cd7c2` và docs cuối; xác nhận grader canonical, redaction/capability, preview không mutation và source checksum/skip không có lỗi actionable khác.

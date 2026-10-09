@@ -53,7 +53,8 @@ Tiêu chí chấp nhận và bounds chi tiết: [spec đã duyệt](./superpower
 | Sự kiện | Điểm | Điều kiện |
 | --- | ---: | --- |
 | Hoàn thành bài | +10 | Tối đa một giao dịch cho mỗi bé/bài |
-| Quiz văn hóa đúng toàn bộ | +5 | Tối đa một giao dịch cho mỗi bé/bài viết |
+| Hoàn thành hoạt động | +1 | Tối đa một giao dịch cho mỗi bé/bài/hoạt động (`refId = <lessonId>:<activityId>`), chỉ trong lượt nộp đỗ |
+| Quiz văn hóa đúng toàn bộ ("Hoàn thành thử thách") | +5 | Tối đa một giao dịch cho mỗi bé/bài viết |
 | Hoàn thành toàn bộ chặng | +20 | Tối đa một giao dịch cho mỗi bé/chặng |
 | Hoàn thành bài 20 | +50 | Tối đa một giao dịch cho mỗi bé/bài 20 |
 | Đổi quà | Âm theo giá | Không được âm số dư; quà vật lý cần địa chỉ |
@@ -64,6 +65,19 @@ Nguyên tắc bắt buộc:
 - Thưởng/trừ điểm và record nghiệp vụ có cơ chế rollback bù lỗi tự động (compensation).
 - Idempotency key phải xác định được cho từng sự kiện thưởng, bảo vệ qua MongoDB unique compound indexes.
 - Không tin `scorePercent` hoặc `isCorrect` do client gửi; server chấm điểm độc lập hoàn toàn.
+
+### Bổ sung trang ViVi Points theo tài liệu khách hàng — 2026-10-09
+
+- *Quyết định nghiệp vụ (D1)*: mỗi hoạt động đạt lần đầu được +1. Không cộng hồi tố và không chạy backfill. Bài đã hoàn thành trước khi phát hành chỉ nhận điểm hoạt động nếu bé nộp lại và đỗ.
+- *Quyết định nghiệp vụ (2026-10-09, suy từ tài liệu khách hàng "Cấu trúc toàn bộ website")*:
+  - Chỉ cộng điểm hoạt động khi lượt nộp đỗ (≥ 50%). Căn cứ: tài liệu ghi "Bé hoàn thành bài và nhận điểm", tức điểm gắn với việc hoàn thành bài; giữ nhất quán với mốc đỗ/sao/thưởng hiện có.
+  - `follow_steps` được +1. Căn cứ: Bài 4 mô tả hoạt động "Nghe và thực hiện… Bé bấm Hoàn thành sau khi thực hiện", tức tài liệu coi bấm Hoàn thành là hoàn thành hoạt động. Vẫn không khẳng định đã xác thực hành động ngoài đời.
+  - `word_card` được +1. Căn cứ: "Thẻ từ" được liệt kê là một hoạt động đánh số trong bài (Bài 1, Bài 2).
+  - Rủi ro còn lại: các loại cũ không có `correctAnswer` vẫn tin `isCorrect` của client (đã có trong `gradeActivity`).
+- *Quyết định nghiệp vụ (D2)*: "Hoàn thành thử thách" là quiz văn hóa (+5, khớp ví dụ "+5" trong tài liệu). 5 "thử thách" của Bài 20 "Báu vật Nước Nam" là các hoạt động của bài 20, được +1 mỗi hoạt động như mọi bài, cộng thưởng bài 20 (+50) khi hoàn thành.
+- *Quyết định nghiệp vụ (D3, áp dụng theo đề xuất)*: admin chỉ sửa được số điểm (0..1000) và bật/tắt 5 quy tắc có sẵn tại `/admin/quy-tac-diem`; không tạo quy tắc mới. Quy tắc tắt hoặc bằng 0 thì không tạo giao dịch. Thay đổi chỉ áp dụng cho lượt nộp mới, không điều chỉnh điểm đã cấp, được ghi audit `update_point_rule`. Mỗi process cache 60 giây.
+- *Quyết định nghiệp vụ (D4, 2026-10-09)*: tài liệu khách hàng không định nghĩa "sử dụng phần thưởng". Vật phẩm đã đổi là sở hữu vĩnh viễn; dùng/bỏ dùng avatar hoặc khung **không trừ điểm** (tránh trừ hai lần cho cùng vật phẩm). Reason `use_reward` được giữ sẵn cho loại phần thưởng tiêu hao nếu sau này khách hàng bổ sung; hiện không có luồng ghi.
+- Trang `/diem-thuong` hiển thị theo thứ tự: số dư → lịch sử cộng/trừ (thời gian "Hôm nay"/"Hôm qua"/ngày, phân trang "Xem thêm") → vật phẩm đổi thưởng. "Tổng tích lũy" là tổng điểm cộng, không tính hoàn điểm. Không hiển thị hạng học tập.
 
 ## 5. Quiz và khám phá
 
@@ -79,6 +93,9 @@ Nguyên tắc bắt buộc:
   - **Quà hiện vật (Physical)**: Bắt buộc cung cấp đầy đủ họ tên người nhận, số điện thoại và địa chỉ giao hàng (`recipientName`, `phone`, `street`, `city`). Phải kiểm tra và trừ tồn kho atomic `{ active: true, stock: { $gte: 1 } }` giảm `$inc: { stock: -1 }`. Từ chối đổi nếu `stock <= 0` (400 "Vật phẩm đã hết hàng trong kho").
   - **Quà ảo (Virtual)**: Cấm mua lặp nếu bé đã sở hữu vật phẩm trong `Child.ownedItemIds` (400 "Bé đã sở hữu vật phẩm ảo này rồi"). Sau khi đổi thành công, ID vật phẩm được ghi nhận vào `ownedItemIds`.
   - **Trừ điểm Atomic & Bù trừ (Compensation)**: Trừ điểm kiểm tra số dư `{ viviPoints: { $gte: costPoints } }`. Nếu trừ điểm thất bại, tồn kho quà vật lý được rollback ngay lập tức. Mọi lỗi phát sinh khi ghi `PointTransaction` hoặc `Redemption` đều kích hoạt rollback compensation tự động: hoàn điểm, hoàn stock và hủy record dở dang, đảm bảo số dư và sổ cái luôn nhất quán.
+- *Quyết định nghiệp vụ (2026-10-09)*: vật phẩm ảo bắt buộc có loại `badge` (huy hiệu), `avatar`, `profile_decoration` (trang trí hồ sơ) hoặc `collectible` (sưu tầm). Quà hiện vật không cần loại và hiển thị nhóm "Quà gửi tận nhà". Vật phẩm ảo cũ chưa có loại được hiển thị là "Sưu tầm".
+- *Quyết định nghiệp vụ (D5)*: bé tự chọn dùng avatar hoặc khung trang trí đã sở hữu; hiển thị ở header khu bé và Phòng báu vật. Server kiểm tra bé sở hữu vật phẩm và loại khớp ô. Avatar mua được ưu tiên hiển thị hơn avatar chọn lúc onboarding, avatar onboarding không bị xóa.
+- *Quyết định nghiệp vụ (2026-10-09)*: admin hủy đơn quà ảo thì hoàn điểm **và thu lại vật phẩm**: gỡ khỏi `ownedItemIds` trong cùng lệnh hoàn điểm, bỏ dùng nếu đang là avatar/khung. Lý do: không để bé vừa được hoàn điểm vừa giữ vật phẩm. Nếu bước sau lỗi, compensation trừ lại điểm và trả lại vật phẩm.
 - Trạng thái đơn: `pending` (chờ xử lý quà vật lý), `shipped` (đang giao), `delivered` (hoàn tất, tự động gán cho quà ảo).
 - *Quyết định triển khai*: hủy đơn chỉ hoàn điểm/tồn kho một lần; đơn `cancelled` không mở lại, nhưng vẫn sửa được ghi chú. Đợt này giữ các trạng thái nguồn mà API hiện chấp nhận; chính sách hoàn quà ảo/đơn đã giao cần chốt riêng. Khóa bù trừ bị kẹt phải được đối soát thủ công theo `docs/08-customer-alignment.md`.
 
