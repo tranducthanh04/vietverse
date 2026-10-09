@@ -72,7 +72,8 @@ const storyReadings = [
   ['Nhạc rừng', 'Bé lắng nghe tiếng lá và tiếng chim. Bé giữ yên lặng để nghe thiên nhiên rõ hơn.', 'lá', 'lắng nghe'],
 ];
 
-export const stories = storyReadings.map(([title, reading, ...vocab]) => ({
+export const stories = storyReadings.map(([title, reading, ...vocab], index) => ({
+  seedKey: `story-${String(index + 1).padStart(2, '0')}`,
   title, type: (title === 'Nhạc rừng' ? 'tho' : 'dong_dao') as 'tho' | 'dong_dao',
   description: 'Bài đọc minh họa do Vietverse biên soạn theo chủ đề nhan đề; không phải nguyên tác, lời đồng dao hoặc lời bài hát. Chờ biên tập xác minh văn bản, thể loại, tác giả và bản quyền trước khi phát hành tác phẩm. Chưa có audio thu âm.',
   author: 'Vietverse — bài đọc minh họa', lyrics: [{ timeSec: 0, text: reading }], audioUrl: '', durationSec: 0, ageGroups: ['5-6', '6-8'], vocab, quiz: [],
@@ -91,7 +92,7 @@ export const culture = [
   { category: 'objects_symbols', title: 'Nón lá và trống đồng', intro: 'Đồ vật và hình ảnh giúp bé tìm hiểu đời sống, lịch sử Việt Nam.', funFacts: ['Nón lá có thể che nắng và mưa nhẹ.', 'Trống đồng là hiện vật gắn với các nền văn hóa cổ, trong đó có Đông Sơn.', 'Trên nhiều mặt trống đồng có hoa văn hình người và chim.'], question: 'Vật nào thường dùng để đội che nắng?', options: ['Nón lá', 'Trống đồng', 'Cái bát'] },
   { category: 'nature', title: 'Thiên nhiên Việt Nam', intro: 'Việt Nam có núi, đồng bằng, sông và biển với nhiều cảnh quan.', funFacts: ['Ruộng lúa có thể thấy ở nhiều vùng đồng bằng.', 'Rừng là nơi sống của nhiều loài cây và động vật.', 'Không xả rác giúp bảo vệ sông, biển và nơi bé sống.'], question: 'Bé làm gì để giữ thiên nhiên sạch?', options: ['Bỏ rác đúng chỗ', 'Ném rác xuống sông', 'Bẻ cành cây'] },
   { category: 'folk_games', title: 'Cùng chơi trò dân gian', intro: 'Trò chơi dân gian giúp bé vận động và hợp tác với bạn.', funFacts: ['Ô ăn quan thường dùng các ô vẽ và những viên sỏi nhỏ.', 'Rồng rắn lên mây là trò chơi theo nhóm.', 'Chọn chỗ chơi an toàn và thống nhất luật trước khi bắt đầu.'], question: 'Trước khi chơi cùng nhóm, bé nên làm gì?', options: ['Thống nhất luật và chọn chỗ an toàn', 'Đẩy bạn ra', 'Chạy ra lòng đường'] },
-].map(({ question, options, ...article }) => ({ ...article, category: cultureCategoryKeys[article.category], audioUrl: '', tags: ['Bài mẫu biên soạn'], quiz: [{ question, options, correctAnswer: 0, explanation: options[0] }] }));
+].map(({ question, options, ...article }) => ({ ...article, seedKey: `culture-${cultureCategoryKeys[article.category]}`, category: cultureCategoryKeys[article.category], audioUrl: '', tags: ['Bài mẫu biên soạn'], quiz: [{ question, options, correctAnswer: 0, explanation: options[0] }] }));
 
 export const shopItems = [
   { name: 'Huy hiệu Sao Sáng Lí Lắc', type: 'virtual', costPoints: 20, badgeCode: 'badge_star_lilac' },

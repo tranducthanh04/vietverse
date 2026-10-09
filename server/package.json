@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx src/seeds/seed.ts"
+    "seed": "tsx src/seeds/seed.ts",
+    "cms:metadata": "tsx src/seeds/migrateContentMetadata.ts"
   },
   "dependencies": {
     "@payos/node": "^2.0.5",

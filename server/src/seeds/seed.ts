@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { env } from '../config/env.js';
 import { User, Child, Stage, Lesson, Story, CultureArticle, ShopItem, Subscription } from '../models/index.js';
 import { stages, lessons, stories, culture, shopItems } from './catalog.js';
+import { matchContentIdentity } from './contentIdentity.js';
 
 export interface SeedOptions { dryRun?: boolean; demoUsers?: boolean }
 type CatalogKind = 'stages' | 'lessons' | 'stories' | 'culture' | 'shop';
@@ -76,6 +77,14 @@ export async function runSeed(options: SeedOptions = {}) {
     async function planNamed<T extends Document>(model: Model<T>, data: Record<string, unknown>[], kind: CatalogKind, field: string) {
       const existing = await model.find();
       for (const item of data) {
+        if (kind === 'stories' || kind === 'culture') {
+          const candidates = existing.map(document => ({ title: String(document.get('title')), seedKey: document.get('seedKey') as string | undefined }));
+          const result = matchContentIdentity(candidates, { title: String(item.title), seedKey: String(item.seedKey) });
+          if (result.conflict) report.conflicts.push(result.conflict);
+          else if (result.match) report.preserved[kind]++;
+          else await plan<T>(model, item, kind);
+          continue;
+        }
         const key = identity(String(item[field]));
         const matches = existing.filter((document) => identity(String(document.get(field))) === key || (kind === 'shop' && item.badgeCode && document.get('badgeCode') === item.badgeCode));
         if (matches.length > 1) report.conflicts.push(`${kind}: duplicate identity ${String(item[field])}`);
