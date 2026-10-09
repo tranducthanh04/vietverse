@@ -1,0 +1,136 @@
+.cms {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.cms h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+.cms h2,
+.cms legend {
+  font-weight: 700;
+  margin: 0.75rem 0;
+}
+.cms fieldset,
+.cms section {
+  min-width: 0;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 1rem;
+  background: white;
+}
+.cms-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.65rem 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+.cms-field > span {
+  font-weight: 600;
+}
+.cms input:not([type="checkbox"]),
+.cms textarea,
+.cms select {
+  min-height: 44px;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #a8a29e;
+  background: white;
+  color: #292524;
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+}
+.cms input[readonly] {
+  background: #f5f5f4;
+}
+.cms button,
+.cms .cms-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #78716c;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  background: #fafaf9;
+}
+.cms button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cms button:focus-visible,
+.cms input:focus-visible,
+.cms select:focus-visible,
+.cms textarea:focus-visible,
+.cms a:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+.cms .cms-primary {
+  background: #0f766e;
+  color: white;
+  border-color: #0f766e;
+}
+.cms-row,
+.cms-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.cms-row > .cms-field {
+  flex-basis: 180px;
+}
+.cms [role="alert"] {
+  color: #9f1239;
+  background: #fff1f2;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  margin: 0.6rem 0;
+}
+.cms aside {
+  padding: 0.75rem;
+  border-left: 3px solid #d97706;
+  background: #fffbeb;
+  font-size: 0.875rem;
+}
+.cms dialog,
+.cms [role="dialog"] {
+  position: fixed;
+  z-index: 60;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 520px);
+  padding: 1.5rem;
+  border: 2px solid #78716c;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 0 0 100vmax #0008;
+}
+.cms table {
+  width: 100%;
+  min-width: 540px;
+  text-align: left;
+}
+.cms th,
+.cms td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+.cms audio {
+  width: 100%;
+  max-width: 400px;
+}
+.cms img {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}

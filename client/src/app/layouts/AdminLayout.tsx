@@ -17,11 +17,14 @@ export const AdminLayout: React.FC = () => {
   const navItems = [
     { to: '/admin', end: true, label: VI_LOCALES.admin.tabDashboard, icon: <LayoutDashboard className="w-5 h-5" /> },
     { to: '/admin/bai-hoc', label: VI_LOCALES.admin.tabLessons, icon: <BookOpen className="w-5 h-5" /> },
+    { to: '/admin/truyen', label: 'Truyện / đồng dao', icon: <BookOpen className="w-5 h-5" /> },
+    { to: '/admin/van-hoa', label: 'Văn hóa', icon: <BookOpen className="w-5 h-5" /> },
     { to: '/admin/hoc-vien', label: VI_LOCALES.admin.tabLearners, icon: <Users className="w-5 h-5" /> },
     { to: '/admin/doi-qua', label: VI_LOCALES.admin.tabRedemptions, icon: <Gift className="w-5 h-5" /> },
     { to: '/admin/test-thanh-toan', label: 'Test thanh toán', icon: <Wallet className="w-5 h-5" /> },
   ];
 
+  if (user?.role !== 'admin') return null;
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col font-sans text-stone-800">
       {/* Top Header */}
@@ -110,7 +113,7 @@ export const AdminLayout: React.FC = () => {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl w-full">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-6xl w-full">
           <Outlet />
         </main>
       </div>

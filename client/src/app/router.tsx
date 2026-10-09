@@ -31,6 +31,7 @@ import { ParentSettingsPage } from '../features/parent/ParentSettingsPage.js';
 import { PaymentResultPage } from '../features/parent/PaymentResultPage.js';
 import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
+import { ContentEditorPage } from '../features/admin/content/ContentEditorPage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
 import { PaymentTestPage } from '../features/parent/PaymentTestPage.js';
@@ -142,6 +143,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: 'bai-hoc', element: <AdminLessonsPage /> },
+      { path: 'bai-hoc/:id', element: <ContentEditorPage kind="lesson" /> },
       { path: 'hoc-vien', element: <AdminLearnersPage /> },
       { path: 'doi-qua', element: <AdminRedemptionsPage /> },
       { path: 'test-thanh-toan', element: <PaymentTestPage /> },

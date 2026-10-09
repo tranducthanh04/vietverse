@@ -100,6 +100,15 @@ Quyết định bảo vệ phiên học khi xuất bản:
 
 ## Response và lỗi
 
+### CMS nháp — 2026-10-09
+
+- Base `/admin/content/:kind` (`lessons`, `stories`, `culture`), JWT + admin trên mọi route. GET list có search/state/stageId/category/page/pageSize; GET `/:id` chỉ đọc `{ live, draft }`, không tự tạo nháp.
+- POST `/:id/draft` bắt đầu/mở lại nháp; khi mở lại phải gửi `expectedDraftVersion`. PUT `/:id/draft` gửi `{ payload, expectedDraftVersion }`; response trả draftVersion mới và activity ID server cấp. Sai version trả 409, UI giữ form và yêu cầu tải lại chủ động.
+- POST `/drafts` tạo story/culture nháp qua `{ payload, requestId }`. POST `/:id/discard-draft` chỉ bỏ nháp bằng version check. Lesson giữ cố định ID/chặng/thứ tự.
+- GET `/:id/preview?draftVersion=` và POST `/:id/validate` (`expectedDraftVersion`) đọc đúng bản đã lưu, trả field issues. POST `/:id/publish` gửi `{ expectedDraftVersion, baseContentVersion }`; transaction ghi revision/live/draft/audit, retry trả receipt của bản đã xuất bản.
+- PATCH `/:id/visibility` gửi `{ visibility, expectedContentVersion }` cho story/culture. Publish/visibility mặc định bị khóa bởi `CMS_PUBLISH_ENABLED=false`; không khóa biên tập nháp. Không hỗ trợ transaction trả 503, không ghi nửa chừng.
+- UI bài học tách lưu/kiểm tra/preview/publish, cảnh báo rời trang chưa lưu; lỗi validation đưa focus tới field đầu tiên. Khi lưu, cấu trúc activities tạm khóa, metadata gõ thêm được giữ. Cờ điểm/quyền học vẫn do server kiểm tra.
+
 - Success dùng wrapper `sendSuccess`; lỗi dùng `sendError`/central error handler.
 - Mã thường dùng: `400` dữ liệu không hợp lệ (Zod `VALIDATION_ERROR`), `401` chưa xác thực, `403` không quyền (`PARENT_GATE_REQUIRED` / role), `404` không tồn tại, `409` trùng lặp (`DUPLICATE_KEY`), `501` tính năng chưa phát hành (`NOT_IMPLEMENTED`).
 - Zod error được format trả về mảng `{ field, message }` thân thiện và an toàn.
