@@ -16,6 +16,7 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional().default(''),
   CLOUDINARY_API_KEY: z.string().optional().default(''),
   CLOUDINARY_API_SECRET: z.string().optional().default(''),
+  CLOUDINARY_RECORDING_UPLOAD_PRESET: z.string().optional().default(''),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@vietverse.edu.vn'),
   SEED_ADMIN_PASSWORD: z.string().default('AdminPass123!'),
   SEED_PARENT_EMAIL: z.string().email().default('phuhuynh@vietverse.edu.vn'),

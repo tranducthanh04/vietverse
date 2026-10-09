@@ -17,3 +17,4 @@ export * from './PaymentTestOrder.js';
 export * from './ContentDraft.js';
 export * from './ContentRevision.js';
 export * from './PointRule.js';
+export * from './RecordingUploadIntent.js';

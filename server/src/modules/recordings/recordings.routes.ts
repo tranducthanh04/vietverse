@@ -20,6 +20,7 @@ const upload = multer({
 const router = Router();
 
 router.use(authMiddleware);
+router.post('/upload-intent', RecordingsController.createIntent);
 
 router.post('/', upload.single('audio'), RecordingsController.upload);
 router.get('/children/:childId', RecordingsController.getByChild);

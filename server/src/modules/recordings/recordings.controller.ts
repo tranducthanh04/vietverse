@@ -3,6 +3,8 @@ import { RecordingsService } from './recordings.service.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
 import { z } from 'zod';
 import { contentVersionParam } from '../content/content.reader.js';
+import { uploadIntentSchema } from './recordings.validation.js';
+import { DirectRecordingsService } from './recordings.directUpload.js';
 
 const recordingFields = z.object({
   childId: z.string().regex(/^[a-f\d]{24}$/i),
@@ -14,6 +16,12 @@ const recordingFields = z.object({
 });
 
 export class RecordingsController {
+  static async createIntent(req: Request, res: Response, next: NextFunction) {
+    try {
+      return sendSuccess(res, await DirectRecordingsService.createIntent(req.user!.id, uploadIntentSchema.parse(req.body)), 201);
+    } catch (error) { next(error); }
+  }
+
   static async upload(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
