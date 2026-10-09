@@ -10,7 +10,7 @@
 
 **Spec:** [Thiết kế đã duyệt](../specs/2026-10-09-customer-activity-types-design.md).
 
-**Trạng thái:** Tasks 1–6 đã commit; Task 7 đã kiểm chứng local và sửa finding Important từ final review, đang bàn giao main. Không import/publish DB thật. Các snippet dưới ghi lại targets lúc lập kế hoạch; kết quả thực tế và giới hạn browser ở `docs/08-customer-alignment.md`. Lệnh chạy từ repo root; `npm --prefix server`/`client` chọn package tương ứng.
+**Trạng thái:** Tasks 1–7 hoàn tất trong phạm vi code/QA local; main đã push code và báo cáo nghiệm thu (`874b175`). Không import/publish DB thật hoặc xác nhận deploy production. Các snippet dưới ghi lại targets lúc lập kế hoạch; kết quả thực tế và giới hạn browser ở `docs/08-customer-alignment.md`. Lệnh chạy từ repo root; `npm --prefix server`/`client` chọn package tương ứng.
 
 ## Global Constraints
 
@@ -342,7 +342,7 @@ Expected all exit0; record exact test totals/warnings/bundle size from current o
 - [x] Browser QA/limitation recorded: Chrome component smoke/real IndexedDB at390/1366, keyboard/touch/overflow/targets/type-change cancel, no console/pageerror. Full-app complete/offline/CAS/audio/account/version browser flows not certified; integration tests cover the code boundaries, not device/Safari/axe certification. See `docs/08-customer-alignment.md`. No production payment/publish/import/micro.
 - [x] Update docs with actor/preconditions/main/error flows, capability/error code, neutral feedback, canonical redaction, partial inputs/outbox, self-report limitations, source/manual upgrade and rollout/rollback. Label business decisions as approved and unresolved audio/ngữ liệu/production deploy as assumptions/pending. Review findings marks only new verified risks resolved; do not relabel unrelated backlog complete.
 - [x] Request final code review per skill; one fresh reviewer checked spec/baseline/Focus/Rulings, found one Important queued-input-loss fixed via four RED→GREEN regressions and green full suite. No Critical/Minor. `git diff --check` passed; stage exact docs/code task files, never scratch/secrets; docs commit `docs: record activity contracts and verified release scope`.
-- [ ] Before push: `git fetch origin`, `git status --short --branch`, `git log --oneline origin/main..main`. If origin advanced, integrate non-destructively and rerun verification; conflicts require explicit resolution, no force push. Use authorized `git push origin main` only after verified final review. Report actual pushed SHA, tested scope and outstanding production DB/audio/content-owner approval. Do not report push success before remote command succeeds.
+- [x] Before push: `git fetch origin`, status/log confirmed main ahead with no divergence; both full suites/typecheck/build, FE lint and baseline whitespace passed after final fix. Authorized `git push origin main` succeeded to `874b175`, no force. Checklist handoff committed separately afterward. Production DB/audio/content-owner approval and deployment remain unverified; no import or flag change.
 
 ## Self-review completed before handoff
 
