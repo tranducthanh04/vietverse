@@ -39,6 +39,17 @@
 
 ## 4. ViVi Points
 
+### Hoạt động mới — quyết định đã duyệt 2026-10-09
+
+- Actor: bé thực hiện; phụ huynh xem kết quả server qua dashboard hiện hữu; admin biên tập/duyệt bằng CMS. Tiền điều kiện vẫn là đăng nhập, đúng hồ sơ, ownership, gói/mở khóa và contentVersion đã mở.
+- Luồng chính: bé chọn nhiều đáp án, phân nhóm, điền mọi slot hoặc tự xác nhận các bước; input chưa gửi được lưu theo bé/bài/version. Gửi câu chỉ ghi nhận trung tính, không trừ tim hay báo đúng; nộp cuối bài để server chấm canonical snapshot. Mỗi hoạt động đạt toàn bộ hoặc không đạt, không chia điểm từng ô/item; mốc đỗ/sao/thưởng cũ không đổi.
+- `follow_steps` chỉ ghi tự báo cáo đủ bước theo thứ tự; không chứng minh hành động ngoài đời, không camera/micro hoặc chấm vận động. Audio chưa có ghi rõ thiếu nguồn, không giả làm audio khách hàng.
+- Luồng lỗi: input thiếu thì chưa gửi; lỗi lưu cho phép thử lại và giữ input; offline giữ answer/version trong outbox, chưa cấp điểm. Client cũ gặp snapshot mới nhận yêu cầu cập nhật, không nâng version hoặc tự làm lại. Answer trùng activity bị server từ chối trước ghi progress/điểm.
+- Admin có bốn form/preview mới; lưu nháp không publish, thiếu cấu trúc/đáp án chặn publish. Xóa item/nhóm/slot không tự đổi đáp án; đổi type phải xác nhận mất trường riêng, giữ prompt/media/hints. Giữ CAS và quyền admin.
+- Nguồn đủ rõ bài 4/5/6 chỉ bổ sung cho lần nhập mới; cùng checksum vẫn skip nháp cũ, admin sửa qua CMS sau duyệt. Bài 11 chưa rõ slot, bài 15/20 và audio/ngữ liệu thiếu vẫn cần content owner. Đây là giới hạn nguồn, không phải dữ liệu được phép tự bịa.
+
+Tiêu chí chấp nhận và bounds chi tiết: [spec đã duyệt](./superpowers/specs/2026-10-09-customer-activity-types-design.md), [API](./05-api-and-data-contracts.md), [QA và giới hạn](./08-customer-alignment.md). Giả định chưa xác nhận: audio/bản quyền, acceptedAnswers còn thiếu do content owner duyệt, nghiệm thu môi trường thật trước publish.
+
 | Sự kiện | Điểm | Điều kiện |
 | --- | ---: | --- |
 | Hoàn thành bài | +10 | Tối đa một giao dịch cho mỗi bé/bài |
@@ -95,7 +106,7 @@ Nguyên tắc bắt buộc:
 
 - Chỉ role `admin` được xem KPI, learners, redemptions và thao tác quản trị bài học / đơn hàng.
 - Tất cả mutation của admin bắt buộc qua Zod schema validation. `createLesson`/`updateLesson` cũ không còn ghi live (409 yêu cầu CMS):
-  - `createLessonSchema`: validate ObjectId `stageId`, `order` nguyên dương 1–100, `title`, `activities` thuộc 7 loại hợp lệ.
+  - `createLessonSchema`: validate ObjectId `stageId`, `order` nguyên dương 1–100, `title`, `activities` thuộc 11 loại hợp lệ; route cũ vẫn không ghi live.
   - `updateRedemptionSchema`: yêu cầu ít nhất 1 trường thay đổi, validate `status` thuộc `['pending', 'shipped', 'delivered', 'cancelled']`, trackingCode, carrier.
 - Các API truy vấn danh sách (`getLearners`, `getRedemptions`) áp dụng giới hạn tối đa 100 bản ghi mỗi yêu cầu.
 

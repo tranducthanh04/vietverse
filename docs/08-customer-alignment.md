@@ -1,5 +1,34 @@
 # 08 — Đối chiếu yêu cầu khách hàng và phạm vi sửa ngày 2026-10-08
 
+## Bốn hoạt động mới — nghiệm thu local 2026-10-09
+
+Quyết định đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps` xuyên server/player/session/CMS/catalog; giữ bảy loại cũ và policy điểm/quyền/version. Spec/plan ở `superpowers/`. Chưa import DB thật, publish hoặc tạo audio/ngữ liệu ngoài nguồn.
+
+- Full backend 244/244 (24 suites), frontend cuối 122/122 (17 suites). Hai phía typecheck/build đạt; lint frontend 0 lỗi/102 warning (baseline trước feature 101). Bundle JS 648,08 KB, gzip 191,99 KB; còn warning chunk >500 KB và React Router v7. Không giảm assertion/ngưỡng lint để che lỗi.
+- Chrome headless local: 1366x844 và 390x844 với touch context; repeated-M bằng bàn phím, chọn đủ ba ID; nhóm nhiều-về-một và sửa lại nhóm; input cả hai slot giữ dấu câu; steps đủ bước/tự báo cáo; CMS đổi type mở native modal, Escape giữ loại cũ. Không tràn ngang, target tương tác mới ≥44px, không pageerror/console error. Đã nhìn screenshot mobile.
+- IndexedDB thật trong Chrome: gõ hai input nhanh → đổi bé → cache bé cũ giữ lựa chọn mới nhất, bé mới trống → restore đúng input → clear xóa và không hồi sinh. Tích hợp unit/API còn bao phủ capability/neutral grading/storage failure/account/version/offline roundtrip/CAS/preview side effects/import skip.
+- Browser tích hợp khởi động lỗi hai lần; fallback runtime Playwright có sẵn, không cài dependency. Harness đầu thiếu Tailwind do cwd, sửa riêng harness về client rồi chạy xanh; không sửa CSS sản phẩm để che failure. Fixture UI cô lập, chỉ loopback, không DB/payment/micro hoặc asset ngoài máy.
+- Giới hạn rõ: chưa chứng nhận full-app E2E offline reconnect/complete kết quả đúng-sai/CAS/audio lỗi qua browser trong release mới; các nhánh này được integration tests kiểm tra, không gọi là browser đã nghiệm thu. Chưa Safari/thiết bị thật/axe/deploy/import/audio/bản quyền production.
+- Review fresh-context: một Important mất queued input khi đổi phiên; bốn test chứng minh RED→GREEN, full suite xanh sau sửa. Không Critical/Minor; không dispatch lại reviewer. Thay đổi cuối được kiểm whitespace, deploy chỉ sau review và test.
+
+### Các quyết định executor và chi phí nếu sai
+
+Theo thứ tự ledger:
+
+1. Dùng main hiện hữu, không worktree/dev merge, theo yêu cầu người dùng; rủi ro nhánh chung nên review trước push.
+2. Tách test validator mới và helper contract chung để không trộn legacy; chi phí là thêm module cần duy trì.
+3. Capability là đúng chuỗi `2`, không coercion `02`/array; client không chuẩn phải sửa query.
+4. Projection nhận canonical `LessonContent`, không Record lỏng; caller phải cung cấp đúng kiểu.
+5. Audio native thay AudioButton có fallback TTS không rõ nguồn; chi phí khác styling, không cung cấp TTS trong loại mới.
+6. Frame media/error dùng chung, bốn tương tác riêng; đổi frame cần test cả bốn UI.
+7. Shared option editor giữ ID/path ghi chú theo index; đổi path cần test editor.
+8. Reviewer không đánh giá production DB/publish/assets: giữ ngoài phạm vi và chờ deploy/content owner, không suy nghiệm thu từ test local; nếu sai về readiness phải trì hoãn publish.
+9. Reviewer không chứng nhận Safari/device/axe/full-app browser flows: chỉ ghi đúng smoke đã chạy, còn lại gate QA triển khai; nếu thiết bị thật khác phải sửa trước phát hành.
+10. Reviewer để legacy answer exposure/media ngoài phạm vi: giữ compatibility theo spec, chưa gọi là hardening toàn bộ; chi phí là nợ legacy cần đợt riêng.
+11. Reviewer để Task7 checklist cho executor: cập nhật theo evidence, không dùng trạng thái kế hoạch làm bằng chứng deploy; nếu sai cần sửa biên bản/checklist.
+
+Không có Minor hoãn lại từ final review. Báo cáo này giữ rulings bền vững; scratch của riêng plan được dọn sau khi commit, không đụng `.superpowers/qa` khác.
+
 Nguồn yêu cầu: [Google Docs của khách hàng](https://docs.google.com/document/d/1Bi_owABMnxrkFRoZQHoIPW0xu_UDPnWJLh2nbHY-VvM/edit).
 
 Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiện” trong inventory cũ không đồng nghĩa đã nghiệm thu theo tài liệu khách hàng. Không thay đổi chính sách điểm, giá subscription hoặc quyền mở khóa trong đợt này.

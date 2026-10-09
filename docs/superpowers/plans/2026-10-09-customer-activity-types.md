@@ -1,6 +1,6 @@
 # Customer Activity Types Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (native được đề xuất cho kế hoạch này) hoặc superpowers:subagent-driven-development nếu người dùng chọn delegation. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (native được đề xuất cho kế hoạch này) hoặc superpowers:subagent-driven-development nếu người dùng chọn delegation. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Thêm bốn hoạt động theo yêu cầu khách hàng, xuyên suốt model, chấm server, màn bé, CMS và catalog nhập nháp, không thao tác DB thật.
 
@@ -10,7 +10,7 @@
 
 **Spec:** [Thiết kế đã duyệt](../specs/2026-10-09-customer-activity-types-design.md).
 
-**Trạng thái:** Plan chờ review; các đoạn code bên dưới là test/implementation targets, không phải API đã tồn tại. Chưa triển khai, chưa import/publish DB. Lệnh chạy từ repo root; `npm --prefix server`/`client` chọn package tương ứng.
+**Trạng thái:** Tasks 1–6 đã commit; Task 7 đã kiểm chứng local và sửa finding Important từ final review, đang bàn giao main. Không import/publish DB thật. Các snippet dưới ghi lại targets lúc lập kế hoạch; kết quả thực tế và giới hạn browser ở `docs/08-customer-alignment.md`. Lệnh chạy từ repo root; `npm --prefix server`/`client` chọn package tương ứng.
 
 ## Global Constraints
 
@@ -74,7 +74,7 @@ Author shape dùng `IActivity` backend và `Activity` CMS hiện hữu, mở r�
 
 **Interfaces:** Consumes `IActivity`, `ActivitySubmission`, `parseDraft(kind,input)`, `validatePublish(kind,payload)`. Produces `gradeNewActivity(activity:IActivity,userAnswer:unknown):boolean`; legacy `gradeActivity` dispatches four new cases to it, no boolean fallback. Canonical reader preserves new fields. Draft allows empty type-specific fields but rejects unsafe/duplicate IDs and wrong structural types; publish applies completeness rules.
 
-- [ ] Write grader tests with complete local fixtures:
+- [x] Write grader tests with complete local fixtures:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -124,9 +124,9 @@ describe('new canonical grading',()=>{
 });
 ```
 
-- [ ] Extend existing content validation fixtures with all four publishable types. Pin lower/upper bounds; legacy options max8 remains; multi accepts 12 repeated texts. For fill use templates `Bé {{verb}} {{object}}.`, `{{verb}} {{verb}}`, `{{verb}} {{unknown}}`, `{{verb} {{object}}`; only first publishes with slots verb/object. Assert unsafe IDs/duplicate IDs throw draft parse; missing answer/empty lists save draft but produce publish fields `activities.0...`. Assert group normalized labels `M`/` m ` fail publish, unknown/missing/extra answer key fail publish. Steps empty draft saves but >3 steps fails parsing. Test canonical reader retains expected fields and old HTTP/order >20.
-- [ ] RED: `npm --prefix server test -- src/test/newActivityGrading.test.ts src/test/contentValidation.test.ts`; expect unsupported type/schema or new grader assertions fail, not setup failures.
-- [ ] Implement schema fields with legacy defaults unchanged. Reuse one strict ID helper only for new fields. For map grading use a plain-record guard before comparing own keys; never cast malformed input to a map:
+- [x] Extend existing content validation fixtures with all four publishable types. Pin lower/upper bounds; legacy options max8 remains; multi accepts 12 repeated texts. For fill use templates `Bé {{verb}} {{object}}.`, `{{verb}} {{verb}}`, `{{verb}} {{unknown}}`, `{{verb} {{object}}`; only first publishes with slots verb/object. Assert unsafe IDs/duplicate IDs throw draft parse; missing answer/empty lists save draft but produce publish fields `activities.0...`. Assert group normalized labels `M`/` m ` fail publish, unknown/missing/extra answer key fail publish. Steps empty draft saves but >3 steps fails parsing. Test canonical reader retains expected fields and old HTTP/order >20.
+- [x] RED: `npm --prefix server test -- src/test/newActivityGrading.test.ts src/test/contentValidation.test.ts`; expect unsupported type/schema or new grader assertions fail, not setup failures.
+- [x] Implement schema fields with legacy defaults unchanged. Reuse one strict ID helper only for new fields. For map grading use a plain-record guard before comparing own keys; never cast malformed input to a map:
 
 ```ts
 const plainRecord = (value: unknown): value is Record<string, unknown> => {
@@ -139,8 +139,8 @@ const normalize = (text: string) => text.normalize('NFC').trim().toLocaleLowerCa
 ```
 
 Exact set/map/sequence checks verify canonical arrays nonempty, IDs unique and bound to definitions before comparison; unknown answer types return false. Fill marker scanner rejects leftover braces after removing valid markers and checks slot/marker bijection. Draft parser does not silently strip invalid references into a publishable payload. Keep old grader branches unchanged.
-- [ ] GREEN: rerun targeted command and `npm --prefix server run typecheck`; all pass, inspect legacy validation regression assertions.
-- [ ] Commit only Task 1 files: `git commit -m "feat: validate and grade four additive activity types"` after exact-path `git add` of this Files list.
+- [x] GREEN: rerun targeted command and `npm --prefix server run typecheck`; all pass, inspect legacy validation regression assertions.
+- [x] Commit only Task 1 files: `git commit -m "feat: validate and grade four additive activity types"` after exact-path `git add` of this Files list.
 
 ## Task 2: Learner projection, client capability and completion integrity
 
@@ -148,7 +148,7 @@ Exact set/map/sequence checks verify canonical arrays nonempty, IDs unique and b
 
 **Interfaces:** Produces `toLearnerLessonPayload(payload:Record<string,unknown>):Record<string,unknown>` as a nonmutating projection, `lessonQuerySchema.activityContract?:2`, and optional fifth argument `LessonsService.getLessonById(id,parentId,childId,contentVersion?,activityContract?:2)`. `readPublished`/`toContentPayload` stay canonical. Complete envelope unchanged.
 
-- [ ] Add projection tests:
+- [x] Add projection tests:
 
 ```ts
 import { expect,it } from 'vitest';
@@ -170,9 +170,9 @@ it('redacts new expected answers without touching canonical or legacy',()=>{
 });
 ```
 
-- [ ] Extend the existing `contentLearning.test.ts` describe using its actual `authGet`, `submit`, `publishLesson` and setup parent/child fixtures (not cross-file imports). Insert a new-type lesson through temporary test DB, publish through existing CMS helpers with `env.CMS_PUBLISH_ENABLED` scoped to test. Assert GET no flag →409/error code, flag2 →200/redacted, flag1 →400, legacy without flag →200. Query explicit prior legacy version without flag →200 after new version publishes. Submit duplicate answer IDs →400 and unchanged `PointTransaction` count; valid new answer plus forged isCorrect does not overcome wrong userAnswer; correct canonical answer succeeds although GET lacks answer. Repeat completion/new version →no second reward. Wrong parent/child and foreign activity/version still fail existing policy tests. Do not change reward thresholds to satisfy tests.
-- [ ] RED: `npm --prefix server test -- src/test/learnerActivityProjection.test.ts src/test/contentLearning.test.ts`; expect missing projection/capability/duplicate protection failures.
-- [ ] Implement query literal with `z.coerce.number().pipe(z.literal(2)).optional()`, propagate controller→service; check snapshot types after authorized canonical read, before response projection. Add duplicate guard before any progress/ledger write:
+- [x] Extend the existing `contentLearning.test.ts` describe using its actual `authGet`, `submit`, `publishLesson` and setup parent/child fixtures (not cross-file imports). Insert a new-type lesson through temporary test DB, publish through existing CMS helpers with `env.CMS_PUBLISH_ENABLED` scoped to test. Assert GET no flag →409/error code, flag2 →200/redacted, flag1 →400, legacy without flag →200. Query explicit prior legacy version without flag →200 after new version publishes. Submit duplicate answer IDs →400 and unchanged `PointTransaction` count; valid new answer plus forged isCorrect does not overcome wrong userAnswer; correct canonical answer succeeds although GET lacks answer. Repeat completion/new version →no second reward. Wrong parent/child and foreign activity/version still fail existing policy tests. Do not change reward thresholds to satisfy tests.
+- [x] RED: `npm --prefix server test -- src/test/learnerActivityProjection.test.ts src/test/contentLearning.test.ts`; expect missing projection/capability/duplicate protection failures.
+- [x] Implement query literal with `z.coerce.number().pipe(z.literal(2)).optional()`, propagate controller→service; check snapshot types after authorized canonical read, before response projection. Add duplicate guard before any progress/ledger write:
 
 ```ts
 const ids = answers.map(answer => answer.activityId);
@@ -183,8 +183,8 @@ if (new Set(ids).size !== ids.length) {
 ```
 
 Use existing service error-object convention and verify middleware exposes `code`; preserve existing ownership, unlock, subscription, recording and transaction paths. Projection clones activities/blankSlots and deletes only expected fields for new types. Never pass projection into grading.
-- [ ] GREEN: targeted tests plus `npm --prefix server run typecheck`.
-- [ ] Stage exact Task 2 paths; `git commit -m "feat: protect learner activity payloads and completion contracts"`.
+- [x] GREEN: targeted tests plus `npm --prefix server run typecheck`.
+- [x] Stage exact Task 2 paths; `git commit -m "feat: protect learner activity payloads and completion contracts"`.
 
 ## Task 3: Four pure learner renderers and fail-closed registry
 
@@ -192,7 +192,7 @@ Use existing service error-object convention and verify middleware exposes `code
 
 **Interfaces:** All four components consume `NewActivityProps` defined above. Controlled value: array for multi/steps, map for group/fill; emit copies through onChange, submit `{status,userAnswer}`, never isCorrect. Registry keeps legacy callback adapter separate, exposes an unknown-type error component without completion callback. Player wiring is Task 4; preview Task 5.
 
-- [ ] Add controlled test harness and repeated-text fixture:
+- [x] Add controlled test harness and repeated-text fixture:
 
 ```tsx
 import { useState } from 'react';
@@ -216,11 +216,11 @@ it('submits IDs with neutral status and distinguishable repeated labels',()=>{
 });
 ```
 
-- [ ] Add harness tests for group native selects (labels `Nhóm của mẹ`, `Nhóm của mèo` with position suffix where repeated), two items same group, reassignment before submit; fill accessible slot labels and preserved full sentence punctuation; steps ordered checkbox list, button disabled until all checked, uncheck works, status self_reported. Media test no audio →visible missing label; rejected play →error and text retained; no autoplay, getUserMedia/session/outbox/API calls. Assert no expected answers in fill DOM. Registry unknown type shows error and cannot invoke onComplete.
-- [ ] RED: `npm --prefix client test -- src/test/newActivities.test.tsx src/test/activityRegistry.test.ts`; expect component import/new registration failures.
-- [ ] Implement each component in its own file with native input/select/button, visible focus and min44px controls; missing data returns error/no submit. Fill splits only explicit `{{id}}` markers preserving surrounding text; IDs remain stable through rendering. Steps constructs ordered IDs from definition, not click order. Reuse existing audio behavior where safe, never request microphone or auto TTS. Submit disabled when incomplete/already submitted; neutral acknowledgement belongs to player/preview, not inferred correctness. Unknown registry does not import Review fallback.
-- [ ] GREEN: targeted tests and `npm --prefix client run typecheck`; include legacy registry tests.
-- [ ] Stage Task 3 paths; `git commit -m "feat: add accessible neutral activity renderers"`.
+- [x] Add harness tests for group native selects (labels `Nhóm của mẹ`, `Nhóm của mèo` with position suffix where repeated), two items same group, reassignment before submit; fill accessible slot labels and preserved full sentence punctuation; steps ordered checkbox list, button disabled until all checked, uncheck works, status self_reported. Media test no audio →visible missing label; rejected play →error and text retained; no autoplay, getUserMedia/session/outbox/API calls. Assert no expected answers in fill DOM. Registry unknown type shows error and cannot invoke onComplete.
+- [x] RED: `npm --prefix client test -- src/test/newActivities.test.tsx src/test/activityRegistry.test.ts`; expect component import/new registration failures.
+- [x] Implement each component in its own file with native input/select/button, visible focus and min44px controls; missing data returns error/no submit. Fill splits only explicit `{{id}}` markers preserving surrounding text; IDs remain stable through rendering. Steps constructs ordered IDs from definition, not click order. Reuse existing audio behavior where safe, never request microphone or auto TTS. Submit disabled when incomplete/already submitted; neutral acknowledgement belongs to player/preview, not inferred correctness. Unknown registry does not import Review fallback.
+- [x] GREEN: targeted tests and `npm --prefix client run typecheck`; include legacy registry tests.
+- [x] Stage Task 3 paths; `git commit -m "feat: add accessible neutral activity renderers"`.
 
 ## Task 4: Player integration, durable partial inputs and offline envelope
 
@@ -228,7 +228,7 @@ it('submits IDs with neutral status and distinguishable repeated labels',()=>{
 
 **Interfaces:** `ActivityAnswer.isCorrect?:boolean`; `CachedLessonSession.partialInputs?:Record<string,NewActivityInput>`. Produce `savePartialInput(identity:{lessonId:string;childId:string;contentVersion:number},activityId:string,value:NewActivityInput):Promise<void>`. Existing init/save/clear signatures stay compatible. Registry adapter supplies controlled input and converts new submission to ActivityAnswer without isCorrect.
 
-- [ ] Add session regression in existing idb-keyval mock suite:
+- [x] Add session regression in existing idb-keyval mock suite:
 
 ```ts
 it('restores unsent input without creating a graded answer',async()=>{
@@ -243,12 +243,12 @@ it('restores unsent input without creating a graded answer',async()=>{
 });
 ```
 
-- [ ] Add delayed storage tests: two rapid partial writes resolve in reverse request order, latest edit persists; partial write overlapping submit does not overwrite answers/current step/hearts; clear/account switch while set pending does not recreate cache/session. Different child/version writes reject identity mismatch, old cached version remains pinned until explicit reset (never silently replace). Legacy cache with no partialInputs renders default empty. Storage rejection displays retry and retains visible edited value, never says saved. Use deferred promises in existing mock, not sleeps.
-- [ ] Add player tests: GET params includes activityContract2 plus pinned contentVersion, submission produces typed answer with no boolean and hearts remain3; false legacy answer still loses heart as before. New neutral message, Next only after successful save, reload restores partial inputs, server result governs stars/points. 409 update required yields clear update/retry UI, no silent fallback/version reset. Outbox test serialize arrays/maps/Unicode nested answers exactly, owner/version retained; retry success one reward,409 needs_attention, offline UI never official success.
-- [ ] RED: `npm --prefix client test -- src/test/lessonSessionVersions.test.ts src/test/lessonVersions.test.tsx src/test/offlineSync.test.ts`; expect missing method/neutral behavior/capability failure.
-- [ ] Implement a per-session serialized write chain with generation/identity checks before read/merge/write; merge latest state, do not write captured stale session snapshots. clear queues behind pending writes then deletes; stale updates never create state for a different generation. Partial input onChange updates immediate controlled state and requests guarded persistence, surface rejected writes. Submitted answer save removes that activity partial input atomically. Key player component by child/lesson/version/activity; auth reset clears in-memory input and invalidates queued work. New adapter calls existing saveStepProgress without isCorrect, not loseHeart. Keep outbox API version and official-result behavior.
-- [ ] GREEN: targeted tests, typecheck; full legacy player/session tests unchanged in assertions.
-- [ ] Stage Task 4 paths; `git commit -m "feat: persist version-bound activity input and neutral submissions"`.
+- [x] Add delayed storage tests: two rapid partial writes resolve in reverse request order, latest edit persists; partial write overlapping submit does not overwrite answers/current step/hearts; clear/account switch while set pending does not recreate cache/session. Different child/version writes reject identity mismatch, old cached version remains pinned until explicit reset (never silently replace). Legacy cache with no partialInputs renders default empty. Storage rejection displays retry and retains visible edited value, never says saved. Use deferred promises in existing mock, not sleeps.
+- [x] Add player tests: GET params includes activityContract2 plus pinned contentVersion, submission produces typed answer with no boolean and hearts remain3; false legacy answer still loses heart as before. New neutral message, Next only after successful save, reload restores partial inputs, server result governs stars/points. 409 update required yields clear update/retry UI, no silent fallback/version reset. Outbox test serialize arrays/maps/Unicode nested answers exactly, owner/version retained; retry success one reward,409 needs_attention, offline UI never official success.
+- [x] RED: `npm --prefix client test -- src/test/lessonSessionVersions.test.ts src/test/lessonVersions.test.tsx src/test/offlineSync.test.ts`; expect missing method/neutral behavior/capability failure.
+- [x] Implement a per-session serialized write chain with generation/identity checks before read/merge/write; merge latest state, do not write captured stale session snapshots. clear queues behind pending writes then deletes; stale updates never create state for a different generation. Partial input onChange updates immediate controlled state and requests guarded persistence, surface rejected writes. Submitted answer save removes that activity partial input atomically. Key player component by child/lesson/version/activity; auth reset clears in-memory input and invalidates queued work. New adapter calls existing saveStepProgress without isCorrect, not loseHeart. Keep outbox API version and official-result behavior.
+- [x] GREEN: targeted tests, typecheck; full legacy player/session tests unchanged in assertions.
+- [x] Stage Task 4 paths; `git commit -m "feat: persist version-bound activity input and neutral submissions"`.
 
 ## Task 5: CMS authoring forms, reference integrity and safe preview
 
@@ -256,8 +256,8 @@ it('restores unsent input without creating a graded answer',async()=>{
 
 **Interfaces:** Each author form takes `{activity:Activity;onChange:(activity:Activity)=>void}` (Activity from existing CMS types, extended canonical fields). Add type choices Vietnamese, preserve common fields. Preview imports four pure components directly and strips expected fields before rendering; admin answer panel is separate. No live registry recording imports.
 
-- [ ] Add editor tests using existing stateful wrapper: add each type by label `Chọn nhiều đáp án`, `Phân nhóm`, `Điền nhiều ô trống`, `Nghe và thực hiện`; save incomplete draft permitted, publish errors shown next to relevant fields/source notes. Multi repeated M IDs stable on reorder; remove correct option removes its reference with visible warning, never chooses alternative. Group removal leaves affected items unassigned with warning. Fill slot removal updates reference diagnostics, never silently rewrites template into another answer. Confirm type switch discards type-specific fields but preserves prompt/media/hints; cancel preserves all fields. CAS stale save leaves author edits available; dirty dialog still traps focus.
-- [ ] Add pure preview smoke test by extending existing render setup:
+- [x] Add editor tests using existing stateful wrapper: add each type by label `Chọn nhiều đáp án`, `Phân nhóm`, `Điền nhiều ô trống`, `Nghe và thực hiện`; save incomplete draft permitted, publish errors shown next to relevant fields/source notes. Multi repeated M IDs stable on reorder; remove correct option removes its reference with visible warning, never chooses alternative. Group removal leaves affected items unassigned with warning. Fill slot removal updates reference diagnostics, never silently rewrites template into another answer. Confirm type switch discards type-specific fields but preserves prompt/media/hints; cancel preserves all fields. CAS stale save leaves author edits available; dirty dialog still traps focus.
+- [x] Add pure preview smoke test by extending existing render setup:
 
 ```tsx
 it('new preview never posts completion or persists a child session',()=>{
@@ -277,10 +277,10 @@ it('new preview never posts completion or persists a child session',()=>{
 ```
 
 This test extends the existing suite's `lesson`, `session`, imported stores and API mocks. Extend to each new type, assert no outbox/mic calls and preview resets when selected activity changes.
-- [ ] RED: `npm --prefix client test -- src/test/cmsLessonEditor.test.tsx src/test/cmsPreview.test.tsx src/test/cmsEditor.test.tsx`; expect absent controls/preview type failures.
-- [ ] Implement four focused forms; generate stable new IDs once at insertion with existing CMS/server ID authority pattern, never on render/reorder. Use explicit item/group selectors for answers, one accepted answer input per approved variant, ordered step text inputs and template/slot validation hints. Type change uses existing native confirmation dialog before removing private fields. Preserve source-note adjacency and backend field paths. Preview passes local controlled input callbacks only; no session store hook or child API. Add separate admin answer summary from canonical fields.
-- [ ] GREEN: targeted suites and typecheck, inspect old7type author tests/CAS/dialog tests still pass.
-- [ ] Stage Task 5 paths; `git commit -m "feat: author and preview new activity types in CMS"`.
+- [x] RED: `npm --prefix client test -- src/test/cmsLessonEditor.test.tsx src/test/cmsPreview.test.tsx src/test/cmsEditor.test.tsx`; expect absent controls/preview type failures.
+- [x] Implement four focused forms; generate stable new IDs once at insertion with existing CMS/server ID authority pattern, never on render/reorder. Use explicit item/group selectors for answers, one accepted answer input per approved variant, ordered step text inputs and template/slot validation hints. Type change uses existing native confirmation dialog before removing private fields. Preserve source-note adjacency and backend field paths. Preview passes local controlled input callbacks only; no session store hook or child API. Add separate admin answer summary from canonical fields.
+- [x] GREEN: targeted suites and typecheck, inspect old7type author tests/CAS/dialog tests still pass.
+- [x] Stage Task 5 paths; `git commit -m "feat: author and preview new activity types in CMS"`.
 
 ## Task 6: Source-complete catalog mappings and unchanged import identity
 
@@ -288,7 +288,7 @@ This test extends the existing suite's `lesson`, `session`, imported stores and 
 
 **Interfaces:** Catalog shape and existing import key/checksum functions unchanged. New activities use Task 1 canonical contract; import remains draft-only. Existing snapshots/manifest are read-only targets, not stage targets.
 
-- [ ] Extend existing catalog suite assertions selecting lessons by existing order field (not new helper):
+- [x] Extend existing catalog suite assertions selecting lessons by existing order field (not new helper):
 
 ```ts
 const sourceLesson = (order:number) => {
@@ -313,11 +313,11 @@ expect(lesson11.activities.some(activity=>activity.type==='fill_blanks')).toBe(f
 ```
 
 The snippet uses `customerCatalog` already imported by the suite; reuse existing count/source checksum assertions. Verify 49 drafts count unchanged, only new activities/precise notes differ. Preserve remaining unsupported requirements in notes; do not replace generic caution with claim of complete support.
-- [ ] In existing importer test, import fixture, manually change draft payload, rerun same source/checksum with catalog adding activity: skipped result, payload unchanged, no revision/publish/ledger. Source identity/requestId unchanged. New empty test DB import includes new types as draft only, then repeat still skip. Source checksum verification remains passed.
-- [ ] RED: `npm --prefix server test -- src/test/customerCatalog.test.ts src/test/customerImport.test.ts`; expect absent mappings, not checksum failures.
-- [ ] Add precise catalog helpers/data: lesson4 three self-report steps, lesson5 six stable letter IDs, lesson6 two groups/six items exact mapping. Do not map ambiguous lesson11 `c_ _`; no technical fill fixture in customer data. Update coverage and deployment runbook: catalog SHA can differ while source checksum fixed; already-imported drafts skip and require reviewed manual CMS edits; no batch upgrade authorized.
-- [ ] GREEN: targeted tests plus existing source verification and import identity suites, typecheck. No CLI import invocation against any configured URI.
-- [ ] Stage only Task 6 paths; `git commit -m "feat: map supported customer activities without reimporting drafts"`.
+- [x] In existing importer test, import fixture, manually change draft payload, rerun same source/checksum with catalog adding activity: skipped result, payload unchanged, no revision/publish/ledger. Source identity/requestId unchanged. New empty test DB import includes new types as draft only, then repeat still skip. Source checksum verification remains passed.
+- [x] RED: `npm --prefix server test -- src/test/customerCatalog.test.ts src/test/customerImport.test.ts`; expect absent mappings, not checksum failures.
+- [x] Add precise catalog helpers/data: lesson4 three self-report steps, lesson5 six stable letter IDs, lesson6 two groups/six items exact mapping. Do not map ambiguous lesson11 `c_ _`; no technical fill fixture in customer data. Update coverage and deployment runbook: catalog SHA can differ while source checksum fixed; already-imported drafts skip and require reviewed manual CMS edits; no batch upgrade authorized.
+- [x] GREEN: targeted tests plus existing source verification and import identity suites, typecheck. No CLI import invocation against any configured URI.
+- [x] Stage only Task 6 paths; `git commit -m "feat: map supported customer activities without reimporting drafts"`.
 
 ## Task 7: Integrated QA, business documentation and authorized main handoff
 
@@ -325,7 +325,7 @@ The snippet uses `customerCatalog` already imported by the suite; reuse existing
 
 **Interfaces:** Documents actual contracts from Tasks 1–6; no new code interfaces. Native final reviewer checks entire change/spec and applicable AGENTS rules; do not use old reviewer status as evidence for new feature.
 
-- [ ] Run fresh full verification:
+- [x] Run fresh full verification:
 
 ```powershell
 npm --prefix server test
@@ -339,9 +339,9 @@ git diff --check
 ```
 
 Expected all exit0; record exact test totals/warnings/bundle size from current output, no inherited counts. If a test fails, use systematic-debugging then RED/GREEN regression, rerun affected/full suites before release claims.
-- [ ] Browser QA against local/staging only: child multi repeated-M keyboard/touch; group many-to-one/reassign; fill reload before submit/Unicode punctuation; steps self-report/missing/failing audio; complete wrong/correct official result; offline reconnect; child/account/version switch. Admin add/edit/remove/reorder/type confirmation/source-note errors/CAS/preview. At390/1366 widths check page overflow, ≥44px controls, focus, console/pageerror. Do not click real payment/publish/import, request mic or use production DB. Record limitation if browser unavailable; unit tests alone not Safari/mobile/axe certification.
-- [ ] Update docs with actor/preconditions/main/error flows, capability/error code, neutral feedback, canonical redaction, partial inputs/outbox, self-report limitations, source/manual upgrade and rollout/rollback. Label business decisions as approved and unresolved audio/ngữ liệu/production deploy as assumptions/pending. Review findings marks only new verified risks resolved; do not relabel unrelated backlog complete.
-- [ ] Request final code review per skill; use one reviewer if authorized by that skill, exact spec and baseline before Task1. Review changes independently; fix concrete defects and rerun relevant checks. Then `git diff --check`, stage exact docs/code task files (never scratch/secrets), commit docs `docs: record activity contracts and verified release scope`.
+- [x] Browser QA/limitation recorded: Chrome component smoke/real IndexedDB at390/1366, keyboard/touch/overflow/targets/type-change cancel, no console/pageerror. Full-app complete/offline/CAS/audio/account/version browser flows not certified; integration tests cover the code boundaries, not device/Safari/axe certification. See `docs/08-customer-alignment.md`. No production payment/publish/import/micro.
+- [x] Update docs with actor/preconditions/main/error flows, capability/error code, neutral feedback, canonical redaction, partial inputs/outbox, self-report limitations, source/manual upgrade and rollout/rollback. Label business decisions as approved and unresolved audio/ngữ liệu/production deploy as assumptions/pending. Review findings marks only new verified risks resolved; do not relabel unrelated backlog complete.
+- [x] Request final code review per skill; one fresh reviewer checked spec/baseline/Focus/Rulings, found one Important queued-input-loss fixed via four RED→GREEN regressions and green full suite. No Critical/Minor. `git diff --check` passed; stage exact docs/code task files, never scratch/secrets; docs commit `docs: record activity contracts and verified release scope`.
 - [ ] Before push: `git fetch origin`, `git status --short --branch`, `git log --oneline origin/main..main`. If origin advanced, integrate non-destructively and rerun verification; conflicts require explicit resolution, no force push. Use authorized `git push origin main` only after verified final review. Report actual pushed SHA, tested scope and outstanding production DB/audio/content-owner approval. Do not report push success before remote command succeeds.
 
 ## Self-review completed before handoff

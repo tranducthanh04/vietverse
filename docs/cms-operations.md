@@ -21,17 +21,17 @@ Quyết định bảo vệ định danh: seed bỏ qua seedKey đã được nh�
 
 - Nguồn nguyên văn, tab ID và checksum ở `customer-source/2026-10-09/manifest.json`; `coverage.md` đối soát từng mục. Import kiểm tra byte UTF-8/SHA-256, file nguồn được giữ LF qua Git.
 - 21 bài đọc có lời nguồn, mốc ban đầu 0 và không bịa URL audio. Giả định chọn dị bản đầu tiên cho Lộn cầu vồng/Kéo cưa; toàn bộ dị bản còn trong snapshot. Nhạc rừng/Thanh Lan/Thơ là nhãn của nguồn, chưa phải xác minh độc lập.
-- 20 giáo án đã ánh xạ dữ liệu có sẵn, không đồng nghĩa 20 bài production-ready. Chọn nhiều chữ M, phân nhóm nhiều-về-một, nghe thực hiện ba bước, nhiều ô trống cần renderer hoặc quyết định biên tập riêng. Bài 15/20 chưa tự bịa bộ hoạt động. Từ thiếu nghĩa/câu thiếu lựa chọn vẫn là nháp.
+- 20 giáo án đã ánh xạ dữ liệu có sẵn, không đồng nghĩa 20 bài production-ready. Lần nhập mới có multi bài 5, groups bài 6 và steps bài 4; bốn renderer/editor đã triển khai. Kéo từ vào câu chưa hỗ trợ riêng; bài 11 chưa rõ slot nên không nhập fill_blanks, bài 15/20 chưa tự bịa bộ hoạt động. Audio/từ thiếu nghĩa/câu thiếu lựa chọn vẫn là nháp.
 - Tám nhóm văn hóa chủ yếu có card/khung; không dùng funFacts mẫu làm lời khách hàng. Câu bánh chưng có đủ lựa chọn/đáp án được nhập; intro/facts/quiz chưa đủ vẫn chặn publish.
 - Chạy lại cùng checksum luôn skip, kể cả bản đã sửa tay/synced/discarded. Nguồn thay đổi cần kế hoạch nhập mới được duyệt; không tự ghi đè nháp hiện hữu.
 
 ## Phiên bản và xử lý lỗi
 
-### Bốn dạng hoạt động mới — code đang triển khai 2026-10-09
+### Bốn dạng hoạt động mới — triển khai local 2026-10-09
 
 CMS đã thêm form/preview `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`. Nháp thiếu cấu trúc/đáp án vẫn cần bổ sung trước publish; giữ gate production tắt. ID option/group/slot/step được tạo một lần khi thêm và giữ qua reorder; ID activity cấp khi lưu server. Đổi type cần xác nhận bỏ dữ liệu riêng, giữ hướng dẫn/media/hints. Xóa lựa chọn/nhóm/slot có cảnh báo sửa đáp án/mẫu câu, không tự chọn đáp án mới; slot marker không được sửa ngầm. Mỗi slot dùng marker rõ `{{slot-id}}` và acceptedAnswers do content owner duyệt, không suy từ underscore.
 
-Preview bốn dạng dùng renderer thuần và state local, phản hồi trung tính; đáp án admin ở vùng riêng. Không gọi API học/session/outbox/micro và không tuyên bố kiểm chứng động tác follow_steps. Màn bé/server/session đã bổ sung nhưng chưa nghiệm thu cả release/browser; trạng thái chi tiết theo plan, không coi đoạn này là xác nhận deploy hoặc import DB thật.
+Preview bốn dạng dùng renderer thuần và state local, phản hồi trung tính; đáp án admin ở vùng riêng. Không gọi API học/session/outbox/micro và không tuyên bố kiểm chứng động tác follow_steps. QA local và giới hạn ở `08-customer-alignment.md`, không coi đoạn này là xác nhận deploy hoặc import DB thật. Ghi SHA catalog khi deploy: source checksum không đổi nên nháp cũ vẫn skip; bổ sung thủ công bằng CMS/CAS sau duyệt, không ép re-import.
 
 - draftVersion là phiên bản biên tập; contentVersion là bản đã phát hành. Legacy live thiếu version là 0. Mỗi save tăng draftVersion, không thay live. Preview đọc đúng draftVersion đã lưu.
 - Save/publish/visibility cạnh tranh trả 409. Giữ form local, xem bản server và chủ động tải lại; không merge tự động mảng hoạt động hoặc đáp án. Mất response publish có thể retry đúng draftVersion/baseContentVersion để nhận receipt cũ, không nhân snapshot/audit.
@@ -48,4 +48,4 @@ Tắt `CMS_PUBLISH_ENABLED` để ngừng publish/visibility. Giữ backend read
 
 Kiểm chứng tự động gồm RBAC, CAS, transaction rollback, nguồn thực tế, import lặp, recording ownership, replay/quiz không nhân thưởng, offline queue, form dirty/conflict và preview không mutation. Kết quả cuối cùng và smoke test ghi ở `08-customer-alignment.md`.
 
-Chưa nghiệm thu audio/bản quyền production, thiết bị thật/Safari/axe, thanh toán thật hoặc import database thật. Các khoảng trống ngoài CMS (Google OAuth, lịch sử điểm đầy đủ, renderer mới) không được coi là đã hoàn tất.
+Chưa nghiệm thu audio/bản quyền production, thiết bị thật/Safari/axe, thanh toán thật hoặc import database thật. Các khoảng trống ngoài CMS (Google OAuth, lịch sử điểm đầy đủ) không được coi là đã hoàn tất. Khi đã publish loại mới không rollback về reader/grader cũ: tắt publish, giữ compatibility code, khôi phục nội dung qua version mới, không rollback ledger/progress.

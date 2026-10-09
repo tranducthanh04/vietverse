@@ -1,6 +1,6 @@
 # Thiết kế bốn dạng hoạt động học theo nguồn khách hàng
 
-Ngày: 2026-10-09 (Asia/Saigon). Trạng thái: **người dùng đã duyệt bản spec bằng “ok tiếp tục làm đi”; implementation plan đang chờ review trước code**. Chưa triển khai các activity mới, chưa thay dữ liệu DB hoặc publish.
+Ngày: 2026-10-09 (Asia/Saigon). Trạng thái: **spec và implementation plan đã duyệt, bốn activity đã triển khai local**; kiểm chứng và giới hạn ở [QA](../../08-customer-alignment.md). Chưa thay dữ liệu DB thật hoặc publish production.
 
 ## 1. Mục tiêu và phạm vi được duyệt
 
@@ -176,4 +176,4 @@ Chi tiết đã được duyệt trong bản spec này: exact type/field names v
 
 Giả định: content owner duyệt acceptedAnswers/dị bản/ngữ liệu còn thiếu; thiết bị có trình duyệt hỗ trợ giao diện hiện tại nhưng không giả định audio/TTS luôn khả dụng; DB production vẫn do deploy owner xử lý theo runbook riêng.
 
-Bản spec đã được duyệt; bước tiếp theo là review [implementation plan](../plans/2026-10-09-customer-activity-types.md), rồi thực hiện TDD theo cách chạy người dùng chọn. Nếu muốn phản hồi đúng/sai từng câu mới ngay lập tức, cần thiết kế endpoint chấm từng activity có ownership/version/rate limit và phân tích offline riêng; không tự thêm vào phạm vi này.
+Bản spec và [implementation plan](../plans/2026-10-09-customer-activity-types.md) đã được duyệt, thực hiện TDD inline theo người dùng chọn. Nếu muốn phản hồi đúng/sai từng câu mới ngay lập tức, cần thiết kế endpoint chấm từng activity có ownership/version/rate limit và phân tích offline riêng; không tự thêm vào phạm vi này.

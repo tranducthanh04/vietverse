@@ -35,7 +35,8 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 | `07-change-workflow.md` | Checklist BA/dev/reviewer trước và sau khi code |
 | `cms-operations.md` | Quy tắc vận hành CMS, import nháp và publish riêng |
 | `superpowers/plans/2026-10-09-customer-data-deployment.md` | Bàn giao deploy: staging → backup/restore → dry-run → import → đối soát → production |
-| `superpowers/plans/2026-10-09-customer-activity-types.md` | Kế hoạch bốn loại hoạt động mới: server, màn bé, session/offline, CMS và catalog; chờ review trước triển khai, không import DB thật |
+| `superpowers/plans/2026-10-09-customer-activity-types.md` | Kế hoạch đã duyệt bốn loại hoạt động mới: server, màn bé, session/offline, CMS và catalog; trạng thái QA local ở `08-customer-alignment.md`, không import DB thật |
+| `superpowers/specs/2026-10-09-customer-activity-types-design.md` | Contract đã duyệt, self-report/điểm/quyền, rollout tương thích và giới hạn nguồn |
 | `adr/` | Quyết định kiến trúc có ảnh hưởng dài hạn |
 
 ## Trạng thái baseline

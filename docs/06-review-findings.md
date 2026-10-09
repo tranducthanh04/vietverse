@@ -1,5 +1,12 @@
 # 06 — Kết quả review senior BA/code
 
+## Bốn activity mới — review cuối 2026-10-09
+
+- Reviewer độc lập kiểm tra range `90472f1..53cd7c2` và docs cuối; xác nhận grader canonical, redaction/capability, preview không mutation và source checksum/skip không có lỗi actionable khác.
+- Important đã sửa: queued input/answer/hearts của phiên cũ bị bỏ khi đổi generation (đổi bé/tài khoản hoặc re-init). Giữ ghi đã nhận trên key/cache gốc, chỉ chặn cập nhật active memory; explicit clear vẫn tuần tự đợi rồi xóa. Bốn regression thất bại trước sửa, qua sau sửa; frontend 122/122. Chrome với IndexedDB thật kiểm chứng gõ nhanh → đổi bé → restore → clear ở 390/1366px.
+- Không có Critical hoặc Minor từ review này. Không đóng lại backlog ngoài phạm vi. Canonical answer của bảy type cũ chưa được harden/redact trong đợt additive này.
+- Release còn cần deploy backend/frontend đồng bộ và nghiệm thu môi trường thật trước publish; DB thật/audio/bản quyền/Safari/thiết bị thật/axe chưa xác nhận. Chi tiết bằng chứng và quyết định ở `08-customer-alignment.md`.
+
 ## Bổ sung CMS — 2026-10-09
 
 - Đã xử lý hai follow-up UX CMS: ghi chú nguồn cạnh field/nhóm biên tập và dialog native có focus/Tab/Escape/return-focus, nền inert. Có test hồi quy editor và Chrome desktop/mobile; không đổi nghiệp vụ/điểm hoặc bật publish. Nghiệm thu Safari/thiết bị thật/axe vẫn riêng.

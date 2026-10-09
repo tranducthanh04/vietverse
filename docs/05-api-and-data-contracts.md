@@ -2,9 +2,9 @@
 
 Base URL: `/api/v1`.
 
-## Hoạt động bổ sung — triển khai theo giai đoạn 2026-10-09
+## Hoạt động bổ sung — contract triển khai local 2026-10-09
 
-Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`, không đổi bảy loại cũ hoặc công thức điểm. Contract canonical/model và kiểm draft/publish đã bổ sung; chưa coi màn bé/CMS mới là sẵn phát hành cho tới khi hoàn tất [plan](./superpowers/plans/2026-10-09-customer-activity-types.md).
+Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`, không đổi bảy loại cũ hoặc công thức điểm. Canonical/model, draft/publish, grader, màn bé/session và CMS/editor/preview đã triển khai local; bằng chứng và giới hạn ở [QA](./08-customer-alignment.md). Chưa xác nhận deploy/import/publish production.
 
 - `multi_select`: options 2–12, text được trùng; correctAnswer là mảng ID duy nhất, userAnswer phải khớp đúng tập ID, không phụ thuộc thứ tự.
 - `group_sort`: groups 2–6, options 2–12; correctAnswer và userAnswer là map đúng mọi item ID tới group ID; cho phép nhiều item cùng nhóm, không nhận khóa thừa/kế thừa/prototype.
@@ -22,7 +22,7 @@ Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, 
 
 - Model nội dung bổ sung `contentVersion`, `publishedAt`, `publishedBy`; bản legacy thiếu version được hiểu là 0. Story/culture có `seedKey` và `visibility` tùy chọn, chưa đổi hành vi API đọc trong bước này.
 - `ContentDraft` tách khỏi live, định danh duy nhất `{kind, contentId}` và tăng `draftVersion` khi lưu. `ContentRevision` lưu snapshot bất biến theo `{kind, contentId, contentVersion}`. Chưa bật publish hoặc chạy migration/import.
-- Schema draft cho phép nội dung dở dang nhưng kiểm tra giới hạn và URL; publish kiểm tra tính khả dụng của bảy activity type, lyrics và quiz. Chi tiết ràng buộc tại thiết kế CMS; đây chưa phải xác nhận toàn bộ CMS đã phát hành.
+- Schema draft cho phép nội dung dở dang nhưng kiểm tra giới hạn và URL; publish kiểm tra tính khả dụng của 11 activity type, lyrics và quiz. Chi tiết ràng buộc tại thiết kế CMS và phần hoạt động bổ sung; đây chưa phải xác nhận toàn bộ CMS đã phát hành.
 
 API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu cầu JWT + admin:
 
@@ -71,7 +71,7 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
 | GET | `/stages?childId=` | Auth | Ownership khi có childId, trả trạng thái mở khóa theo điều kiện hoàn thành chặng trước + subscription |
-| GET | `/lessons/:id?childId=&contentVersion=` | Auth | Bắt buộc child ownership/unlock; đọc live hoặc snapshot đã xuất bản |
+| GET | `/lessons/:id?childId=&contentVersion=&activityContract=2` | Auth | Bắt buộc child ownership/unlock; đọc live hoặc snapshot đã xuất bản; thiếu capability chỉ đọc loại cũ |
 | POST | `/lessons/:id/complete` | Auth | Child ownership; kiểm tra mở khóa, server tự chấm answers (bỏ qua client score), ghi nhận sao và thưởng ViVi Points (+10) |
 
 ## Content và recording

@@ -10,7 +10,7 @@
 | Onboarding | Tạo hồ sơ bé | Có wizard 4 bước | `POST /children` | Child | Hoàn thiện |
 | Child | Chuyển/Xóa hồ sơ | Có dropdown & nút xóa | `PATCH /children/:id/select`, `DELETE /children/:id` | Child, Progress, Recording | Hoàn thiện (P1.6 cascade delete) |
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |
-| Lesson | Lesson player | Có 7 activity types | `GET /lessons/:id`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Hoàn thiện (P0.1 chấm điểm server, P1.5 offline queue) |
+| Lesson | Lesson player | 7 loại cũ + multi_select/group_sort/fill_blanks/follow_steps | `GET /lessons/:id?activityContract=2`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Triển khai local 2026-10-09; loại mới ghi nhận trung tính, chấm server; chưa xác nhận deploy/content production |
 | Lesson | Tim/gợi ý/offline session | Có | IndexedDB + Offline Sync Queue localStorage | lesson session, queue | Hoàn thiện (P1.5) |
 | Recording | Thu âm | Có MediaRecorder | `POST /recordings` | Recording, StorageService | Hoàn thiện (P2.3 audio only + 180s cap, P2.4 safe storage) |
 | Stories | Kho truyện/đồng dao | Có | GET public, mark explored auth | Story, ExplorationLog | Hoàn thiện (P1.3 idempotency, P2.5 safe search) |
