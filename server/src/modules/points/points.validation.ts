@@ -14,3 +14,24 @@ export const redeemItemSchema = z.object({
     })
     .optional(),
 });
+
+const objectIdString = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Mã định danh không hợp lệ');
+
+export const childPointsQuerySchema = z.object({
+  before: z
+    .string()
+    .datetime({ offset: true, message: 'before phải là thời điểm ISO 8601' })
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const EQUIP_SLOTS = ['avatar', 'profile_decoration'] as const;
+export type EquipSlot = (typeof EQUIP_SLOTS)[number];
+
+export const equipItemSchema = z
+  .object({
+    slot: z.enum(EQUIP_SLOTS),
+    itemId: objectIdString.nullable(),
+  })
+  .strict();
+

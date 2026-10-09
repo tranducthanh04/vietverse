@@ -24,6 +24,7 @@ describe('Points & Gift Redemption API with Stock & Atomic Guarantees', () => {
     const item = await ShopItem.create({
       name: 'Huy hiệu Ngôi Sao',
       type: 'virtual',
+      category: 'badge',
       costPoints: 50, // Costs 50 points
       assetUrl: '/badge.png',
       active: true,
@@ -63,6 +64,7 @@ describe('Points & Gift Redemption API with Stock & Atomic Guarantees', () => {
     const item = await ShopItem.create({
       name: 'Mũ Nón Lá Tí Hon',
       type: 'virtual',
+      category: 'badge',
       costPoints: 30, // Costs 30 points
       assetUrl: '/hat.png',
       active: true,
@@ -191,6 +193,7 @@ describe('Points & Gift Redemption API with Stock & Atomic Guarantees', () => {
     const item = await ShopItem.create({
       name: 'Huy Hiệu Rồng Vàng',
       type: 'virtual',
+      category: 'badge',
       costPoints: 20,
       assetUrl: '/badge-dragon.png',
       active: true,

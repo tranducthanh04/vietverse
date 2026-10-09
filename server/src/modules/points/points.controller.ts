@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PointsService } from './points.service.js';
-import { redeemItemSchema } from './points.validation.js';
+import { childPointsQuerySchema, equipItemSchema, redeemItemSchema } from './points.validation.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 
 export class PointsController {
@@ -8,7 +8,27 @@ export class PointsController {
     try {
       const parentId = req.user!.id;
       const childId = req.params.childId;
-      const data = await PointsService.getChildPoints(childId, parentId);
+      const page = childPointsQuerySchema.parse(req.query);
+      const data = await PointsService.getChildPoints(childId, parentId, page);
+      return sendSuccess(res, data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getChildCollection(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await PointsService.getChildCollection(req.params.childId, req.user!.id);
+      return sendSuccess(res, data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async equip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validated = equipItemSchema.parse(req.body);
+      const data = await PointsService.equipItem(req.params.childId, req.user!.id, validated);
       return sendSuccess(res, data);
     } catch (error) {
       next(error);
