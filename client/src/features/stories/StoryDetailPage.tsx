@@ -16,6 +16,7 @@ import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
+import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const StoryDetailPage: React.FC = () => {
@@ -165,11 +166,19 @@ export const StoryDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Side: Cover & Controls */}
         <div className="md:col-span-1 flex flex-col items-center">
-          <img
-            src={story.coverImage || 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400'}
-            alt={story.title}
-            className="w-full max-w-xs rounded-3xl shadow-kid border-4 border-white mb-6 object-cover h-64"
-          />
+          {story.coverImage ? (
+            <img
+              src={story.coverImage}
+              alt={story.title}
+              className="w-full max-w-xs rounded-3xl shadow-kid border-4 border-white mb-6 object-cover h-64"
+            />
+          ) : (
+            <CoverPlaceholder
+              kind="story"
+              variant={story.type}
+              className="w-full max-w-xs rounded-3xl shadow-kid border-4 border-white mb-6 h-64"
+            />
+          )}
 
           <h2 className="text-kid-lg font-bold font-display text-center text-stone-800 mb-1">
             {story.title}

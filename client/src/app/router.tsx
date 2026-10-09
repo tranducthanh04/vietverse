@@ -37,6 +37,7 @@ import { ContentPreviewPage } from '../features/admin/content/ContentPreviewPage
 import { ContentCreatePage } from '../features/admin/content/ContentCreatePage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
+import { AdminPointRulesPage } from '../features/admin/AdminPointRulesPage.js';
 import { PaymentTestPage } from '../features/parent/PaymentTestPage.js';
 
 import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
@@ -158,6 +159,7 @@ export const router = createBrowserRouter([
       { path: 'van-hoa/:id/xem-truoc', element: <ContentPreviewPage kind="culture" /> },
       { path: 'hoc-vien', element: <AdminLearnersPage /> },
       { path: 'doi-qua', element: <AdminRedemptionsPage /> },
+      { path: 'quy-tac-diem', element: <AdminPointRulesPage /> },
       { path: 'test-thanh-toan', element: <PaymentTestPage /> },
     ],
   },

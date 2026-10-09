@@ -4,6 +4,7 @@ import { Map, BookOpen, Compass, Gift, Award, Lock, Shield } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
+import { EquippedAvatar } from '../../features/points/EquippedAvatar.js';
 
 export const KidsLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -49,9 +50,7 @@ export const KidsLayout: React.FC = () => {
               className="flex items-center space-x-2 bg-cream px-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px]"
               aria-label="Chọn hồ sơ bé"
             >
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center font-display font-black text-stone-900 shadow-sm shrink-0">
-                {activeChild?.name ? activeChild.name.charAt(0) : 'B'}
-              </div>
+              <EquippedAvatar child={activeChild} />
               <span className="font-bold font-display text-stone-800 text-sm md:text-base">
                 {activeChild?.name || 'Bé yêu'}
               </span>

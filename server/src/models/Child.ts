@@ -13,6 +13,9 @@ export interface IChild extends Document {
   currentStageId?: Types.ObjectId;
   level: number;
   ownedItemIds: Types.ObjectId[];
+  /** Avatar bought in the shop; when set it is displayed instead of the onboarding `avatarId`. */
+  equippedAvatarItemId?: Types.ObjectId;
+  profileDecorationId?: Types.ObjectId;
   badges: string[];
   screenTimeLimit: number; // minutes per session: 15, 20, 30, 0 (unlimited)
   refundLock?: string;
@@ -66,6 +69,14 @@ const childSchema = new Schema<IChild>(
         ref: 'ShopItem',
       },
     ],
+    equippedAvatarItemId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ShopItem',
+    },
+    profileDecorationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ShopItem',
+    },
     badges: {
       type: [String],
       default: ['tan-binh-vietverse'],

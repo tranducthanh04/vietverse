@@ -2,7 +2,7 @@ import { CultureArticle } from '../../models/CultureArticle.js';
 import { ExplorationLog } from '../../models/ExplorationLog.js';
 import { PointTransaction } from '../../models/PointTransaction.js';
 import { Child } from '../../models/Child.js';
-import { POINT_RULES } from '../../constants/points.js';
+import { getPointRuleAmount } from '../../services/pointRules.service.js';
 import { readPublished, resolveSubmissionVersion } from '../content/content.reader.js';
 import { toContentPayload } from '../content/content.dto.js';
 
@@ -78,7 +78,9 @@ export class CultureService {
     const isAllCorrect = totalQuestions > 0 && correctCount === totalQuestions;
     let pointsAwarded = 0;
 
-    if (isAllCorrect) {
+    // Rule may be disabled/zeroed by admin (D3): then no transaction is written.
+    const quizAmount = isAllCorrect ? await getPointRuleAmount('CULTURE_QUIZ') : 0;
+    if (isAllCorrect && quizAmount > 0) {
       // Check if child has already been awarded points for this culture quiz
       const existingTxn = await PointTransaction.findOne({
         childId: child._id,
@@ -90,7 +92,7 @@ export class CultureService {
         try {
           const txn = await PointTransaction.create({
             childId: child._id,
-            delta: POINT_RULES.CULTURE_QUIZ,
+            delta: quizAmount,
             reason: 'culture_quiz',
             refId: article._id.toString(),
             description: `Trả lời đúng đố vui văn hóa: ${article.title}`,
@@ -98,9 +100,9 @@ export class CultureService {
 
           try {
             await Child.findByIdAndUpdate(child._id, {
-              $inc: { viviPoints: POINT_RULES.CULTURE_QUIZ },
+              $inc: { viviPoints: quizAmount },
             });
-            pointsAwarded = POINT_RULES.CULTURE_QUIZ;
+            pointsAwarded = quizAmount;
           } catch (childErr) {
             await PointTransaction.findByIdAndDelete(txn._id);
             throw childErr;

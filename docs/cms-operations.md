@@ -40,6 +40,10 @@ Preview bốn dạng dùng renderer thuần và state local, phản hồi trung 
 - Session/outbox giữ version và câu trả lời; item 400/403/404/409 giữ lại trạng thái cần xử lý, lỗi mạng dừng không mất tail, chỉ đồng bộ đúng tài khoản/hồ sơ. Không báo thưởng cuối cùng trước xác nhận server.
 - Reader whitelist tách khỏi giới hạn biên tập mới để không làm mất khả năng đọc catalog cũ (số bài >20, media HTTP cũ). Lưu/publish mới vẫn bắt buộc URL an toàn; trường legacy không hợp lệ phải được admin sửa trước khi xuất bản.
 
+## Ảnh bìa demo story/culture (2026-10-09)
+
+Ảnh bìa minh họa từ Wikimedia Commons được tự host ở `client/public/images/covers/`; nguồn, tác giả, giấy phép ở [`content-image-credits.md`](./content-image-credits.md) và `server/src/seeds/contentCovers.ts`. Script `server/src/seeds/applyContentCovers.ts` (dry-run mặc định, `--apply` để ghi) chỉ điền `coverImage` đang trống cho nội dung legacy (contentVersion trống/0, chưa có ContentRevision và không có ContentDraft chưa discarded); bản đã qua CMS bị bỏ qua và phải gán qua nháp → xuất bản. Đây là **quyết định triển khai** cho DB demo/local, không phải seed ghi đè live. Không tạo revision/audit vì nội dung legacy chưa có phiên bản; snapshot legacy 0 sẽ chứa ảnh khi publish lần đầu. **Giả định chờ duyệt**: content team duyệt ảnh và cách hiển thị ghi công (CC BY/BY-SA) trước production. Client hiển thị khối gradient + icon theo type/category khi không có `coverImage`, không còn ảnh fallback dùng chung.
+
 ## Rollback
 
 Tắt `CMS_PUBLISH_ENABLED` để ngừng publish/visibility. Giữ backend reader phiên bản và client/session/outbox hiểu version. Không hạ về grader chỉ đọc live sau khi đã xuất bản revisions. Không xóa revisions, drafts, progress, recording hay ledger. Khôi phục nội dung cũ bằng lần xuất bản mới có kiểm tra từ snapshot; chưa có nút khôi phục một chạm.

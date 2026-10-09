@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart, HelpCircle, X, Check, ArrowRight } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
@@ -28,6 +28,7 @@ export const LessonPlayerPage: React.FC = () => {
 const LearningSession: React.FC<{ lessonId: string; childId: string; userId: string }> = ({ lessonId, childId, userId }) => {
   const navigate = useNavigate();
   const { activeChild, updatePointsLocally } = useChildStore();
+  const queryClient = useQueryClient();
   const {
     initSession,
     saveStepProgress,
@@ -209,6 +210,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
 
         const { stars, pointsEarned, totalPoints } = res.data.data;
         updatePointsLocally(totalPoints);
+        void queryClient.invalidateQueries({ queryKey: ['childPoints'] });
         if (activeChild) {
           await clearSession(lesson._id, activeChild._id);
         }

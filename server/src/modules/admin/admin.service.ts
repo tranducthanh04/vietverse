@@ -11,6 +11,10 @@ import { ShopItem } from '../../models/ShopItem.js';
 import { PointTransaction } from '../../models/PointTransaction.js';
 import { AdminAuditLog } from '../../models/AdminAuditLog.js';
 import { logger } from '../../utils/logger.js';
+import type { z } from 'zod';
+import type { createInventorySchema } from './admin.validation.js';
+
+type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 
 export class AdminService {
   static async getKPIs() {
@@ -135,6 +139,7 @@ export class AdminService {
     }
 
     let refunded = false;
+    let itemRevoked = false;
     let stockRestored = false;
     let refundTransaction;
     const item = current.itemId as any;
@@ -178,12 +183,26 @@ export class AdminService {
             };
           itemLocked = true;
         }
+        // A refunded virtual item is revoked so the child cannot keep both the points and the item.
+        const revokeVirtual = item?.type === 'virtual';
         const child = await Child.findByIdAndUpdate(current.childId, {
           $inc: { viviPoints: current.pointsSpent },
+          ...(revokeVirtual ? { $pull: { ownedItemIds: item._id } } : {}),
         });
         if (!child)
           throw { statusCode: 409, message: 'Hồ sơ bé không còn tồn tại.' };
         refunded = true;
+        if (revokeVirtual) {
+          itemRevoked = true;
+          await Child.updateOne(
+            { _id: current.childId, equippedAvatarItemId: item._id },
+            { $unset: { equippedAvatarItemId: 1 } }
+          );
+          await Child.updateOne(
+            { _id: current.childId, profileDecorationId: item._id },
+            { $unset: { profileDecorationId: 1 } }
+          );
+        }
 
         // 2. Audit ledger transaction for refund
         refundTransaction = await PointTransaction.create({
@@ -282,7 +301,10 @@ export class AdminService {
               refundLock: id,
               viviPoints: { $gte: current.pointsSpent },
             },
-            { $inc: { viviPoints: -current.pointsSpent } }
+            {
+              $inc: { viviPoints: -current.pointsSpent },
+              ...(itemRevoked ? { $addToSet: { ownedItemIds: item._id } } : {}),
+            }
           );
           if (reversed.modifiedCount !== 1) compensationFailed = true;
         } catch (compensationError) {
@@ -374,6 +396,31 @@ export class AdminService {
 
   static async getInventory() {
     return ShopItem.find().sort({ type: 1, costPoints: 1 });
+  }
+
+  static async createInventory(data: CreateInventoryInput, adminId?: string) {
+    const item = await ShopItem.create({
+      ...data,
+      // Physical gifts start without stock until operations confirm it; virtual items are unlimited.
+      ...(data.type === 'physical' ? { stock: data.stock ?? 0 } : {}),
+    });
+    if (adminId) {
+      await AdminAuditLog.create({
+        adminId,
+        action: 'create_inventory',
+        targetType: 'ShopItem',
+        targetId: item._id.toString(),
+        details: {
+          name: item.name,
+          type: item.type,
+          category: item.category,
+          costPoints: item.costPoints,
+          stock: item.type === 'physical' ? item.stock : undefined,
+          active: item.active,
+        },
+      }).catch(() => {});
+    }
+    return item;
   }
 
   static async updateInventory(id: string, data: any, adminId?: string) {

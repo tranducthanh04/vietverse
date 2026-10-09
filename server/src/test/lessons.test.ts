@@ -137,7 +137,7 @@ describe('Lessons & Idempotent Points API with Server-side Grading & Unlock Enfo
     expect(cheatRes.status).toBe(200);
     expect(cheatRes.body.data.scorePercent).toBe(50);
     expect(cheatRes.body.data.stars).toBe(1); // 1 star instead of 3 stars!
-    expect(cheatRes.body.data.pointsEarned).toBe(10); // Passed at 50%
+    expect(cheatRes.body.data.pointsEarned).toBe(11); // Passed at 50%: +10 lesson, +1 passed activity (D1)
   });
 
   it('rejects completion with unknown activityId or missing answers', async () => {
@@ -257,14 +257,14 @@ describe('Lessons & Idempotent Points API with Server-side Grading & Unlock Enfo
 
     expect(res1.status).toBe(200);
     expect(res1.body.success).toBe(true);
-    expect(res1.body.data.pointsEarned).toBe(10);
-    expect(res1.body.data.totalPoints).toBe(10);
+    expect(res1.body.data.pointsEarned).toBe(12); // +10 lesson, +1 x 2 passed activities (D1)
+    expect(res1.body.data.totalPoints).toBe(12);
     expect(res1.body.data.stars).toBe(3);
     expect(res1.body.data.scorePercent).toBe(100);
 
     // Verify Child in DB
     const childAfterFirst = await Child.findById(child._id);
-    expect(childAfterFirst?.viviPoints).toBe(10);
+    expect(childAfterFirst?.viviPoints).toBe(12);
 
     // 3. Second completion of the SAME lesson by the same child:
     // MUST NOT award duplicate points (idempotent)!
@@ -282,9 +282,9 @@ describe('Lessons & Idempotent Points API with Server-side Grading & Unlock Enfo
     expect(res2.status).toBe(200);
     expect(res2.body.success).toBe(true);
     expect(res2.body.data.pointsEarned).toBe(0); // 0 points on duplicate completion
-    expect(res2.body.data.totalPoints).toBe(10); // Still 10 points!
+    expect(res2.body.data.totalPoints).toBe(12); // Still 12 points!
 
     const childAfterSecond = await Child.findById(child._id);
-    expect(childAfterSecond?.viviPoints).toBe(10); // Confirmed unchanged
+    expect(childAfterSecond?.viviPoints).toBe(12); // Confirmed unchanged
   });
 });

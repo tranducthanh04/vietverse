@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "seed": "tsx src/seeds/seed.ts",
     "cms:metadata": "tsx src/seeds/migrateContentMetadata.ts",
-    "cms:import-customer": "tsx src/seeds/customer/importCustomerContent.ts"
+    "cms:import-customer": "tsx src/seeds/customer/importCustomerContent.ts",
+    "migrate:shop-category": "tsx src/seeds/migrateShopItemCategory.ts"
   },
   "dependencies": {
     "@payos/node": "^2.0.5",

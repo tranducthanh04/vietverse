@@ -199,8 +199,8 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     expect(completeRes.status).toBe(200);
     expect(completeRes.body.success).toBe(true);
     expect(completeRes.body.data.stars).toBe(3);
-    expect(completeRes.body.data.pointsEarned).toBe(10);
-    expect(completeRes.body.data.totalPoints).toBe(10);
+    expect(completeRes.body.data.pointsEarned).toBe(12); // +10 lesson, +1 x 2 passed activities (D1)
+    expect(completeRes.body.data.totalPoints).toBe(12);
 
     // ==========================================
     // STEP 6: Verify Idempotency - Retrying Lesson 1 does not duplicate ViVi Points
@@ -219,7 +219,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
 
     expect(retryRes.status).toBe(200);
     expect(retryRes.body.data.pointsEarned).toBe(0); // Idempotent!
-    expect(retryRes.body.data.totalPoints).toBe(10);
+    expect(retryRes.body.data.totalPoints).toBe(12);
 
     // ==========================================
     // STEP 7: Post Culture Article Quiz, Win +5 ViVi Points
@@ -235,7 +235,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     expect(cultureRes.status).toBe(200);
     expect(cultureRes.body.success).toBe(true);
     expect(cultureRes.body.data.pointsAwarded).toBe(5);
-    expect(cultureRes.body.data.totalPoints).toBe(15);
+    expect(cultureRes.body.data.totalPoints).toBe(17);
 
     // Verify Culture Quiz Idempotency: Retrying does not double award points
     const retryCultureRes = await request(app)
@@ -248,7 +248,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
 
     expect(retryCultureRes.status).toBe(200);
     expect(retryCultureRes.body.data.pointsAwarded).toBe(0); // 0 points on retry!
-    expect(retryCultureRes.body.data.totalPoints).toBe(15); // balance still 15!
+    expect(retryCultureRes.body.data.totalPoints).toBe(17); // balance still 17!
 
     const expLogs = await ExplorationLog.find({ childId, kind: 'culture', refId: cultureId });
     expect(expLogs.length).toBe(1); // exactly 1 log!
@@ -295,7 +295,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
 
     expect(redeemRes.status).toBe(200);
     expect(redeemRes.body.success).toBe(true);
-    expect(redeemRes.body.data.remainingPoints).toBe(5); // 15 - 10 = 5
+    expect(redeemRes.body.data.remainingPoints).toBe(7); // 17 - 10 = 7
 
     // ==========================================
     // STEP 10: Points Shop - Prevent Overdrafting (Cannot redeem when balance is insufficient)
@@ -305,7 +305,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
       .set('Authorization', `Bearer ${parentToken}`)
       .send({
         childId,
-        itemId: shopItemId, // Costs 10, but balance is only 5
+        itemId: shopItemId, // Costs 10, but balance is only 7
         shippingAddress: {
           recipientName: 'Mẹ Bé Bắp',
           phone: '0901234567',
