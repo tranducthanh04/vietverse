@@ -27,6 +27,8 @@ Quyết định bảo vệ phiên học khi xuất bản:
 - Complete lesson và culture quiz nhận `contentVersion`; thiếu version chỉ tương thích khi live vẫn là 0. Live đã đổi trả `409 CONTENT_VERSION_REQUIRED`; version không tồn tại trả 404. Chấm snapshot nhưng giữ nguyên ID progress/khóa thưởng, không reset sao/điểm.
 - Story/culture `withdrawn` bị loại khỏi list/detail và từ chối exploration/quiz mới, kể cả gửi version cũ; lịch sử cũ còn nguyên.
 - Multipart recording dùng field `audio`, nhận `contentVersion`; `lessonId`/`activityId` phải đi cùng nhau. Server kiểm tra ownership, unlock và activity thu âm đúng version trước upload. Response có `id` dùng làm đáp án; thiếu version trên recording legacy chỉ khớp bài version 0. `true`, text hoặc ID bản thu khác bé/bài/activity/version không được tính đạt.
+- Client đọc session IndexedDB trước GET lesson, giữ `contentVersion` xuyên reload/nộp bài/thu âm. Session legacy thiếu version cần người dùng chủ động bắt đầu lại; không tự gán đáp án cũ vào bài mới. Quiz giữ bản đã tải khi đổi focus/kết nối.
+- Outbox lưu ID ổn định, chủ tài khoản, child và version; chỉ xóa đúng item đã xác nhận. Lỗi 400/403/404/409 giữ đáp án với trạng thái `needs_attention`, có thử lại chủ động; lỗi mạng/401 dừng nhưng giữ toàn bộ đuôi. JSON hỏng giữ nguyên để khôi phục. Nếu cả mạng và lưu local lỗi, không xóa session hoặc báo hoàn thành.
 
 ## Auth
 

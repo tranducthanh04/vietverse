@@ -25,6 +25,7 @@ export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { activeChild, updatePointsLocally } = useChildStore();
+  const [viewId] = useState(() => crypto.randomUUID());
 
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -43,12 +44,15 @@ export const CultureDetailPage: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['cultureArticle', id],
+    queryKey: ['cultureArticle', id, viewId],
     queryFn: async () => {
       const res = await api.get(`/culture/${id}`);
       return res.data.data;
     },
     enabled: !!id,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   useEffect(() => {
@@ -172,6 +176,7 @@ export const CultureDetailPage: React.FC = () => {
       setSubmitError(null);
       const res = await api.post(`/culture/${id}/quiz`, {
         childId: activeChild._id,
+        contentVersion: article.contentVersion,
         answers: formattedAnswers,
       });
 

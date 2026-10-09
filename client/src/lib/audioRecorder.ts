@@ -17,6 +17,7 @@ export interface UseAudioRecorderReturn {
     childId: string;
     lessonId?: string;
     activityId?: string;
+    contentVersion?: number;
     wordOrPrompt?: string;
   }) => Promise<any>;
 }
@@ -146,6 +147,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       childId: string;
       lessonId?: string;
       activityId?: string;
+      contentVersion?: number;
       wordOrPrompt?: string;
     }) => {
       if (!audioBlob) {
@@ -158,6 +160,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       formData.append('childId', params.childId);
       if (params.lessonId) formData.append('lessonId', params.lessonId);
       if (params.activityId) formData.append('activityId', params.activityId);
+      if (params.contentVersion !== undefined) formData.append('contentVersion', String(params.contentVersion));
       if (params.wordOrPrompt) formData.append('wordOrPrompt', params.wordOrPrompt);
       formData.append('durationSec', durationSec.toString());
 

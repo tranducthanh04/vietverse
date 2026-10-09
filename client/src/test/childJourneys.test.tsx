@@ -176,11 +176,13 @@ describe('child route hydration and session limits', () => {
     expect(screen.queryByLabelText('Thoát bài học')).not.toBeInTheDocument();
   });
 
-  it('allows an administrator to preview a lesson without creating a child', async () => {
+  it('directs the legacy preview URL to CMS without creating a child or reading the learner API', async () => {
     useAuthStore.setState({ user: { id: 'admin', email: 'admin@example.test', displayName: 'Admin', role: 'admin' } });
-    request = (config) => config.url?.startsWith('/lessons/') ? { _id: 'lesson', activities: [] } : [];
+    const learnerRequests: string[] = [];
+    request = (config) => { if (config.url?.startsWith('/lessons/')) learnerRequests.push(config.url); return []; };
     showRoute('/hoc/lesson?preview=true');
-    expect(await screen.findByLabelText('Thoát bài học')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Về quản trị bài học' })).toBeInTheDocument();
+    expect(learnerRequests).toEqual([]);
     expect(screen.queryByRole('link', { name: /tạo hồ sơ/i })).not.toBeInTheDocument();
   });
 

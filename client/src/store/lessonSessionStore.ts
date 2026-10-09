@@ -8,6 +8,7 @@ export interface ActivityAnswer {
 }
 
 export interface CachedLessonSession {
+  contentVersion?: number;
   lessonId: string;
   childId: string;
   currentStepIndex: number;
@@ -18,27 +19,33 @@ export interface CachedLessonSession {
 
 interface LessonSessionState {
   currentSession: CachedLessonSession | null;
-  initSession: (lessonId: string, childId: string) => Promise<CachedLessonSession>;
+  initSession: (lessonId: string, childId: string, contentVersion: number) => Promise<CachedLessonSession>;
   saveStepProgress: (stepIndex: number, answer?: ActivityAnswer) => Promise<void>;
   loseHeart: () => Promise<number>;
   clearSession: (lessonId: string, childId: string) => Promise<void>;
 }
 
+export const readCachedSession = (lessonId: string, childId: string) => get<CachedLessonSession>(`vietverse_session_${childId}_${lessonId}`);
+let generation = 0;
+
 export const useLessonSessionStore = create<LessonSessionState>((setStore, getStore) => ({
   currentSession: null,
 
-  initSession: async (lessonId: string, childId: string) => {
+  initSession: async (lessonId: string, childId: string, contentVersion: number) => {
+    const request = ++generation;
+    setStore({ currentSession: null });
     const key = `vietverse_session_${childId}_${lessonId}`;
     const cached = await get<CachedLessonSession>(key);
 
     if (cached) {
-      setStore({ currentSession: cached });
+      if (request === generation) setStore({ currentSession: cached });
       return cached;
     }
 
     const newSession: CachedLessonSession = {
       lessonId,
       childId,
+      contentVersion,
       currentStepIndex: 0,
       answers: [],
       hearts: 3,
@@ -46,7 +53,7 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
     };
 
     await set(key, newSession);
-    setStore({ currentSession: newSession });
+    if (request === generation) setStore({ currentSession: newSession });
     return newSession;
   },
 
@@ -66,7 +73,7 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
 
     const key = `vietverse_session_${currentSession.childId}_${currentSession.lessonId}`;
     await set(key, updatedSession);
-    setStore({ currentSession: updatedSession });
+    if (getStore().currentSession === currentSession) setStore({ currentSession: updatedSession });
   },
 
   loseHeart: async () => {
@@ -77,13 +84,15 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
     const updatedSession = { ...currentSession, hearts: nextHearts };
     const key = `vietverse_session_${currentSession.childId}_${currentSession.lessonId}`;
     await set(key, updatedSession);
-    setStore({ currentSession: updatedSession });
+    if (getStore().currentSession === currentSession) setStore({ currentSession: updatedSession });
     return nextHearts;
   },
 
   clearSession: async (lessonId: string, childId: string) => {
+    generation++;
     const key = `vietverse_session_${childId}_${lessonId}`;
     await del(key);
-    setStore({ currentSession: null });
+    const current = getStore().currentSession;
+    if (current?.lessonId === lessonId && current.childId === childId) setStore({ currentSession: null });
   },
 }));

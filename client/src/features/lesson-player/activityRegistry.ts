@@ -11,6 +11,7 @@ export interface ActivityRendererProps {
   activity: any;
   childId: string;
   lessonId: string;
+  contentVersion?: number;
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 

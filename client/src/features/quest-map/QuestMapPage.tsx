@@ -5,6 +5,7 @@ import { Lock, Star, Play, CheckCircle2, Award, Sparkles, MapPin, Compass } from
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
 
 export const QuestMapPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export const QuestMapPage: React.FC = () => {
 
   return (
     <div className="py-6 px-4 max-w-6xl mx-auto space-y-8">
+      {activeChild && <PendingSubmissions childId={activeChild._id} />}
       {/* Header Banner: Stitch Folk Play Styling */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary via-primary-container to-secondary-container text-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-outline-variant/30">
         <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />

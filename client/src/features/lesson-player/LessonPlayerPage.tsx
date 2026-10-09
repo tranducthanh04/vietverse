@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Heart, HelpCircle, X, Check, ArrowRight } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
-import { useLessonSessionStore, ActivityAnswer } from '../../store/lessonSessionStore.js';
+import { useLessonSessionStore, readCachedSession, type CachedLessonSession, ActivityAnswer } from '../../store/lessonSessionStore.js';
+import { useAuthStore } from '../../store/authStore.js';
+import { enqueueOfflineCompletion } from '../../lib/offlineSync.js';
+import { PendingSubmissions } from './PendingSubmissions.js';
 import { getActivityComponent } from './activityRegistry.js';
 import { ProgressBar } from '../../components/ui/ProgressBar.js';
 import { Button } from '../../components/ui/Button.js';
@@ -14,16 +17,28 @@ import { VI_LOCALES } from '../../locales/vi.js';
 export const LessonPlayerPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [searchParams] = useSearchParams();
+  const childId = useChildStore(state => state.activeChild?._id);
+  const userId = useAuthStore(state => state.user?.id);
+  if (searchParams.get('preview') === 'true') return <div className="p-6">Xem trước nội dung qua CMS. <Link to="/admin/lessons">Về quản trị bài học</Link></div>;
+  if (!lessonId || !childId || !userId) return <p className="p-6">Hãy chọn hồ sơ bé trước khi học.</p>;
+  return <LearningSession key={`${userId}:${childId}:${lessonId}`} lessonId={lessonId} childId={childId} userId={userId} />;
+};
+
+const LearningSession: React.FC<{ lessonId: string; childId: string; userId: string }> = ({ lessonId, childId, userId }) => {
   const navigate = useNavigate();
-  const isPreview = searchParams.get('preview') === 'true';
   const { activeChild, updatePointsLocally } = useChildStore();
   const {
-    currentSession,
     initSession,
     saveStepProgress,
     loseHeart,
     clearSession,
   } = useLessonSessionStore();
+  const [cached, setCached] = useState<CachedLessonSession | null | undefined>(undefined);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [cacheError, setCacheError] = useState<string | null>(null);
+  const [offlinePending, setOfflinePending] = useState(false);
+  const [submissionId] = useState(() => crypto.randomUUID());
+  const legacySession = !!cached && cached.contentVersion === undefined;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [hearts, setHearts] = useState(3);
@@ -43,31 +58,52 @@ export const LessonPlayerPage: React.FC = () => {
 
   // Fetch lesson details
   const { data: lesson, isLoading, error } = useQuery({
-    queryKey: ['lesson', lessonId, activeChild?._id],
+    queryKey: ['lesson', lessonId, childId, cached?.contentVersion ?? `current:${submissionId}`],
     queryFn: async () => {
-      const url = activeChild?._id
-        ? `/lessons/${lessonId}?childId=${activeChild._id}`
-        : `/lessons/${lessonId}`;
+      const url = `/lessons/${lessonId}?childId=${childId}${cached?.contentVersion !== undefined ? `&contentVersion=${cached.contentVersion}` : ''}`;
       const res = await api.get(url);
       return res.data.data;
     },
-    enabled: !!lessonId,
+    enabled: cached !== undefined && !legacySession && !cacheError,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   // Restore session from IndexedDB if available
   useEffect(() => {
-    if (lessonId && activeChild) {
-      initSession(lessonId, activeChild._id).then((session) => {
-        if (session) {
-          setCurrentStep(session.currentStepIndex || 0);
-          setHearts(session.hearts ?? 3);
-          setAnswers(session.answers || []);
-        }
-      });
-    }
-  }, [lessonId, activeChild]);
+    let cancelled = false;
+    readCachedSession(lessonId, childId).then(session => { if (!cancelled) setCached(session ?? null); })
+      .catch(() => { if (!cancelled) setCacheError('Chưa đọc được phiên học trên máy. Vui lòng tải lại trang.'); });
+    return () => { cancelled = true; };
+  }, [lessonId, childId]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!lesson || legacySession) return;
+    let cancelled = false;
+    initSession(lessonId, childId, lesson.contentVersion).then(session => {
+      if (cancelled) return;
+      if (session.contentVersion !== lesson.contentVersion) { setCacheError('Phiên học đã thay đổi ở tab khác. Vui lòng tải lại trang.'); return; }
+      setCurrentStep(session.currentStepIndex || 0); setHearts(session.hearts ?? 3); setAnswers(session.answers || []); setSessionReady(true);
+    }).catch(() => { if (!cancelled) setCacheError('Chưa lưu được phiên học. Vui lòng kiểm tra bộ nhớ trình duyệt.'); });
+    return () => { cancelled = true; };
+  }, [lesson, lessonId, childId, legacySession, initSession]);
+
+  const restart = async () => {
+    try {
+      await clearSession(lessonId, childId);
+      setSessionReady(false); setCacheError(null); setCached(null);
+      setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false);
+    } catch { setCacheError('Chưa thể bắt đầu lại. Dữ liệu cũ vẫn được giữ.'); }
+  };
+
+  if (legacySession || cacheError || (error && cached)) return <div className="p-6 space-y-4" role="alert">
+    <p>{legacySession ? 'Không xác định được phiên bản của bài đang làm. Câu trả lời cũ vẫn được giữ cho tới khi bạn chọn bắt đầu lại.' : cacheError ?? 'Chưa tải được phiên bản bài đang học. Bạn có thể tải lại trang hoặc bắt đầu lại bài hiện tại.'}</p>
+    <p>Tiến độ và điểm đã lưu trên máy chủ không thay đổi.</p>
+    <Button onClick={restart}>Bắt đầu lại bài học</Button>
+  </div>;
+
+  if (cached === undefined || isLoading || (!error && !sessionReady)) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
@@ -126,16 +162,6 @@ export const LessonPlayerPage: React.FC = () => {
     }
 
     if (isLastStep) {
-      if (isPreview) {
-        setVictoryData({
-          stars: 3,
-          pointsEarned: 0,
-          totalPoints: activeChild?.viviPoints || 0,
-          isOfflinePending: false,
-        });
-        setShowVictory(true);
-        return;
-      }
       if (isSubmitting) return;
       try {
         setIsSubmitting(true);
@@ -143,6 +169,7 @@ export const LessonPlayerPage: React.FC = () => {
         const res = await api.post(`/lessons/${lesson._id}/complete`, {
           childId: activeChild?._id,
           answers: currentAnswers,
+          contentVersion: lesson.contentVersion,
         });
 
         const { stars, pointsEarned, totalPoints } = res.data.data;
@@ -157,27 +184,23 @@ export const LessonPlayerPage: React.FC = () => {
         const isNetworkError = !err.response || err.code === 'ERR_NETWORK';
         if (isNetworkError) {
           try {
-            const queue = JSON.parse(localStorage.getItem('vietverse_offline_completions') || '[]');
-            queue.push({
+            enqueueOfflineCompletion({
+              id: submissionId, userId, contentVersion: lesson.contentVersion,
               lessonId: lesson._id,
-              childId: activeChild?._id,
+              childId,
               answers: currentAnswers,
               savedAt: Date.now(),
             });
-            localStorage.setItem('vietverse_offline_completions', JSON.stringify(queue));
-          } catch { /* localStorage unavailable — skip offline queuing */ }
+          } catch {
+            setSubmitError('Chưa lưu được bài lên máy chủ hoặc bộ nhớ máy. Giữ trang này và thử nộp lại.');
+            return;
+          }
 
           if (activeChild) {
             await clearSession(lesson._id, activeChild._id);
           }
 
-          setVictoryData({
-            stars: 0,
-            pointsEarned: 0,
-            totalPoints: activeChild?.viviPoints || 0,
-            isOfflinePending: true,
-          });
-          setShowVictory(true);
+          setOfflinePending(true);
         } else {
           const msg = err.response?.data?.error?.message || 'Có lỗi khi lưu kết quả bài học. Bé bấm thử nộp lại nhé!';
           setSubmitError(msg);
@@ -241,19 +264,23 @@ export const LessonPlayerPage: React.FC = () => {
 
       {/* Main Activity Area */}
       <main className="flex-1 flex flex-col justify-center items-center py-6 px-4">
-        {ActivityComponent && (activeChild || isPreview) && (
+        {ActivityComponent && activeChild && (
           <ActivityComponent
+            key={`${lesson.contentVersion}:${currentActivity.id}`}
             activity={currentActivity}
             childId={activeChild?._id || 'preview_child'}
             lessonId={lesson._id}
+            contentVersion={lesson.contentVersion}
             onComplete={handleActivityComplete}
           />
         )}
       </main>
+      <PendingSubmissions childId={childId} />
+      {offlinePending && <div role="status" className="p-4 bg-amber-50">Bài đã lưu trên máy, đang chờ đồng bộ. Chưa xác nhận điểm thưởng. <Button onClick={() => navigate('/kham-pha')}>Về bản đồ</Button></div>}
 
       {/* Error alert banner if submission failed */}
       {submitError && (
-        <div className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fadeIn">
+        <div role="alert" className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fadeIn">
           <span>⚠️ {submitError}</span>
           <Button
             type="button"
@@ -292,7 +319,7 @@ export const LessonPlayerPage: React.FC = () => {
             variant={stepAnswered ? 'primary' : 'outline'}
             size="kid"
             onClick={handleNextStep}
-            disabled={isSubmitting || (!stepAnswered && currentActivity?.type !== 'word_card')}
+            disabled={isSubmitting || offlinePending || (!stepAnswered && currentActivity?.type !== 'word_card')}
             className="flex items-center space-x-2 px-8"
           >
             <span>{isSubmitting ? 'Đang lưu...' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
@@ -309,11 +336,11 @@ export const LessonPlayerPage: React.FC = () => {
         totalPoints={victoryData.totalPoints}
         isOfflinePending={victoryData.isOfflinePending}
         onBackToMap={() => navigate('/kham-pha')}
-        onPlayAgain={() => {
-          setShowVictory(false);
-          setCurrentStep(0);
-          setAnswers([]);
-          setStepAnswered(false);
+        onPlayAgain={async () => {
+          try {
+            await initSession(lessonId, childId, lesson.contentVersion);
+            setShowVictory(false); setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false); setLastAnswerCorrect(null);
+          } catch { setShowVictory(false); setCacheError('Chưa lưu được phiên học mới. Vui lòng tải lại trang.'); }
         }}
       />
     </div>

@@ -15,6 +15,7 @@ export interface RecordVoiceActivityProps {
   };
   childId: string;
   lessonId: string;
+  contentVersion?: number;
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
 
@@ -22,6 +23,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
   activity,
   childId,
   lessonId,
+  contentVersion,
   onComplete,
 }) => {
   const {
@@ -50,10 +52,13 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
         childId,
         lessonId,
         activityId: activity.id,
+        contentVersion,
         wordOrPrompt: activity.targetWord || activity.prompt,
       });
+      const recordingId = res?.id ?? res?._id;
+      if (typeof recordingId !== 'string' || !/^[a-f\d]{24}$/i.test(recordingId)) throw new Error('Invalid recording response');
       setIsSubmitted(true);
-      onComplete(true, res?.id || activity.targetWord || true);
+      onComplete(true, recordingId);
     } catch (err: any) {
       const msg = err.response?.data?.error?.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
       setUploadError(msg);
