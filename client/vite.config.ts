@@ -23,5 +23,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // Node 25+ ships a global localStorage that shadows jsdom's; turn it off so tests use jsdom storage.
+    // Guarded because Node 20 (CI) rejects the flag.
+    poolOptions: {
+      forks: {
+        execArgv: Number(process.versions.node.split('.')[0]) >= 22 ? ['--no-experimental-webstorage'] : [],
+      },
+    },
   },
 });
