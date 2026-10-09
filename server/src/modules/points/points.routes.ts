@@ -8,5 +8,7 @@ router.use(authMiddleware);
 router.get('/shop/items', PointsController.getShopItems);
 router.post('/shop/redeem', PointsController.redeem);
 router.get('/children/:childId', PointsController.getChildPoints);
+router.get('/children/:childId/collection', PointsController.getChildCollection);
+router.patch('/children/:childId/equip', PointsController.equip);
 
 export default router;

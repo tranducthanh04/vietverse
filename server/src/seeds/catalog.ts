@@ -94,10 +94,28 @@ export const culture = [
   { category: 'folk_games', title: 'Cùng chơi trò dân gian', intro: 'Trò chơi dân gian giúp bé vận động và hợp tác với bạn.', funFacts: ['Ô ăn quan thường dùng các ô vẽ và những viên sỏi nhỏ.', 'Rồng rắn lên mây là trò chơi theo nhóm.', 'Chọn chỗ chơi an toàn và thống nhất luật trước khi bắt đầu.'], question: 'Trước khi chơi cùng nhóm, bé nên làm gì?', options: ['Thống nhất luật và chọn chỗ an toàn', 'Đẩy bạn ra', 'Chạy ra lòng đường'] },
 ].map(({ question, options, ...article }) => ({ ...article, seedKey: `culture-${cultureCategoryKeys[article.category]}`, category: cultureCategoryKeys[article.category], audioUrl: '', tags: ['Bài mẫu biên soạn'], quiz: [{ question, options, correctAnswer: 0, explanation: options[0] }] }));
 
-export const shopItems = [
-  { name: 'Huy hiệu Sao Sáng Lí Lắc', type: 'virtual', costPoints: 20, badgeCode: 'badge_star_lilac' },
-  { name: 'Nón Lá Tí Hon cho Mascot', type: 'virtual', costPoints: 35, badgeCode: 'item_non_la_mascot' },
-  { name: 'Áo Dài Gấm Mini cho Vivi', type: 'virtual', costPoints: 50, badgeCode: 'item_ao_dai_mini' },
+const emojiAsset = (emoji: string, background: string) =>
+  `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" rx="40" fill="${background}"/><text x="40" y="54" font-size="40" text-anchor="middle">${emoji}</text></svg>`)}`;
+const SAMPLE_NOTE = 'Vật phẩm mẫu; quà hiện vật chỉ mở khi vận hành xác nhận tồn kho và giao hàng.';
+const STAR_ASSET = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ctext x="20" y="55" font-size="48"%3E★%3C/text%3E%3C/svg%3E';
+
+// Seed is insert-only by name: existing items (and their categories) are never rewritten here;
+// legacy rows get a category through `npm run migrate:shop-category -w server`.
+interface SeedShopItem { name: string; type: 'virtual' | 'physical'; category?: 'badge' | 'avatar' | 'profile_decoration' | 'collectible'; costPoints: number; badgeCode?: string; stock?: number; description?: string; assetUrl?: string }
+const legacyShopItems: SeedShopItem[] = [
+  { name: 'Huy hiệu Sao Sáng Lí Lắc', type: 'virtual', category: 'badge', costPoints: 20, badgeCode: 'badge_star_lilac' },
+  { name: 'Nón Lá Tí Hon cho Mascot', type: 'virtual', category: 'collectible', costPoints: 35, badgeCode: 'item_non_la_mascot' },
+  { name: 'Áo Dài Gấm Mini cho Vivi', type: 'virtual', category: 'collectible', costPoints: 50, badgeCode: 'item_ao_dai_mini' },
   { name: 'Bộ Sticker Bảng Chữ Cái Vietverse', type: 'physical', costPoints: 80, stock: 0 },
   { name: 'Truyện Tranh Tích Xưa Nước Nam', type: 'physical', costPoints: 150, stock: 0 },
-].map((item) => ({ ...item, active: item.type === 'virtual', assetUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ctext x="20" y="55" font-size="48"%3E★%3C/text%3E%3C/svg%3E', description: 'Vật phẩm mẫu; quà hiện vật chỉ mở khi vận hành xác nhận tồn kho và giao hàng.' }));
+];
+const categoryShopItems: SeedShopItem[] = [
+  { name: 'Avatar Bé Mèo Tam Thể', type: 'virtual', category: 'avatar', costPoints: 30, description: 'Ảnh đại diện mèo tam thể cho hồ sơ của bé.', assetUrl: emojiAsset('🐱', '#FFE0B2') },
+  { name: 'Avatar Chú Trâu Vàng', type: 'virtual', category: 'avatar', costPoints: 40, description: 'Ảnh đại diện chú trâu chăm chỉ của làng quê.', assetUrl: emojiAsset('🐃', '#FFF3C4') },
+  { name: 'Khung Hoa Sen', type: 'virtual', category: 'profile_decoration', costPoints: 45, description: 'Khung hoa sen hồng bao quanh ảnh đại diện.', assetUrl: emojiAsset('🪷', '#FCE4EC') },
+  { name: 'Khung Đèn Ông Sao', type: 'virtual', category: 'profile_decoration', costPoints: 60, description: 'Khung đèn ông sao rực rỡ mùa Trung thu.', assetUrl: emojiAsset('⭐', '#FFF8E1') },
+];
+export const shopItems = [
+  ...legacyShopItems.map((item) => ({ ...item, active: item.type === 'virtual', assetUrl: STAR_ASSET, description: SAMPLE_NOTE })),
+  ...categoryShopItems.map((item) => ({ ...item, active: true })),
+];

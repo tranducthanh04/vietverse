@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { SHOP_ITEM_CATEGORIES } from '../../models/ShopItem.js';
+import { isAllowedMediaUrl } from '../content/content.validation.js';
 
 export const updateRedemptionSchema = z
   .object({
@@ -10,6 +12,46 @@ export const updateRedemptionSchema = z
   .refine((data) => Object.keys(data).length > 0, {
     message:
       'Cần cung cấp ít nhất một trường thông tin để cập nhật đơn đổi quà',
+  });
+
+const DATA_IMAGE_URL = /^data:image\/(png|jpeg|gif|webp|svg\+xml)[;,]/i;
+const MAX_ASSET_URL_LENGTH = 20000;
+
+/** HTTPS, same-origin path, or an inline image (used by the seed catalog). */
+export function isAllowedShopAssetUrl(value: string): boolean {
+  if (!value) return false;
+  if (DATA_IMAGE_URL.test(value)) return true;
+  return isAllowedMediaUrl(value);
+}
+
+const shopAssetUrl = z
+  .string()
+  .trim()
+  .min(1, 'Thiếu ảnh vật phẩm')
+  .max(MAX_ASSET_URL_LENGTH)
+  .refine(isAllowedShopAssetUrl, 'Ảnh phải là HTTPS, đường dẫn nội bộ hoặc data:image');
+const shopCategory = z.enum(SHOP_ITEM_CATEGORIES);
+
+export const createInventorySchema = z
+  .object({
+    name: z.string().trim().min(1, 'Thiếu tên vật phẩm').max(120),
+    type: z.enum(['virtual', 'physical']),
+    category: shopCategory.optional(),
+    costPoints: z.number().int().min(1).max(100000),
+    assetUrl: shopAssetUrl,
+    description: z.string().trim().max(500).optional(),
+    badgeCode: z.string().trim().max(100).optional(),
+    stock: z.number().int().min(0).max(100000).optional(),
+    active: z.boolean().default(true),
+  })
+  .strict()
+  .refine((data) => data.type !== 'virtual' || data.category !== undefined, {
+    message: 'Vật phẩm ảo bắt buộc chọn loại',
+    path: ['category'],
+  })
+  .refine((data) => data.type !== 'virtual' || data.stock === undefined, {
+    message: 'Vật phẩm ảo không quản lý tồn kho',
+    path: ['stock'],
   });
 
 export const updateInventorySchema = z
@@ -24,7 +66,10 @@ export const updateInventorySchema = z
       .optional(),
     costPoints: z.number().int().min(1).optional(),
     active: z.boolean().optional(),
-    name: z.string().trim().min(1).optional(),
+    name: z.string().trim().min(1).max(120).optional(),
+    category: shopCategory.optional(),
+    description: z.string().trim().max(500).optional(),
+    assetUrl: shopAssetUrl.optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'Cần cung cấp ít nhất một trường thông tin để cập nhật vật phẩm',

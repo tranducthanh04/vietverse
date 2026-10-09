@@ -2,9 +2,14 @@ import { Schema, model, Document } from 'mongoose';
 
 export type ShopItemType = 'virtual' | 'physical';
 
+export const SHOP_ITEM_CATEGORIES = ['badge', 'avatar', 'profile_decoration', 'collectible'] as const;
+export type ShopItemCategory = (typeof SHOP_ITEM_CATEGORIES)[number];
+
 export interface IShopItem extends Document {
   name: string;
   type: ShopItemType;
+  /** Required for virtual items; physical gifts may omit it and are shown as "Quà gửi tận nhà". */
+  category?: ShopItemCategory;
   costPoints: number;
   assetUrl: string;
   description?: string;
@@ -28,6 +33,17 @@ const shopItemSchema = new Schema<IShopItem>(
       enum: ['virtual', 'physical'],
       required: true,
       index: true,
+    },
+    category: {
+      type: String,
+      enum: SHOP_ITEM_CATEGORIES,
+      // Enforced on document create/save. Update queries are guarded by the admin service.
+      required: [
+        function (this: { type?: ShopItemType }) {
+          return this.type === 'virtual';
+        },
+        'Vật phẩm ảo bắt buộc có loại (category)',
+      ],
     },
     costPoints: {
       type: Number,

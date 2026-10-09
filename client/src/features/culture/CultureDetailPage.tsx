@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   Sparkles,
@@ -19,12 +19,14 @@ import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
+import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
 export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { activeChild, updatePointsLocally } = useChildStore();
+  const queryClient = useQueryClient();
   const [viewId] = useState(() => crypto.randomUUID());
 
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
@@ -183,6 +185,7 @@ export const CultureDetailPage: React.FC = () => {
       const { pointsAwarded, totalPoints } = res.data.data;
       setPointsResult(pointsAwarded);
       setQuizSubmitted(true);
+      void queryClient.invalidateQueries({ queryKey: ['childPoints'] });
       if (pointsAwarded > 0) {
         updatePointsLocally(totalPoints);
       }
@@ -253,11 +256,11 @@ export const CultureDetailPage: React.FC = () => {
 
       {/* Hero Banner */}
       <div className="relative rounded-3xl overflow-hidden mb-8 h-80 shadow-kid border-4 border-white">
-        <img
-          src={article.coverImage || 'https://images.unsplash.com/photo-1528127269322-539801943592?w=600'}
-          alt={article.title}
-          className="w-full h-full object-cover"
-        />
+        {article.coverImage ? (
+          <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
+        ) : (
+          <CoverPlaceholder kind="culture" variant={article.category} className="w-full h-full" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-8 text-white">
           <div className="flex items-center space-x-2 mb-2">
             <span className="bg-accent text-stone-900 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">

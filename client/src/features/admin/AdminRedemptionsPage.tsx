@@ -26,6 +26,37 @@ const CARRIERS = [
   { id: 'VNPost', name: 'Bưu điện VNPost', trackUrl: 'https://www.vnpost.vn/tra-cuu-dinh-vi?code=' },
 ];
 
+type ItemCategory = 'badge' | 'avatar' | 'profile_decoration' | 'collectible';
+
+const ITEM_CATEGORIES: { value: ItemCategory; label: string }[] = [
+  { value: 'badge', label: 'Huy hiệu đặc biệt' },
+  { value: 'avatar', label: 'Avatar' },
+  { value: 'profile_decoration', label: 'Trang trí hồ sơ' },
+  { value: 'collectible', label: 'Vật phẩm sưu tầm' },
+];
+
+interface CreateItemForm {
+  name: string;
+  type: 'virtual' | 'physical';
+  category: ItemCategory | '';
+  costPoints: string;
+  assetUrl: string;
+  description: string;
+  stock: string;
+  active: boolean;
+}
+
+const EMPTY_CREATE_FORM: CreateItemForm = {
+  name: '',
+  type: 'virtual',
+  category: 'badge',
+  costPoints: '',
+  assetUrl: '',
+  description: '',
+  stock: '',
+  active: true,
+};
+
 export const AdminRedemptionsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory'>('orders');
@@ -39,13 +70,10 @@ export const AdminRedemptionsPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Inventory editing state
-  const [editingItem, setEditingItem] = useState<any | null>(null);
-  const [inventoryForm, setInventoryForm] = useState({
-    stock: 0,
-    costPoints: 0,
-    active: true,
-  });
+  // Inventory creation state
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createForm, setCreateForm] = useState<CreateItemForm>(EMPTY_CREATE_FORM);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   // Query Redemptions
   const {
@@ -101,12 +129,67 @@ export const AdminRedemptionsPage: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminInventory'] });
-      setEditingItem(null);
+      queryClient.invalidateQueries({ queryKey: ['shopItems'] });
     },
     onError: (err: any) => {
       alert(err.response?.data?.error?.message || 'Không thể cập nhật kho quà.');
     },
   });
+
+  // Mutation: Create Inventory Item
+  const createInventoryMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const res = await api.post('/admin/inventory', payload);
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminInventory'] });
+      queryClient.invalidateQueries({ queryKey: ['shopItems'] });
+      setCreateForm(EMPTY_CREATE_FORM);
+      setShowCreateForm(false);
+    },
+    onError: (err: any) => {
+      const details: { field: string; message: string }[] | undefined = err.response?.data?.error?.details;
+      setCreateError(
+        details?.length
+          ? details.map((d) => `${d.field}: ${d.message}`).join('; ')
+          : err.response?.data?.error?.message || 'Không thể tạo vật phẩm.'
+      );
+    },
+  });
+
+  const handleCreateItem = (event: React.FormEvent) => {
+    event.preventDefault();
+    setCreateError(null);
+    const costPoints = Number(createForm.costPoints);
+    const stock = createForm.stock.trim() === '' ? undefined : Number(createForm.stock);
+    if (!createForm.name.trim() || !createForm.assetUrl.trim()) {
+      setCreateError('Cần nhập tên và ảnh vật phẩm.');
+      return;
+    }
+    if (!Number.isInteger(costPoints) || costPoints < 1) {
+      setCreateError('Giá điểm phải là số nguyên từ 1 trở lên.');
+      return;
+    }
+    if (createForm.type === 'virtual' && !createForm.category) {
+      setCreateError('Vật phẩm ảo cần chọn loại.');
+      return;
+    }
+    if (stock !== undefined && (!Number.isInteger(stock) || stock < 0)) {
+      setCreateError('Tồn kho phải là số nguyên không âm.');
+      return;
+    }
+    createInventoryMutation.mutate({
+      name: createForm.name.trim(),
+      type: createForm.type,
+      ...(createForm.category ? { category: createForm.category } : {}),
+      costPoints,
+      assetUrl: createForm.assetUrl.trim(),
+      ...(createForm.description.trim() ? { description: createForm.description.trim() } : {}),
+      ...(createForm.type === 'physical' && stock !== undefined ? { stock } : {}),
+      active: createForm.active,
+    });
+  };
 
   const handleStartEditOrder = (red: any) => {
     setEditingId(red._id);
@@ -378,7 +461,131 @@ export const AdminRedemptionsPage: React.FC = () => {
                     Quản lý số lượng hàng tồn kho quà hiện vật và giá điểm đổi quà của bé
                   </p>
                 </div>
+                <Button
+                  type="button"
+                  variant={showCreateForm ? 'outline' : 'primary'}
+                  size="sm"
+                  aria-expanded={showCreateForm}
+                  onClick={() => {
+                    setCreateError(null);
+                    setShowCreateForm((open) => !open);
+                  }}
+                >
+                  {showCreateForm ? 'Đóng biểu mẫu' : '+ Tạo vật phẩm'}
+                </Button>
               </div>
+
+              {showCreateForm && (
+                <form
+                  onSubmit={handleCreateItem}
+                  aria-label="Tạo vật phẩm mới"
+                  className="p-4 border-b border-cream-border grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"
+                >
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
+                    Tên vật phẩm
+                    <input
+                      required
+                      maxLength={120}
+                      value={createForm.name}
+                      onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
+                    Hình thức
+                    <select
+                      value={createForm.type}
+                      onChange={(e) => {
+                        const type = e.target.value as CreateItemForm['type'];
+                        setCreateForm({
+                          ...createForm,
+                          type,
+                          category: type === 'virtual' ? createForm.category || 'badge' : '',
+                        });
+                      }}
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    >
+                      <option value="virtual">Vật phẩm ảo</option>
+                      <option value="physical">Quà gửi tận nhà</option>
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
+                    Loại vật phẩm
+                    <select
+                      value={createForm.category}
+                      onChange={(e) => setCreateForm({ ...createForm, category: e.target.value as CreateItemForm['category'] })}
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    >
+                      {createForm.type === 'physical' && <option value="">Không phân loại</option>}
+                      {ITEM_CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
+                    Giá điểm (ViVi Points)
+                    <input
+                      required
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={createForm.costPoints}
+                      onChange={(e) => setCreateForm({ ...createForm, costPoints: e.target.value })}
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700 md:col-span-2">
+                    Ảnh (HTTPS hoặc đường dẫn nội bộ)
+                    <input
+                      required
+                      value={createForm.assetUrl}
+                      onChange={(e) => setCreateForm({ ...createForm, assetUrl: e.target.value })}
+                      placeholder="https://... hoặc /assets/..."
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 font-bold text-xs text-stone-700 md:col-span-2">
+                    Mô tả ngắn
+                    <input
+                      maxLength={500}
+                      value={createForm.description}
+                      onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                    />
+                  </label>
+                  {createForm.type === 'physical' && (
+                    <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
+                      Tồn kho ban đầu (mặc định 0)
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={createForm.stock}
+                        onChange={(e) => setCreateForm({ ...createForm, stock: e.target.value })}
+                        className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      />
+                    </label>
+                  )}
+                  <label className="flex items-center gap-2 font-bold text-xs text-stone-700">
+                    <input
+                      type="checkbox"
+                      checked={createForm.active}
+                      onChange={(e) => setCreateForm({ ...createForm, active: e.target.checked })}
+                    />
+                    Mở bán ngay
+                  </label>
+                  {createError && (
+                    <p role="alert" className="md:col-span-2 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl p-2">
+                      {createError}
+                    </p>
+                  )}
+                  <div className="md:col-span-2 flex justify-end">
+                    <Button type="submit" variant="primary" size="md" isLoading={createInventoryMutation.isPending}>
+                      Tạo vật phẩm
+                    </Button>
+                  </div>
+                </form>
+              )}
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-stone-600 min-w-[700px]">
@@ -405,15 +612,29 @@ export const AdminRedemptionsPage: React.FC = () => {
                         </td>
                         <td className="px-5 py-3 font-bold text-stone-800">{item.name}</td>
                         <td className="px-5 py-3">
-                          <span
-                            className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                              item.type === 'physical'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-purple-100 text-purple-800'
-                            }`}
-                          >
-                            {item.type === 'physical' ? 'Hiện vật vật lý' : 'Huy hiệu ảo'}
-                          </span>
+                          {item.type === 'physical' ? (
+                            <span className="px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800">
+                              Quà gửi tận nhà
+                            </span>
+                          ) : (
+                            <select
+                              aria-label={`Loại của ${item.name}`}
+                              value={item.category ?? ''}
+                              disabled={updateInventoryMutation.isPending}
+                              onChange={(e) =>
+                                updateInventoryMutation.mutate({
+                                  id: item._id,
+                                  data: { category: e.target.value },
+                                })
+                              }
+                              className="px-2 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200"
+                            >
+                              {!item.category && <option value="" disabled>Chưa phân loại</option>}
+                              {ITEM_CATEGORIES.map((c) => (
+                                <option key={c.value} value={c.value}>{c.label}</option>
+                              ))}
+                            </select>
+                          )}
                         </td>
                         <td className="px-5 py-3 font-bold text-secondary">{item.costPoints} pts</td>
                         <td className="px-5 py-3">

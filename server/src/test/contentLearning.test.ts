@@ -74,7 +74,7 @@ describe('published learning versions', () => {
     const answers = activities.map((a, i) => ({ activityId: a.id, userAnswer: userAnswers[i] }));
     const passed = await submit(lessonId, token, { childId, contentVersion: 1, answers }).expect(200);
     expect(passed.body.data.scorePercent).toBe(100);
-    expect(passed.body.data.pointsEarned).toBe(10);
+    expect(passed.body.data.pointsEarned).toBe(14); // +10 lesson, +1 x 4 passed activities (D1)
     const replay = await submit(lessonId, token, { childId, contentVersion: 1, answers }).expect(200);
     expect(replay.body.data.pointsEarned).toBe(0);
     expect(await PointTransaction.countDocuments({ childId, reason: 'lesson' })).toBe(1);
@@ -92,7 +92,7 @@ describe('published learning versions', () => {
     expect(resumed.body.data.activities[0].correctAnswer).toBe('a');
     expect(resumed.body.data.contentVersion).toBe(0);
     const first = await submit(lessonId, token, { childId, contentVersion: 0, answers: [{ activityId: 'q', userAnswer: 'a' }] }).expect(200);
-    expect(first.body.data.scorePercent).toBe(100); expect(first.body.data.pointsEarned).toBe(10);
+    expect(first.body.data.scorePercent).toBe(100); expect(first.body.data.pointsEarned).toBe(11);
     const second = await submit(lessonId, token, { childId, contentVersion: 1, answers: [{ activityId: 'q', userAnswer: 'b' }] }).expect(200);
     expect(second.body.data.scorePercent).toBe(100); expect(second.body.data.pointsEarned).toBe(0);
     expect(await PointTransaction.countDocuments({ childId, reason: 'lesson' })).toBe(1);

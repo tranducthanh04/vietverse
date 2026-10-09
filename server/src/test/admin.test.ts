@@ -247,6 +247,39 @@ describe('Admin API & Schema Validation (P1.7)', () => {
       expect(item?.stock).toBe(11);
     });
 
+    it('cancelling a virtual redemption revokes and unequips the item', async () => {
+      const avatar = await ShopItem.create({
+        name: 'Avatar Mèo',
+        type: 'virtual',
+        category: 'avatar',
+        costPoints: 30,
+        active: true,
+        assetUrl: '/assets/cat.png',
+      });
+      const child = await Child.findOneAndUpdate(
+        { name: 'Bé Na' },
+        { $set: { ownedItemIds: [avatar._id], equippedAvatarItemId: avatar._id } },
+        { new: true }
+      );
+      const virtualRedemption = await Redemption.create({
+        childId: child!._id,
+        itemId: avatar._id,
+        pointsSpent: 30,
+        status: 'delivered',
+      });
+
+      const res = await request(app)
+        .patch(`/api/v1/admin/redemptions/${virtualRedemption._id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ status: 'cancelled' });
+
+      expect(res.status).toBe(200);
+      const after = await Child.findById(child!._id);
+      expect(after?.viviPoints).toBe(30);
+      expect(after?.ownedItemIds.map(String)).not.toContain(avatar._id.toString());
+      expect(after?.equippedAvatarItemId).toBeUndefined();
+    });
+
     it('refunds an order only once when cancellation requests arrive together', async () => {
       const responses = await Promise.all(
         Array.from({ length: 5 }, () =>
@@ -372,6 +405,7 @@ describe('Admin API & Schema Validation (P1.7)', () => {
         name: 'Virtual lock probe',
         description: 'Test item',
         type: 'virtual',
+        category: 'badge',
         costPoints: 50,
         active: true,
         assetUrl: '/assets/test.png',

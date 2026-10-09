@@ -17,6 +17,9 @@ export interface ChildProfile {
   level: number;
   badges: string[];
   ownedItemIds?: string[];
+  /** Avatar bought in the shop; displayed instead of the onboarding `avatarId` when set. */
+  equippedAvatarItemId?: string | null;
+  profileDecorationId?: string | null;
   screenTimeLimit: number;
 }
 

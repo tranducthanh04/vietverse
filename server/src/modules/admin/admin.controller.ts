@@ -5,6 +5,7 @@ import {
   createLessonSchema,
   updateLessonSchema,
   updateInventorySchema,
+  createInventorySchema,
 } from './admin.validation.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 
@@ -86,6 +87,16 @@ export class AdminController {
     try {
       const items = await AdminService.getInventory();
       return sendSuccess(res, items);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async createInventory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validated = createInventorySchema.parse(req.body);
+      const item = await AdminService.createInventory(validated, req.user?.id);
+      return sendSuccess(res, item, 201);
     } catch (error) {
       next(error);
     }

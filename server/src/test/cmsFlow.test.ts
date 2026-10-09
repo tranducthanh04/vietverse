@@ -18,7 +18,7 @@ it('imports source drafts, publishes edits, preserves old learning/rewards and s
   await Lesson.updateOne({ _id: lesson.id }, { activities: [{ id: 'legacy-q', type: 'review', prompt: 'Choose A', options: [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }], correctAnswer: 'a' }] });
   const oldAnswers = [{ activityId: 'legacy-q', userAnswer: 'a' }];
   const complete = () => request(app).post(`/api/v1/lessons/${lesson.id}/complete`).set('Authorization', `Bearer ${parent.accessToken}`).send({ childId: child.id, contentVersion: 0, answers: oldAnswers });
-  expect((await complete().expect(200)).body.data.pointsEarned).toBe(10);
+  expect((await complete().expect(200)).body.data.pointsEarned).toBe(11); // +10 lesson, +1 passed activity (D1)
   const balance = (await Child.findById(child.id).orFail()).viviPoints;
   await importCustomerContent({ dryRun: false, adminId: admin.id });
   const root = `/api/v1/admin/content/lessons/${lesson.id}`;
