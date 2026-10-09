@@ -7,7 +7,11 @@ export type ActivityType =
   | "fill_blank"
   | "sort_order"
   | "record_voice"
-  | "review";
+  | "review"
+  | "multi_select"
+  | "group_sort"
+  | "fill_blanks"
+  | "follow_steps";
 export type Activity = {
   id: string;
   type: ActivityType;
@@ -23,6 +27,10 @@ export type Activity = {
   pairs?: { left: string; right: string }[];
   blanks?: { sentence: string; missing: string }[];
   orderedItems?: string[];
+  groups?: { id: string; label: string }[];
+  template?: string;
+  blankSlots?: { id: string; label: string; acceptedAnswers: string[] }[];
+  steps?: { id: string; text: string }[];
   pointsWeight?: number;
 };
 export type Vocabulary = {
@@ -133,6 +141,11 @@ export const titles = {
   lesson: "Bài học",
   story: "Truyện / đồng dao",
   culture: "Văn hóa",
+};
+export const activityTypeLabels: Record<ActivityType, string> = {
+  listen_choose: 'listen_choose', word_card: 'word_card', drag_match: 'drag_match',
+  fill_blank: 'fill_blank', sort_order: 'sort_order', record_voice: 'record_voice', review: 'review',
+  multi_select: 'Chọn nhiều đáp án', group_sort: 'Phân nhóm', fill_blanks: 'Điền nhiều ô trống', follow_steps: 'Nghe và thực hiện',
 };
 export const categories = {
   tet: "Tết",

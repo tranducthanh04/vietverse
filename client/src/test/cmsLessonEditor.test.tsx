@@ -140,3 +140,63 @@ it("describes legacy answer conversion beside its existing activity select", () 
     screen.getByRole("combobox", { name: "Đáp án 1" }),
   ).toHaveAccessibleDescription(/Đáp án legacy chưa rõ/);
 });
+it('adds the four new authoring types with Vietnamese labels and empty server activity IDs',()=>{
+  render(<Form/>);
+  for(const [type,label] of [['multi_select','Chọn nhiều đáp án'],['group_sort','Phân nhóm'],['fill_blanks','Điền nhiều ô trống'],['follow_steps','Nghe và thực hiện']]){
+    expect(screen.getAllByRole('option',{name:label}).length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText('Loại hoạt động mới'),{target:{value:type}});
+    fireEvent.click(screen.getByRole('button',{name:'Thêm hoạt động'}));
+  }
+  const value=JSON.parse(screen.getByTestId('value').textContent!);
+  expect(value.activities.slice(2).map((a:{id:string;type:string})=>[a.id,a.type])).toEqual([
+    ['', 'multi_select'],['','group_sort'],['','fill_blanks'],['','follow_steps']]);
+  expect(screen.getByLabelText('Mẫu câu 5')).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Thêm bước 6'})).toBeInTheDocument();
+});
+function NewForm({activity}:{activity:LessonContent['activities'][number]}){
+  const [value,onChange]=useState({...initial,activities:[activity]});
+  return <><LessonEditor value={value} onChange={onChange}/><output data-testid="value">{JSON.stringify(value)}</output></>;
+}
+it('keeps repeated option IDs stable on reorder and warns when selected answers are removed',()=>{
+  render(<NewForm activity={{id:'m',type:'multi_select',prompt:'Chọn M',audioUrl:'',imageUrl:'',
+    options:[{id:'m1',text:'M',audioUrl:'',imageUrl:''},{id:'m2',text:'M',audioUrl:'',imageUrl:''}],correctAnswer:['m1','m2']}}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Đưa lựa chọn 1.2 lên'}));
+  let value=JSON.parse(screen.getByTestId('value').textContent!);
+  expect(value.activities[0].options.map((o:{id:string})=>o.id)).toEqual(['m2','m1']);
+  expect(value.activities[0].correctAnswer).toEqual(['m1','m2']);
+  fireEvent.click(screen.getByRole('button',{name:'Xóa lựa chọn 1.1'}));
+  value=JSON.parse(screen.getByTestId('value').textContent!);
+  expect(value.activities[0].correctAnswer).toEqual(['m1']);
+  expect(screen.getByText(/Kiểm tra lại đáp án sau/)).toBeInTheDocument();
+});
+it('leaves all mappings unassigned when their group is deleted',()=>{
+  render(<NewForm activity={{id:'g',type:'group_sort',prompt:'Nhóm',audioUrl:'',imageUrl:'',
+    options:[{id:'me',text:'mẹ',audioUrl:'',imageUrl:''},{id:'meo',text:'mèo',audioUrl:'',imageUrl:''}],
+    groups:[{id:'m',label:'M'},{id:'b',label:'B'}],correctAnswer:{me:'m',meo:'m'}}}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Xóa nhóm 1.1'}));
+  const value=JSON.parse(screen.getByTestId('value').textContent!);
+  expect(value.activities[0].correctAnswer).toEqual({me:'',meo:''});
+  expect(screen.getByText(/Cần phân nhóm lại/)).toBeInTheDocument();
+});
+it('does not reinterpret a removed slot marker or invent accepted variants',()=>{
+  render(<NewForm activity={{id:'f',type:'fill_blanks',prompt:'Điền',audioUrl:'',imageUrl:'',template:'Bé {{v}} {{o}}.',
+    blankSlots:[{id:'v',label:'Hành động',acceptedAnswers:['đọc']},{id:'o',label:'Đồ vật',acceptedAnswers:['sách']}]}}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Xóa ô 1.1'}));
+  const value=JSON.parse(screen.getByTestId('value').textContent!);
+  expect(value.activities[0].template).toBe('Bé {{v}} {{o}}.');
+  expect(value.activities[0].blankSlots).toEqual([{id:'o',label:'Đồ vật',acceptedAnswers:['sách']}]);
+  expect(screen.getByText(/Sửa marker/)).toBeInTheDocument();
+});
+it('requires explicit type-change confirmation and preserves common fields only',()=>{
+  render(<NewForm activity={{id:'m',type:'multi_select',prompt:'Giữ hướng dẫn',audioUrl:'/a.mp3',imageUrl:'/a.png',hints:['Gợi ý'],
+    options:[{id:'a',text:'A',audioUrl:'',imageUrl:''}],correctAnswer:['a']}}/>);
+  fireEvent.change(screen.getByLabelText('Loại hoạt động 1'),{target:{value:'follow_steps'}});
+  expect(screen.getByRole('dialog')).toHaveTextContent(/dữ liệu riêng/);
+  fireEvent.click(screen.getByRole('button',{name:'Hủy'}));
+  expect(JSON.parse(screen.getByTestId('value').textContent!).activities[0].type).toBe('multi_select');
+  fireEvent.change(screen.getByLabelText('Loại hoạt động 1'),{target:{value:'follow_steps'}});
+  fireEvent.click(screen.getByRole('button',{name:'Đổi loại'}));
+  const next=JSON.parse(screen.getByTestId('value').textContent!).activities[0];
+  expect(next).toMatchObject({id:'m',type:'follow_steps',prompt:'Giữ hướng dẫn',audioUrl:'/a.mp3',imageUrl:'/a.png',hints:['Gợi ý']});
+  expect(next.options).toBeUndefined(); expect(next.correctAnswer).toBeUndefined();
+});

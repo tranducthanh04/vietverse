@@ -6,15 +6,38 @@ import { DragMatchActivity } from "../../lesson-player/activities/DragMatchActiv
 import { FillBlankActivity } from "../../lesson-player/activities/FillBlankActivity.js";
 import { SortOrderActivity } from "../../lesson-player/activities/SortOrderActivity.js";
 import { ReviewActivity } from "../../lesson-player/activities/ReviewActivity.js";
+import { MultiSelectActivity } from '../../lesson-player/activities/MultiSelectActivity.js';
+import { GroupSortActivity } from '../../lesson-player/activities/GroupSortActivity.js';
+import { FillBlanksActivity } from '../../lesson-player/activities/FillBlanksActivity.js';
+import { FollowStepsActivity } from '../../lesson-player/activities/FollowStepsActivity.js';
+import { isNewActivityType, type NewActivityInput, type NewActivityProps, type NewLearnerActivity } from '../../lesson-player/activities/newActivity.types.js';
 
 // Deliberately no activityRegistry import: it includes the live recording component.
 function PureActivity({
   activity,
   onComplete,
+  onSubmit,
 }: {
   activity: Activity;
   onComplete: (correct: boolean) => void;
+  onSubmit: (status: string) => void;
 }) {
+  const [value,setValue]=useState<NewActivityInput>(['multi_select','follow_steps'].includes(activity.type)?[]:{});
+  const [submitted,setSubmitted]=useState(false);
+  if(isNewActivityType(activity.type)) {
+    const common={id:activity.id,prompt:activity.prompt,subPrompt:activity.subPrompt,audioUrl:activity.audioUrl};
+    let visible:NewLearnerActivity;
+    let Component:React.FC<NewActivityProps>;
+    switch(activity.type){
+      case 'multi_select': visible={...common,type:activity.type,options:activity.options??[]};Component=MultiSelectActivity;break;
+      case 'group_sort': visible={...common,type:activity.type,options:activity.options??[],groups:activity.groups??[]};Component=GroupSortActivity;break;
+      case 'fill_blanks': visible={...common,type:activity.type,template:activity.template??'',blankSlots:(activity.blankSlots??[]).map(slot=>({id:slot.id,label:slot.label}))};Component=FillBlanksActivity;break;
+      case 'follow_steps': visible={...common,type:activity.type,steps:activity.steps??[]};Component=FollowStepsActivity;break;
+    }
+    return <Component activity={visible} value={value} onChange={setValue} disabled={submitted} onSubmit={result=>{
+      setSubmitted(true);onSubmit(result.status==='self_reported'?'Đã ghi xác nhận của bé':'Đã ghi câu trả lời');
+    }}/>;
+  }
   const correctAnswer =
     typeof activity.correctAnswer === "string" ? activity.correctAnswer : "";
   switch (activity.type) {
@@ -83,6 +106,7 @@ export function LessonPreview({
 }) {
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<boolean | null>(null);
+  const [acknowledgement,setAcknowledgement]=useState<string|null>(null);
   const activity = payload.activities[step];
   const errors = issues.filter(
     (issue) =>
@@ -115,6 +139,7 @@ export function LessonPreview({
                 key={`${step}:${activity.id}`}
                 activity={activity}
                 onComplete={setResult}
+                onSubmit={setAcknowledgement}
               />
             )}
           </div>
@@ -125,10 +150,16 @@ export function LessonPreview({
                 : "Chưa đúng trong bản xem trước."}
             </p>
           )}
+          {acknowledgement && <p role="status">{acknowledgement}</p>}
+          {isNewActivityType(activity.type) && <details><summary>Đáp án dành cho admin — không phải dữ liệu gửi cho bé</summary>
+            <pre className="whitespace-pre-wrap break-words">{JSON.stringify(activity.type==='fill_blanks'?activity.blankSlots?.map(slot=>({id:slot.id,acceptedAnswers:slot.acceptedAnswers})):
+              activity.type==='follow_steps'?activity.steps?.map(step=>step.id):activity.correctAnswer,null,2)}</pre>
+          </details>}
           <button
             onClick={() => {
               setStep(step + 1);
               setResult(null);
+              setAcknowledgement(null);
             }}
           >
             Tiếp tục xem trước
@@ -140,6 +171,7 @@ export function LessonPreview({
         onClick={() => {
           setStep(Math.max(0, step - 1));
           setResult(null);
+          setAcknowledgement(null);
         }}
       >
         Hoạt động trước

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { ActivityType, LessonContent } from "./content.types.js";
+import { activityTypeLabels } from './content.types.js';
 import { TextField } from "./FormFields.js";
 import { VocabularyEditor } from "./VocabularyEditor.js";
 import { ActivityEditor } from "./ActivityEditor.js";
@@ -109,16 +110,8 @@ export function LessonEditor({
             value={type}
             onChange={(e) => setType(e.target.value as ActivityType)}
           >
-            {[
-              "listen_choose",
-              "word_card",
-              "drag_match",
-              "fill_blank",
-              "sort_order",
-              "record_voice",
-              "review",
-            ].map((type) => (
-              <option key={type}>{type}</option>
+            {Object.entries(activityTypeLabels).map(([type,label]) => (
+              <option key={type} value={type}>{label}</option>
             ))}
           </select>
         </label>

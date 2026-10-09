@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Activity } from "./content.types.js";
+import { activityTypeLabels, type ActivityType } from './content.types.js';
 import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
+import { MultiSelectEditor } from './MultiSelectEditor.js';
+import { GroupSortEditor } from './GroupSortEditor.js';
+import { FillBlanksEditor } from './FillBlanksEditor.js';
+import { FollowStepsEditor } from './FollowStepsEditor.js';
+import { ConfirmationDialog } from './ConfirmationDialog.js';
 export function ActivityEditor({
   value,
   onChange,
@@ -15,6 +21,7 @@ export function ActivityEditor({
 }) {
   const path = `activities.${index}`;
   const answerNoteId = useNoteDescription(`${path}.correctAnswer`);
+  const [pendingType, setPendingType] = useState<ActivityType | null>(null);
   const n = index + 1;
   const patch = (change: Partial<Activity>) =>
     onChange({ ...value, ...change });
@@ -23,6 +30,22 @@ export function ActivityEditor({
       <p>
         Loại: {value.type} · ID: {value.id || "Cấp khi lưu"}
       </p>
+      <label className="cms-field"><span>Loại hoạt động {n}</span>
+        <select value={value.type} onChange={event => {
+          const type=event.target.value as ActivityType;
+          if(type!==value.type) setPendingType(type);
+        }}>{Object.entries(activityTypeLabels).map(([type,label])=><option key={type} value={type}>{label}</option>)}</select>
+      </label>
+      {pendingType && <ConfirmationDialog title="Đổi loại hoạt động" onCancel={()=>setPendingType(null)}>
+        <p>Đổi loại sẽ bỏ dữ liệu riêng của loại cũ (lựa chọn, đáp án, nhóm, ô hoặc bước). Giữ hướng dẫn, media và gợi ý.</p>
+        <div className="cms-actions"><button type="button" onClick={()=>setPendingType(null)}>Hủy</button>
+          <button type="button" onClick={()=>{
+            onChange({id:value.id,type:pendingType,prompt:value.prompt,subPrompt:value.subPrompt,
+              audioUrl:value.audioUrl,imageUrl:value.imageUrl,hints:value.hints,pointsWeight:value.pointsWeight});
+            setPendingType(null);
+          }}>Đổi loại</button>
+        </div>
+      </ConfirmationDialog>}
       <TextField
         label={`Hướng dẫn ${n}`}
         name={`${path}.prompt`}
@@ -37,6 +60,10 @@ export function ActivityEditor({
         onChange={(subPrompt) => patch({ subPrompt })}
       />
       <MediaFields value={value} prefix={`${path}.`} onChange={patch} />
+      {value.type==='multi_select' && <MultiSelectEditor activity={value} onChange={onChange} index={index}/>}
+      {value.type==='group_sort' && <GroupSortEditor activity={value} onChange={onChange} index={index}/>}
+      {value.type==='fill_blanks' && <FillBlanksEditor activity={value} onChange={onChange} index={index}/>}
+      {value.type==='follow_steps' && <FollowStepsEditor activity={value} onChange={onChange} index={index}/>}
       {["word_card", "record_voice"].includes(value.type) && (
         <>
           <TextField

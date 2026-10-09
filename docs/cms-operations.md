@@ -27,6 +27,12 @@ Quyết định bảo vệ định danh: seed bỏ qua seedKey đã được nh�
 
 ## Phiên bản và xử lý lỗi
 
+### Bốn dạng hoạt động mới — code đang triển khai 2026-10-09
+
+CMS đã thêm form/preview `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`. Nháp thiếu cấu trúc/đáp án vẫn cần bổ sung trước publish; giữ gate production tắt. ID option/group/slot/step được tạo một lần khi thêm và giữ qua reorder; ID activity cấp khi lưu server. Đổi type cần xác nhận bỏ dữ liệu riêng, giữ hướng dẫn/media/hints. Xóa lựa chọn/nhóm/slot có cảnh báo sửa đáp án/mẫu câu, không tự chọn đáp án mới; slot marker không được sửa ngầm. Mỗi slot dùng marker rõ `{{slot-id}}` và acceptedAnswers do content owner duyệt, không suy từ underscore.
+
+Preview bốn dạng dùng renderer thuần và state local, phản hồi trung tính; đáp án admin ở vùng riêng. Không gọi API học/session/outbox/micro và không tuyên bố kiểm chứng động tác follow_steps. Màn bé/server/session đã bổ sung nhưng chưa nghiệm thu cả release/browser; trạng thái chi tiết theo plan, không coi đoạn này là xác nhận deploy hoặc import DB thật.
+
 - draftVersion là phiên bản biên tập; contentVersion là bản đã phát hành. Legacy live thiếu version là 0. Mỗi save tăng draftVersion, không thay live. Preview đọc đúng draftVersion đã lưu.
 - Save/publish/visibility cạnh tranh trả 409. Giữ form local, xem bản server và chủ động tải lại; không merge tự động mảng hoạt động hoặc đáp án. Mất response publish có thể retry đúng draftVersion/baseContentVersion để nhận receipt cũ, không nhân snapshot/audit.
 - Publish ghi snapshot legacy 0 (lần đầu), snapshot mới, live, draft và audit trong một transaction. Lỗi bất kỳ bước nào rollback tất cả. Ẩn/hiện story/culture tạo version mới, không xóa lịch sử; bài học không có thao tác ẩn/xóa.

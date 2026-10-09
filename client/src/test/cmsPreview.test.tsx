@@ -112,6 +112,46 @@ it("renders invalid activity errors rather than executing fallback sample conten
   expect(screen.getByText(/Thiếu câu nguồn/)).toBeInTheDocument();
   expect(screen.queryByText("__úp bê")).not.toBeInTheDocument();
 });
+it('previews new multi interaction without learning writes and resets input between activities',()=>{
+  const activity={...lesson.activities[0],id:'m',type:'multi_select' as const,prompt:'Chọn M',
+    options:[{id:'m1',text:'M',audioUrl:'',imageUrl:''},{id:'m2',text:'M',audioUrl:'',imageUrl:''}],correctAnswer:['m1','m2']};
+  render(<LessonPreview payload={{...lesson,activities:[activity,{...activity,id:'n'}]}} issues={[]}/>);
+  fireEvent.click(screen.getByRole('checkbox',{name:'Chữ M, vị trí 1'}));
+  fireEvent.click(screen.getByRole('button',{name:'Gửi câu trả lời'}));
+  expect(screen.getByText('Đã ghi câu trả lời')).toBeInTheDocument();
+  expect(api.post).not.toHaveBeenCalled();
+  expect(useLessonSessionStore.getState().currentSession).toEqual(session);
+  expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+  expect(localStorage.getItem('vietverse_offline_completions')).toBe('[{"id":"keep"}]');
+  fireEvent.click(screen.getByRole('button',{name:'Tiếp tục xem trước'}));
+  expect(screen.getByRole('checkbox',{name:'Chữ M, vị trí 1'})).not.toBeChecked();
+  expect(screen.queryByText('Đã ghi câu trả lời')).not.toBeInTheDocument();
+});
+it('previews grouping, multiple blanks and self-report without altering the child session',()=>{
+  const common={...lesson.activities[0]};
+  render(<LessonPreview payload={{...lesson,activities:[
+    {...common,id:'g',type:'group_sort',prompt:'Nhóm',options:[{id:'me',text:'mẹ',audioUrl:'',imageUrl:''},{id:'ba',text:'bà',audioUrl:'',imageUrl:''}],groups:[{id:'m',label:'M'},{id:'b',label:'B'}],correctAnswer:{me:'m',ba:'b'}},
+    {...common,id:'f',type:'fill_blanks',prompt:'Điền',template:'Bé {{v}} {{o}}.',blankSlots:[{id:'v',label:'Hành động',acceptedAnswers:['đọc']},{id:'o',label:'Đồ vật',acceptedAnswers:['sách']}]},
+    {...common,id:'s',type:'follow_steps',prompt:'Thực hiện',steps:[{id:'stand',text:'Đứng lên'}]},
+  ]}}/>);
+  fireEvent.change(screen.getByRole('combobox',{name:'Nhóm của mẹ, vị trí 1'}),{target:{value:'m'}});
+  fireEvent.change(screen.getByRole('combobox',{name:'Nhóm của bà, vị trí 2'}),{target:{value:'m'}});
+  fireEvent.click(screen.getByRole('button',{name:'Gửi câu trả lời'}));
+  expect(screen.getByText('Đã ghi câu trả lời')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'Tiếp tục xem trước'}));
+  expect(screen.getByRole('textbox',{name:'Hành động'})).toHaveValue('');
+  fireEvent.change(screen.getByRole('textbox',{name:'Hành động'}),{target:{value:'đọc'}});
+  fireEvent.change(screen.getByRole('textbox',{name:'Đồ vật'}),{target:{value:'sách'}});
+  fireEvent.click(screen.getByRole('button',{name:'Gửi câu trả lời'}));
+  fireEvent.click(screen.getByRole('button',{name:'Tiếp tục xem trước'}));
+  fireEvent.click(screen.getByRole('checkbox',{name:'Bước 1: Đứng lên'}));
+  fireEvent.click(screen.getByRole('button',{name:'Gửi xác nhận'}));
+  expect(screen.getByText('Đã ghi xác nhận của bé')).toBeInTheDocument();
+  expect(api.post).not.toHaveBeenCalled();
+  expect(useLessonSessionStore.getState().currentSession).toEqual(session);
+  expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+  expect(localStorage.getItem('vietverse_offline_completions')).toBe('[{"id":"keep"}]');
+});
 it("allows real choice interaction across all non-recording activity renderers without learning writes", () => {
   const option = (id: string, text: string) => ({
     id,
