@@ -2,7 +2,7 @@
 
 Ngày: 2026-10-09, Asia/Saigon.
 
-Trạng thái: hướng triển khai và upload trực tiếp đã được người dùng đồng ý trong chat; bản thiết kế chi tiết này đang chờ duyệt. Chưa sửa code ứng dụng, tạo project Vercel, đổi proxy production hoặc thao tác database thật.
+Trạng thái: người dùng đã đồng ý hướng triển khai/upload trực tiếp và yêu cầu triển khai sau khi nhận bản thiết kế này ngày 2026-10-09. Kế hoạch thực thi chi tiết được lập riêng để duyệt trước khi code. Chưa sửa code ứng dụng, tạo project Vercel, đổi proxy production hoặc thao tác database thật.
 
 ## 1. Mục tiêu và phạm vi
 
