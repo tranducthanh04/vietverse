@@ -8,6 +8,15 @@ Base URL: `/api/v1`.
 - `ContentDraft` tách khỏi live, định danh duy nhất `{kind, contentId}` và tăng `draftVersion` khi lưu. `ContentRevision` lưu snapshot bất biến theo `{kind, contentId, contentVersion}`. Chưa bật publish hoặc chạy migration/import.
 - Schema draft cho phép nội dung dở dang nhưng kiểm tra giới hạn và URL; publish kiểm tra tính khả dụng của bảy activity type, lyrics và quiz. Chi tiết ràng buộc tại thiết kế CMS; đây chưa phải xác nhận toàn bộ CMS đã phát hành.
 
+API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu cầu JWT + admin:
+
+- `GET /`, `GET /:id`: danh sách phân trang hoặc live/draft; GET không tạo dữ liệu. Filter `search` tối đa 50 ký tự, `state`, `stageId`, `category`, `page` từ 1, `pageSize` 1–100.
+- `POST /drafts`: tạo truyện/văn hóa nháp với `{payload, requestId}`; requestId của cùng admin không tạo bản trùng. Không tạo lesson mới.
+- `POST /:id/draft`: bắt đầu nháp; mở lại bản đã bỏ/đã đồng bộ phải gửi `expectedDraftVersion` hiện tại.
+- `PUT /:id/draft`: `{payload, expectedDraftVersion}`; lỗi cạnh tranh trả `409 CONTENT_CONFLICT`, không sửa live. Giữ stage/order; ID activity mới do server cấp.
+- `POST /:id/discard-draft`: bỏ đúng phiên bản nháp, không xóa live/history.
+- `GET /:id/preview?draftVersion=` và `POST /:id/validate` với `expectedDraftVersion`: chỉ đọc đúng version, trả lỗi field; không ghi tiến độ/điểm.
+
 ## Auth
 
 | Method | Path | Auth | Mục đích |

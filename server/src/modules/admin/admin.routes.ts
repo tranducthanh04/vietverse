@@ -3,11 +3,13 @@ import { AdminController } from './admin.controller.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { requireRole } from '../../middlewares/role.middleware.js';
 import { ROLES } from '../../constants/roles.js';
+import contentRouter from './content/content.routes.js';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole(ROLES.ADMIN));
+router.use('/content', contentRouter);
 
 // KPI & Analytics
 router.get('/kpi', AdminController.getKPIs);
