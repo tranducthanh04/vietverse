@@ -57,6 +57,13 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 
 ## Khoảng trống chưa triển khai trong đợt này
 
+### Bộ nguồn CMS đã chuẩn bị — 2026-10-09
+
+- Snapshot ba tab và SHA-256 nằm tại `customer-source/2026-10-09/manifest.json`; [báo cáo đối soát](./customer-source/2026-10-09/coverage.md) liệt kê từng mục: 20 giáo án, 21 bài đọc, tám nhóm văn hóa. Nội dung thiếu hoặc thao tác chưa hỗ trợ được ghi chú, không coi là bài hoàn chỉnh.
+- `npm run cms:import-customer -w server -- --dry-run` chỉ đọc, trả kế hoạch create/skip/conflict và coverage. `--apply --admin-id=<id>` yêu cầu admin có thật và MongoDB transaction; nhập toàn bộ vào draft cùng nguồn/ghi chú, không sửa live, tài khoản hay dữ liệu học. Chưa chạy trên production.
+- Quyết định: giữ stable seedKey nội bộ cả draft-only để xuất bản rồi đổi tên không bị seed tạo lại bản trùng. Chạy lại cùng checksum bỏ qua bản đã nhập kể cả đã sửa tay, xuất bản hoặc bỏ nháp; nguồn khác/conflict phải được đối soát riêng.
+- Giả định lựa chọn dị bản và các ánh xạ renderer được ghi ở từng entry; bản quyền/audio và các khoảng trống của giáo án vẫn cần người biên tập xác nhận trước xuất bản.
+
 - Đăng ký Google OAuth và ngôn ngữ đồng hành chọn nhiều (hiện model lưu một ngôn ngữ).
 - Dashboard phụ huynh đã bổ sung chặng hiện tại, tiến độ theo catalog (5 chặng ở seed chuẩn), 10 ghi nhận gần nhất và điều hướng kho điểm ngày 2026-10-09. Công thức năng lực hiện tại vẫn là benchmark MVP, chưa phải đánh giá chuyên môn toàn khóa. Nhật ký không lưu mọi lượt truy cập; lịch sử điểm đầy đủ vẫn là khoảng trống riêng.
 - CMS biên tập đủ activities/vocabulary, truyện và văn hóa; admin hiện chủ yếu chỉnh metadata bài học.

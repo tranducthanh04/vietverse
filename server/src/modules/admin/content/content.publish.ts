@@ -81,7 +81,7 @@ export async function publishContent(kind: ContentKind, id: string, input: Publi
           { $set: { ...payload, ...metadata }, ...(Object.keys(unset).length ? { $unset: unset } : {}) }, { session, runValidators: true });
         if (result.matchedCount !== 1) throw conflict();
       } else {
-        await model.create([{ _id: id, ...payload, ...metadata }], { session });
+        await model.create([{ _id: id, ...payload, ...metadata, ...(draft.seedKey ? { seedKey: draft.seedKey } : {}) }], { session });
       }
       const synced = await ContentDraft.updateOne({ _id: draft._id, state: 'editing', draftVersion: input.expectedDraftVersion },
         { $set: { state: 'synced', updatedBy: adminId }, $inc: { draftVersion: 1 } }, { session });
