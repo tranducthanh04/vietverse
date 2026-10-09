@@ -80,6 +80,16 @@ describe('Offline Completion Queue Sync Worker', () => {
 const key = 'vietverse_offline_completions';
 const item = (id: string) => ({ id, userId: 'parent', childId: 'child', lessonId: id, contentVersion: 0, answers: [{ activityId: 'a', userAnswer: 'b' }], savedAt: 1, status: 'pending' as const });
 describe('lossless offline submissions', () => {
+  it('round-trips new typed answers and pinned version without invented correctness', async () => {
+    const answers=[{activityId:'m',userAnswer:['m2','m1']},{activityId:'g',userAnswer:{me:'m',ba:'b'}},
+      {activityId:'f',userAnswer:{verb:'ĐỌC',object:'sách'}},{activityId:'s',userAnswer:['stand','sit']}];
+    enqueueOfflineCompletion({...item('new'),contentVersion:4,answers});
+    expect(readOfflineCompletions()[0]).toMatchObject({userId:'parent',contentVersion:4,answers});
+    vi.mocked(api.post).mockResolvedValueOnce({data:{}});
+    await syncOfflineCompletions();
+    expect(api.post).toHaveBeenCalledWith('/lessons/new/complete',{childId:'child',contentVersion:4,answers});
+    expect(readOfflineCompletions()).toEqual([]);
+  });
   beforeEach(() => {
     localStorage.clear(); vi.resetAllMocks();
     useAuthStore.setState({ user: { id: 'parent', email: '', role: 'parent', displayName: 'Parent' }, isLoading: false });

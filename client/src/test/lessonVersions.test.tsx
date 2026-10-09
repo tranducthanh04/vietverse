@@ -10,10 +10,11 @@ import { useLessonSessionStore } from '../store/lessonSessionStore.js';
 import { LessonPlayerPage } from '../features/lesson-player/LessonPlayerPage.js';
 import { CultureDetailPage } from '../features/culture/CultureDetailPage.js';
 import { PendingSubmissions } from '../features/lesson-player/PendingSubmissions.js';
+import { set } from 'idb-keyval';
 
 const cache = vi.hoisted(() => new Map<string, unknown>());
 vi.mock('canvas-confetti', () => ({ default: () => {} }));
-vi.mock('idb-keyval', () => ({ get: async (key: string) => cache.get(key), set: async (key: string, value: unknown) => { cache.set(key, value); }, del: async (key: string) => { cache.delete(key); } }));
+vi.mock('idb-keyval', () => ({ get: async (key: string) => cache.get(key), set: vi.fn(async (key: string, value: unknown) => { cache.set(key, value); }), del: async (key: string) => { cache.delete(key); } }));
 const original = api.defaults.adapter;
 let client: QueryClient;
 let calls: Array<{ url?: string; method?: string; body: any }>;
@@ -36,6 +37,57 @@ function show(path = '/lesson/lesson') {
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[path]}><Routes><Route path="/lesson/:lessonId" element={<LessonPlayerPage />} /><Route path="/culture/:id" element={<CultureDetailPage />} /></Routes></MemoryRouter></QueryClientProvider>);
 }
 describe('versioned learning client', () => {
+  it('requests capability2 and persists unsent selection across remount without local grading', async () => {
+    respond = () => ({ _id:'lesson',contentVersion:2,activities:[{id:'m',type:'multi_select',prompt:'Chọn M',
+      options:[{id:'m1',text:'M'},{id:'m2',text:'M'}]}] });
+    show(); await screen.findByText('Chọn M');
+    expect(calls[0].url).toContain('activityContract=2');
+    fireEvent.click(screen.getByRole('checkbox',{name:'Chữ M, vị trí 1'}));
+    await waitFor(() => expect(cache.get('vietverse_session_child_lesson')).toMatchObject({partialInputs:{m:['m1']},answers:[]}));
+    cleanup(); show(); await screen.findByText('Chọn M');
+    expect(screen.getByRole('checkbox',{name:'Chữ M, vị trí 1'})).toBeChecked();
+    fireEvent.click(screen.getByRole('checkbox',{name:'Chữ M, vị trí 2'}));
+    fireEvent.click(screen.getByRole('button',{name:'Gửi câu trả lời'}));
+    await screen.findByText('Đã ghi câu trả lời');
+    expect(useLessonSessionStore.getState().currentSession?.hearts).toBe(3);
+    expect(useLessonSessionStore.getState().currentSession?.answers).toEqual([{activityId:'m',userAnswer:['m1','m2']}]);
+    respond = () => ({stars:0,pointsEarned:0,totalPoints:0,passed:false});
+    fireEvent.click(screen.getByRole('button',{name:'Hoàn thành bài'}));
+    await waitFor(() => expect(calls.find(call=>call.method==='post')?.body).toEqual({childId:'child',contentVersion:2,answers:[{activityId:'m',userAnswer:['m1','m2']}]}));
+  });
+  it('retains input and disables advance until failed storage is retried', async () => {
+    respond = () => ({_id:'lesson',contentVersion:2,activities:[{id:'f',type:'fill_blanks',prompt:'Điền',template:'Bé {{v}} {{o}}.',blankSlots:[{id:'v',label:'Hành động'},{id:'o',label:'Đồ vật'}]}]});
+    show(); await screen.findByText('Điền');
+    vi.mocked(set).mockRejectedValueOnce(new Error('quota'));
+    fireEvent.change(screen.getByRole('textbox',{name:'Hành động'}),{target:{value:'đọc'}});
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Chưa lưu được câu trả lời/);
+    expect(screen.getByRole('textbox',{name:'Hành động'})).toHaveValue('đọc');
+    expect(screen.getByRole('button',{name:'Hoàn thành bài'})).toBeDisabled();
+    fireEvent.click(screen.getByRole('button',{name:'Thử lưu lại'}));
+    await waitFor(()=>expect(cache.get('vietverse_session_child_lesson')).toMatchObject({partialInputs:{f:{v:'đọc'}}}));
+  });
+  it('does not reset a pinned session when capability update is required', async () => {
+    cache.set('vietverse_session_child_lesson',{...cached,partialInputs:{m:['m1']}});
+    respond=()=>{throw {response:{status:409,data:{error:{code:'ACTIVITY_CLIENT_UPDATE_REQUIRED',message:'Cập nhật trang để học hoạt động mới'}}}};};
+    show(); expect(await screen.findByRole('alert')).toHaveTextContent('Cập nhật trang');
+    expect(screen.queryByRole('button',{name:/Bắt đầu lại/i})).not.toBeInTheDocument();
+    expect(cache.get('vietverse_session_child_lesson')).toMatchObject({contentVersion:0,partialInputs:{m:['m1']}});
+  });
+  it('keeps legacy immediate wrong feedback and heart deduction', async () => {
+    respond=()=>({_id:'lesson',contentVersion:0,activities:[{id:'q',type:'review',prompt:'Chọn',options:[{id:'a',text:'A'},{id:'b',text:'B'}],correctAnswer:'a'}]});
+    show(); await screen.findByText('Chọn');
+    fireEvent.click(screen.getByRole('button',{name:/B$/}));
+    await waitFor(()=>expect(useLessonSessionStore.getState().currentSession?.hearts).toBe(2));
+    expect(useLessonSessionStore.getState().currentSession?.answers[0]).toMatchObject({isCorrect:false,userAnswer:'b'});
+  });
+  it('restores self-reported answer acknowledgement without pretending it was verified',async()=>{
+    cache.set('vietverse_session_child_lesson',{...cached,answers:[{activityId:'s',userAnswer:['stand']}]});
+    respond=()=>({_id:'lesson',contentVersion:0,activities:[{id:'s',type:'follow_steps',prompt:'Thực hiện',steps:[{id:'stand',text:'Đứng lên'}]}]});
+    show(); await screen.findByText('Đã ghi xác nhận của bé');
+    expect(screen.getByRole('checkbox',{name:'Bước 1: Đứng lên'})).toBeChecked();
+    expect(screen.getByRole('button',{name:'Hoàn thành bài'})).toBeEnabled();
+    expect(useLessonSessionStore.getState().currentSession?.hearts).toBe(3);
+  });
   it('does not start a fresh session from an old current-version query cache', async () => {
     client.setQueryData(['lesson', 'lesson', 'child', 'current'], { _id: 'lesson', contentVersion: 1, activities: [{ id: 'old', type: 'word_card', prompt: 'Stale cached content', targetWord: 'B' }] });
     show();

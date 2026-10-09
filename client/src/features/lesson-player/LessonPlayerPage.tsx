@@ -13,6 +13,7 @@ import { ProgressBar } from '../../components/ui/ProgressBar.js';
 import { Button } from '../../components/ui/Button.js';
 import { VictoryModal } from '../../components/ui/VictoryModal.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { isNewActivityType, type NewActivityInput, type NewActivitySubmission } from './activities/newActivity.types.js';
 
 export const LessonPlayerPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -32,6 +33,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     saveStepProgress,
     loseHeart,
     clearSession,
+    savePartialInput,
   } = useLessonSessionStore();
   const [cached, setCached] = useState<CachedLessonSession | null | undefined>(undefined);
   const [sessionReady, setSessionReady] = useState(false);
@@ -45,6 +47,9 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   const [answers, setAnswers] = useState<ActivityAnswer[]>([]);
   const [stepAnswered, setStepAnswered] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
+  const [partialInputs, setPartialInputs] = useState<Record<string, NewActivityInput>>({});
+  const [inputError, setInputError] = useState<string | null>(null);
+  const [isSavingAnswer, setIsSavingAnswer] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,7 +65,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   const { data: lesson, isLoading, error } = useQuery({
     queryKey: ['lesson', lessonId, childId, cached?.contentVersion ?? `current:${submissionId}`],
     queryFn: async () => {
-      const url = `/lessons/${lessonId}?childId=${childId}${cached?.contentVersion !== undefined ? `&contentVersion=${cached.contentVersion}` : ''}`;
+      const url = `/lessons/${lessonId}?childId=${childId}&activityContract=2${cached?.contentVersion !== undefined ? `&contentVersion=${cached.contentVersion}` : ''}`;
       const res = await api.get(url);
       return res.data.data;
     },
@@ -85,6 +90,9 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       if (cancelled) return;
       if (session.contentVersion !== lesson.contentVersion) { setCacheError('Phiên học đã thay đổi ở tab khác. Vui lòng tải lại trang.'); return; }
       setCurrentStep(session.currentStepIndex || 0); setHearts(session.hearts ?? 3); setAnswers(session.answers || []); setSessionReady(true);
+      setPartialInputs(session.partialInputs ?? {});
+      const restoredAnswer = session.answers.find(answer => answer.activityId === lesson.activities?.[session.currentStepIndex || 0]?.id);
+      setStepAnswered(Boolean(restoredAnswer)); setLastAnswerCorrect(restoredAnswer?.isCorrect ?? null);
     }).catch(() => { if (!cancelled) setCacheError('Chưa lưu được phiên học. Vui lòng kiểm tra bộ nhớ trình duyệt.'); });
     return () => { cancelled = true; };
   }, [lesson, lessonId, childId, legacySession, initSession]);
@@ -94,9 +102,15 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       await clearSession(lessonId, childId);
       setSessionReady(false); setCacheError(null); setCached(null);
       setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false);
+      setPartialInputs({}); setInputError(null);
     } catch { setCacheError('Chưa thể bắt đầu lại. Dữ liệu cũ vẫn được giữ.'); }
   };
 
+  const activityUpdateRequired = (error as { response?: { data?: { error?: { code?: string } } } } | null)?.response?.data?.error?.code === 'ACTIVITY_CLIENT_UPDATE_REQUIRED';
+  if (activityUpdateRequired) return <div role="alert" className="p-6 space-y-4">
+    <p>Cập nhật trang để học hoạt động mới. Câu trả lời và phiên bản đang học vẫn được giữ.</p>
+    <Button onClick={() => window.location.reload()}>Tải lại trang</Button>
+  </div>;
   if (legacySession || cacheError || (error && cached)) return <div className="p-6 space-y-4" role="alert">
     <p>{legacySession ? 'Không xác định được phiên bản của bài đang làm. Câu trả lời cũ vẫn được giữ cho tới khi bạn chọn bắt đầu lại.' : cacheError ?? 'Chưa tải được phiên bản bài đang học. Bạn có thể tải lại trang hoặc bắt đầu lại bài hiện tại.'}</p>
     <p>Tiến độ và điểm đã lưu trên máy chủ không thay đổi.</p>
@@ -124,6 +138,27 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   const activities = lesson.activities || [];
   const currentActivity = activities[currentStep];
   const isLastStep = currentStep === activities.length - 1;
+  const newActivity = currentActivity && isNewActivityType(currentActivity.type);
+  const savedAnswer = answers.find(answer => answer.activityId === currentActivity?.id);
+  const activityInput: NewActivityInput = partialInputs[currentActivity?.id] ?? savedAnswer?.userAnswer ??
+    (['multi_select','follow_steps'].includes(currentActivity?.type) ? [] : {});
+  const persistInput = async (value: NewActivityInput) => {
+    try {
+      await savePartialInput({ lessonId, childId, contentVersion: lesson.contentVersion }, currentActivity.id, value);
+      setInputError(null);
+    } catch { setInputError('Chưa lưu được câu trả lời trên máy. Dữ liệu đang nhập vẫn được giữ trên trang.'); }
+  };
+  const handleNewSubmit = async (result: NewActivitySubmission) => {
+    if (isSavingAnswer || stepAnswered) return;
+    setIsSavingAnswer(true); setInputError(null);
+    const answer: ActivityAnswer = { activityId: currentActivity.id, userAnswer: result.userAnswer };
+    try {
+      await saveStepProgress(currentStep, answer);
+      setAnswers(previous => [...previous.filter(a => a.activityId !== answer.activityId), answer]);
+      setStepAnswered(true); setLastAnswerCorrect(null);
+    } catch { setInputError('Chưa lưu được câu trả lời trên máy. Bé thử gửi lại, dữ liệu vẫn được giữ.'); }
+    finally { setIsSavingAnswer(false); }
+  };
 
   const handleActivityComplete = (isCorrect: boolean, userAnswer?: any) => {
     setLastAnswerCorrect(isCorrect);
@@ -210,10 +245,11 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       }
     } else {
       const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      setStepAnswered(false);
-      setLastAnswerCorrect(null);
-      saveStepProgress(nextStep);
+      try {
+        await saveStepProgress(nextStep);
+        setCurrentStep(nextStep); setStepAnswered(false); setLastAnswerCorrect(null);
+      }
+      catch { setInputError('Chưa lưu được bước học. Vui lòng tải lại để tiếp tục phiên đã lưu.'); }
     }
   };
 
@@ -272,10 +308,21 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             lessonId={lesson._id}
             contentVersion={lesson.contentVersion}
             onComplete={handleActivityComplete}
+            {...(newActivity ? {
+              value: activityInput, disabled: stepAnswered || isSavingAnswer,
+              onChange: (value: NewActivityInput) => {
+                setPartialInputs(previous => ({ ...previous, [currentActivity.id]: value }));
+                void persistInput(value);
+              },
+              onSubmit: handleNewSubmit,
+            } : {})}
           />
         )}
       </main>
       <PendingSubmissions childId={childId} />
+      {inputError && <div role="alert" className="p-4 bg-amber-50 space-y-3">
+        <p>{inputError}</p><Button onClick={() => void persistInput(activityInput)}>Thử lưu lại</Button>
+      </div>}
       {offlinePending && <div role="status" className="p-4 bg-amber-50">Bài đã lưu trên máy, đang chờ đồng bộ. Chưa xác nhận điểm thưởng. <Button onClick={() => navigate('/kham-pha')}>Về bản đồ</Button></div>}
 
       {/* Error alert banner if submission failed */}
@@ -301,7 +348,9 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
           <div className="flex-1">
             {stepAnswered && (
               <div className="flex items-center space-x-2">
-                {lastAnswerCorrect ? (
+                {newActivity ? <span role="status" className="font-bold text-stone-700">
+                  {currentActivity.type === 'follow_steps' ? 'Đã ghi xác nhận của bé' : 'Đã ghi câu trả lời'}
+                </span> : lastAnswerCorrect ? (
                   <span className="flex items-center space-x-1 text-emerald-600 font-bold font-display text-kid-base animate-bounce-subtle">
                     <Check className="w-6 h-6 text-emerald-500" />
                     <span>{VI_LOCALES.lesson.correctPraise}</span>
@@ -319,7 +368,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             variant={stepAnswered ? 'primary' : 'outline'}
             size="kid"
             onClick={handleNextStep}
-            disabled={isSubmitting || offlinePending || (!stepAnswered && currentActivity?.type !== 'word_card')}
+            disabled={isSubmitting || offlinePending || isSavingAnswer || Boolean(inputError) || (!stepAnswered && currentActivity?.type !== 'word_card')}
             className="flex items-center space-x-2 px-8"
           >
             <span>{isSubmitting ? 'Đang lưu...' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
@@ -340,6 +389,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
           try {
             await initSession(lessonId, childId, lesson.contentVersion);
             setShowVictory(false); setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false); setLastAnswerCorrect(null);
+            setPartialInputs({}); setInputError(null);
           } catch { setShowVictory(false); setCacheError('Chưa lưu được phiên học mới. Vui lòng tải lại trang.'); }
         }}
       />

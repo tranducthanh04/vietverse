@@ -15,6 +15,8 @@ Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, 
 - GET `/lessons/:id?childId=&contentVersion=&activityContract=2`: capability phải đúng chuỗi query `2`; thiếu flag chỉ đọc được snapshot bảy type cũ. Snapshot chứa type mới trả `409 ACTIVITY_CLIENT_UPDATE_REQUIRED` khi thiếu capability; giá trị flag khác trả 400. Không tự nâng contentVersion.
 - Payload bé bỏ `correctAnswer` của multi/group/fill và `blankSlots[].acceptedAnswers`; canonical snapshots/admin vẫn giữ đủ dữ liệu. Grader chỉ dùng canonical, không dùng learner projection. Bảy type cũ giữ response như trước.
 - Complete từ chối answers trùng activityId bằng `400 DUPLICATE_ACTIVITY_ANSWER` trước mọi ghi progress/ledger; reward vẫn một lần theo child/lesson, không theo version. Các bounds/quyền/unlock/recording trước đây không đổi.
+- Client mới gửi capability2 và phản hồi trung tính cho ba câu hỏi mới; follow_steps ghi “Đã ghi xác nhận của bé”. Không trừ tim khi chưa có kết quả server; answer mới không có `isCorrect`. Type lạ hiển thị lỗi, không fallback Review.
+- Session thêm `partialInputs` theo activity ID trong phiên child/lesson/version. Ghi input/answer/hearts/bước được tuần tự hóa, submitted answer bỏ partial tương ứng; clear đợi ghi đang chạy rồi xóa. Legacy session thiếu field vẫn đọc được, cached version không bị nâng ngầm. Đổi tài khoản vô hiệu hóa state đang học; lỗi lưu giữ input trên trang và có thử lưu lại. Outbox giữ nguyên typed answer và version, không tạo kết quả/điểm chính thức offline.
 
 ## CMS — lớp dữ liệu đang triển khai (2026-10-09)
 
