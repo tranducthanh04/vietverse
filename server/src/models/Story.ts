@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { contentMetadataFields, discoverableContentFields, type ContentMetadata } from './contentMetadata.js';
 
 export type StoryType = 'dong_dao' | 'co_tich' | 'tho' | 'ngu_ngon';
 
@@ -14,7 +15,9 @@ export interface IQuizQuestion {
   explanation?: string;
 }
 
-export interface IStory extends Document {
+export interface IStory extends Document, ContentMetadata {
+  visibility?: 'published' | 'withdrawn';
+  seedKey?: string;
   type: StoryType;
   title: string;
   author?: string;
@@ -33,6 +36,8 @@ export interface IStory extends Document {
 
 const storySchema = new Schema<IStory>(
   {
+    ...contentMetadataFields,
+    ...discoverableContentFields,
     type: {
       type: String,
       enum: ['dong_dao', 'co_tich', 'tho', 'ngu_ngon'],
@@ -83,4 +88,5 @@ const storySchema = new Schema<IStory>(
   }
 );
 
+storySchema.index({ seedKey: 1 }, { unique: true, sparse: true });
 export const Story = model<IStory>('Story', storySchema);

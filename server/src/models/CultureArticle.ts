@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { contentMetadataFields, discoverableContentFields, type ContentMetadata } from './contentMetadata.js';
 
 export interface ICultureQuiz {
   question: string;
@@ -7,7 +8,9 @@ export interface ICultureQuiz {
   explanation?: string;
 }
 
-export interface ICultureArticle extends Document {
+export interface ICultureArticle extends Document, ContentMetadata {
+  visibility?: 'published' | 'withdrawn';
+  seedKey?: string;
   category: string;
   title: string;
   intro: string;
@@ -22,6 +25,8 @@ export interface ICultureArticle extends Document {
 
 const cultureArticleSchema = new Schema<ICultureArticle>(
   {
+    ...contentMetadataFields,
+    ...discoverableContentFields,
     category: {
       type: String,
       required: true,
@@ -58,4 +63,5 @@ const cultureArticleSchema = new Schema<ICultureArticle>(
   }
 );
 
+cultureArticleSchema.index({ seedKey: 1 }, { unique: true, sparse: true });
 export const CultureArticle = model<ICultureArticle>('CultureArticle', cultureArticleSchema);

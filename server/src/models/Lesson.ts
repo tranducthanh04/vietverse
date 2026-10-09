@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { contentMetadataFields, type ContentMetadata } from './contentMetadata.js';
 
 export type ActivityType =
   | 'listen_choose'
@@ -34,7 +35,7 @@ export interface IActivity {
   pointsWeight?: number;
 }
 
-export interface ILesson extends Document {
+export interface ILesson extends Document, ContentMetadata {
   stageId: Types.ObjectId;
   order: number; // 1 to 20
   title: string;
@@ -103,6 +104,7 @@ const activitySchema = new Schema<IActivity>(
 
 const lessonSchema = new Schema<ILesson>(
   {
+    ...contentMetadataFields,
     stageId: {
       type: Schema.Types.ObjectId,
       ref: 'Stage',
