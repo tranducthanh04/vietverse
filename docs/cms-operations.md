@@ -2,6 +2,8 @@
 
 Ngày 2026-10-09. Quyết định triển khai: admin dùng bản nháp chung, xuất bản chủ động, không ghi live bằng seed. Không đổi điểm, unlock, subscription hoặc ID học tập.
 
+Kế hoạch thực thi chi tiết cho người deploy: [nhập dữ liệu staging và production](./superpowers/plans/2026-10-09-customer-data-deployment.md). Bao gồm kiểm đúng DB/admin, backup/restore rehearsal, index prerequisites, report-bound apply, retry/rollback và biên bản. Đây là bàn giao chưa thực thi DB thật; không thay các gate bên dưới.
+
 ## Trước khi bật production
 
 1. Xác nhận đúng database đích, tài khoản admin và bản sao lưu. Các test/QA của đợt này chỉ dùng MongoMemoryReplSet riêng, không thay thế bước xác nhận đích.

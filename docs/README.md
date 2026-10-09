@@ -33,6 +33,8 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 | `05-api-and-data-contracts.md` | Endpoint, payload, quyền, lỗi, idempotency |
 | `06-review-findings.md` | Ưu tiên xử lý và bằng chứng review |
 | `07-change-workflow.md` | Checklist BA/dev/reviewer trước và sau khi code |
+| `cms-operations.md` | Quy tắc vận hành CMS, import nháp và publish riêng |
+| `superpowers/plans/2026-10-09-customer-data-deployment.md` | Bàn giao deploy: staging → backup/restore → dry-run → import → đối soát → production |
 | `adr/` | Quyết định kiến trúc có ảnh hưởng dài hạn |
 
 ## Trạng thái baseline
