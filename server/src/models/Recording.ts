@@ -7,6 +7,7 @@ export interface IRecording extends Document {
   contentVersion?: number;
   url: string;
   publicId?: string;
+  uploadIntentId?: Types.ObjectId;
   durationSec: number;
   wordOrPrompt?: string;
   createdAt: Date;
@@ -34,6 +35,7 @@ const recordingSchema = new Schema<IRecording>(
       required: true,
     },
     publicId: String,
+    uploadIntentId: { type: Schema.Types.ObjectId, select: false },
     contentVersion: { type: Number, min: 0 },
     durationSec: {
       type: Number,
@@ -46,4 +48,5 @@ const recordingSchema = new Schema<IRecording>(
   }
 );
 
+recordingSchema.index({ uploadIntentId: 1 }, { unique: true, sparse: true });
 export const Recording = model<IRecording>('Recording', recordingSchema);

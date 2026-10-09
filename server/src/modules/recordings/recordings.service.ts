@@ -2,6 +2,7 @@ import { Recording } from '../../models/Recording.js';
 import { Child } from '../../models/Child.js';
 import { storageService } from '../../services/storage.service.js';
 import { assertRecordingContext } from './recordings.policy.js';
+import { persistOwnedRecording } from './recordings.persistence.js';
 
 export class RecordingsService {
   static async uploadRecording(
@@ -26,18 +27,14 @@ export class RecordingsService {
       data.originalname || `rec_${data.childId}`
     );
 
-    const recording = await Recording.create({
-      childId: context.childId,
-      lessonId: data.lessonId,
-      activityId: data.activityId,
-      contentVersion: context.contentVersion,
-      url: uploadRes.url,
-      publicId: uploadRes.publicId,
-      durationSec: data.durationSec ? Math.max(0, Math.min(180, Number(data.durationSec))) : 0,
-      wordOrPrompt: data.wordOrPrompt || '',
-    });
-
-    return { ...recording.toObject(), id: recording.id };
+    try {
+      return await persistOwnedRecording(parentId, context, { ...uploadRes,
+        durationSec: data.durationSec ? Math.max(0, Math.min(180, Number(data.durationSec))) : 0 });
+    } catch (error) {
+      // Only this legacy operation owns this asset; never clean up a direct receipt.
+      try { await storageService.deleteAudio(uploadRes.publicId); } catch { /* manual reconciliation */ }
+      throw error;
+    }
   }
 
   static async getRecordingsByChild(childId: string, parentId: string) {

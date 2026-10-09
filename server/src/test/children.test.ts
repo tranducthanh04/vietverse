@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../app.js';
 import { Child } from '../models/Child.js';
 import { AuthService } from '../modules/auth/auth.service.js';
+import { Recording, RecordingUploadIntent, Redemption } from '../models/index.js';
+import { Types } from 'mongoose';
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('Children & Ownership API', () => {
   it('GET /children/:id should return 404/403 when accessing a child belonging to another parent', async () => {
@@ -102,6 +106,9 @@ describe('Children & Ownership API', () => {
       kind: 'story',
       refId: lesson._id,
     });
+    await RecordingUploadIntent.create({ parentId: parent.user.id, requestId: 'child-delete', childId: child.id,
+      fingerprint: 'test', publicId: 'test-asset', timestamp: 1, expiresAt: new Date(), deleteAt: new Date(Date.now()+86400000) });
+    await Redemption.create({ childId: child.id, itemId: new Types.ObjectId(), pointsSpent: 1, status: 'pending' });
 
     // Delete child
     const delRes = await request(app)
@@ -126,5 +133,16 @@ describe('Children & Ownership API', () => {
 
     const remainingLogs = await ExplorationLog.find({ childId: child._id });
     expect(remainingLogs.length).toBe(0);
+    expect(await RecordingUploadIntent.countDocuments({ childId: child.id })).toBe(0);
+    expect(await Redemption.countDocuments({ childId: child.id })).toBe(0);
+  });
+  it('rolls back the entire cascade when one database delete fails', async () => {
+    const parent = await AuthService.register({ email: 'delete-rollback@example.test', password: 'Password123!', displayName: 'Owner' });
+    const child = await Child.create({ parentId: parent.user.id, name: 'Child', ageGroup: '5-6', companionLanguage: 'en' });
+    await Recording.create({ childId: child.id, url: '/test.webm' });
+    vi.spyOn(Recording, 'deleteMany').mockRejectedValueOnce(new Error('injected cascade failure'));
+    expect((await request(app).delete(`/api/v1/children/${child.id}`).set('Authorization', `Bearer ${parent.accessToken}`)).status).toBe(503);
+    expect(await Child.exists({ _id: child.id })).not.toBeNull();
+    expect(await Recording.countDocuments({ childId: child.id })).toBe(1);
   });
 });

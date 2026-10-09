@@ -3,7 +3,7 @@ import { RecordingsService } from './recordings.service.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
 import { z } from 'zod';
 import { contentVersionParam } from '../content/content.reader.js';
-import { uploadIntentSchema } from './recordings.validation.js';
+import { uploadIntentSchema, finalizeSchema } from './recordings.validation.js';
 import { DirectRecordingsService } from './recordings.directUpload.js';
 
 const recordingFields = z.object({
@@ -16,6 +16,12 @@ const recordingFields = z.object({
 });
 
 export class RecordingsController {
+  static async finalize(req: Request, res: Response, next: NextFunction) {
+    try {
+      return sendSuccess(res, await DirectRecordingsService.finalize(req.user!.id, finalizeSchema.parse(req.body).intentId), 201);
+    } catch (error) { next(error); }
+  }
+
   static async createIntent(req: Request, res: Response, next: NextFunction) {
     try {
       return sendSuccess(res, await DirectRecordingsService.createIntent(req.user!.id, uploadIntentSchema.parse(req.body)), 201);

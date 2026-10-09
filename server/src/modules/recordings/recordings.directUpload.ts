@@ -3,8 +3,22 @@ import { RecordingUploadIntent } from '../../models/RecordingUploadIntent.js';
 import { directAudioStorage, type UploadIntentDto } from '../../services/directAudioStorage.js';
 import { assertRecordingContext } from './recordings.policy.js';
 import { uploadIntentSchema, type UploadIntentInput } from './recordings.validation.js';
+import { findOwnedRecordingReceipt, intentExpired, persistOwnedRecording, type RecordingReceipt } from './recordings.persistence.js';
 
 export class DirectRecordingsService {
+  static async finalize(parentId: string, intentId: string): Promise<RecordingReceipt> {
+    // The Recording remains the receipt even after the intent TTL has elapsed.
+    const existing = await findOwnedRecordingReceipt(parentId, intentId);
+    if (existing) return existing;
+    const intent = await RecordingUploadIntent.findOne({ _id: intentId, parentId });
+    if (!intent) throw { statusCode: 404, code: 'NOT_FOUND', message: 'Không tìm thấy lượt gửi thu âm.' };
+    if (intent.expiresAt.getTime() <= Date.now()) throw intentExpired();
+    const context = await assertRecordingContext(parentId, { childId: intent.childId.toString(),
+      lessonId: intent.lessonId?.toString(), activityId: intent.activityId ?? undefined, contentVersion: intent.contentVersion ?? undefined, wordOrPrompt: intent.wordOrPrompt ?? undefined });
+    const audio = await directAudioStorage.inspect(intent.publicId);
+    return persistOwnedRecording(parentId, context, { url: audio.url, publicId: audio.publicId, durationSec: audio.durationSec }, intentId);
+  }
+
   static async createIntent(parentId: string, input: UploadIntentInput): Promise<UploadIntentDto> {
     const parsed = uploadIntentSchema.parse(input);
     const context = await assertRecordingContext(parentId, parsed);

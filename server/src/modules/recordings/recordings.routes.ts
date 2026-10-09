@@ -21,6 +21,7 @@ const router = Router();
 
 router.use(authMiddleware);
 router.post('/upload-intent', RecordingsController.createIntent);
+router.post('/finalize', RecordingsController.finalize);
 
 router.post('/', upload.single('audio'), RecordingsController.upload);
 router.get('/children/:childId', RecordingsController.getByChild);
