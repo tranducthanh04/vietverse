@@ -74,6 +74,11 @@ Nguyên tắc bắt buộc:
 ## 7. Parent portal và parent gate
 
 - Dashboard hiển thị tiến độ mô tả, không phải điểm xếp hạng trẻ.
+- *Quyết định hiển thị (2026-10-09)*: dashboard tổng hợp các chặng theo catalog thực tế (catalog chuẩn có 5 chặng). Tiến độ bằng số bài `completed` còn tồn tại trong chặng chia tổng số bài của chặng; không dùng số 4 cố định cho database cũ, không tính bài đang luyện tập hoặc bài đã xóa.
+- Chặng hiện tại là chặng đầu tiên theo thứ tự chưa hoàn thành, kể cả khi bị khóa; không lấy `Child.currentStageId` làm nguồn chuẩn. Khi tất cả chặng có bài và đã hoàn thành thì không tạo chặng kế tiếp. Catalog trống/chặng chưa có bài không được coi là hoàn thành.
+- Quyền mở chặng dùng lại `StagesService`, không thay đổi subscription hay quyền replay. Nhãn khóa ưu tiên: chưa có bài, cần gói học còn hiệu lực (vẫn cần hoàn thành chặng trước), cần hoàn thành chặng trước. Gói hết hạn không xóa tiến độ đã đạt.
+- *Giả định hiển thị nhật ký*: 10 ghi nhận mới nhất, trộn trạng thái gần nhất của mỗi bài (`LessonProgress.updatedAt`), bản thu âm và lần khám phá đầu tiên mỗi truyện/bài văn hóa. Đây không phải lịch sử mọi lượt truy cập hay mọi lần làm bài; nhãn khám phá không khẳng định đã nghe audio. Nội dung bị xóa có nhãn không còn khả dụng.
+- Số dư ViVi lấy từ báo cáo server; liên kết điểm mở kho điểm hiện có `/diem-thuong` trong không gian bé (chịu giới hạn giờ học), không thay thế trang ledger đầy đủ. Bốn năng lực giữ công thức MVP và phải ghi rõ là chỉ số tham khảo, không phải đánh giá chuyên môn.
 - Bốn năng lực: nghe hiểu, nói & giao tiếp, nhận diện mặt chữ, tư duy & văn hóa.
 - Mốc trạng thái: từ 70% là `Đã khám phá`, trên 0% là `Đang luyện tập`, còn lại `Chưa bắt đầu`.
 - *Quyết định nghiệp vụ (Server-side Parent Gate Step-Up Auth)*: Cổng phụ huynh được bảo vệ bằng quy trình xác thực nâng cấp (step-up token) có chữ ký số từ server:

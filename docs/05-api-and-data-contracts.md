@@ -77,6 +77,16 @@ Base URL: `/api/v1`.
 
 ## Contract cần giữ ổn định
 
+### Dashboard phụ huynh — bổ sung 2026-10-09
+
+`GET /parent/progress/:childId` giữ nguyên `child`, `overview`, `competencies`; bổ sung dữ liệu chỉ đọc sau khi xác minh ownership và Parent Gate:
+
+- `journey.stages[]`: `id`, `order`, `title`, `totalLessons`, `completedCount`, `percentage` (làm tròn nguyên), `isCompleted`, `isUnlocked`, `requiresSubscription`, `lockReason` (`null`, `no_lessons`, `subscription`, `previous_stage`). Không trả vocabulary/đáp án của lesson trong báo cáo.
+- `journey.currentStageId`: ID chặng đầu chưa hoàn thành hoặc `null`; `journey.isCompleted` chỉ đúng khi catalog không trống và mọi chặng có bài đã hoàn thành.
+- `recentActivities[]`: tối đa 10 phần tử, giảm dần theo thời điểm; `id` có tiền tố loại, `kind` (`lesson`, `recording`, `story`, `culture`), `title`, `occurredAt` ISO. Bài học thêm `lessonStatus` (`in_progress`, `completed`). Không xuất URL audio hay dữ liệu bé khác.
+- Bài học lấy thời điểm cập nhật progress, thu âm/khám phá lấy thời điểm tạo. Mỗi nguồn chỉ đọc tối đa 10 bản ghi trước khi trộn; nội dung đã xóa trả nhãn không còn khả dụng. Không tạo collection nhật ký mới.
+- FE chấp nhận API cũ chưa có hai trường mới trong khi triển khai lệch phiên bản; các phần cũ vẫn đọc được. Lỗi tải báo cáo có retry, không hiển thị như dữ liệu trống.
+
 ### Bổ sung ngày 2026-10-08
 
 - `PATCH /admin/redemptions/:id`: đơn đã `cancelled` không được mở lại (409); request cạnh tranh cùng đơn nhận 409. Retry cùng trạng thái hủy sau khi request trước hoàn tất không thưởng thêm. Khóa vận hành `mutationInProgress` không xuất ra response.

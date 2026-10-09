@@ -1,11 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Clock, Mic, BookOpen, HeartHandshake, Compass } from 'lucide-react';
+import { Mic, BookOpen, HeartHandshake, Compass } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { ParentJourney, ParentRecentActivities } from './ParentJourney.js';
+import type { ParentProgress } from './parentProgress.types.js';
 
 export const ParentDashboardPage: React.FC = () => {
   const { activeChild } = useChildStore();
@@ -15,7 +17,7 @@ export const ParentDashboardPage: React.FC = () => {
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useQuery<ParentProgress>({
     queryKey: ['parentProgress', activeChild?._id],
     queryFn: async () => {
       const res = await api.get(`/parent/progress/${activeChild?._id}`);
@@ -76,6 +78,7 @@ export const ParentDashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <ParentJourney journey={progressData.journey} child={progressData.child} />
       {/* Overview Stat Cards */}
       <div>
         <h2 className="text-xl font-bold font-display text-stone-800 mb-4">
@@ -109,6 +112,8 @@ export const ParentDashboardPage: React.FC = () => {
         </div>
       </div>
 
+      <ParentRecentActivities activities={progressData.recentActivities} />
+
       {/* 4 Core Competency Cards */}
       <div>
         <div className="mb-4">
@@ -118,10 +123,11 @@ export const ParentDashboardPage: React.FC = () => {
           <p className="text-sm text-stone-500">
             {VI_LOCALES.parentPortal.competenciesDesc}
           </p>
+          <p className="text-sm text-stone-500 mt-1">Chỉ số tham khảo từ hoạt động đã ghi nhận, không phải đánh giá chuyên môn hay xếp hạng trẻ.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {competencies.map((comp: any) => (
+          {competencies.map((comp) => (
             <Card key={comp.key} className="p-6 bg-white border-2 border-cream-border flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3">

@@ -47,7 +47,7 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 ## Khoảng trống chưa triển khai trong đợt này
 
 - Đăng ký Google OAuth và ngôn ngữ đồng hành chọn nhiều (hiện model lưu một ngôn ngữ).
-- Dashboard phụ huynh đầy đủ chặng hiện tại, tiến độ 5 chặng, hoạt động gần đây và điều hướng điểm thưởng. Công thức năng lực hiện tại vẫn là benchmark MVP, chưa phải đánh giá chuyên môn toàn khóa.
+- Dashboard phụ huynh đã bổ sung chặng hiện tại, tiến độ theo catalog (5 chặng ở seed chuẩn), 10 ghi nhận gần nhất và điều hướng kho điểm ngày 2026-10-09. Công thức năng lực hiện tại vẫn là benchmark MVP, chưa phải đánh giá chuyên môn toàn khóa. Nhật ký không lưu mọi lượt truy cập; lịch sử điểm đầy đủ vẫn là khoảng trống riêng.
 - CMS biên tập đủ activities/vocabulary, truyện và văn hóa; admin hiện chủ yếu chỉnh metadata bài học.
 - Pagination toàn bộ lịch sử điểm (API hiện giới hạn 100 bản ghi), chính sách hoàn quà ảo/đơn đã giao.
 - Khi hợp nhất `origin/main`, giữ nguyên module thanh toán PayOS đã được phát triển độc lập. Code checkout/webhook đã có; kiểm thử giao dịch production vẫn cần cấu hình và người dùng xác nhận theo `03-feature-inventory.md`. Đợt này không tạo giao dịch thật.
@@ -77,3 +77,12 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - Phát hiện nhỏ chưa sửa trong lượt này: tab admin ghi cứng chặng 3–5 là “Khung” dù catalog mới đã có activities; nút đăng nhập demo còn nhãn 45 điểm trong khi seed mới bắt đầu 0 điểm. Không dùng các nhãn này để kết luận dữ liệu thật.
 - Giới hạn: đây là smoke test tương tác, không phải bộ E2E tự động toàn bộ ứng dụng; chưa kiểm thử Safari/thiết bị thật, axe, media production, mua quà đủ điểm hay hủy đơn qua browser. Các trường hợp concurrency vẫn được kiểm tra qua API tests.
 - Kiểm chứng sau sửa reload: backend 58/58, frontend 36/36; typecheck/build đạt; lint FE 0 lỗi/123 warning. Review độc lập không phát hiện regression cần xử lý trong diff vòng đời gate.
+
+## Hoàn thiện dashboard phụ huynh — 2026-10-09
+
+- Đã triển khai phương án được duyệt: chặng hiện tại là chặng đầu chưa hoàn thành, tiến độ từng chặng theo catalog thực, lý do khóa, 10 ghi nhận gần nhất phân biệt học/thu âm/khám phá, số dư và liên kết kho điểm. Giữ công thức năng lực, chính sách điểm và mở khóa.
+- API chỉ đọc, giữ ownership và Parent Gate; không thay schema hoặc chạy migration. Client vẫn hiển thị các phần cũ nếu API chưa triển khai trường mới. Có trạng thái loading/error/retry/empty, khóa query theo hồ sơ bé để không render response cũ sau khi đổi bé.
+- Test-first: 4 test API và 5 test UI mới thất bại khi chưa có tính năng; sau triển khai, toàn bộ backend 63/63 và frontend 41/41 đạt. `typecheck`/`build` đạt; lint FE 0 lỗi/120 warning. Bundle khoảng 603 KB; lint toàn repo vẫn thiếu script server.
+- Browser local với MongoDB replica set tạm: đăng nhập demo, mở Parent Gate, kiểm tra dashboard tại 390×844 và 1366×900, không tràn ngang toàn trang trên mobile, reload giữ dashboard, link điểm mở đúng `/diem-thuong`. Dữ liệu gồm catalog mẫu, một progress đang học và một khám phá truyện; không ghi database thật hoặc thanh toán. Tiến trình và script QA tạm đã được dọn.
+- Review độc lập không có finding cần sửa. Giới hạn còn lại: chưa nghiệm thu thiết bị thật/Safari/axe; lịch sử điểm đầy đủ, CMS, Google OAuth, nội dung/audio production và thanh toán thật vẫn là các hạng mục riêng.
+- Rollback: revert thay đổi báo cáo/UI; vì không có mutation/schema mới, không cần rollback dữ liệu.

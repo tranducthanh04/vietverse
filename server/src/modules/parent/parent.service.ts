@@ -7,6 +7,7 @@ import { ExplorationLog } from '../../models/ExplorationLog.js';
 import { Lesson } from '../../models/Lesson.js';
 import { User } from '../../models/User.js';
 import { env } from '../../config/env.js';
+import { getParentJourney, getParentRecentActivities } from './parent.reporting.js';
 
 export interface CompetencyScore {
   key: string;
@@ -175,7 +176,14 @@ export class ParentService {
       },
     ];
 
+    const [journey, recentActivities] = await Promise.all([
+      getParentJourney(parentId, childId),
+      getParentRecentActivities(childId),
+    ]);
+
     return {
+      journey,
+      recentActivities,
       child: {
         id: child._id,
         name: child.name,

@@ -19,7 +19,7 @@
 | Points | Lịch sử điểm | Có | `GET /points/children/:childId` | PointTransaction | Hoàn thiện (P2.5 limit 100) |
 | Shop | Kho vật phẩm | Có hiển thị tồn kho | `GET /points/shop/items` | ShopItem | Hoàn thiện (P0.2 stock display) |
 | Shop | Đổi quà ảo/vật lý | Có | `POST /points/shop/redeem` | Child, PointTransaction, Redemption | Hoàn thiện (P0.2 atomic stock decrement & rollback) |
-| Parent | Dashboard năng lực | Có | `GET /parent/progress/:childId` | LessonProgress, Recording, ExplorationLog | Hoàn thiện (P0.4 bảo vệ bằng Parent Gate) |
+| Parent | Dashboard tiến độ và năng lực | Chặng hiện tại, tiến độ theo catalog, 10 hoạt động, số dư/liên kết kho điểm, 4 năng lực tham khảo | `GET /parent/progress/:childId` | Stage, Lesson, LessonProgress, Recording, ExplorationLog | Mở rộng 2026-10-09; giữ Parent Gate và ownership, chưa phải đánh giá chuyên môn |
 | Parent | Bản thu âm | Có | `GET /recordings/children/:childId` | Recording | Hoàn thiện |
 | Parent | Screen time | Có Modal nhắc nhở mắt + đếm giờ | `PATCH /parent/screen-time` | Child | Hoàn thiện (P1.4 real-time enforcement & override) |
 | Parent | Parent Gate | Có Modal toán / PIN | `GET /challenge`, `POST /verify` | Step-up Token 15m | Hoàn thiện (P0.4 server-side token) |
