@@ -2,7 +2,7 @@
 
 Ngày: 2026-10-09. Baseline: `f727c60` trên `main`.
 
-Trạng thái: **thiết kế chờ người dùng duyệt, chưa triển khai**. Người dùng đã đồng ý hướng lưu nháp -> xem trước -> xuất bản. Các lựa chọn kỹ thuật và giới hạn bên dưới là đề xuất để duyệt, không phải hành vi đã có của hệ thống.
+Trạng thái: **thiết kế đã được phản hồi, bổ sung phạm vi dữ liệu khách hàng ngày 2026-10-09; chưa triển khai**. Người dùng đồng ý hướng CMS và yêu cầu dùng dữ liệu đã gửi. Bản sửa này làm rõ nguồn và cách nhập dữ liệu; các lựa chọn kỹ thuật là đề xuất, không phải hành vi đã có của hệ thống.
 
 ## 1. Mục tiêu và căn cứ
 
@@ -37,7 +37,19 @@ Bằng chứng baseline đã kiểm tra:
 - **Vòng đời:** ẩn/hiện truyện và văn hóa thay vì xóa; bài học không có nút ẩn/xóa vì sẽ ảnh hưởng điều kiện hoàn thành chặng. Bỏ thay đổi nháp chỉ tác động bản nháp.
 - **Cấu trúc chương trình:** không thêm, bớt, đổi chặng hoặc số thứ tự bài đang chạy. Nút tạo bài học trực tiếp hiện có được thay bằng biên tập catalog đã nạp; mở rộng catalog cần migration riêng được duyệt. Giữ nguyên cả catalog cũ, không ép database cũ về 4 bài/chặng.
 
-Không bao gồm: đổi công thức điểm/năng lực, payment, Google OAuth, CMS landing page, lịch xuất bản, duyệt nhiều cấp, tự dịch, nhập hàng loạt, thay nguyên tác hoặc tự xác nhận bản quyền. Những giới hạn này không được báo là đã hoàn thiện cùng CMS.
+Không bao gồm: đổi công thức điểm/năng lực, payment, Google OAuth, CMS landing page, lịch xuất bản, duyệt nhiều cấp, tự dịch, công cụ nhập file bất kỳ hoặc tự xác nhận bản quyền. Nhập bộ dữ liệu từ tài liệu khách hàng đã gửi nằm trong phạm vi; không yêu cầu khách hàng nhập lại bằng tay. Những giới hạn này không được báo là đã hoàn thiện cùng CMS.
+
+### Dữ liệu khách hàng đã cung cấp
+
+Căn cứ đối chiếu trực tiếp ba tab ngày 2026-10-09 và liên kết tại `docs/08-customer-alignment.md`:
+
+- Kho Truyện có lời cho 21 bài, không chỉ tên. Nhập lời và liên kết nguồn thay cho đoạn minh họa hiện tại; giữ nguyên ngắt dòng. Lưu các dị bản trong bộ nguồn, không tự ghép thành một tác phẩm; draft ghi rõ bản được chọn để admin xem trước. Thông tin tác giả/thể loại có nghi vấn được đánh dấu cần xác minh, không tự sửa thành dữ kiện đã kiểm chứng.
+- Khám phá có giáo án cho 20 bài: dùng từ vựng, câu mẫu, đáp án và hướng dẫn đã viết. Mỗi hoạt động có ánh xạ về bài/mục nguồn; phần bổ sung để chạy được renderer phải ghi là biên soạn bổ sung. Hoạt động như chọn nhiều chữ M hoặc nghe rồi thực hiện ba bước chưa chắc tương đương bảy renderer hiện có: ghi rõ khoảng trống, không thay bằng câu hỏi khác rồi báo đã khớp hoàn toàn.
+- Văn hóa có tám nhóm và ví dụ nội dung/câu hỏi; nhập phần đã có. Phần intro/funFacts/câu hỏi chưa được viết đầy đủ được giữ nháp và đánh dấu cần biên tập, không gán bài mẫu hiện tại là lời của khách hàng.
+- Chưa thấy file audio trực tiếp hoặc timestamp trong ba tab. Nhập văn bản không phụ thuộc việc nhận audio; thiếu audio dùng chế độ đọc/fallback có nhãn, không bịa URL, thời lượng hay timestamp.
+- Bộ nguồn nhập cần có tab/heading, ngày đối chiếu và checksum; phân biệt nội dung chép từ tài liệu, phần biên soạn bổ sung và trường còn thiếu. Liên kết nguồn dùng làm attribution, không tự tải media từ các website đó.
+- Import có dry-run và ánh xạ tường minh tới ID đang có. Chỉ tạo draft khi chưa có draft đang biên tập, kiểm tra base version và báo conflict nếu nội dung đã đổi. Chạy lại cùng source checksum không tạo bản trùng hoặc ghi đè sửa tay. Nội dung mới chưa có ID live được tạo dưới dạng draft; lesson không khớp catalog hiện hữu phải báo xung đột, không tự thêm/di chuyển bài.
+- Đây là đợt nhập có kiểm soát cho bộ nguồn đã biết, không phải editor/importer tổng quát. Không ghi đè live qua seed; admin xuất bản qua luồng version/audit sau khi kiểm tra bản nhập. Không đụng tiến độ, điểm, recording hoặc database production trong bước chuẩn bị dữ liệu.
 
 ## 3. Lựa chọn kiến trúc
 
@@ -176,7 +188,7 @@ Contract mở rộng cụ thể: `GET /lessons/:id?childId=&contentVersion=` đ�
 - Mở rộng model additive; legacy thiếu metadata vẫn đọc như published version 0. Migration có dry-run, chỉ tạo index/metadata cần thiết (gồm seedKey) và báo xung đột, không viết lại nội dung catalog, progress hoặc ledger. Nội dung không thuộc seed không bị gán key tùy tiện.
 - Deploy bộ đọc snapshot/version và client biết version trước; CMS publish chỉ bật bằng cờ server mặc định tắt sau khi kiểm chứng API/client. Old client thiếu version được xử lý như mục 5, không có cam kết khôi phục phiên không xác định được bản.
 - Seed insert-only phải được cập nhật nhận diện bằng seedKey trước khi bật đổi tên CMS; giữ nguyên nội dung đã xuất bản, drafts, revisions, không tạo lại tên cũ hoặc làm hồi sinh story/culture đã ẩn. Kiểm thử chạy seed lại sau rename/publish/withdraw để xác nhận.
-- Bản CMS đầu không tự chuyển mọi bài khung thành giáo án mới. Admin chọn từng bài, biên tập và xuất bản; nhập hàng loạt hoặc thay catalog cần phê duyệt khác.
+- Bản CMS đầu chuẩn bị draft từ dữ liệu khách hàng theo mục 2; admin kiểm tra rồi xuất bản, không phải nhập lại lời đã có. Không tự chuyển mọi bài khung trên database cũ hoặc ghi đè nội dung live; thay cấu trúc catalog vẫn cần migration riêng.
 - Rollback an toàn: tắt mutation CMS, giữ reader hiểu snapshot/version; không hạ server về bản chấm hoàn toàn theo live sau khi đã có nhiều version. Trở lại nội dung cũ bằng một lần xuất bản mới từ snapshot được admin kiểm tra, không sửa/xóa snapshot lịch sử. UI khôi phục một chạm chưa nằm trong phạm vi.
 - Sau triển khai cập nhật docs 02/03/04/05/06/08 theo hành vi thực tế và kết quả kiểm chứng; tài liệu thiết kế này không thay nhãn baseline thành đã hoàn thiện.
 
@@ -192,7 +204,8 @@ Contract mở rộng cụ thể: `GET /lessons/:id?childId=&contentVersion=` đ�
 8. Bản thu được ràng buộc đúng child/lesson/activity/version; payload record_voice giả và recording của bé khác không thể nhận hoàn thành.
 9. Editor có loading/empty/error/retry, lỗi field, cảnh báo form chưa lưu, conflict; thao tác được bằng bàn phím và trên 390px/desktop. Nội dung legacy vẫn mở/sửa được mà không mất field.
 10. Test regression seed, ownership, unlock, điểm, offline, Parent Gate và các role không suy giảm. Chạy toàn bộ tests, typecheck, build, lint FE; báo rõ warning và giới hạn nghiệm thu media/thiết bị thật.
+11. Bộ nhập đối soát đủ 21 mục Kho Truyện và 20 mục bài học với nguồn; tám nhóm văn hóa cùng phần còn thiếu được ghi rõ. Kiểm tra nội dung lời thực tế, không chỉ đếm bản ghi. Dị bản và phần biên soạn bổ sung có nhãn; dry-run không ghi, chạy lại không nhân draft, không ghi đè sửa tay/live hoặc đổi ID học tập.
 
 ## 11. Cổng duyệt tiếp theo
 
-Người dùng duyệt tài liệu này, đặc biệt ba đề xuất: phiên bản cho bài đang học; giữ nguyên catalog bài học; media bằng URL trước. Sau đó mới viết kế hoạch triển khai chia theo lớp dữ liệu/API/editor/kiểm thử và xin chọn cách thực hiện. Chưa có thay đổi product code, API hay database ở bước thiết kế này.
+Người dùng xem phần dữ liệu khách hàng đã bổ sung ở mục 2; giữ hướng phiên bản cho bài đang học, catalog hiện hữu và media bằng URL. Sau khi duyệt bản sửa, viết kế hoạch triển khai chia theo nguồn dữ liệu/API/editor/kiểm thử và chọn cách thực hiện. Chưa có thay đổi product code, API hay database ở bước thiết kế này.

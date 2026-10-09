@@ -26,7 +26,7 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - Seed mặc định chỉ thêm bản ghi còn thiếu; không thay thế giáo án, đổi stage của lesson, reset tồn kho hay tái tạo tài khoản đang tồn tại.
 - Database mới nhận giáo án mẫu theo 5 mục tiêu: làm quen tiếng Việt; âm/chữ/thanh/vần; ghép tiếng/đọc; nói/kể chuyện; đọc hiểu/vận dụng. Bài 20 có năm thử thách.
 - Database cũ giữ nguyên lesson IDs và nội dung, kể cả bài khung. Thay bài khung cần một migration đã xem trước và duyệt riêng, vì progress/recording đang tham chiếu lesson IDs và activity IDs.
-- Danh mục tác phẩm lấy từ khách hàng không đồng nghĩa đã có nguyên tác, quyền sử dụng và file âm thanh. Bài đọc biên soạn phải được ghi nhãn rõ, không gán là lời nguyên tác.
+- Đối chiếu lại ngày 2026-10-09: tab Kho Truyện đã có văn bản cho cả 21 bài, một số kèm liên kết nguồn và dị bản. Seed hiện tại mới dùng tên tác phẩm và bài đọc minh họa; đây là phần triển khai chưa sử dụng dữ liệu đã được cung cấp, không phải khách hàng chưa gửi lời. Quyền sử dụng và file âm thanh là các thông tin riêng, không suy ra từ việc có văn bản.
 - `Story.audioUrl` có thể trống khi chưa có media; UI phải hiển thị chưa có âm thanh thay vì mô phỏng đang phát.
 
 ### Chạy seed an toàn
@@ -41,8 +41,19 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 ## Giả định cần khách hàng xác nhận
 
 - Giáo án mẫu, câu hỏi và nội dung văn hóa biên soạn là dữ liệu thử nghiệm cần chuyên môn giáo dục duyệt trước phát hành.
-- Khách hàng/content team cung cấp hoặc duyệt nguyên tác, tác giả, quyền sử dụng, ảnh và bản thu âm. Không xem URL chưa tồn tại là asset hoàn thiện.
+- Dùng văn bản khách hàng đã gửi làm nguồn nhập CMS, giữ liên kết và nhãn tác giả/thể loại như nguồn. Chỉ yêu cầu làm rõ chỗ mâu thuẫn, dị bản cần chọn và quyền sử dụng/media chưa xác nhận; không yêu cầu gửi lại toàn bộ nội dung. Không xem liên kết bài viết là URL audio hoặc tự đặt thời gian karaoke.
 - Giữ tiến độ tổng hợp trong Góc Phụ Huynh; việc thêm trang tiến độ dành riêng cho bé cần chốt sau.
+
+## Đính chính nguồn nội dung khách hàng — 2026-10-09
+
+Đã mở và xuất riêng ba tab nội dung từ tài liệu gốc. Xuất tab Cấu trúc toàn bộ web không bao gồm các tab còn lại; không dùng riêng bản xuất đó để kết luận khách hàng thiếu dữ liệu.
+
+- [Khám phá](https://docs.google.com/document/d/1Bi_owABMnxrkFRoZQHoIPW0xu_UDPnWJLh2nbHY-VvM/edit?tab=t.6aij8uhnuc6p): có 5 chặng, 20 bài, mục tiêu, từ vựng, câu mẫu, đáp án và mô tả hoạt động ở mức chi tiết khác nhau. Không phải chỉ có khung tên bài. Một số hoạt động vẫn là mô tả cần chuyển thành dữ liệu tương tác; ví dụ ôn tập 5 câu chưa liệt kê đủ câu và bài nghe truyện chưa có bản thu.
+- [Kho Truyện](https://docs.google.com/document/d/1Bi_owABMnxrkFRoZQHoIPW0xu_UDPnWJLh2nbHY-VvM/edit?tab=t.4844z8cb97b): có 21 mục với lời bên dưới, từ Trồng nụ trồng hoa đến Nhạc rừng; có liên kết nguồn ở một số bài, hai bản Lộn cầu vồng và hai đoạn Kéo cưa lừa xẻ. Không gộp dị bản âm thầm, không thay lời bằng đoạn minh họa tự viết. Nhãn Nhạc rừng/Thanh Lan/Thơ được giữ như thông tin nguồn, chưa phải xác minh độc lập về tác giả hay thể loại.
+- [Khám Phá Văn Hóa](https://docs.google.com/document/d/1Bi_owABMnxrkFRoZQHoIPW0xu_UDPnWJLh2nbHY-VvM/edit?tab=t.7s9fq5a2a7uw): có 8 nhóm, ví dụ card, bố cục chi tiết và câu hỏi/đáp án về bánh chưng; chưa có toàn văn từng bài và 3–4 thông tin thú vị cho mọi chủ đề.
+- Chưa thấy file/URL audio trực tiếp hoặc mốc đồng bộ lời trong ba tab đã kiểm tra. Các dòng “Audio” ở giáo án mô tả lời cần phát, không phải file âm thanh đã được giao. Không kết luận về các tài sản có thể được gửi ngoài tài liệu này.
+
+**Yêu cầu người dùng:** hoàn thiện CMS với dữ liệu khách hàng đã cung cấp, không chỉ tạo editor trống hoặc dùng lại toàn bộ dữ liệu mẫu. **Đề xuất kỹ thuật:** nhập có nguồn vào draft, đối soát ID hiện hữu và xuất bản qua cơ chế phiên bản; xem thiết kế CMS. Đây là phạm vi tiếp theo, chưa có import hoặc thay đổi database trong lượt đính chính này.
 
 ## Khoảng trống chưa triển khai trong đợt này
 
