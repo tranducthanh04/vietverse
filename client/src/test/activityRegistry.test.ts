@@ -24,8 +24,8 @@ describe('Lesson Engine Activity Registry', () => {
     expect(getActivityComponent('record_voice')).toBe(RecordVoiceActivity);
   });
 
-  it('should fallback gracefully to ReviewActivity for unknown activity types', () => {
+  it('does not fallback to a graded Review for unknown activity types', () => {
     const fallback = getActivityComponent('unknown_future_activity_type');
-    expect(fallback).toBe(ReviewActivity);
+    expect(fallback).not.toBe(ReviewActivity);
   });
 });

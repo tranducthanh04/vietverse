@@ -6,6 +6,10 @@ import { FillBlankActivity } from './activities/FillBlankActivity.js';
 import { SortOrderActivity } from './activities/SortOrderActivity.js';
 import { RecordVoiceActivity } from './activities/RecordVoiceActivity.js';
 import { ReviewActivity } from './activities/ReviewActivity.js';
+import { MultiSelectActivity } from './activities/MultiSelectActivity.js';
+import { GroupSortActivity } from './activities/GroupSortActivity.js';
+import { FillBlanksActivity } from './activities/FillBlanksActivity.js';
+import { FollowStepsActivity } from './activities/FollowStepsActivity.js';
 
 export interface ActivityRendererProps {
   activity: any;
@@ -25,13 +29,19 @@ export const activityRegistry: Record<string, ActivityComponent> = {
   sort_order: SortOrderActivity,
   record_voice: RecordVoiceActivity,
   review: ReviewActivity,
+  multi_select: MultiSelectActivity,
+  group_sort: GroupSortActivity,
+  fill_blanks: FillBlanksActivity,
+  follow_steps: FollowStepsActivity,
 };
+
+const UnsupportedActivity = () => React.createElement('p', { role: 'alert', className: 'p-4' },
+  'Hoạt động chưa được hỗ trợ. Vui lòng cập nhật trang hoặc nhờ phụ huynh kiểm tra.');
 
 export function getActivityComponent(type: string): ActivityComponent {
   const Component = activityRegistry[type];
   if (!Component) {
-    // Graceful fallback for unknown activity type
-    return ReviewActivity;
+    return UnsupportedActivity;
   }
   return Component;
 }
