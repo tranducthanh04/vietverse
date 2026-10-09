@@ -2,6 +2,8 @@
 
 ## Bổ sung CMS — 2026-10-09
 
+- Review cuối đã tái hiện và sửa seed tạo live trùng seedKey với nháp khách hàng chưa xuất bản: giữ chỗ mọi trạng thái nháp, phát hiện live/draft khác ID trước ghi, khóa chung seed/import. Test bao phủ import -> seed -> publish, nháp discarded và writer đang chạy.
+- Đã sửa renderer điền khuyết để một chuỗi từ hai dấu gạch dưới liên tiếp là một ô trống, khớp validator CMS; test learner/preview giữ đầy đủ vế sau câu với `__`, `___`, `______`.
 - Đã thêm draft/CAS/publish transaction và whitelist reader phiên bản; preview admin không có mutation học tập. Recording answer phải là ID bản ghi đúng hồ sơ/nội dung/version, không nhận boolean hoàn thành giả.
 - Test tích hợp phát hiện giới hạn draft order <=20 chặn catalog cũ; đã tách whitelist đọc khỏi validate ghi và giữ số thứ tự hiện hữu (không cho CMS sửa thứ tự). Media HTTP legacy còn đọc được; lưu/publish mới phải dùng URL an toàn.
 - Nguồn khách hàng được snapshot/checksum và nhập nháp, không gọi seed để ghi đè live. Các khoảng trống renderer/quiz/audio/bản quyền được giữ thành ghi chú, không tự tuyên bố đủ nội dung production.

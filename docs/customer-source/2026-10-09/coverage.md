@@ -430,4 +430,3 @@ Trường ánh xạ: category, title, intro, coverImage, funFacts, quiz, audioUr
 - funFacts (missing_source): Chưa có 3–4 thông tin cụ thể trong nguồn; không dùng bài mẫu thay lời khách hàng.
 - quiz (missing_source): Chưa có bộ câu hỏi và đáp án cho nhóm này.
 - audioUrl (missing_source): Chưa có file audio.
-

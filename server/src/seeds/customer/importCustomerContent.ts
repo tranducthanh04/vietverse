@@ -54,8 +54,20 @@ export async function planCustomerImport(): Promise<ImportReport> {
 export async function importCustomerContent({ dryRun = true, adminId, expectedPlan }: { dryRun?: boolean; adminId?: string; expectedPlan?: ImportReport } = {}): Promise<ImportReport> {
   const ownsConnection = mongoose.connection.readyState === 0;
   if (ownsConnection) await mongoose.connect(env.MONGODB_URI, { autoIndex: false, autoCreate: false });
+  const lockId = 'vietverse-catalog-seed';
+  let locked = false;
   try {
     if (!dryRun && (!adminId || !await User.exists({ _id: adminId, role: 'admin' }))) throw new Error('An existing admin actor is required for import');
+    if (!dryRun) {
+      // Share the seed writer lock before planning so missing live identities stay reserved.
+      try {
+        await mongoose.connection.db!.collection<{ _id: string; startedAt: Date }>('seed_locks').insertOne({ _id: lockId, startedAt: new Date() });
+        locked = true;
+      } catch (error) {
+        if ((error as { code?: number }).code === 11000) throw new Error('Catalog seed/import already running, or stale seed lock needs operator review');
+        throw error;
+      }
+    }
     const report = await planCustomerImport();
     if (dryRun) return report;
     if (report.entries.some(entry => entry.action === 'conflict')) throw new Error('Customer import conflict; inspect dry-run before applying');
@@ -87,7 +99,10 @@ export async function importCustomerContent({ dryRun = true, adminId, expectedPl
       }
     });
     return { ...report, dryRun: false };
-  } finally { if (ownsConnection) await mongoose.disconnect(); }
+  } finally {
+    if (locked) await mongoose.connection.db?.collection<{ _id: string }>('seed_locks').deleteOne({ _id: lockId });
+    if (ownsConnection) await mongoose.disconnect();
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

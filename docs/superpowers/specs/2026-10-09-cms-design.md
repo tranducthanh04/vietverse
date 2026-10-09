@@ -2,7 +2,7 @@
 
 Ngày: 2026-10-09. Baseline: `f727c60` trên `main`.
 
-Trạng thái: **đã triển khai CMS và bộ nhập local, đang nghiệm thu cuối ngày 2026-10-09**. Không nhập production; publish mặc định tắt. Nội dung thiết kế ghi quyết định gốc, trạng thái và hướng dẫn vận hành thực tế xem `docs/cms-operations.md` và `docs/08-customer-alignment.md`.
+Trạng thái: **đã triển khai CMS, hoàn tất review độc lập và kiểm chứng local ngày 2026-10-09**. Không nhập production; publish mặc định tắt. Nội dung thiết kế ghi quyết định gốc, trạng thái và hướng dẫn vận hành thực tế xem `docs/cms-operations.md` và `docs/08-customer-alignment.md`.
 
 ## 1. Mục tiêu và căn cứ
 

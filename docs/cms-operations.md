@@ -13,6 +13,8 @@ Ngày 2026-10-09. Quyết định triển khai: admin dùng bản nháp chung, x
 
 Không chạy lại seed để cập nhật lời. Seed là insert-only, không phải migration nội dung. SeedKey nội bộ của story/culture được giữ cả khi đổi tên/ẩn và khi draft-only xuất bản lần đầu.
 
+Quyết định bảo vệ định danh: seed bỏ qua seedKey đã được nháp khách hàng giữ chỗ, kể cả nháp discarded; không tạo bản live mẫu thay nháp. Live và nháp cùng key nhưng khác ID là conflict, dừng trước khi ghi catalog. Seed và import apply dùng chung khóa `seed_locks/vietverse-catalog-seed` từ trước bước lập kế hoạch đến hết thao tác; dry-run vẫn chỉ đọc. Nếu tiến trình chết để lại khóa, người vận hành phải xác minh không còn writer và đối soát kết quả trước khi gỡ khóa, không tự hết hạn.
+
 ## Bộ nguồn và khoảng trống
 
 - Nguồn nguyên văn, tab ID và checksum ở `customer-source/2026-10-09/manifest.json`; `coverage.md` đối soát từng mục. Import kiểm tra byte UTF-8/SHA-256, file nguồn được giữ LF qua Git.

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import mongoose, { type Model, type Document } from 'mongoose';
 import { pathToFileURL } from 'node:url';
 import { env } from '../config/env.js';
-import { User, Child, Stage, Lesson, Story, CultureArticle, ShopItem, Subscription } from '../models/index.js';
+import { User, Child, Stage, Lesson, Story, CultureArticle, ShopItem, Subscription, ContentDraft } from '../models/index.js';
 import { stages, lessons, stories, culture, shopItems } from './catalog.js';
 import { matchContentIdentity } from './contentIdentity.js';
 
@@ -76,12 +76,20 @@ export async function runSeed(options: SeedOptions = {}) {
     }
     async function planNamed<T extends Document>(model: Model<T>, data: Record<string, unknown>[], kind: CatalogKind, field: string) {
       const existing = await model.find();
+      const reservations = kind === 'stories' || kind === 'culture'
+        ? await ContentDraft.find({ kind: kind === 'stories' ? 'story' : 'culture', seedKey: { $exists: true } }).select('seedKey contentId').lean()
+        : [];
       for (const item of data) {
         if (kind === 'stories' || kind === 'culture') {
-          const candidates = existing.map(document => ({ title: String(document.get('title')), seedKey: document.get('seedKey') as string | undefined }));
+          const candidates = existing.map(document => ({ id: String(document._id), title: String(document.get('title')), seedKey: document.get('seedKey') as string | undefined }));
           const result = matchContentIdentity(candidates, { title: String(item.title), seedKey: String(item.seedKey) });
+          // Discarding an import does not release its identity or authorize publishing demo content.
+          const reserved = reservations.filter(draft => draft.seedKey === item.seedKey);
           if (result.conflict) report.conflicts.push(result.conflict);
-          else if (result.match) report.preserved[kind]++;
+          else if (reserved.length > 1 || reserved.length === 1 && result.match && result.match.id !== String(reserved[0].contentId)) {
+            report.conflicts.push(`${String(item.seedKey)}: conflicting live/draft identity; review manually`);
+          }
+          else if (result.match || reserved.length) report.preserved[kind]++;
           else await plan<T>(model, item, kind);
           continue;
         }

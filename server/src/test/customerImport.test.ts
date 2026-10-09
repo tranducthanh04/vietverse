@@ -66,6 +66,45 @@ describe('draft-only customer import', () => {
     await expect(importCustomerContent({ dryRun: false, adminId, expectedPlan })).rejects.toThrow(/conflict/i);
     expect(await ContentDraft.countDocuments()).toBe(0);
   });
+  it.each(['editing', 'discarded'] as const)('reserves draft-only identities during seed while %s', async state => {
+    const adminId = await setup();
+    await Story.deleteMany({});
+    await CultureArticle.deleteMany({});
+    await importCustomerContent({ dryRun: false, adminId });
+    await ContentDraft.updateMany({ kind: { $in: ['story', 'culture'] } }, { state });
+    const before = await ContentDraft.collection.find({}).sort({ _id: 1 }).toArray();
+    const preview = await runSeed({ dryRun: true });
+    expect(preview.planned).toMatchObject({ stories: 0, culture: 0 });
+    await runSeed();
+    expect(await Story.countDocuments()).toBe(0);
+    expect(await CultureArticle.countDocuments()).toBe(0);
+    expect(await ContentDraft.collection.find({}).sort({ _id: 1 }).toArray()).toEqual(before);
+    if (state === 'editing') {
+      const draft = await ContentDraft.findOne({ seedKey: 'story-02' }).orFail();
+      env.CMS_PUBLISH_ENABLED = true;
+      try { await publishContent('story', String(draft.contentId), { expectedDraftVersion: 1, baseContentVersion: null }, adminId); }
+      finally { env.CMS_PUBLISH_ENABLED = false; }
+      expect((await Story.findOne({ seedKey: 'story-02' }).orFail()).id).toBe(String(draft.contentId));
+    }
+  });
+  it('rejects split live/draft seed identities before any catalog writes', async () => {
+    const adminId = await setup();
+    await Story.deleteMany({});
+    await importCustomerContent({ dryRun: false, adminId });
+    await Story.create({ title: 'Another ID', type: 'dong_dao', seedKey: 'story-02' });
+    const preview = await runSeed({ dryRun: true });
+    expect(preview.conflicts.join(' ')).toContain('story-02');
+    await expect(runSeed()).rejects.toThrow(/conflict/i);
+    expect(await Story.countDocuments()).toBe(1);
+  });
+  it('refuses customer import while seed owns the catalog writer lock', async () => {
+    const adminId = await setup();
+    await mongoose.connection.db!.collection<{ _id: string }>('seed_locks').insertOne({ _id: 'vietverse-catalog-seed' });
+    await expect(importCustomerContent({ dryRun: false, adminId })).rejects.toThrow(/lock|running/i);
+    expect(await ContentDraft.countDocuments()).toBe(0);
+    expect(await mongoose.connection.db!.collection('seed_locks').countDocuments()).toBe(1);
+    expect((await importCustomerContent()).dryRun).toBe(true);
+  });
   it('rolls back a failed import and can retry without leaving partial drafts', async () => {
     const adminId = await setup(); await ContentDraft.init();
     await mongoose.connection.db!.command({ collMod: ContentDraft.collection.name, validator: { kind: { $ne: 'story' } } });
@@ -85,6 +124,7 @@ describe('draft-only customer import', () => {
     finally { env.CMS_PUBLISH_ENABLED = false; }
     await Story.updateOne({ _id: draft.contentId }, { title: 'New authored title' });
     await runSeed();
-    expect(await Story.countDocuments()).toBe(21);
+    expect(await Story.countDocuments()).toBe(1);
+    expect((await Story.findOne({ seedKey: 'story-02' }).orFail()).id).toBe(String(draft.contentId));
   });
 });

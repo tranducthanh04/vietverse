@@ -150,7 +150,7 @@ it("allows real choice interaction across all non-recording activity renderers w
             prompt: "Điền",
             options: [option("yes", "c"), option("no", "b")],
             correctAnswer: "yes",
-            blanks: [{ sentence: "__á", missing: "c" }],
+            blanks: [{ sentence: "______á", missing: "c" }],
           },
           {
             ...lesson.activities[0],
@@ -175,6 +175,7 @@ it("allows real choice interaction across all non-recording activity renderers w
   );
   for (const title of ["Thẻ chữ", "Nghe", "Ghép", "Điền", "Xếp", "Ôn tập"]) {
     expect(screen.getByText(title)).toBeInTheDocument();
+    if (title === "Điền") expect(screen.getByText("á")).toBeInTheDocument();
     if (title === "Nghe" || title === "Ôn tập") {
       fireEvent.click(screen.getByRole("button", { name: /mẹ$/ }));
       expect(screen.getByText("Đúng trong bản xem trước.")).toBeInTheDocument();

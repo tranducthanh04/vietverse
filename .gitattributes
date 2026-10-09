@@ -1,1 +1,5 @@
 docs/customer-source/** text eol=lf
+# Exact source exports retain Markdown hard-break spaces covered by SHA-256.
+docs/customer-source/2026-10-09/explore.md whitespace=-blank-at-eol
+docs/customer-source/2026-10-09/stories.md whitespace=-blank-at-eol
+docs/customer-source/2026-10-09/culture.md whitespace=-blank-at-eol

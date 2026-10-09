@@ -27,7 +27,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
     onComplete(isCorrect, letter);
   };
 
-  const sentenceParts = blank.sentence.split('__');
+  const sentenceParts = blank.sentence.split(/_{2,}/);
 
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
