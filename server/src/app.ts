@@ -8,6 +8,7 @@ import { logger } from './utils/logger.js';
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import { apiLimiter } from './middlewares/rateLimiter.middleware.js';
 import { sendSuccess, sendError } from './utils/apiResponse.js';
+import { connectDB } from './config/db.js';
 
 // Route imports
 import authRouter from './modules/auth/auth.routes.js';
@@ -83,6 +84,17 @@ app.get('/health', (_req: Request, res: Response) => {
     uptimeSec: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/ready', async (_req: Request, res: Response) => {
+  try {
+    const connection = await connectDB();
+    if (!connection.connection.db) throw new Error('Database not connected');
+    await connection.connection.db.command({ ping: 1 });
+    return sendSuccess(res, { status: 'ready' });
+  } catch {
+    return sendError(res, 'Cơ sở dữ liệu chưa sẵn sàng. Vui lòng thử lại.', 503, 'DATABASE_UNAVAILABLE');
+  }
 });
 
 // Apply API rate limiter to all API v1 endpoints
