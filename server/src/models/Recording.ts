@@ -4,6 +4,7 @@ export interface IRecording extends Document {
   childId: Types.ObjectId;
   lessonId?: Types.ObjectId;
   activityId?: string;
+  contentVersion?: number;
   url: string;
   publicId?: string;
   durationSec: number;
@@ -33,6 +34,7 @@ const recordingSchema = new Schema<IRecording>(
       required: true,
     },
     publicId: String,
+    contentVersion: { type: Number, min: 0 },
     durationSec: {
       type: Number,
       default: 0,

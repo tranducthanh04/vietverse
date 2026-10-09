@@ -1,7 +1,8 @@
 import { Story, StoryType } from '../../models/Story.js';
 import { ExplorationLog } from '../../models/ExplorationLog.js';
 import { Child } from '../../models/Child.js';
-import { Types } from 'mongoose';
+import { readPublished } from '../content/content.reader.js';
+import { toContentPayload } from '../content/content.dto.js';
 
 function escapeRegex(text: string): string {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -9,7 +10,7 @@ function escapeRegex(text: string): string {
 
 export class StoriesService {
   static async getStories(filter: { type?: StoryType; ageGroup?: string; search?: string }) {
-    const query: any = {};
+    const query: any = { visibility: { $ne: 'withdrawn' } };
 
     if (filter.type) {
       query.type = filter.type;
@@ -27,15 +28,13 @@ export class StoriesService {
       ];
     }
 
-    return Story.find(query).sort({ createdAt: -1 }).limit(100);
+    const stories = await Story.find(query).sort({ createdAt: -1 }).limit(100);
+    return stories.map(story => ({ ...toContentPayload('story', story), _id: story.id, id: story.id, contentVersion: story.contentVersion ?? 0 }));
   }
 
   static async getStoryById(id: string) {
-    const story = await Story.findById(id);
-    if (!story) {
-      throw { statusCode: 404, message: 'Không tìm thấy câu chuyện' };
-    }
-    return story;
+    const published = await readPublished('story', id);
+    return { ...published.payload, _id: id, id, contentVersion: published.contentVersion };
   }
 
   static async markExplored(storyId: string, childId: string, parentId: string) {
@@ -44,7 +43,7 @@ export class StoriesService {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé' };
     }
 
-    const story = await Story.findById(storyId);
+    const story = await Story.findOne({ _id: storyId, visibility: { $ne: 'withdrawn' } });
     if (!story) {
       throw { statusCode: 404, message: 'Không tìm thấy câu chuyện' };
     }

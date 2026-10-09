@@ -21,6 +21,13 @@ API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu c�
 - Quyết định triển khai: `CMS_PUBLISH_ENABLED` mặc định `false`; publish/visibility trả 503 khi tắt hoặc MongoDB không hỗ trợ transaction. Chưa bật trên production; phải hoàn tất reader/client hiểu phiên bản trước khi bật.
 - POST/PUT `/admin/lessons` cũ từ chối payload hợp lệ bằng `409 CONTENT_CMS_REQUIRED`, không còn ghi thẳng live; payload sai vẫn trả 400.
 
+Quyết định bảo vệ phiên học khi xuất bản:
+
+- GET lesson bắt buộc `childId` sở hữu/mở khóa; thêm query `contentVersion` không âm để tiếp tục bản đã mở. Response lesson/story/culture có `contentVersion` (legacy = 0), không xuất metadata nội bộ CMS.
+- Complete lesson và culture quiz nhận `contentVersion`; thiếu version chỉ tương thích khi live vẫn là 0. Live đã đổi trả `409 CONTENT_VERSION_REQUIRED`; version không tồn tại trả 404. Chấm snapshot nhưng giữ nguyên ID progress/khóa thưởng, không reset sao/điểm.
+- Story/culture `withdrawn` bị loại khỏi list/detail và từ chối exploration/quiz mới, kể cả gửi version cũ; lịch sử cũ còn nguyên.
+- Multipart recording dùng field `audio`, nhận `contentVersion`; `lessonId`/`activityId` phải đi cùng nhau. Server kiểm tra ownership, unlock và activity thu âm đúng version trước upload. Response có `id` dùng làm đáp án; thiếu version trên recording legacy chỉ khớp bài version 0. `true`, text hoặc ID bản thu khác bé/bài/activity/version không được tính đạt.
+
 ## Auth
 
 | Method | Path | Auth | Mục đích |
@@ -42,7 +49,7 @@ API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu c�
 | DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
 | GET | `/stages?childId=` | Auth | Ownership khi có childId, trả trạng thái mở khóa theo điều kiện hoàn thành chặng trước + subscription |
-| GET | `/lessons/:id?childId=` | Auth | Trả bài học; kiểm tra unlock sequence nếu có childId |
+| GET | `/lessons/:id?childId=&contentVersion=` | Auth | Bắt buộc child ownership/unlock; đọc live hoặc snapshot đã xuất bản |
 | POST | `/lessons/:id/complete` | Auth | Child ownership; kiểm tra mở khóa, server tự chấm answers (bỏ qua client score), ghi nhận sao và thưởng ViVi Points (+10) |
 
 ## Content và recording

@@ -1,6 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { RecordingsService } from './recordings.service.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
+import { z } from 'zod';
+import { contentVersionParam } from '../content/content.reader.js';
+
+const recordingFields = z.object({
+  childId: z.string().regex(/^[a-f\d]{24}$/i),
+  lessonId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
+  activityId: z.string().min(1).optional(),
+  contentVersion: contentVersionParam,
+  durationSec: z.coerce.number().finite().min(0).optional(),
+  wordOrPrompt: z.string().max(5000).optional(),
+});
 
 export class RecordingsController {
   static async upload(req: Request, res: Response, next: NextFunction) {
@@ -10,7 +21,7 @@ export class RecordingsController {
       }
 
       const parentId = req.user!.id;
-      const { childId, lessonId, activityId, durationSec, wordOrPrompt } = req.body;
+      const { childId, lessonId, activityId, contentVersion, durationSec, wordOrPrompt } = recordingFields.parse(req.body);
 
       if (!childId) {
         return sendError(res, 'Thiếu childId', 400);
@@ -20,6 +31,7 @@ export class RecordingsController {
         childId,
         lessonId,
         activityId,
+        contentVersion,
         durationSec: durationSec ? Number(durationSec) : 0,
         wordOrPrompt,
         buffer: req.file.buffer,

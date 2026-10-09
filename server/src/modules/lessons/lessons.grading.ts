@@ -20,8 +20,8 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
       return true;
 
     case 'record_voice':
-      // Voice recording activity: considered completed if recorded or marked completed by child
-      return Boolean(submission.userAnswer || submission.isCorrect);
+      // Only the service's owned, version-bound recording lookup can grant credit.
+      return false;
 
     case 'listen_choose':
     case 'review': {

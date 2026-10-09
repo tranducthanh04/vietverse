@@ -3,6 +3,8 @@ import { ExplorationLog } from '../../models/ExplorationLog.js';
 import { PointTransaction } from '../../models/PointTransaction.js';
 import { Child } from '../../models/Child.js';
 import { POINT_RULES } from '../../constants/points.js';
+import { readPublished, resolveSubmissionVersion } from '../content/content.reader.js';
+import { toContentPayload } from '../content/content.dto.js';
 
 function escapeRegex(text: string): string {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -10,7 +12,7 @@ function escapeRegex(text: string): string {
 
 export class CultureService {
   static async getArticles(filter: { category?: string; search?: string }) {
-    const query: any = {};
+    const query: any = { visibility: { $ne: 'withdrawn' } };
     if (filter.category) {
       query.category = filter.category;
     }
@@ -21,30 +23,34 @@ export class CultureService {
         { intro: { $regex: safeSearch, $options: 'i' } },
       ];
     }
-    return CultureArticle.find(query).sort({ createdAt: -1 }).limit(100);
+    const articles = await CultureArticle.find(query).sort({ createdAt: -1 }).limit(100);
+    return articles.map(article => ({ ...toContentPayload('culture', article), _id: article.id, id: article.id, contentVersion: article.contentVersion ?? 0 }));
   }
 
   static async getArticleById(id: string) {
-    const article = await CultureArticle.findById(id);
-    if (!article) {
-      throw { statusCode: 404, message: 'Không tìm thấy bài viết văn hóa' };
-    }
-    return article;
+    const published = await readPublished('culture', id);
+    return { ...published.payload, _id: id, id, contentVersion: published.contentVersion };
   }
 
   static async submitQuiz(
     articleId: string,
     parentId: string,
-    data: { childId: string; answers: { questionIndex: number; selectedAnswer: number }[] }
+    data: { childId: string; contentVersion?: number; answers: { questionIndex: number; selectedAnswer: number }[] }
   ) {
     const child = await Child.findOne({ _id: data.childId, parentId });
     if (!child) {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
     }
 
-    const article = await CultureArticle.findById(articleId);
+    const article = await CultureArticle.findOne({ _id: articleId, visibility: { $ne: 'withdrawn' } });
     if (!article) {
       throw { statusCode: 404, message: 'Không tìm thấy bài viết văn hóa' };
+    }
+    const version = resolveSubmissionVersion(data.contentVersion, article.contentVersion ?? 0);
+    const { payload } = await readPublished('culture', articleId, version);
+    if (new Set(data.answers.map(answer => answer.questionIndex)).size !== data.answers.length || data.answers.some(answer =>
+      !payload.quiz[answer.questionIndex] || answer.selectedAnswer >= payload.quiz[answer.questionIndex].options.length)) {
+      throw { statusCode: 400, message: 'Câu trả lời trắc nghiệm không hợp lệ.' };
     }
 
     // Log exploration idempotently
@@ -60,9 +66,9 @@ export class CultureService {
 
     // Evaluate quiz
     let correctCount = 0;
-    const totalQuestions = article.quiz.length;
+    const totalQuestions = payload.quiz.length;
 
-    article.quiz.forEach((q, idx) => {
+    payload.quiz.forEach((q, idx) => {
       const submitted = data.answers.find((a) => a.questionIndex === idx);
       if (submitted && submitted.selectedAnswer === q.correctAnswer) {
         correctCount++;

@@ -1,6 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { CultureService } from './culture.service.js';
-import { sendSuccess, sendError } from '../../utils/apiResponse.js';
+import { sendSuccess } from '../../utils/apiResponse.js';
+import { z } from 'zod';
+import { contentVersionSchema } from '../content/content.reader.js';
+
+const quizSubmission = z.object({
+  childId: z.string().regex(/^[a-f\d]{24}$/i),
+  contentVersion: contentVersionSchema.optional(),
+  answers: z.array(z.object({ questionIndex: z.number().int().min(0), selectedAnswer: z.number().int().min(0) })).max(20),
+});
 
 export class CultureController {
   static async getArticles(req: Request, res: Response, next: NextFunction) {
@@ -28,14 +36,7 @@ export class CultureController {
   static async submitQuiz(req: Request, res: Response, next: NextFunction) {
     try {
       const parentId = req.user!.id;
-      const { childId, answers } = req.body;
-      if (!childId || !Array.isArray(answers)) {
-        return sendError(res, 'Dữ liệu trắc nghiệm không hợp lệ', 400);
-      }
-      const result = await CultureService.submitQuiz(req.params.id, parentId, {
-        childId,
-        answers,
-      });
+      const result = await CultureService.submitQuiz(req.params.id, parentId, quizSubmission.parse(req.body));
       return sendSuccess(res, result);
     } catch (error) {
       next(error);

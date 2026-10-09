@@ -6,19 +6,15 @@ import { PointTransaction } from '../../models/PointTransaction.js';
 import { POINT_RULES } from '../../constants/points.js';
 import { assertLessonUnlocked } from './lessons.policy.js';
 import { gradeActivity, ActivitySubmission } from './lessons.grading.js';
+import { Recording } from '../../models/Recording.js';
+import { readPublished, resolveSubmissionVersion } from '../content/content.reader.js';
 
 export class LessonsService {
-  static async getLessonById(lessonId: string, parentId?: string, childId?: string) {
-    const lesson = await Lesson.findById(lessonId).populate('stageId');
-    if (!lesson) {
-      throw { statusCode: 404, message: 'Không tìm thấy bài học' };
-    }
-
-    if (parentId && childId) {
-      await assertLessonUnlocked(childId, lessonId, parentId);
-    }
-
-    return lesson;
+  static async getLessonById(lessonId: string, parentId?: string, childId?: string, contentVersion?: number) {
+    if (!parentId || !childId) throw { statusCode: 400, message: 'Thiếu hồ sơ bé để mở bài học.' };
+    const { stage } = await assertLessonUnlocked(childId, lessonId, parentId);
+    const published = await readPublished('lesson', lessonId, contentVersion);
+    return { ...published.payload, _id: lessonId, id: lessonId, stageId: stage, contentVersion: published.contentVersion };
   }
 
   static async completeLesson(
@@ -26,6 +22,7 @@ export class LessonsService {
     parentId: string,
     data: {
       childId: string;
+      contentVersion?: number;
       scorePercent?: number;
       durationSec?: number;
       answers?: ActivitySubmission[];
@@ -33,9 +30,11 @@ export class LessonsService {
   ) {
     // 1. Enforce unlock & ownership
     const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId);
+    const contentVersion = resolveSubmissionVersion(data.contentVersion, lesson.contentVersion ?? 0);
+    const { payload } = await readPublished('lesson', lessonId, contentVersion);
 
     // 2. Validate activity IDs belong to this lesson
-    const lessonActivityIds = new Set(lesson.activities.map((a: any) => a.id));
+    const lessonActivityIds = new Set(payload.activities.map((a) => a.id));
     if (data.answers && data.answers.length > 0) {
       for (const ans of data.answers) {
         if (!lessonActivityIds.has(ans.activityId)) {
@@ -49,8 +48,15 @@ export class LessonsService {
 
     // 3. Server-side grading of activities
     let correctActivitiesCount = 0;
-    const totalActivities = lesson.activities.length;
+    const totalActivities = payload.activities.length;
     let computedScorePercent = 0;
+    const recordingIds = (data.answers ?? []).map(answer => answer.userAnswer)
+      .filter((answer): answer is string => typeof answer === 'string' && /^[a-f\d]{24}$/i.test(answer));
+    const recordings = recordingIds.length ? await Recording.find({
+      _id: { $in: recordingIds }, childId: child._id, lessonId,
+      ...(contentVersion === 0 ? { $or: [{ contentVersion: 0 }, { contentVersion: { $exists: false } }] } : { contentVersion }),
+    }).select('_id activityId') : [];
+    const recordingActivities = new Map(recordings.map(recording => [recording.id, recording.activityId]));
 
     if (totalActivities === 0) {
       computedScorePercent = 100;
@@ -62,9 +68,12 @@ export class LessonsService {
         };
       }
 
-      for (const activity of lesson.activities) {
+      for (const activity of payload.activities) {
         const submission = data.answers.find((a) => a.activityId === activity.id);
-        if (gradeActivity(activity, submission)) {
+        const correct = activity.type === 'record_voice'
+          ? typeof submission?.userAnswer === 'string' && recordingActivities.get(submission.userAnswer) === activity.id
+          : gradeActivity(activity, submission);
+        if (correct) {
           correctActivitiesCount++;
         }
       }

@@ -167,7 +167,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     // STEP 4: Open Lesson 1 and Load Activity Registry Data
     // ==========================================
     const lessonRes = await request(app)
-      .get(`/api/v1/lessons/${lesson1Id}`)
+      .get(`/api/v1/lessons/${lesson1Id}?childId=${childId}`)
       .set('Authorization', `Bearer ${parentToken}`);
 
     expect(lessonRes.status).toBe(200);
@@ -179,6 +179,11 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     // ==========================================
     // STEP 5: Complete Lesson 1, Earn +10 ViVi Points and 3 Stars
     // ==========================================
+    const recordingRes = await request(app).post('/api/v1/recordings')
+      .set('Authorization', `Bearer ${parentToken}`)
+      .field('childId', childId).field('lessonId', lesson1Id).field('activityId', 'act-2').field('contentVersion', '0')
+      .attach('audio', Buffer.from('audio fixture'), { filename: 'voice.webm', contentType: 'audio/webm' })
+      .expect(201);
     const completeRes = await request(app)
       .post(`/api/v1/lessons/${lesson1Id}/complete`)
       .set('Authorization', `Bearer ${parentToken}`)
@@ -186,7 +191,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
         childId,
         answers: [
           { activityId: 'act-1', userAnswer: 'A' },
-          { activityId: 'act-2', isCorrect: true, userAnswer: true },
+          { activityId: 'act-2', userAnswer: recordingRes.body.data.id },
         ],
         durationSec: 120,
       });
@@ -207,7 +212,7 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
         childId,
         answers: [
           { activityId: 'act-1', userAnswer: 'A' },
-          { activityId: 'act-2', isCorrect: true, userAnswer: true },
+          { activityId: 'act-2', userAnswer: recordingRes.body.data.id },
         ],
         durationSec: 90,
       });
