@@ -8,13 +8,18 @@ import { assertLessonUnlocked } from './lessons.policy.js';
 import { gradeActivity, ActivitySubmission } from './lessons.grading.js';
 import { Recording } from '../../models/Recording.js';
 import { readPublished, resolveSubmissionVersion } from '../content/content.reader.js';
+import { toLearnerLessonPayload } from '../content/content.dto.js';
+import { isNewActivityType } from '../content/newActivity.contract.js';
 
 export class LessonsService {
-  static async getLessonById(lessonId: string, parentId?: string, childId?: string, contentVersion?: number) {
+  static async getLessonById(lessonId: string, parentId?: string, childId?: string, contentVersion?: number, activityContract?: 2) {
     if (!parentId || !childId) throw { statusCode: 400, message: 'Thiếu hồ sơ bé để mở bài học.' };
     const { stage } = await assertLessonUnlocked(childId, lessonId, parentId);
     const published = await readPublished('lesson', lessonId, contentVersion);
-    return { ...published.payload, _id: lessonId, id: lessonId, stageId: stage, contentVersion: published.contentVersion };
+    if (activityContract !== 2 && published.payload.activities.some(activity => isNewActivityType(activity.type))) {
+      throw { statusCode: 409, code: 'ACTIVITY_CLIENT_UPDATE_REQUIRED', message: 'Vui lòng cập nhật trang để học hoạt động mới.' };
+    }
+    return { ...toLearnerLessonPayload(published.payload), _id: lessonId, id: lessonId, stageId: stage, contentVersion: published.contentVersion };
   }
 
   static async completeLesson(
@@ -32,6 +37,10 @@ export class LessonsService {
     const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId);
     const contentVersion = resolveSubmissionVersion(data.contentVersion, lesson.contentVersion ?? 0);
     const { payload } = await readPublished('lesson', lessonId, contentVersion);
+    const submittedIds = (data.answers ?? []).map(answer => answer.activityId);
+    if (new Set(submittedIds).size !== submittedIds.length) {
+      throw { statusCode: 400, code: 'DUPLICATE_ACTIVITY_ANSWER', message: 'Mỗi hoạt động chỉ được gửi một câu trả lời.' };
+    }
 
     // 2. Validate activity IDs belong to this lesson
     const lessonActivityIds = new Set(payload.activities.map((a) => a.id));

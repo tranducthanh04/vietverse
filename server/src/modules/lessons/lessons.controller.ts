@@ -7,8 +7,8 @@ export class LessonsController {
   static async getLesson(req: Request, res: Response, next: NextFunction) {
     try {
       const parentId = req.user!.id;
-      const { childId, contentVersion } = lessonQuerySchema.parse(req.query);
-      const lesson = await LessonsService.getLessonById(req.params.id, parentId, childId, contentVersion);
+      const { childId, contentVersion, activityContract } = lessonQuerySchema.parse(req.query);
+      const lesson = await LessonsService.getLessonById(req.params.id, parentId, childId, contentVersion, activityContract);
       return sendSuccess(res, lesson);
     } catch (error) {
       next(error);

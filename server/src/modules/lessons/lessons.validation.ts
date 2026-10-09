@@ -4,6 +4,7 @@ import { contentVersionSchema, contentVersionParam } from '../content/content.re
 export const lessonQuerySchema = z.object({
   childId: z.string().regex(/^[a-f\d]{24}$/i),
   contentVersion: contentVersionParam,
+  activityContract: z.literal('2').transform(() => 2 as const).optional(),
 });
 
 export const completeLessonSchema = z.object({

@@ -12,6 +12,20 @@ export function toContentPayload<K extends ContentKind>(kind: K, document: unkno
   return readSchemas[kind].parse(copy) as ContentPayloadMap[K];
 }
 
+/** Learner-only projection. Canonical readers, CMS and graders must never use this. */
+export function toLearnerLessonPayload(payload: LessonContent) {
+  return { ...payload, activities: payload.activities.map(activity => {
+    if (activity.type === 'multi_select' || activity.type === 'group_sort' || activity.type === 'fill_blanks') {
+      const { correctAnswer: _expected, ...visible } = activity;
+      if (activity.type === 'fill_blanks') {
+        return { ...visible, blankSlots: activity.blankSlots?.map(({ acceptedAnswers: _answers, ...slot }) => slot) };
+      }
+      return visible;
+    }
+    return { ...activity };
+  }) };
+}
+
 export function normalizeLessonDraft(input: LessonContent): { payload: LessonContent; notes: EditorialNote[] } {
   const payload = structuredClone(input);
   const notes: EditorialNote[] = [];

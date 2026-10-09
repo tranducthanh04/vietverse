@@ -12,6 +12,9 @@ Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, 
 - `follow_steps`: 1–3 steps `{id,text}` có thứ tự, text tối đa 500 ký tự; userAnswer là đầy đủ step ID theo thứ tự. Chỉ ghi nhận bé tự báo cáo, không xác minh hành động ngoài đời.
 - ID con mới 1–64 ASCII chữ/số/`_`/`-`, cấm `__proto__`, `prototype`, `constructor`; không áp giới hạn mới lên legacy. Nháp thiếu ngữ liệu/đáp án vẫn biên tập được nhưng publish bị chặn bằng field issues.
 - Grader mới dùng đáp án canonical, malformed/missing userAnswer không đạt và không fallback `isCorrect`. Mỗi activity đạt toàn bộ hoặc không đạt, không chia trọng số từng slot/item. Không rewrite source/snapshot/live cũ hay import DB thật trong bước này.
+- GET `/lessons/:id?childId=&contentVersion=&activityContract=2`: capability phải đúng chuỗi query `2`; thiếu flag chỉ đọc được snapshot bảy type cũ. Snapshot chứa type mới trả `409 ACTIVITY_CLIENT_UPDATE_REQUIRED` khi thiếu capability; giá trị flag khác trả 400. Không tự nâng contentVersion.
+- Payload bé bỏ `correctAnswer` của multi/group/fill và `blankSlots[].acceptedAnswers`; canonical snapshots/admin vẫn giữ đủ dữ liệu. Grader chỉ dùng canonical, không dùng learner projection. Bảy type cũ giữ response như trước.
+- Complete từ chối answers trùng activityId bằng `400 DUPLICATE_ACTIVITY_ANSWER` trước mọi ghi progress/ledger; reward vẫn một lần theo child/lesson, không theo version. Các bounds/quyền/unlock/recording trước đây không đổi.
 
 ## CMS — lớp dữ liệu đang triển khai (2026-10-09)
 

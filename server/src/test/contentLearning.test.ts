@@ -26,6 +26,64 @@ describe('published learning versions', () => {
     const saved = await ContentService.saveDraft('lesson', lessonId, { ...draft.payload, activities: draft.payload.activities.map(a => ({ ...a, correctAnswer: 'b' })) }, draft.draftVersion, parentId);
     await publishContent('lesson', lessonId, { expectedDraftVersion: saved.draftVersion, baseContentVersion: 0 }, parentId);
   }
+  async function publishNewActivities() {
+    const draft = await ContentService.startDraft('lesson', lessonId, parentId);
+    const activities = [
+      { id: '', type: 'multi_select' as const, prompt: 'Chọn M', options: [{ id: 'm1', text: 'M' }, { id: 'b', text: 'B' }, { id: 'm2', text: 'M' }], correctAnswer: ['m1', 'm2'] },
+      { id: '', type: 'group_sort' as const, prompt: 'Phân nhóm', options: [{ id: 'me', text: 'mẹ' }, { id: 'ba', text: 'bà' }], groups: [{ id: 'm', label: 'M' }, { id: 'b', label: 'B' }], correctAnswer: { me: 'm', ba: 'b' } },
+      { id: '', type: 'fill_blanks' as const, prompt: 'Điền', template: 'Bé {{verb}} {{object}}.', blankSlots: [{ id: 'verb', label: 'Hành động', acceptedAnswers: ['đọc'] }, { id: 'object', label: 'Đồ vật', acceptedAnswers: ['sách'] }] },
+      { id: '', type: 'follow_steps' as const, prompt: 'Thực hiện', steps: [{ id: 'stand', text: 'Đứng lên' }] },
+    ];
+    const saved = await ContentService.saveDraft('lesson', lessonId, { ...draft.payload, activities } as typeof draft.payload, draft.draftVersion, parentId);
+    await publishContent('lesson', lessonId, { expectedDraftVersion: saved.draftVersion, baseContentVersion: 0 }, parentId);
+    return saved.payload.activities;
+  }
+  it('requires client capability for new snapshots while preserving the prior legacy snapshot', async () => {
+    await publishNewActivities();
+    const blocked = await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}`, token).expect(409);
+    expect(blocked.body.error.code).toBe('ACTIVITY_CLIENT_UPDATE_REQUIRED');
+    const current = await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}&activityContract=2`, token).expect(200);
+    expect(current.body.data.contentVersion).toBe(1);
+    expect(current.body.data.activities[0]).not.toHaveProperty('correctAnswer');
+    expect(current.body.data.activities[1]).not.toHaveProperty('correctAnswer');
+    expect(current.body.data.activities[2].blankSlots[0]).toEqual({ id: 'verb', label: 'Hành động' });
+    expect(current.body.data.activities[2].blankSlots[1]).not.toHaveProperty('acceptedAnswers');
+    const old = await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}&contentVersion=0`, token).expect(200);
+    expect(old.body.data.activities[0].type).toBe('review');
+    expect(old.body.data.contentVersion).toBe(0);
+    for (const flag of ['1','3','abc','', '02']) {
+      await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}&activityContract=${flag}`, token).expect(400);
+    }
+    const canonical = await ContentService.get('lesson', lessonId);
+    expect(canonical.draft?.payload).toMatchObject({ activities: [{ correctAnswer: ['m1','m2'] }, {}, {}, {}] });
+  });
+  it('rejects duplicate activity submissions before any progress or reward', async () => {
+    const response = await submit(lessonId, token, { childId, contentVersion: 0,
+      answers: [{ activityId: 'q', userAnswer: 'b' }, { activityId: 'q', userAnswer: 'a' }] }).expect(400);
+    expect(response.body.error.code).toBe('DUPLICATE_ACTIVITY_ANSWER');
+    expect(await PointTransaction.countDocuments({ childId })).toBe(0);
+    expect((await Child.findById(childId))?.viviPoints).toBe(0);
+  });
+  it('grades all new types from canonical published answers, never forged correctness', async () => {
+    const activities = await publishNewActivities();
+    const forged = await submit(lessonId, token, { childId, contentVersion: 1, scorePercent: 100,
+      answers: activities.map(a => ({ activityId: a.id, userAnswer: true, isCorrect: true })) }).expect(200);
+    expect(forged.body.data.scorePercent).toBe(0);
+    expect(forged.body.data.pointsEarned).toBe(0);
+    const userAnswers = [['m2', 'm1'], { me: 'm', ba: 'b' }, { verb: 'ĐỌC', object: 'sách' }, ['stand']];
+    const answers = activities.map((a, i) => ({ activityId: a.id, userAnswer: userAnswers[i] }));
+    const passed = await submit(lessonId, token, { childId, contentVersion: 1, answers }).expect(200);
+    expect(passed.body.data.scorePercent).toBe(100);
+    expect(passed.body.data.pointsEarned).toBe(10);
+    const replay = await submit(lessonId, token, { childId, contentVersion: 1, answers }).expect(200);
+    expect(replay.body.data.pointsEarned).toBe(0);
+    expect(await PointTransaction.countDocuments({ childId, reason: 'lesson' })).toBe(1);
+    await submit(lessonId, token, { childId, contentVersion: 1, answers: [{ activityId: 'foreign', userAnswer: true }] }).expect(400);
+    await submit(lessonId, token, { childId, contentVersion: 999, answers }).expect(404);
+    const other = await AuthService.register({ email: 'new-other@example.test', password: 'Password123!', displayName: 'Other' });
+    await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}&activityContract=2`, other.accessToken).expect(404);
+    await submit(lessonId, other.accessToken, { childId, contentVersion: 1, answers }).expect(404);
+  });
   it('grades and reloads the opened snapshot after publishing without awarding twice across versions', async () => {
     const initial = await authGet(`/api/v1/lessons/${lessonId}?childId=${childId}`, token).expect(200);
     expect(initial.body.data.contentVersion).toBe(0);
