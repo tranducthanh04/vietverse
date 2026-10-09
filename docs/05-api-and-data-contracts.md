@@ -108,6 +108,8 @@ Quyết định bảo vệ phiên học khi xuất bản:
 - GET `/:id/preview?draftVersion=` và POST `/:id/validate` (`expectedDraftVersion`) đọc đúng bản đã lưu, trả field issues. POST `/:id/publish` gửi `{ expectedDraftVersion, baseContentVersion }`; transaction ghi revision/live/draft/audit, retry trả receipt của bản đã xuất bản.
 - PATCH `/:id/visibility` gửi `{ visibility, expectedContentVersion }` cho story/culture. Publish/visibility mặc định bị khóa bởi `CMS_PUBLISH_ENABLED=false`; không khóa biên tập nháp. Không hỗ trợ transaction trả 503, không ghi nửa chừng.
 - UI bài học tách lưu/kiểm tra/preview/publish, cảnh báo rời trang chưa lưu; lỗi validation đưa focus tới field đầu tiên. Khi lưu, cấu trúc activities tạm khóa, metadata gõ thêm được giữ. Cờ điểm/quyền học vẫn do server kiểm tra.
+- Admin có trang `/admin/truyen` và `/admin/van-hoa`, tạo nháp bằng requestId ổn định khi retry trong cùng màn tạo. Form đủ lyrics/timestamp/quiz/vocab/media/nhóm tuổi hoặc category/intro/facts/tags. Xóa đáp án đang chọn đặt correctAnswer=-1 để server chặn publish; sắp lại lựa chọn giữ đúng đáp án theo identity local.
+- Preview nằm tại `/:id/xem-truoc?draftVersion=`, chỉ tải bản đã lưu đúng version. Không mount learner/detail pages, không dùng child context, không gọi complete/explore/quiz/upload; recording được thay bằng mô phỏng. Nháp activity lỗi không chạy renderer mẫu. Audio trống hiển thị bản đọc, lỗi media có fallback thật.
 
 - Success dùng wrapper `sendSuccess`; lỗi dùng `sendError`/central error handler.
 - Mã thường dùng: `400` dữ liệu không hợp lệ (Zod `VALIDATION_ERROR`), `401` chưa xác thực, `403` không quyền (`PARENT_GATE_REQUIRED` / role), `404` không tồn tại, `409` trùng lặp (`DUPLICATE_KEY`), `501` tính năng chưa phát hành (`NOT_IMPLEMENTED`).

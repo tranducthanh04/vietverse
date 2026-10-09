@@ -32,6 +32,9 @@ import { PaymentResultPage } from '../features/parent/PaymentResultPage.js';
 import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { ContentEditorPage } from '../features/admin/content/ContentEditorPage.js';
+import { ContentListPage } from '../features/admin/content/ContentListPage.js';
+import { ContentPreviewPage } from '../features/admin/content/ContentPreviewPage.js';
+import { ContentCreatePage } from '../features/admin/content/ContentCreatePage.js';
 import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
 import { PaymentTestPage } from '../features/parent/PaymentTestPage.js';
@@ -144,6 +147,15 @@ export const router = createBrowserRouter([
       { index: true, element: <AdminDashboardPage /> },
       { path: 'bai-hoc', element: <AdminLessonsPage /> },
       { path: 'bai-hoc/:id', element: <ContentEditorPage kind="lesson" /> },
+      { path: 'bai-hoc/:id/xem-truoc', element: <ContentPreviewPage kind="lesson" /> },
+      { path: 'truyen', element: <ContentListPage kind="story" /> },
+      { path: 'truyen/moi', element: <ContentCreatePage kind="story" /> },
+      { path: 'truyen/:id', element: <ContentEditorPage kind="story" /> },
+      { path: 'truyen/:id/xem-truoc', element: <ContentPreviewPage kind="story" /> },
+      { path: 'van-hoa', element: <ContentListPage kind="culture" /> },
+      { path: 'van-hoa/moi', element: <ContentCreatePage kind="culture" /> },
+      { path: 'van-hoa/:id', element: <ContentEditorPage kind="culture" /> },
+      { path: 'van-hoa/:id/xem-truoc', element: <ContentPreviewPage kind="culture" /> },
       { path: 'hoc-vien', element: <AdminLearnersPage /> },
       { path: 'doi-qua', element: <AdminRedemptionsPage /> },
       { path: 'test-thanh-toan', element: <PaymentTestPage /> },

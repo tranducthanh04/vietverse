@@ -8,12 +8,16 @@ import {
   type DraftView,
   type FieldIssue,
   type LessonContent,
+  type StoryContent,
+  type CultureContent,
   type Payload,
   paths,
   titles,
 } from "./content.types.js";
 import { TextField } from "./FormFields.js";
 import { LessonEditor } from "./LessonEditor.js";
+import { StoryEditor } from "./StoryEditor.js";
+import { CultureEditor } from "./CultureEditor.js";
 import { useUnsavedChanges } from "./useUnsavedChanges.js";
 
 export function ContentEditorPage({ kind }: { kind: ContentKind }) {
@@ -272,7 +276,10 @@ function Editor({
       )}
       {editing && value ? (
         <>
-          <fieldset ref={form} disabled={Boolean(confirmation) || (busy && !allowTyping)}>
+          <fieldset
+            ref={form}
+            disabled={Boolean(confirmation) || (busy && !allowTyping)}
+          >
             <legend>Nội dung nháp</legend>
             <TextField
               label="Tiêu đề"
@@ -285,6 +292,15 @@ function Editor({
                 value={value as LessonContent}
                 onChange={setValue}
                 busy={busy}
+              />
+            )}
+            {kind === "story" && (
+              <StoryEditor value={value as StoryContent} onChange={setValue} />
+            )}
+            {kind === "culture" && (
+              <CultureEditor
+                value={value as CultureContent}
+                onChange={setValue}
               />
             )}
           </fieldset>
