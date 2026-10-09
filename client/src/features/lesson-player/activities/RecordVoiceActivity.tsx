@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useAuthStore } from '../../../store/authStore.js';
+import { useChildStore } from '../../../store/childStore.js';
 import { Mic, Square, Play, RotateCcw, Check, AlertCircle } from 'lucide-react';
 import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
@@ -37,14 +39,29 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     clearRecording,
     playRecording,
     uploadRecording,
-  } = useAudioRecorder();
+  } = useAudioRecorder(JSON.stringify([childId,lessonId,activity.id,contentVersion]));
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const userId = useAuthStore(state => state.user?.id);
+  const activeChildId = useChildStore(state => state.activeChild?._id);
+  const contextKey = JSON.stringify([userId,activeChildId,childId,lessonId,activity.id,contentVersion]);
+  const contextRef = useRef(contextKey);
+  contextRef.current = contextKey;
+  const generation = useRef(0), mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    const auth = useAuthStore.subscribe((state,previous) => { if (state.user?.id !== previous.user?.id) generation.current++; });
+    const child = useChildStore.subscribe((state,previous) => { if (state.activeChild?._id !== previous.activeChild?._id) generation.current++; });
+    return () => { mounted.current = false; generation.current++; auth(); child(); };
+  },[]);
+  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); },[contextKey]);
 
   const handleSubmit = async () => {
     if (!audioBlob) return;
+    const epoch = generation.current, key = contextKey;
+    const current = () => mounted.current && epoch === generation.current && key === contextRef.current;
     try {
       setIsUploading(true);
       setUploadError(null);
@@ -56,14 +73,16 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
         wordOrPrompt: activity.targetWord || activity.prompt,
       });
       const recordingId = res?.id ?? res?._id;
+      if (!current()) return;
       if (typeof recordingId !== 'string' || !/^[a-f\d]{24}$/i.test(recordingId)) throw new Error('Invalid recording response');
       setIsSubmitted(true);
       onComplete(true, recordingId);
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
+      if (!current()) return;
+      const msg = err.response?.data?.error?.message || err.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
       setUploadError(msg);
     } finally {
-      setIsUploading(false);
+      if (current()) setIsUploading(false);
     }
   };
 
@@ -151,6 +170,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 variant="ghost"
                 size="md"
                 onClick={clearRecording}
+                disabled={isUploading}
                 className="flex items-center space-x-2 text-stone-600"
               >
                 <RotateCcw className="w-5 h-5" />

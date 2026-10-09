@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RecordVoiceActivity } from '../features/lesson-player/activities/RecordVoiceActivity.js';
 const upload = vi.hoisted(() => vi.fn());
 vi.mock('../lib/audioRecorder.js', () => ({ useAudioRecorder: () => ({ audioBlob: new Blob(['audio']), durationSec: 1, uploadRecording: upload, clearRecording: () => {}, playRecording: () => {} }) }));
@@ -20,5 +20,25 @@ describe('recording submission', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Gửi giọng đọc của bé' }));
     await waitFor(() => expect(complete).toHaveBeenCalledWith(true, '123456789012345678901234'));
     expect(upload).toHaveBeenCalledWith(expect.objectContaining({ contentVersion: 4 }));
+  });
+  it('does not complete an unmounted activity from a late upload response', async () => {
+    let finish!: (value: unknown) => void;
+    upload.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    const complete = vi.fn();
+    const view = render(<RecordVoiceActivity activity={{ id:'voice',prompt:'A' }} childId="child" lessonId="lesson" onComplete={complete} />);
+    fireEvent.click(screen.getByRole('button',{ name:'Gửi giọng đọc của bé' }));
+    view.unmount();
+    await act(async () => finish({ id:'123456789012345678901234' }));
+    expect(complete).not.toHaveBeenCalled();
+  });
+  it('does not complete a different child/activity from an old response', async () => {
+    let finish!: (value: unknown) => void;
+    upload.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    const complete = vi.fn();
+    const view = render(<RecordVoiceActivity activity={{ id:'voice',prompt:'A' }} childId="child" lessonId="lesson" onComplete={complete} />);
+    fireEvent.click(screen.getByRole('button',{ name:'Gửi giọng đọc của bé' }));
+    view.rerender(<RecordVoiceActivity activity={{ id:'new',prompt:'B' }} childId="other" lessonId="lesson" onComplete={complete} />);
+    await act(async () => finish({ id:'123456789012345678901234' }));
+    expect(complete).not.toHaveBeenCalled();
   });
 });
