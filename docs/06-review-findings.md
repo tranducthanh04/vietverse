@@ -230,6 +230,13 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - Seed mẫu và bài đọc là dữ liệu minh họa. Nội dung nguyên tác, attribution, quyền sử dụng và audio cần content team xác nhận trước production.
 - Còn rủi ro vận hành đã biết: lock tài nguyên sau crash hoặc bù trừ lỗi cần đối soát thủ công, không tự động timeout.
 
+### P1-FE.7 — Reload phụ huynh xóa nhầm Parent Gate [ĐÃ SỬA - 2026-10-09]
+
+- Tái hiện trên browser local: đăng nhập phụ huynh, mở Parent Gate, vào trang tiến độ rồi reload; UI chuyển về `/kham-pha` dù token còn hạn.
+- Nguyên nhân: subscription trong `childStore` xóa gate mỗi khi user ID đổi, bao gồm bootstrap `null -> user`. Test cũ bắt đầu với user đã tải nên không bao phủ ranh giới này.
+- Sửa: vòng đời gate thuộc `authStore`; giữ token khi restore lần đầu, xóa khi login/register tường minh, logout, restore thất bại hoặc đổi user đã tải. Child cache vẫn được xóa và request cũ vẫn bị vô hiệu hóa khi tài khoản thay đổi.
+- Bằng chứng: test hồi quy auth và route thất bại trước sửa, qua sau sửa; browser reload giữ đúng dashboard. Chi tiết smoke test và giới hạn ở `08-customer-alignment.md`.
+
 ## Tổng kết tình trạng Review Findings (2026-10-01, cập nhật lần 2)
 
 - **P0 (Rủi ro chặn phát hành)**: 4/4 mục ĐÃ HOÀN TẤT VÀ KIỂM THỬ.

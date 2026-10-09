@@ -66,3 +66,14 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - `npm.cmd run typecheck` và `npm.cmd run build`: đạt. Bundle client khoảng 598 KB chưa nén, còn cảnh báo chunk lớn.
 - `npm.cmd run lint -w client`: 0 lỗi, 123 warning. Chưa chạy nghiệm thu trình duyệt/mobile/accessibility.
 - Cài dependency theo lockfile bằng `npm.cmd install --ignore-scripts` báo 17 advisory (5 moderate, 7 high, 5 critical). Chưa đánh giá khả năng khai thác từng advisory và chưa tự nâng dependency; cần đợt xử lý riêng.
+
+## Smoke test trình duyệt local — 2026-10-09
+
+- Môi trường: API cổng 5509, FE cổng 5179, database riêng `vietverse_browser_20261009`; PayOS và Cloudinary bị tắt. Dùng cùng hostname `localhost` ở FE/API khi kiểm tra refresh cookie. Không nạp dữ liệu hay gửi giao dịch lên production.
+- Bé: đăng nhập mẫu, bản đồ hiển thị 4 bài ở chặng 1, mở bài đầu và đi qua word card/chọn đáp án/điền từ/xếp câu. Màn thu âm yêu cầu micro; không cấp quyền hoặc ghi âm trong lượt này. Chưa nghiệm thu hoàn thành trọn bài bằng browser.
+- Phụ huynh: phát hiện và sửa reload mất Parent Gate, tái hiện lại sau sửa thì ở nguyên dashboard; lưu cấu hình 15 phút hiển thị thành công. Desktop 1366px hiển thị dashboard; mobile 390px kiểm tra bài học và điều hướng.
+- Truyện: tìm kiếm Nhạc rừng mở đúng bài đọc mẫu, có nhãn chưa có âm thanh; nút phát, nghe lại và thanh tua bị khóa.
+- Admin: đăng nhập chuyển đúng `/admin`; tổng quan hiển thị 20 bài/5 vật phẩm, đơn quà trống có thông báo; kho local tăng từ 0 lên 1 khi bấm `+1`; bảng có cuộn ngang ở 390px. Preview bài học không yêu cầu tạo hồ sơ bé.
+- Phát hiện nhỏ chưa sửa trong lượt này: tab admin ghi cứng chặng 3–5 là “Khung” dù catalog mới đã có activities; nút đăng nhập demo còn nhãn 45 điểm trong khi seed mới bắt đầu 0 điểm. Không dùng các nhãn này để kết luận dữ liệu thật.
+- Giới hạn: đây là smoke test tương tác, không phải bộ E2E tự động toàn bộ ứng dụng; chưa kiểm thử Safari/thiết bị thật, axe, media production, mua quà đủ điểm hay hủy đơn qua browser. Các trường hợp concurrency vẫn được kiểm tra qua API tests.
+- Kiểm chứng sau sửa reload: backend 58/58, frontend 36/36; typecheck/build đạt; lint FE 0 lỗi/123 warning. Review độc lập không phát hiện regression cần xử lý trong diff vòng đời gate.

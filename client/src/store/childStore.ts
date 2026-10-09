@@ -106,6 +106,4 @@ useAuthStore.subscribe((state, previous) => {
   fetchRequestId++;
   selectionVersion++;
   useChildStore.setState({ children: [], activeChild: null, isLoading: false });
-  sessionStorage.removeItem('vietverse_parent_gate_token');
-  sessionStorage.removeItem('vietverse_parent_gate_unlocked');
 });

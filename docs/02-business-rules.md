@@ -80,6 +80,7 @@ Nguyên tắc bắt buộc:
   - Client gọi `GET /parent/gate/challenge` để nhận phép nhân ngẫu nhiên và `challengeToken` ngắn hạn (5 phút).
   - Phụ huynh giải toán hoặc nhập PIN gửi đến `POST /parent/gate/verify`, server kiểm tra và phát hành `gateToken` có hạn 15 phút.
   - Các API nhạy cảm (`GET /parent/progress/:childId`, `PATCH /parent/screen-time`) bắt buộc gửi kèm header `X-Parent-Gate-Token`. Nếu thiếu hoặc hết hạn, server từ chối truy cập bằng lỗi `403 PARENT_GATE_REQUIRED`.
+  - *Quyết định triển khai (2026-10-09)*: reload trong cùng tab giữ token Parent Gate còn hạn khi khôi phục phiên đăng nhập; không coi bước khôi phục `user: null -> user` là đăng nhập mới. Đăng nhập/đăng ký tường minh, đăng xuất, khôi phục phiên thất bại hoặc đổi tài khoản đã tải phải xóa token và thời hạn mở khóa. Server vẫn kiểm tra chủ token và hạn dùng, không thay bằng niềm tin ở client.
 
 ## 8. Admin
 

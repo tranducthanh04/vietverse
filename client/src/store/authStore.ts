@@ -25,7 +25,12 @@ interface AuthState {
   setAccessToken: (token: string | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+function clearParentGate() {
+  sessionStorage.removeItem('vietverse_parent_gate_token');
+  sessionStorage.removeItem('vietverse_parent_gate_unlocked');
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   subscription: null,
   accessToken: null,
@@ -39,6 +44,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (credentials) => {
     const res = await api.post('/auth/login', credentials);
     const { user, accessToken } = res.data.data;
+    clearParentGate();
     setApiAccessToken(accessToken);
     set({ user, accessToken });
   },
@@ -46,6 +52,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (data) => {
     const res = await api.post('/auth/register', data);
     const { user, accessToken } = res.data.data;
+    clearParentGate();
     setApiAccessToken(accessToken);
     set({ user, accessToken });
   },
@@ -56,6 +63,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       // ignore
     } finally {
+      clearParentGate();
       setApiAccessToken(null);
       set({ user: null, subscription: null, accessToken: null });
     }
@@ -65,11 +73,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true });
       const res = await api.get('/auth/me');
+      // A bootstrap restore is not a new login; keep the tab's signed gate on reload.
+      const previousUser = get().user;
+      if (previousUser && previousUser.id !== res.data.data.user.id) clearParentGate();
       set({
         user: res.data.data.user,
         subscription: res.data.data.subscription,
       });
     } catch (err) {
+      clearParentGate();
       setApiAccessToken(null);
       set({ user: null, subscription: null, accessToken: null });
     } finally {
