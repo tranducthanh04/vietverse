@@ -10,4 +10,6 @@ router.put('/:kind/:id/draft', controller.save);
 router.post('/:kind/:id/discard-draft', controller.discard);
 router.get('/:kind/:id/preview', controller.preview);
 router.post('/:kind/:id/validate', controller.validate);
+router.post('/:kind/:id/publish', controller.publish);
+router.patch('/:kind/:id/visibility', controller.visibility);
 export default router;

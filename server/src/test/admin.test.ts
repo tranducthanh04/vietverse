@@ -153,7 +153,7 @@ describe('Admin API & Schema Validation (P1.7)', () => {
       expect(res.body.error.code).toBe('VALIDATION_ERROR');
     });
 
-    it('successfully creates lesson when payload passes validation', async () => {
+    it('requires the CMS workflow instead of directly creating live content', async () => {
       const res = await request(app)
         .post('/api/v1/admin/lessons')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -177,10 +177,8 @@ describe('Admin API & Schema Validation (P1.7)', () => {
           freeInStarterPlan: true,
         });
 
-      expect(res.status).toBe(201);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.title).toBe('Chữ A - Búp Sen Hồng');
-      expect(res.body.data.activities).toHaveLength(1);
+      expect(res.status).toBe(409);
+      expect(res.body.error.code).toBe('CONTENT_CMS_REQUIRED');
     });
   });
 

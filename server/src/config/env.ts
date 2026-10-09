@@ -6,6 +6,7 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  CMS_PUBLISH_ENABLED: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/vietverse'),
   JWT_SECRET: z.string().min(16).default('vietverse_jwt_access_secret_super_key_2026'),

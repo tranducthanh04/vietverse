@@ -16,6 +16,10 @@ API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu c�
 - `PUT /:id/draft`: `{payload, expectedDraftVersion}`; lỗi cạnh tranh trả `409 CONTENT_CONFLICT`, không sửa live. Giữ stage/order; ID activity mới do server cấp.
 - `POST /:id/discard-draft`: bỏ đúng phiên bản nháp, không xóa live/history.
 - `GET /:id/preview?draftVersion=` và `POST /:id/validate` với `expectedDraftVersion`: chỉ đọc đúng version, trả lỗi field; không ghi tiến độ/điểm.
+- `POST /:id/publish`: `{expectedDraftVersion, baseContentVersion}`; transaction ghi snapshot, live, trạng thái draft và audit cùng lúc. Retry đúng phiên bản đã xuất bản trả receipt cũ; bản legacy được giữ snapshot 0.
+- `PATCH /:id/visibility`: `{visibility, expectedContentVersion}` cho truyện/văn hóa; tăng version, giữ lịch sử, làm nháp dựa trên version cũ bị conflict. Không áp dụng bài học.
+- Quyết định triển khai: `CMS_PUBLISH_ENABLED` mặc định `false`; publish/visibility trả 503 khi tắt hoặc MongoDB không hỗ trợ transaction. Chưa bật trên production; phải hoàn tất reader/client hiểu phiên bản trước khi bật.
+- POST/PUT `/admin/lessons` cũ từ chối payload hợp lệ bằng `409 CONTENT_CMS_REQUIRED`, không còn ghi thẳng live; payload sai vẫn trả 400.
 
 ## Auth
 
@@ -81,8 +85,8 @@ API nháp `/admin/content/:kind` (kind: `lessons`, `stories`, `culture`) yêu c�
 | GET | `/admin/redemptions` | Admin | Danh sách 100 đơn đổi quà gần nhất |
 | PATCH | `/admin/redemptions/:id` | Admin | Cập nhật đơn qua `updateRedemptionSchema` (`status`: 'pending'\|'shipped'\|'delivered', `trackingCode`, `carrier`, `notes`) |
 | GET | `/admin/lessons` | Admin | Danh sách tất cả bài học kèm populate stage |
-| POST | `/admin/lessons` | Admin | Tạo bài học mới qua `createLessonSchema` (validate ObjectId `stageId`, `order` 1–100, `activities.type` 7 loại chuẩn) |
-| PUT | `/admin/lessons/:id` | Admin | Cập nhật bài học qua `updateLessonSchema` (partial schema của createLesson) |
+| POST | `/admin/lessons` | Admin | Ngừng ghi live; payload hợp lệ trả 409 `CONTENT_CMS_REQUIRED` |
+| PUT | `/admin/lessons/:id` | Admin | Ngừng ghi live; dùng luồng draft/publish CMS |
 
 ## Response và lỗi
 

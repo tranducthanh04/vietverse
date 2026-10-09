@@ -66,9 +66,8 @@ export class AdminController {
 
   static async createLesson(req: Request, res: Response, next: NextFunction) {
     try {
-      const validated = createLessonSchema.parse(req.body);
-      const lesson = await AdminService.createLesson(validated, req.user?.id);
-      return sendSuccess(res, lesson, 201);
+      createLessonSchema.parse(req.body);
+      throw { statusCode: 409, code: 'CONTENT_CMS_REQUIRED', message: 'Hãy biên tập và xuất bản qua CMS.' };
     } catch (error) {
       next(error);
     }
@@ -76,9 +75,8 @@ export class AdminController {
 
   static async updateLesson(req: Request, res: Response, next: NextFunction) {
     try {
-      const validated = updateLessonSchema.parse(req.body);
-      const lesson = await AdminService.updateLesson(req.params.id, validated, req.user?.id);
-      return sendSuccess(res, lesson);
+      updateLessonSchema.parse(req.body);
+      throw { statusCode: 409, code: 'CONTENT_CMS_REQUIRED', message: 'Hãy biên tập và xuất bản qua CMS.' };
     } catch (error) {
       next(error);
     }
