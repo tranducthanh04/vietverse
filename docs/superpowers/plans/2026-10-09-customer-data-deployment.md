@@ -14,6 +14,9 @@ Ngày bàn giao: 2026-10-09 (Asia/Saigon). Đây là **kế hoạch chưa thực
 
 ## Global Constraints
 
+- Cập nhật catalog bốn loại activity: ghi SHA checkout/catalog thực tế trong báo cáo deploy. Lần nhập mới thêm steps bài 4, multi bài 5 và groups bài 6; source checksum/requestId không đổi nên nháp đã nhập vẫn skip, không bị nâng cấp tự động. Admin bổ sung qua CMS sau duyệt và save CAS; không đổi checksum/requestId, ép re-import hay tạo migration để vượt skip.
+- Chỉ publish loại mới sau khi backend reader/grader và frontend CMS/player đã deploy tương thích `activityContract=2` và được nghiệm thu. Đợt code này không cấp quyền import DB thật hoặc bật publish.
+
 - `CMS_PUBLISH_ENABLED=false` trên backend thật trong toàn bộ đợt nhập nháp; đặt false ở runner thôi không tắt publish của backend đang chạy.
 - Không sửa policy điểm, unlock, subscription, stage/order hoặc ID nội dung đã có.
 - Không dùng `npm run seed` để cập nhật lời; không dùng MongoDB insert/update trực tiếp vào `lessons`, `stories`, `culturearticles` để nhập nguồn.

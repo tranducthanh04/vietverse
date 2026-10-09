@@ -2,8 +2,31 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { customerCatalog } from '../seeds/customer/customerCatalog.js';
 import { verifyCustomerSources } from '../seeds/customer/customerSource.js';
+import { validatePublish } from '../modules/content/content.validation.js';
 
 describe('customer source coverage', () => {
+  it('maps only source-complete new activities with stable IDs and no fabricated media',()=>{
+    const sourceLesson=(order:number)=>{
+      const entry=customerCatalog.find(entry=>entry.kind==='lesson'&&entry.order===order);
+      if(entry?.kind!=='lesson')throw new Error('Missing lesson');return entry.payload;
+    };
+    const l4=sourceLesson(4),l5=sourceLesson(5),l6=sourceLesson(6);
+    const steps=l4.activities.find(a=>a.type==='follow_steps');
+    expect(steps?.steps?.map(s=>s.text)).toEqual(['Bé đứng lên.','Bé đi đến bàn.','Bé ngồi xuống.']);
+    const multi=l5.activities.find(a=>a.type==='multi_select');
+    expect(multi?.options?.map(o=>o.text)).toEqual(['A','M','B','M','C','M']);
+    expect(multi?.correctAnswer).toEqual(['letter-2','letter-4','letter-6']);
+    const group=l6.activities.find(a=>a.type==='group_sort');
+    expect(group?.options?.map(o=>o.text)).toEqual(['mẹ','mèo','mũ','bà','bé','bóng']);
+    expect(group?.correctAnswer).toEqual({'item-me':'group-m','item-meo':'group-m','item-mu':'group-m','item-ba':'group-b','item-be':'group-b','item-bong':'group-b'});
+    for(const [payload,activity] of [[l4,steps],[l5,multi],[l6,group]] as const){
+      expect(activity?.audioUrl).toBe('');
+      const valid=validatePublish('lesson',{...payload,stageId:'507f1f77bcf86cd799439011',vocabulary:[],activities:activity?[activity]:[]});
+      expect(valid).toEqual([]);
+    }
+    expect(sourceLesson(11).activities.some(a=>a.type==='fill_blanks')).toBe(false);
+    expect(sourceLesson(15).activities).toEqual([]);expect(sourceLesson(20).activities).toEqual([]);
+  });
   it('verifies the saved source bytes and covers all supplied sections', () => {
     expect(verifyCustomerSources()).toBe(true);
     expect(customerCatalog.filter(entry => entry.kind === 'story')).toHaveLength(21);
@@ -38,8 +61,10 @@ describe('customer source coverage', () => {
     expect(first.payload.vocabulary.map(word => word.word)).toEqual(['mẹ', 'bố', 'ông', 'bà', 'anh', 'chị', 'em', 'bạn']);
     expect(first.payload.activities.some(activity => activity.prompt.includes('Đây là mẹ.'))).toBe(true);
     expect(first.payload.activities.some(activity => activity.correctAnswer === 'option-0')).toBe(true);
-    expect(customerCatalog.find(entry => entry.key === 'lesson-05')?.editorialNotes.some(note => note.reason === 'unsupported_activity')).toBe(true);
+    expect(customerCatalog.find(entry => entry.key === 'lesson-05')?.editorialNotes.some(note => note.reason === 'missing_source')).toBe(true);
     expect(customerCatalog.find(entry => entry.key === 'lesson-04')?.editorialNotes.some(note => note.reason === 'unsupported_activity')).toBe(true);
+    expect(customerCatalog.find(entry => entry.key === 'lesson-04')?.editorialNotes.some(note => note.reason === 'unsupported_activity' && note.message.includes('Kéo từ vào câu'))).toBe(true);
+    expect(customerCatalog.find(entry => entry.key === 'lesson-11')?.editorialNotes.some(note => note.message.includes('c_ _'))).toBe(true);
     const last = customerCatalog.find(entry => entry.key === 'lesson-20');
     if (last?.kind !== 'lesson') throw new Error('Missing lesson');
     expect(last.payload.activities).toEqual([]);

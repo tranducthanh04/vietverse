@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { User, ContentDraft, Lesson, Story, CultureArticle, Child, PointTransaction, Recording, LessonProgress } from '../models/index.js';
+import { User, ContentDraft, ContentRevision, Lesson, Story, CultureArticle, Child, PointTransaction, Recording, LessonProgress } from '../models/index.js';
 import { runSeed } from '../seeds/seed.js';
 import { planCustomerImport, importCustomerContent } from '../seeds/customer/importCustomerContent.js';
 import mongoose from 'mongoose';
@@ -12,6 +12,26 @@ async function setup() {
   return admin.id;
 }
 describe('draft-only customer import', () => {
+  it('imports new types into drafts only and skips an older manually edited mapping with the same checksum',async()=>{
+    const adminId=await setup();
+    await importCustomerContent({dryRun:false,adminId});
+    const d4=await ContentDraft.findOne({requestId:/^customer:lesson-04:/}).orFail();
+    const d5=await ContentDraft.findOne({requestId:/^customer:lesson-05:/}).orFail();
+    const d6=await ContentDraft.findOne({requestId:/^customer:lesson-06:/}).orFail();
+    expect(d4.payload.activities.some((a:{type:string})=>a.type==='follow_steps')).toBe(true);
+    expect(d5.payload.activities.some((a:{type:string})=>a.type==='multi_select')).toBe(true);
+    expect(d6.payload.activities.some((a:{type:string})=>a.type==='group_sort')).toBe(true);
+    expect(await Lesson.countDocuments({'activities.type':{$in:['multi_select','group_sort','follow_steps']}})).toBe(0);
+    await ContentDraft.updateOne({_id:d5.id},{$set:{'payload.title':'Manual older mapping',
+      'payload.activities':d5.payload.activities.filter((a:{type:string})=>a.type!=='multi_select')},$inc:{draftVersion:1}});
+    const before=await ContentDraft.findById(d5.id).lean();
+    const result=await importCustomerContent({dryRun:false,adminId});
+    expect(result.entries.every(entry=>entry.action==='skip')).toBe(true);
+    expect(await ContentDraft.findById(d5.id).lean()).toEqual(before);
+    expect(await ContentRevision.countDocuments()).toBe(0);
+    expect(await PointTransaction.countDocuments()).toBe(0);
+    expect(await ContentDraft.countDocuments()).toBe(49);
+  });
   it('previews without writing and applies once without modifying any live or learning data', async () => {
     const adminId = await setup();
     const models = [User, Lesson, Story, CultureArticle, Child, PointTransaction, Recording, LessonProgress];

@@ -1,5 +1,13 @@
 # Đối soát nội dung khách hàng — 2026-10-09
 
+## Cập nhật ánh xạ hoạt động — 2026-10-09
+
+Phần này thay thế ghi chú unsupported tổng quát trong bản đối soát ban đầu bên dưới: lần nhập mới bổ sung bài 4 `follow_steps` (đứng lên → đi đến bàn → ngồi xuống, tự báo cáo), bài 5 `multi_select` (A–M–B–M–C–M, ba ID chữ M), bài 6 `group_sort` (M: mẹ/mèo/mũ; B: bà/bé/bóng). Không bịa audio và không tuyên bố các bài đã đủ điều kiện publish.
+
+Kéo từ vào câu ở bài 2/4 vẫn chưa hỗ trợ riêng; bài 5/6 còn yêu cầu thiếu ngữ liệu; bài 11 `c_ _ → cá` chưa rõ slot nên không nhập `fill_blanks`; bài 15/20 vẫn không có activity hoàn chỉnh. Tổng số vẫn là 49 nháp.
+
+Snapshot, manifest, source checksum và requestId không đổi. Người deploy phải ghi SHA catalog: code ánh xạ thay đổi không làm nguồn đổi checksum. Nháp đã nhập cùng nguồn vẫn skip, kể cả có sửa tay; bổ sung qua CMS sau duyệt và save CAS. Không ép re-import hoặc chạy batch upgrade trong phạm vi này.
+
 Nguồn: ba snapshot và manifest trong thư mục này. Đây là dữ liệu nháp, không phải toàn bộ bài đã đủ điều kiện xuất bản. Mọi mục giữ nguồn/checksum và ghi chú biên tập trong CMS. Không chạy import production trong bước chuẩn bị.
 
 Quyết định: không lấy nội dung demo làm lời khách hàng, không bịa audio/đáp án còn thiếu. Giả định: chọn dị bản đầu tiên ở hai bài có nhiều bản; ánh xạ thao tác được ghi theo từng mục dưới đây và cần admin duyệt.

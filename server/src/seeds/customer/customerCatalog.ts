@@ -15,6 +15,19 @@ const match = (pairs: [string, string][]): Partial<Activity> => ({ type: 'drag_m
 const fill = (sentence: string, options: string[]): Partial<Activity> => ({ ...choose(sentence, options), type: 'fill_blank', blanks: [{ sentence, missing: options[0] }] });
 const sort = (orderedItems: string[]): Partial<Activity> => ({ type: 'sort_order', prompt: 'Sắp xếp câu', orderedItems, correctAnswer: orderedItems });
 const speak = (word: string): Partial<Activity> => ({ type: 'record_voice', prompt: 'Đọc cùng Lí Lắc', targetWord: word });
+const sourceSteps: Partial<Activity> = { type: 'follow_steps', prompt: 'Bé tự xác nhận đã thực hiện', steps: [
+  { id: 'step-stand', text: 'Bé đứng lên.' }, { id: 'step-walk', text: 'Bé đi đến bàn.' }, { id: 'step-sit', text: 'Bé ngồi xuống.' },
+] };
+const sourceMulti: Partial<Activity> = { type: 'multi_select', prompt: 'Tìm chữ M.',
+  options: ['A', 'M', 'B', 'M', 'C', 'M'].map((text, index) => ({ id: `letter-${index + 1}`, text, audioUrl: '', imageUrl: '' })),
+  correctAnswer: ['letter-2', 'letter-4', 'letter-6'],
+};
+const sourceGroups: Partial<Activity> = { type: 'group_sort', prompt: 'Ghép nhóm M và nhóm B',
+  groups: [{ id: 'group-m', label: 'M' }, { id: 'group-b', label: 'B' }],
+  options: [['item-me', 'mẹ'], ['item-meo', 'mèo'], ['item-mu', 'mũ'], ['item-ba', 'bà'], ['item-be', 'bé'], ['item-bong', 'bóng']]
+    .map(([id, text]) => ({ id, text, audioUrl: '', imageUrl: '' })),
+  correctAnswer: { 'item-me': 'group-m', 'item-meo': 'group-m', 'item-mu': 'group-m', 'item-ba': 'group-b', 'item-be': 'group-b', 'item-bong': 'group-b' },
+};
 const lessonWords: string[][] = [
   ['mẹ', 'bố', 'ông', 'bà', 'anh', 'chị', 'em', 'bạn'], ['sách', 'vở', 'bút', 'cặp', 'bàn', 'ghế'], ['chó', 'mèo', 'gà', 'cá', 'trâu', 'chim'], ['ăn', 'uống', 'ngủ', 'chơi', 'đọc', 'chạy', 'đi', 'ngồi'],
   ['A', 'B', 'M'], ['mẹ', 'mèo', 'mũ', 'bà', 'bé', 'bóng'], ['ba', 'bà', 'bá', 'bả', 'bã', 'bạ'], ['bàn', 'lan', 'cá', 'mẹ'], ['b', 'a', 'm', 'e', 'c', 'ch', 'tr', 'nh', 'ph'], ['con cá', 'cái bàn', 'mẹ bé'], ['cá', 'mẹ'], ['mẹ', 'cá', 'bà', 'bé'], [], [], [], [], [], [], [], [],
@@ -24,9 +37,9 @@ const lessonActivities: Partial<Activity>[][] = [
   [choose('Đây là mẹ.', ['mẹ', 'bố', 'bà']), card('MẸ'), match([['MẸ', 'người chăm sóc bé'], ['BỐ', 'bố của bé'], ['BÀ', 'bà của bé']]), choose('Mẹ đang nấu cơm.', ['Mẹ đang nấu cơm.', 'Bố đang ngủ.', 'Bé đang chơi.'])],
   [...['sách', 'bút', 'cặp'].map(card), choose('Bé lấy quyển sách.', ['sách', 'bút', 'cặp']), match([['sách', 'đồ dùng để đọc'], ['bút', 'đồ dùng để viết'], ['cặp', 'đồ dùng để đựng sách vở']]), fill('Bé viết bằng __.', ['bút'])],
   [card('CON MÈO'), match([['con mèo', 'mèo'], ['con cá', 'cá'], ['con chim', 'chim']]), fill('Con __ đang bơi.', ['cá']), choose('Con nào sống dưới nước?', ['cá']), choose('Con nào có thể bay?', ['chim'])],
-  [...lessonWords[3].map(card), choose('Bé đang đọc sách.', ['đọc', 'ngủ', 'chạy']), sort(['Bé', 'đang', 'chơi.'])],
-  [...['A', 'B', 'M'].map(card), choose('/m/', ['M', 'B', 'A']), match([['M', 'mẹ'], ['B', 'bà'], ['C', 'cá']])],
-  [...['mẹ', 'mèo', 'mũ'].map(card), choose('mẹ', ['mèo', 'cá', 'bà'])],
+  [...lessonWords[3].map(card), choose('Bé đang đọc sách.', ['đọc', 'ngủ', 'chạy']), sort(['Bé', 'đang', 'chơi.']), sourceSteps],
+  [...['A', 'B', 'M'].map(card), choose('/m/', ['M', 'B', 'A']), match([['M', 'mẹ'], ['B', 'bà'], ['C', 'cá']]), sourceMulti],
+  [...['mẹ', 'mèo', 'mũ'].map(card), choose('mẹ', ['mèo', 'cá', 'bà']), sourceGroups],
   [choose('bà', ['huyền', 'ngang', 'sắc']), match([['ba', 'ngang'], ['bà', 'huyền'], ['bá', 'sắc']]), speak('bà')],
   [choose('bàn', ['lan', 'cá', 'mẹ'])],
   [sort(['b', 'a']), sort(['m', 'e']), sort(['c', 'a'])],
@@ -53,7 +66,11 @@ function buildLessons(): CustomerEntry[] {
       note('activities', 'normalization', 'Biên soạn bổ sung chỉ ở nhãn thao tác, ID lựa chọn và chuẩn hóa ô trống thành __; không bổ sung đáp án nhiễu ngoài nguồn. Những câu chỉ có một đáp án chưa đủ điều kiện xuất bản.'),
     ];
     if ([1, 5, 6, 7, 8, 12, 13, 14, 15, 16, 19, 20].includes(section.number)) notes.push(note('activities', 'missing_source', 'Một số yêu cầu còn mô tả chung, thiếu bộ câu hỏi/lựa chọn hoặc ngữ liệu hoàn chỉnh. Đối chiếu toàn văn giáo án trước xuất bản.'));
-    if ([2, 4, 5, 6, 11].includes(section.number)) notes.push(note('activities', 'unsupported_activity', 'Chưa chuyển các thao tác kéo từ vào câu, thực hiện 3 bước, chọn nhiều chữ M, phân nhóm nhiều-về-một hoặc nhiều ô trống sang bài khác. Cần renderer phù hợp hoặc quyết định biên tập riêng.'));
+    if ([2, 4].includes(section.number)) notes.push(note('activities', 'unsupported_activity', 'Kéo từ vào câu chưa có renderer riêng; không tự thay bằng thao tác khác. Cần quyết định biên tập trước xuất bản.'));
+    if (section.number === 4) notes.push(note('activities', 'normalization', 'Ba bước nguyên văn dùng follow_steps, chỉ là bé tự xác nhận; chưa có audio nguồn, không xác minh động tác.'));
+    if (section.number === 5) notes.push(note('activities', 'normalization', 'A–M–B–M–C–M dùng multi_select; ba chữ M có ID riêng, chọn đủ cả ba. Các yêu cầu thiếu ngữ liệu khác vẫn cần biên tập.'));
+    if (section.number === 6) notes.push(note('activities', 'normalization', 'group_sort giữ nhóm M: mẹ/mèo/mũ và nhóm B: bà/bé/bóng. Yêu cầu chọn âm đầu từ audio vẫn chưa có ngữ liệu hoàn chỉnh.'));
+    if (section.number === 11) notes.push(note('activities', 'unsupported_activity', 'Nguồn c_ _ → cá chưa xác định rõ từng slot. Chưa ánh xạ fill_blanks hoặc tự bịa acceptedAnswers; content owner cần duyệt cấu trúc.'));
     if ([5, 14, 15, 16].includes(section.number)) notes.push(note('title', 'variant', 'Tên ở sơ đồ tổng quan khác heading giáo án chi tiết; nháp chọn heading chi tiết, không tự đổi live.'));
     if ([9, 10, 13, 16].includes(section.number)) notes.push(note('activities', 'normalization', 'Giả định ánh xạ: thẻ ghép có thứ tự dùng sort_order; câu nói mẫu dùng record_voice, không chấm phát âm bằng AI. Cần admin duyệt sự tương đương thao tác.'));
     return { kind: 'lesson', key: `lesson-${String(section.number).padStart(2, '0')}`, order: section.number, stageOrder: Math.ceil(section.number / 4), source: sourceRef('explore', section.heading), editorialNotes: notes,
