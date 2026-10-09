@@ -89,8 +89,12 @@ Nguyên tắc bắt buộc:
 
 ## 8. Admin
 
+- *Quyết định CMS (2026-10-09)*: admin biên tập lesson/story/culture qua draft dùng chung, lưu không phát hành. Publish cần xác nhận đúng draft/base version và transaction snapshot/live/audit. Không đổi ID/chặng/thứ tự lesson hoặc reset điểm/tiến độ; story/culture có thể ẩn nhưng không xóa lịch sử.
+- Bản bé đang học giữ contentVersion đã mở, kể cả offline/reload; snapshot không cấp thêm quyền. Thu âm phải có ID bản ghi thật đúng child/lesson/activity/version. Thưởng vẫn gắn ID nội dung, không gắn phiên bản.
+- Nhập lời khách hàng chỉ tạo nháp có nguồn/ghi chú; dữ liệu thiếu và giả định ánh xạ phải được biên tập duyệt. Chi tiết rollout/rollback: [CMS operations](./cms-operations.md).
+
 - Chỉ role `admin` được xem KPI, learners, redemptions và thao tác quản trị bài học / đơn hàng.
-- Tất cả mutation của admin (`createLesson`, `updateLesson`, `updateRedemption`) bắt buộc qua Zod schema validation:
+- Tất cả mutation của admin bắt buộc qua Zod schema validation. `createLesson`/`updateLesson` cũ không còn ghi live (409 yêu cầu CMS):
   - `createLessonSchema`: validate ObjectId `stageId`, `order` nguyên dương 1–100, `title`, `activities` thuộc 7 loại hợp lệ.
   - `updateRedemptionSchema`: yêu cầu ít nhất 1 trường thay đổi, validate `status` thuộc `['pending', 'shipped', 'delivered', 'cancelled']`, trackingCode, carrier.
 - Các API truy vấn danh sách (`getLearners`, `getRedemptions`) áp dụng giới hạn tối đa 100 bản ghi mỗi yêu cầu.

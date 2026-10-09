@@ -25,11 +25,13 @@
 | Parent | Parent Gate | Có Modal toán / PIN | `GET /challenge`, `POST /verify` | Step-up Token 15m | Hoàn thiện (P0.4 server-side token) |
 | Admin | KPI | Có | `GET /admin/kpi` | Nhiều collection | Hoàn thiện |
 | Admin | Learners | Có | `GET /admin/learners` | Child/User | Hoàn thiện (Limit 100) |
-| Admin | Lessons | Có | GET/POST/PUT admin | Lesson | Hoàn thiện (P1.7 Zod validation & RBAC) |
+| Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, publish/ẩn có xác nhận | `/admin/content/:kind` | ContentDraft, ContentRevision, live, AdminAuditLog | Đã triển khai local 2026-10-09; publish mặc định tắt, chưa import production |
 | Admin | Redemptions | Có | GET/PATCH admin | Redemption | Hoàn thiện (P1.7 Zod validation, P2.5 limit 100) |
 | Platform | Health/deploy | Có config Render/Vercel | `/health`, `render.yaml` | Env | Hoàn thiện (P0.3 CORS allowlist, P2.6 secret check) |
 
 ## Mức hoàn thiện nội dung seed (đối chiếu 2026-10-08)
+
+Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/tám nhóm văn hóa tạo draft, không ghi đè seed/live. Xem [coverage](./customer-source/2026-10-09/coverage.md). Hoạt động không hỗ trợ và nội dung/media thiếu vẫn cần biên tập; số draft không phải số bài đủ điều kiện phát hành.
 
 - Seed insert-only tạo 5 chặng × 4 bài, 6 hoạt động/bài thông thường và 5 hoạt động ở bài 20.
 - Stories seed 21 bài đọc biên tập có thể thiếu audio; không khẳng định là lời nguyên tác hoặc đã có quyền sử dụng.

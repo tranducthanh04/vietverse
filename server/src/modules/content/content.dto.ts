@@ -1,5 +1,5 @@
 import type { ContentKind, ContentPayloadMap, EditorialNote, LessonContent } from './content.types.js';
-import { parseDraft } from './content.validation.js';
+import { readSchemas } from './content.read-schema.js';
 
 export function toContentPayload<K extends ContentKind>(kind: K, document: unknown): ContentPayloadMap[K] {
   const source = document as { toObject?: () => Record<string, unknown> };
@@ -9,7 +9,7 @@ export function toContentPayload<K extends ContentKind>(kind: K, document: unkno
     const stage = copy.stageId as { _id?: unknown };
     copy.stageId = String(stage._id ?? copy.stageId);
   }
-  return parseDraft(kind, copy);
+  return readSchemas[kind].parse(copy) as ContentPayloadMap[K];
 }
 
 export function normalizeLessonDraft(input: LessonContent): { payload: LessonContent; notes: EditorialNote[] } {

@@ -24,7 +24,9 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Module theo domain: auth, children, stages, lessons, recordings, stories, culture, points, parent, admin.
 - Controller parse input và gọi service.
 - Service thực hiện nghiệp vụ và truy cập model.
-- Zod hiện có ở auth, children, lesson complete; các module khác còn payload tự do.
+- Zod bảo vệ auth/children/lesson complete/admin và CMS. CMS tách schema ghi nháp/validate publish khỏi whitelist đọc legacy, không áp giới hạn tác giả mới lên dữ liệu đã có.
+- Module content quản lý DTO/reader/version; admin/content quản lý CAS drafts/publish/visibility. ContentRevision bất biến và live/draft/audit được cập nhật trong MongoDB transaction, yêu cầu replica set.
+- CMS preview dùng renderer thuần, không mount trang học/chi tiết có mutation. Session/outbox và recording mang contentVersion; khóa thưởng vẫn dùng ID nội dung.
 - `PointTransaction` là sổ cái điểm; `Child.viviPoints` là số dư đọc nhanh.
 
 ## Auth và authorization
@@ -34,7 +36,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - API đọc Bearer token hoặc cookie access token nếu có.
 - Admin API dùng `authMiddleware` + `requireRole(admin)`.
 - Các route parent/child xác định ownership bằng `req.user.id` và `child.parentId`.
-- CORS callback hiện cho phép cả origin không nằm trong allowlist; cần siết khi production.
+- CORS production chỉ cho origin trong allowlist; development cho phép origin local khác phục vụ QA.
 
 ## Storage audio
 
@@ -50,7 +52,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - GitHub integration tự động deploy: push vào `main` tạo production deployment; push các branch khác hoặc mở Pull Request tạo preview deployment và bình luận vào PR.
 - Server: Render, health `/health`.
 - Database: MongoDB local hoặc Atlas.
-- Env được validate bằng Zod nhưng có default secret; production phải bắt buộc secret ngoài default.
+- Env qua Zod; production từ chối secret mặc định. `CMS_PUBLISH_ENABLED` mặc định false, chỉ bật sau khi reader/client phiên bản và MongoDB transaction được kiểm chứng. Xem `cms-operations.md`.
 
 ## Nguyên tắc thay đổi
 

@@ -1,5 +1,12 @@
 # 06 — Kết quả review senior BA/code
 
+## Bổ sung CMS — 2026-10-09
+
+- Đã thêm draft/CAS/publish transaction và whitelist reader phiên bản; preview admin không có mutation học tập. Recording answer phải là ID bản ghi đúng hồ sơ/nội dung/version, không nhận boolean hoàn thành giả.
+- Test tích hợp phát hiện giới hạn draft order <=20 chặn catalog cũ; đã tách whitelist đọc khỏi validate ghi và giữ số thứ tự hiện hữu (không cho CMS sửa thứ tự). Media HTTP legacy còn đọc được; lưu/publish mới phải dùng URL an toàn.
+- Nguồn khách hàng được snapshot/checksum và nhập nháp, không gọi seed để ghi đè live. Các khoảng trống renderer/quiz/audio/bản quyền được giữ thành ghi chú, không tự tuyên bố đủ nội dung production.
+- CMS chưa import database production và publish mặc định tắt. Nghiệm thu môi trường thật, dependency advisories và các nợ ngoài CMS vẫn tách biệt; xem `cms-operations.md` và kết quả ở `08-customer-alignment.md`.
+
 Ngày review: 2026-10-01. Phạm vi: toàn bộ `client/src`, `server/src`, seed, route, model, config và README; không chạy test/build trong lượt review này.
 
 ## P0 — cần xử lý trước khi coi là an toàn nghiệp vụ

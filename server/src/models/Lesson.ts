@@ -37,7 +37,7 @@ export interface IActivity {
 
 export interface ILesson extends Document, ContentMetadata {
   stageId: Types.ObjectId;
-  order: number; // 1 to 20
+  order: number; // Existing catalog identity; CMS cannot change it.
   title: string;
   description?: string;
   vocabulary: {
@@ -115,7 +115,6 @@ const lessonSchema = new Schema<ILesson>(
       type: Number,
       required: true,
       min: 1,
-      max: 20,
       index: true,
     },
     title: {

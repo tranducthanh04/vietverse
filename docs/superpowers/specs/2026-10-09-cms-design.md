@@ -2,7 +2,7 @@
 
 Ngày: 2026-10-09. Baseline: `f727c60` trên `main`.
 
-Trạng thái: **thiết kế đã được phản hồi, bổ sung phạm vi dữ liệu khách hàng ngày 2026-10-09; chưa triển khai**. Người dùng đồng ý hướng CMS và yêu cầu dùng dữ liệu đã gửi. Bản sửa này làm rõ nguồn và cách nhập dữ liệu; các lựa chọn kỹ thuật là đề xuất, không phải hành vi đã có của hệ thống.
+Trạng thái: **đã triển khai CMS và bộ nhập local, đang nghiệm thu cuối ngày 2026-10-09**. Không nhập production; publish mặc định tắt. Nội dung thiết kế ghi quyết định gốc, trạng thái và hướng dẫn vận hành thực tế xem `docs/cms-operations.md` và `docs/08-customer-alignment.md`.
 
 ## 1. Mục tiêu và căn cứ
 

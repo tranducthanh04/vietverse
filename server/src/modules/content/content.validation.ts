@@ -33,7 +33,7 @@ export const activityDraftSchema = z.object({
 const vocabularySchema = z.object({ word: text.default(''), meaning: text.default(''), phonetic: text.optional(), audioUrl: media, imageUrl: media });
 const quizSchema = z.object({ question: text.default(''), options: z.array(text).max(8).default([]), correctAnswer: z.number().int().default(-1), explanation: text.optional() });
 export const lessonDraftSchema = z.object({
-  stageId: z.union([objectId, z.literal('')]).default(''), order: z.number().int().min(0).max(20).default(0),
+  stageId: z.union([objectId, z.literal('')]).default(''), order: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).default(0),
   title: short.default(''), description: text.default(''),
   vocabulary: z.array(vocabularySchema).max(100).default([]), activities: z.array(activityDraftSchema).max(50).default([]),
   freeInStarterPlan: z.boolean().default(false), totalActivities: z.number().optional(),
@@ -95,7 +95,7 @@ export function validatePublish<K extends ContentKind>(kind: K, input: ContentPa
   if (kind === 'lesson') {
     const lesson = payload as ContentPayloadMap['lesson'];
     requireText(lesson.stageId, 'stageId');
-    if (lesson.order < 1) issues.push({ field: 'order', message: 'Order must be 1–20' });
+    if (lesson.order < 1) issues.push({ field: 'order', message: 'Order must be positive' });
     minimum(lesson.activities, 1, 'activities');
     lesson.vocabulary.forEach((word, i) => { requireText(word.word, `vocabulary.${i}.word`); requireText(word.meaning, `vocabulary.${i}.meaning`); });
     lesson.activities.forEach((a, i) => {

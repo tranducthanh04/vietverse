@@ -66,7 +66,7 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 
 - Đăng ký Google OAuth và ngôn ngữ đồng hành chọn nhiều (hiện model lưu một ngôn ngữ).
 - Dashboard phụ huynh đã bổ sung chặng hiện tại, tiến độ theo catalog (5 chặng ở seed chuẩn), 10 ghi nhận gần nhất và điều hướng kho điểm ngày 2026-10-09. Công thức năng lực hiện tại vẫn là benchmark MVP, chưa phải đánh giá chuyên môn toàn khóa. Nhật ký không lưu mọi lượt truy cập; lịch sử điểm đầy đủ vẫn là khoảng trống riêng.
-- CMS biên tập đủ activities/vocabulary, truyện và văn hóa; admin hiện chủ yếu chỉnh metadata bài học.
+- CMS đủ form activities/vocabulary/truyện/văn hóa và preview đã triển khai local 2026-10-09; phần còn lại là xác nhận database đích, import/biên tập/xuất bản production và renderer mới cho các yêu cầu nguồn chưa hỗ trợ.
 - Pagination toàn bộ lịch sử điểm (API hiện giới hạn 100 bản ghi), chính sách hoàn quà ảo/đơn đã giao.
 - Khi hợp nhất `origin/main`, giữ nguyên module thanh toán PayOS đã được phát triển độc lập. Code checkout/webhook đã có; kiểm thử giao dịch production vẫn cần cấu hình và người dùng xác nhận theo `03-feature-inventory.md`. Đợt này không tạo giao dịch thật.
 - Kiểm thử trình duyệt thật, mobile, accessibility và audio/media production; giảm bundle bằng lazy routes.
@@ -104,3 +104,14 @@ Tài liệu này bổ sung baseline ngày 2026-10-01. Các dòng “hoàn thiệ
 - Browser local với MongoDB replica set tạm: đăng nhập demo, mở Parent Gate, kiểm tra dashboard tại 390×844 và 1366×900, không tràn ngang toàn trang trên mobile, reload giữ dashboard, link điểm mở đúng `/diem-thuong`. Dữ liệu gồm catalog mẫu, một progress đang học và một khám phá truyện; không ghi database thật hoặc thanh toán. Tiến trình và script QA tạm đã được dọn.
 - Review độc lập không có finding cần sửa. Giới hạn còn lại: chưa nghiệm thu thiết bị thật/Safari/axe; lịch sử điểm đầy đủ, CMS, Google OAuth, nội dung/audio production và thanh toán thật vẫn là các hạng mục riêng.
 - Rollback: revert thay đổi báo cáo/UI; vì không có mutation/schema mới, không cần rollback dữ liệu.
+
+## CMS và dữ liệu khách hàng — nghiệm thu local 2026-10-09
+
+- Admin có danh sách/tìm kiếm/lọc/phân trang, draft version/CAS, form cho cả ba nhóm, từ vựng/bảy activity, lyrics/timestamp/quiz/media và preview bản đã lưu. Lưu không publish; lỗi mạng/conflict giữ form, form bẩn cảnh báo khi rời trang, publish có xác nhận.
+- Bộ nhập thực sự tạo 49 draft trong database QA tạm từ snapshot/checksum: 20 giáo án, 21 bài đọc và tám nhóm văn hóa. Test đối chiếu lời thực tế và dị bản, không chỉ kiểm số lượng. Không nạp dữ liệu production; không coi các trường còn thiếu/hoạt động chưa hỗ trợ là đã hoàn thiện.
+- Browser: Chrome headless có sẵn, 1366x900 và 390x844, FE/API loopback với MongoMemoryReplSet riêng. Công cụ browser tích hợp bị lỗi khởi động sandbox; dùng runtime Playwright sẵn có, không cài dependency. PayOS/Cloudinary tắt, chặn request ngoài loopback, không cấp micro.
+- Đã kiểm tra lời Rồng rắn thực tế trong editor/preview; bảy loại activity preview không tràn ngang toàn trang; publish rồi reload bé vẫn thấy phiên bản cũ; hai editor cùng bản tạo 409 và giữ chữ local; publish/ẩn truyện chặn GET public; văn hóa list/editor và lỗi audio có trạng thái đúng. Dashboard phụ huynh mở qua Parent Gate thật và reload giữ nguyên; không ghi database thật hay thanh toán.
+- Không có pageerror trong lượt smoke hoàn tất. Console có 401 lúc bootstrap trước refresh token và lỗi tài nguyên ngoài loopback do QA chủ động chặn; không coi đây là lỗi app mới. Selector textarea phải lấy theo accessible textbox name vì Playwright getByLabel exact tính cả text con; đã kiểm tra riêng accessibility tree, không sửa label vô căn cứ.
+- Rủi ro compatibility được kiểm tra: catalog cũ có bài order28 và audio HTTP vẫn đọc được; whitelist không trả CMS nội bộ. Draft/publish mới giữ chính sách media an toàn, stage/order vẫn bất biến.
+- Giới hạn: chưa Safari/thiết bị thật/axe, media/bản quyền production, import database thật. Chi tiết bật cờ và rollback ở [CMS operations](./cms-operations.md).
+- Kiểm chứng trước review độc lập: backend 167/167, frontend 84/84; typecheck/build đạt; lint FE 0 lỗi/101 warning tồn tại, git diff --check đạt. Bundle client 626,56 KB (gzip 186,26 KB), còn cảnh báo chunk >500 KB; React Router còn warning tương thích v7.
