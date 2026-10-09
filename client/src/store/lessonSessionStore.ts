@@ -40,6 +40,14 @@ function serialize(key: string, work: () => Promise<void>): Promise<void> {
   return next;
 }
 
+// Session switches invalidate active memory, not edits already accepted for the
+// old key. Clear is queued after those edits and deletes their durable result.
+async function latestForWrite(key: string, captured: CachedLessonSession, request: number): Promise<CachedLessonSession> {
+  const active = useLessonSessionStore.getState().currentSession;
+  if (request === generation && active) return active;
+  return (await get<CachedLessonSession>(key)) ?? captured;
+}
+
 export const useLessonSessionStore = create<LessonSessionState>((setStore, getStore) => ({
   currentSession: null,
 
@@ -79,8 +87,7 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
     const request = generation;
     const key = sessionKey(currentSession.lessonId, currentSession.childId);
     await serialize(key, async () => {
-      const latest = getStore().currentSession;
-      if (!latest || request !== generation) return;
+      const latest = await latestForWrite(key, currentSession, request);
       const partialInputs = { ...latest.partialInputs };
       if (answer) delete partialInputs[answer.activityId];
       const updatedSession = { ...latest, currentStepIndex: stepIndex, partialInputs,
@@ -97,11 +104,11 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
     }
     const request = generation;
     const input = structuredClone(value);
-    await serialize(sessionKey(identity.lessonId, identity.childId), async () => {
-      const latest = getStore().currentSession;
-      if (!latest || request !== generation) return;
+    const key = sessionKey(identity.lessonId, identity.childId);
+    await serialize(key, async () => {
+      const latest = await latestForWrite(key, current, request);
       const updated = { ...latest, partialInputs: { ...latest.partialInputs, [activityId]: input } };
-      await set(sessionKey(identity.lessonId, identity.childId), updated);
+      await set(key, updated);
       if (request === generation) setStore({ currentSession: updated });
     });
   },
@@ -112,12 +119,12 @@ export const useLessonSessionStore = create<LessonSessionState>((setStore, getSt
 
     const request = generation;
     let nextHearts = currentSession.hearts;
-    await serialize(sessionKey(currentSession.lessonId, currentSession.childId), async () => {
-      const latest = getStore().currentSession;
-      if (!latest || request !== generation) return;
+    const key = sessionKey(currentSession.lessonId, currentSession.childId);
+    await serialize(key, async () => {
+      const latest = await latestForWrite(key, currentSession, request);
       nextHearts = Math.max(0, latest.hearts - 1);
       const updatedSession = { ...latest, hearts: nextHearts };
-      await set(sessionKey(latest.lessonId, latest.childId), updatedSession);
+      await set(key, updatedSession);
       if (request === generation) setStore({ currentSession: updatedSession });
     });
     return nextHearts;

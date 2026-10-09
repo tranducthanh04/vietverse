@@ -7,6 +7,45 @@ const cache = vi.hoisted(() => new Map<string, unknown>());
 vi.mock('idb-keyval', () => ({ get: vi.fn(async (key: string) => cache.get(key)), set: vi.fn(async (key: string, value: unknown) => { cache.set(key, value); }), del: vi.fn(async (key: string) => { cache.delete(key); }) }));
 beforeEach(() => { cache.clear(); vi.clearAllMocks(); useLessonSessionStore.setState({ currentSession: null }); });
 describe('pinned lesson sessions', () => {
+  it.each(['child switch', 'account switch', 'same-session reload'])('flushes newest queued edits to their original child during %s', async (boundary) => {
+    useAuthStore.setState({ user: { id: 'first', email: '', displayName: '', role: 'parent' } });
+    const store = useLessonSessionStore.getState();
+    await store.initSession('lesson', 'child-a', 2);
+    let release!: () => void;
+    vi.mocked(set).mockImplementationOnce(async (key, value) => {
+      await new Promise<void>(resolve => { release = resolve; }); cache.set(key as string, value);
+    });
+    const identity = { lessonId: 'lesson', childId: 'child-a', contentVersion: 2 };
+    const first = store.savePartialInput(identity, 'multi', ['letter-2']);
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'));
+    const second = store.savePartialInput(identity, 'multi', ['letter-2', 'letter-4']);
+    let switching: Promise<unknown> | undefined;
+    if (boundary === 'account switch') useAuthStore.setState({ user: { id: 'second', email: '', displayName: '', role: 'parent' } });
+    else switching = store.initSession('lesson', boundary === 'child switch' ? 'child-b' : 'child-a', 2);
+    release(); await Promise.all([first, second, switching]);
+    expect((await readCachedSession('lesson', 'child-a'))?.partialInputs?.multi).toEqual(['letter-2', 'letter-4']);
+    if (boundary === 'child switch') {
+      expect(useLessonSessionStore.getState().currentSession?.childId).toBe('child-b');
+      expect(useLessonSessionStore.getState().currentSession?.partialInputs).toEqual({});
+    } else if (boundary === 'account switch') expect(useLessonSessionStore.getState().currentSession).toBeNull();
+    else expect(useLessonSessionStore.getState().currentSession?.partialInputs?.multi).toEqual(['letter-2', 'letter-4']);
+  });
+  it('flushes queued submission and heart changes only to the old child when switching', async () => {
+    const store = useLessonSessionStore.getState(); await store.initSession('lesson', 'child-a', 2);
+    let release!: () => void;
+    vi.mocked(set).mockImplementationOnce(async (key, value) => {
+      await new Promise<void>(resolve => { release = resolve; }); cache.set(key as string, value);
+    });
+    const input = store.savePartialInput({ lessonId: 'lesson', childId: 'child-a', contentVersion: 2 }, 'multi', ['letter-2']);
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'));
+    const submit = store.saveStepProgress(1, { activityId: 'multi', userAnswer: ['letter-2'] });
+    const heart = store.loseHeart();
+    const switching = store.initSession('lesson', 'child-b', 2);
+    release(); await Promise.all([input, submit, heart, switching]);
+    expect(await readCachedSession('lesson', 'child-a')).toMatchObject({ currentStepIndex: 1, hearts: 2, answers: [{ activityId: 'multi', userAnswer: ['letter-2'] }] });
+    expect((await readCachedSession('lesson', 'child-a'))?.partialInputs?.multi).toBeUndefined();
+    expect(useLessonSessionStore.getState().currentSession).toMatchObject({ childId: 'child-b', currentStepIndex: 0, hearts: 3, answers: [], partialInputs: {} });
+  });
   it('restores unsent input without inventing graded answers', async () => {
     const store = useLessonSessionStore.getState();
     await store.initSession('lesson', 'child', 2);
