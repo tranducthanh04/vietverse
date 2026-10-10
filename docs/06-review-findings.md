@@ -21,6 +21,13 @@
 - Snapshot commit `741cf9f` build native Preview exit0; handler `server/src/index.js`, Node22.x, không env/listener. Compiled handler và chính function artifact health/security headers/bcrypt qua local Windows, không DB thật. Full suite340/340 BE +163/163 FE, typecheck/build qua; lint0 errors87 warnings.
 - **Gate còn lại:** bcrypt artifact local là Windows PE, không dùng `--prebuilt` để deploy Linux. Phải build source trên Vercel và nghiệm thu staging riêng sau khi owner xác nhận target/env/preset. Chưa deployment/cutover/index apply; project env đang trống. Dependency warnings/advisories trong install chưa được giải quyết bằng migration này. Chi tiết ở runbook.
 
+## BE shell Preview — deployment thật 2026-10-10
+
+- Owner yêu cầu deploy trước, MongoDB/Cloudinary bổ sung sau. Đã có5 env cơ bản chỉ Preview (JWT random riêng, không dùng JWT mẫu), source build Linux/Node22 READY và health200. Preview verified `vietverse-backend-754ru0q09.vercel.app`; SSO giữ nguyên. Readiness/API503 DATABASE_UNAVAILABLE, ngoài API404 NOT_FOUND đúng response wrapper; không test DB thật/audio/account mutation.
+- Vercel auto-promote deployment đầu lên Production dù CLI yêu cầu Preview; đã tạo deployment thứ hai đúng Preview. Production đầu chưa đủ env/chưa nghiệm thu, vẫn tồn tại; không dùng domain chính, không đổi FE proxy/Render/webhook. Xem runbook về hai deployment và giới hạn.
+- **Debt phát hiện:** DB guard trong `index.ts` trả API503 trước khi Helmet được áp dụng, nên response đó thiếu nosniff. Các app-handled health/readiness/404 giữ header. Chưa sửa source trong lượt deploy này; không gọi smoke là security/auth audit hoàn tất.
+- **Gate còn lại:** MongoDB credential đã rotate/backup/index/transaction, Cloudinary/preset/provider, bcrypt hash/auth có DB, IP/cookie qua rewrite, cutover/rollback. Linux health chứng minh dependency load, không chứng minh các nghiệp vụ. Native dependencies/advisories và cloud asset retention debt vẫn còn.
+
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 
 - **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).
