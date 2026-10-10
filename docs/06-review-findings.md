@@ -28,6 +28,18 @@
 - **Debt phát hiện:** DB guard trong `index.ts` trả API503 trước khi Helmet được áp dụng, nên response đó thiếu nosniff. Các app-handled health/readiness/404 giữ header. Chưa sửa source trong lượt deploy này; không gọi smoke là security/auth audit hoàn tất.
 - **Gate còn lại:** MongoDB credential đã rotate/backup/index/transaction, Cloudinary/preset/provider, bcrypt hash/auth có DB, IP/cookie qua rewrite, cutover/rollback. Linux health chứng minh dependency load, không chứng minh các nghiệp vụ. Native dependencies/advisories và cloud asset retention debt vẫn còn.
 
+## BE shell Production — sửa khởi động 2026-10-10
+
+- Log domain chính xác nhận lỗi500 FUNCTION_INVOCATION_FAILED do `JWT_SECRET, JWT_REFRESH_SECRET, CLIENT_ORIGIN` thiếu cấu hình Production; Preview vẫn health200 với5 env. Owner đồng ý cấu hình tối thiểu/redeploy, không cung cấp DB/storage trong lượt này.
+- Đã thêm5 env Production (hai JWT random mới riêng biệt, sensitive/stdin), source snapshot `b2c8613` build/deploy exit0/READY. Alias chính chuyển sang `dpl_3AJPKm1eNFa52xZEqazkazTn16kt`, không xóa deployment đầu. Không thay code runtime hoặc tắt SSO setting.
+- Fresh GET smoke main alias: `/health`200/ok/production, cả không bypass; `/`404/NOT_FOUND; `/ready` và `/api/v1/not-found`503/DATABASE_UNAVAILABLE. App-handled endpoints giữ nosniff; API DB guard vẫn thiếu header như debt trước. Không có MongoDB/Cloudinary/PayOS env hay DB/account/storage/write calls thật.
+- Không coi shell Production READY là cutover/đủ nghiệp vụ. FE/Render/webhook không đổi. JWT shell không tương thích Render; DB/index/backup/rotation/storage/auth/rewrite/cutover gates giữ nguyên.
+
+## Proxy FE sang BE Vercel — source2026-10-10
+
+- Owner yêu cầu đổi proxy ngay dù đã được cảnh báo thiếu MongoDB/API503, sau đó yêu cầu push code. Source `client/vercel.json` đổi destination sang BE Production alias, giữ prefix API và SPA fallback; không đổi backend/auth/cookie/Render/webhook.
+- Push nhánh không chứng minh FE Production đang dùng bản mới. `VITE_API_URL` override, deployment rewrite thực, cookies/auth/IP qua proxy vẫn phải kiểm chứng riêng. JWT shell mới không tương thích Render, API503 giữ có kiểm soát; DB/storage vẫn hoãn, không nghiệm thu đủ nghiệp vụ.
+
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 
 - **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).

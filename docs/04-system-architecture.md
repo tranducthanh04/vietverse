@@ -52,11 +52,11 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Deploy và môi trường
 
-- Client: Vercel/Vite, proxy `/api`.
+- Client: Vercel/Vite, proxy `/api`. Theo yêu cầu owner2026-10-10, cấu hình source `client/vercel.json` đổi destination sang `https://vietverse-backend.vercel.app/api/:path*`, giữ SPA rewrite cuối. Cấu hình chỉ áp dụng trên deployment chứa thay đổi; chưa xác nhận FE Production đã deploy bản này. BE chưa MongoDB nên API503; JWT mới không tương thích Render, auth/cookie/cutover đầy đủ chưa nghiệm thu.
 - Vercel project dùng `client` làm Root Directory, build bằng `npm run build` và phát hành thư mục `dist`.
 - GitHub integration tự động deploy: push vào `main` tạo production deployment; push các branch khác hoặc mở Pull Request tạo preview deployment và bình luận vào PR.
 - Server: Render, health `/health`.
-- BE Vercel riêng, Root Directory `server`, native Express default export `src/index.ts`. Đã deploy Preview2026-10-10 theo yêu cầu owner trước DB/Cloudinary: health200, DB-backed API/readiness503; chưa cutover. Deployment đầu được Vercel auto-promote Production nhưng chưa đủ env/nghiệm thu, không dùng domain chính thay Preview verified. `src/server.ts` giữ listener local/Render. Không có legacy builds hoặc seed khi deploy.
+- BE Vercel riêng, Root Directory `server`, native Express default export `src/index.ts`. Đã deploy Preview và Production shell2026-10-10 theo yêu cầu owner trước DB/Cloudinary: health200, DB-backed API/readiness503; chưa cutover FE/Render. Deployment đầu auto-promote Production lỗi thiếu JWT/origin; sau owner cho phép sửa, đã cấu hình5 env tối thiểu/JWT random riêng và deploy source lại. Domain `vietverse-backend.vercel.app` trỏ deployment `dpl_3AJPKm1eNFa52xZEqazkazTn16kt`, `/health`200, `/`404/NOT_FOUND (không có giao diện BE). JWT shell không tương thích Render; chính sách token/cutover vẫn là gate riêng. `src/server.ts` giữ listener local/Render. Không có legacy builds hoặc seed khi deploy.
 - Mongo connection warm/in-flight được cache (pool max5/min0, selection5s). `/ready` connect+ping, không chứng minh transaction/storage/PayOS. API cold connect lỗi trả503; không disconnect theo request.
 - Production rate limit MongoDB chung: auth30/15 phút, API120/phút, window từ request đầu và reset atomic theo DB clock; store lỗi503. Vercel chỉ đọc single provider-normalized `x-vercel-forwarded-for` khi `VERCEL=1`; Render `RENDER=true` dùng immediate proxy. Không tin XFF ở host khác; chuẩn hóa/băm IP. Qua FE rewrite và giả header vẫn cần staging thật.
 - Node BE chọn22.x để khớp local verification. Native bcrypt/bundle trên Vercel là gate riêng. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
