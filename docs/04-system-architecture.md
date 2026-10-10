@@ -20,7 +20,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Backend
 
-- `app.ts` gắn security middleware, CORS, rate limit, route và error handler.
+- `httpApp.ts` gắn security middleware, CORS, rate limit, route và error handler; `app.ts` chỉ re-export tương thích, không cạnh tranh native Express entrypoint `index.ts`.
 - Module theo domain: auth, children, stages, lessons, recordings, stories, culture, points, parent, admin.
 - Controller parse input và gọi service.
 - Service thực hiện nghiệp vụ và truy cập model.
@@ -60,6 +60,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Mongo connection warm/in-flight được cache (pool max5/min0, selection5s). `/ready` connect+ping, không chứng minh transaction/storage/PayOS. API cold connect lỗi trả503; không disconnect theo request.
 - Production rate limit MongoDB chung: auth30/15 phút, API120/phút, window từ request đầu và reset atomic theo DB clock; store lỗi503. Vercel chỉ đọc single provider-normalized `x-vercel-forwarded-for` khi `VERCEL=1`; Render `RENDER=true` dùng immediate proxy. Không tin XFF ở host khác; chuẩn hóa/băm IP. Qua FE rewrite và giả header vẫn cần staging thật.
 - Node BE chọn22.x để khớp local verification. Native bcrypt/bundle trên Vercel là gate riêng. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
+- TypeScript emit ESM với ESNext/Bundler resolution để native builder và `tsc` cùng đọc nhánh ESM của dual packages; relative imports vẫn `.js` để compiled Node22/Render chạy được. Đây là quyết định kỹ thuật, không đổi API/nghiệp vụ.
 - Database: MongoDB local hoặc Atlas.
 - Env qua Zod; production từ chối secret mặc định. `CMS_PUBLISH_ENABLED` mặc định false, chỉ bật sau khi reader/client phiên bản và MongoDB transaction được kiểm chứng. Xem `cms-operations.md`.
 
