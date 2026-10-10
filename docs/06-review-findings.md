@@ -15,6 +15,12 @@
 - Regression đã tái hiện trước sửa: asset committed bị xóa, same-clock asset collision, intent/delete race, expiry UI/workflow và delayed/background recording. Fix: UUID/overwrite=false; stable Recording ID/reconciliation và giữ asset khi DB outcome unknown; issuance/reuse intent Child transaction; nút resend mới giữ Blob; monotonic179s margin/background stop. Bằng chứng suite cuối và các gate deployment được ghi ở runbook, không suy ra từ test giả là production an toàn.
 - Giới hạn thêm: main thread bị khóa có thể overshoot (báo lỗi, giữ Blob, không fake-valid); một số upload abort còn orphan để đối soát, không xóa khi chưa chắc. Không mở rộng thay đổi sang writer progress/points/exploration hoặc legacy MIME/clamp; chưa đóng các debt ngoài recording migration.
 
+## Native Vercel bundle — kiểm chứng local 2026-10-10
+
+- Bundle baseline chọn `app.ts` trước `index.ts`, bỏ qua wrapper DB; native resolver NodeNext khác `tsc` và lỗi Helmet/express-rate-limit. Đã chuyển assembly sang `httpApp.ts` (app chỉ re-export) và chọn ESM/Bundler resolution, không thay middleware/nghiệp vụ hoặc suppress lỗi kiểu. Detector/compiler regression RED→GREEN.
+- Snapshot commit `741cf9f` build native Preview exit0; handler `server/src/index.js`, Node22.x, không env/listener. Compiled handler và chính function artifact health/security headers/bcrypt qua local Windows, không DB thật. Full suite340/340 BE +163/163 FE, typecheck/build qua; lint0 errors87 warnings.
+- **Gate còn lại:** bcrypt artifact local là Windows PE, không dùng `--prebuilt` để deploy Linux. Phải build source trên Vercel và nghiệm thu staging riêng sau khi owner xác nhận target/env/preset. Chưa deployment/cutover/index apply; project env đang trống. Dependency warnings/advisories trong install chưa được giải quyết bằng migration này. Chi tiết ở runbook.
+
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 
 - **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).
