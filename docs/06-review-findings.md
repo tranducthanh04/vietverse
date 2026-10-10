@@ -35,10 +35,11 @@
 - Fresh GET smoke main alias: `/health`200/ok/production, cả không bypass; `/`404/NOT_FOUND; `/ready` và `/api/v1/not-found`503/DATABASE_UNAVAILABLE. App-handled endpoints giữ nosniff; API DB guard vẫn thiếu header như debt trước. Không có MongoDB/Cloudinary/PayOS env hay DB/account/storage/write calls thật.
 - Không coi shell Production READY là cutover/đủ nghiệp vụ. FE/Render/webhook không đổi. JWT shell không tương thích Render; DB/index/backup/rotation/storage/auth/rewrite/cutover gates giữ nguyên.
 
-## Proxy FE sang BE Vercel — source2026-10-10
+## Proxy FE sang BE Vercel — deployment2026-10-10
 
 - Owner yêu cầu đổi proxy ngay dù đã được cảnh báo thiếu MongoDB/API503, sau đó yêu cầu push code. Source `client/vercel.json` đổi destination sang BE Production alias, giữ prefix API và SPA fallback; không đổi backend/auth/cookie/Render/webhook.
-- Push nhánh không chứng minh FE Production đang dùng bản mới. `VITE_API_URL` override, deployment rewrite thực, cookies/auth/IP qua proxy vẫn phải kiểm chứng riêng. JWT shell mới không tương thích Render, API503 giữ có kiểm soát; DB/storage vẫn hoãn, không nghiệm thu đủ nghiệp vụ.
+- Sau owner yêu cầu push `main`, đã xác nhận FE alias Production chạy commit `7542c57` từ `main`, READY; không cần deploy thủ công thêm. Fresh GET `/` và `/dang-nhap`200 HTML, `/api/v1/not-found` qua FE503/DATABASE_UNAVAILABLE, BE `/health`200; không có `VITE_API_URL` override tên ở env FE Production. Đây là bằng chứng routing/SPA, không phải auth/cookies/IP/nghiệp vụ với DB thật.
+- Các tên biến MongoDB đang có ở project FE, nhưng BE Production không có `MONGODB_URI`. Không đọc/copy giá trị hoặc xóa env FE; owner cần cấu hình credential đã rotate vào đúng project BE. JWT shell mới không tương thích Render, API503 giữ có kiểm soát; DB/storage vẫn hoãn, không nghiệm thu đủ nghiệp vụ. Runbook ghi đúng route env và rollback.
 
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 

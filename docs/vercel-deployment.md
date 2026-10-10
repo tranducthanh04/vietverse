@@ -1,6 +1,6 @@
 # Rollout backend Vercel — Vietverse
 
-Ngày 2026-10-10. Quyết định đã duyệt: project BE riêng, giữ MongoDB/nghiệp vụ/5MiB, direct Cloudinary, Render rollback. **Trạng thái: BE Preview và Production shell đã deploy/READY, chưa có MongoDB/Cloudinary; chưa cutover traffic từ FE/Render.** Theo yêu cầu của chủ dự án, deploy trước rồi bổ sung DB/storage sau; đây là shell deployment, không phải nghiệm thu đủ nghiệp vụ.
+Ngày 2026-10-10. Quyết định đã duyệt: project BE riêng, giữ MongoDB/nghiệp vụ/5MiB, direct Cloudinary, Render rollback. **Trạng thái: FE Production đã nối BE Vercel; BE Preview và Production shell READY, chưa có MongoDB/Cloudinary nên API dữ liệu503.** Owner yêu cầu chuyển proxy trước khi bổ sung DB/storage; đây không phải nghiệm thu đủ nghiệp vụ. Render vẫn giữ làm rollback, webhook chưa chuyển.
 
 URL Preview đã kiểm chứng: https://vietverse-backend-754ru0q09.vercel.app — deployment `dpl_7cuB6M2cYsTbLva1Kqpk3N9mXYzZ`, source commit `b2c8613`, Node22.x. Có Vercel SSO protection, cần đăng nhập Vercel hoặc cơ chế truy cập protected deployment để xem.
 
@@ -8,10 +8,11 @@ URL Production shell đã kiểm chứng: https://vietverse-backend.vercel.app/h
 
 ## Đích và giới hạn
 
-### Proxy FE — thay đổi source theo yêu cầu owner2026-10-10
+### Proxy FE — đã triển khai theo yêu cầu owner2026-10-10
 
 - **Quyết định triển khai:** owner yêu cầu trỏ FE sang BE Vercel mới sau khi đã được thông báo BE thiếu MongoDB/API503, rồi yêu cầu push code. `client/vercel.json` đổi `/api/:path*` destination từ Render sang `https://vietverse-backend.vercel.app/api/:path*`, giữ SPA rewrite cuối. Không đổi API base URL mặc định `/api/v1` hoặc auth/cookie code.
-- **Giới hạn/giả định:** push nhánh `codex/vercel-backend` không đồng nghĩa alias FE Production đã đổi. Cần deployment có cấu hình mới; nếu env `VITE_API_URL` override bằng URL tuyệt đối thì env phải được xác minh riêng. Không tuyên bố smoke qua FE thành công khi chưa có deployment verified.
+- **Xác minh deployment:** FE Git integration theo `main`, Root Directory `client`; alias https://vietverse-nine.vercel.app đã chạy source chứa proxy mới. GET `/` và `/dang-nhap` trả200 HTML; `/api/v1/not-found` trả503/DATABASE_UNAVAILABLE, không rơi vào SPA fallback. BE `/health`200. Kiểm env metadata không có `VITE_API_URL` override ở FE Production; không đọc giá trị secret. Bằng chứng rollout nằm trong [review findings](./06-review-findings.md).
+- **Env đúng project:** Vercel → project `vietverse-backend` → Settings → Environment Variables → Production là nơi owner bổ sung `MONGODB_URI` đã rotate và Cloudinary, rồi redeploy BE. Có các tên biến MongoDB ở project FE `vietverse` không đồng nghĩa BE nhận được chúng; không tự copy credential hoặc xóa env FE. Dừng nếu target/credential chưa xác nhận, không seed/import/index apply để kiểm deployment.
 - API sau chuyển vẫn503 do thiếu DB; audio/PayOS/index/auth/IP/cookie chưa nghiệm thu. JWT BE shell khác Render, phiên đăng nhập cũ không được bảo đảm tương thích. Render và webhook vẫn giữ nguyên. Rollback proxy về `https://vietverse.onrender.com/api/:path*` rồi redeploy FE, không xóa dữ liệu hoặc Render.
 
 ### Backend
@@ -31,7 +32,7 @@ NODE_ENV=production, MONGODB_URI (replica set, target/backup/network đã xác m
 
 Quyết định bảo mật cho Preview chưa chuyển traffic: dùng JWT random riêng thay vì giá trị mẫu local; không sửa JWT Render và không coi token Render có thể dùng trên Preview này. Khi cutover production vẫn phải chốt chính sách tương thích/rotation riêng. Preview chưa gọi account/child/payment mutation với MongoDB dùng chung; authorization deploy không thay thế quyền test dữ liệu thật, backup/index gates hoặc webhook/cutover.
 
-**Quyết định triển khai Production shell:** owner cho phép cấu hình env tối thiểu/redeploy để domain chính hết500, vẫn hoãn DB/storage. JWT của shell không tương thích Render hoặc Preview. **Giả định giới hạn:** chưa có traffic FE tới shell; không coi việc alias Production READY là quyền cutover hoặc bằng chứng auth/DB/nghiệp vụ an toàn. SSO project setting vẫn `all_except_custom_domains`, không bị sửa; smoke quan sát `/health` trên alias Production200 không bypass.
+**Quyết định triển khai Production shell:** owner cho phép cấu hình env tối thiểu/redeploy để domain chính hết500, vẫn hoãn DB/storage; sau đó yêu cầu chuyển proxy và push `main` dù API503. JWT của shell không tương thích Render hoặc Preview. **Giới hạn:** FE đã gửi API tới shell, nhưng auth/DB/nghiệp vụ chưa nghiệm thu. SSO project setting vẫn `all_except_custom_domains`, không bị sửa; smoke quan sát `/health` trên alias Production200 không bypass.
 
 Preview/staging phải có DB/credentials riêng hoặc protection phù hợp, không tự copy `.env` local/Render production để chạy tests. Không in env hoặc connection errors/SDK errors thô. Atlas credential từng xuất hiện trong failing mock assertion của phiên này cần rotate trước dùng tiếp; không coi credential đó là an toàn để deploy.
 
