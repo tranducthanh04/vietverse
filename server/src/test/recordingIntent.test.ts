@@ -1,16 +1,20 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../app.js';
 import { env } from '../config/env.js';
 import { Child, Stage, Lesson, Recording } from '../models/index.js';
 import { RecordingUploadIntent } from '../models/RecordingUploadIntent.js';
 import { AuthService } from '../modules/auth/auth.service.js';
+import { ChildrenService } from '../modules/children/children.service.js';
 
 const original = { ...env };
-afterEach(() => Object.assign(env, original));
+afterEach(() => { Object.assign(env, original); vi.restoreAllMocks(); });
 let token: string, parentId: string, childId: string, lessonId: string;
 const requestId = 'df1a4398-a090-451c-86aa-f6aa3c9b1087';
 beforeEach(async () => {
+  // Deployment explicitly requires indexes before traffic; do not race
+  // asynchronous Mongoose auto-index setup in a freshly created memory DB.
+  await RecordingUploadIntent.init();
   Object.assign(env, { CLOUDINARY_CLOUD_NAME: 'test-cloud', CLOUDINARY_API_KEY: 'test-key', CLOUDINARY_API_SECRET: 'test-secret', CLOUDINARY_RECORDING_UPLOAD_PRESET: 'test-signed' });
   const auth = await AuthService.register({ email: 'intent@example.test', password: 'Password123!', displayName: 'Owner' });
   token = auth.accessToken; parentId = auth.user.id;
@@ -22,6 +26,44 @@ const input = () => ({ requestId, childId, lessonId, activityId: 'voice', conten
 const post = (body: unknown, auth = token) => request(app).post('/api/v1/recordings/upload-intent').set('Authorization', `Bearer ${auth}`).send(body);
 
 describe('recording upload permission', () => {
+  it('rejects reused requestId with another child even under concurrent issuance', async () => {
+    let arrivals = 0, release!: () => void;
+    const bothRead = new Promise<void>(resolve => { release = resolve; });
+    const find = RecordingUploadIntent.findOne.bind(RecordingUploadIntent);
+    const simultaneousLookup = (...args: Parameters<typeof find>) => {
+      const query = find(...args), exec = query.exec.bind(query);
+      query.exec = async () => {
+        const result = await exec();
+        if (++arrivals === 2) release();
+        await bothRead; return result;
+      };
+      return query;
+    };
+    vi.spyOn(RecordingUploadIntent, 'findOne').mockImplementationOnce(simultaneousLookup).mockImplementationOnce(simultaneousLookup);
+    const other = await Child.create({ parentId, name: 'Other', ageGroup: '5-6', companionLanguage: 'en' });
+    const results = await Promise.all([post(input()), post({ ...input(), childId: other.id })]);
+    expect(results.map(value => value.status).sort()).toEqual([201,409]);
+    expect(await RecordingUploadIntent.countDocuments()).toBe(1);
+  });
+  it('does not issue an orphan intent if delete commits after initial ownership validation', async () => {
+    let entered!: () => void, finish!: () => void;
+    const reached = new Promise<void>(resolve => { entered = resolve; });
+    const resume = new Promise<void>(resolve => { finish = resolve; });
+    // Intent lookup is after context validation, before intent persistence.
+    const find = RecordingUploadIntent.findOne.bind(RecordingUploadIntent);
+    vi.spyOn(RecordingUploadIntent, 'findOne').mockImplementationOnce((...args: Parameters<typeof find>) => {
+      const query = find(...args);
+      const exec = query.exec.bind(query);
+      query.exec = async () => { entered(); await resume; return exec(); };
+      return query;
+    });
+    const pending = post(input()).then(value => value);
+    await reached;
+    await ChildrenService.deleteChild(childId, parentId);
+    finish();
+    expect((await pending).status).toBe(404);
+    expect(await RecordingUploadIntent.countDocuments({ childId })).toBe(0);
+  });
   it('issues one signed permission for concurrent retries, without creating a recording', async () => {
     const results = await Promise.all([post(input()), post(input())]);
     expect(results.map(r => r.status)).toEqual([201,201]);

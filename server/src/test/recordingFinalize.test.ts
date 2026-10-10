@@ -7,6 +7,7 @@ import { Child, Stage, Lesson, Recording, PointTransaction, RecordingUploadInten
 import { AuthService } from '../modules/auth/auth.service.js';
 import { ChildrenService } from '../modules/children/children.service.js';
 import { storageService } from '../services/storage.service.js';
+import mongoose from 'mongoose';
 
 const original = { ...env };
 let token: string, parentId: string, childId: string, lessonId: string, intentId: string, publicId: string;
@@ -26,6 +27,34 @@ afterEach(() => { Object.assign(env, original); vi.restoreAllMocks(); });
 const finalize = (auth = token, body: unknown = { intentId }) => request(app).post('/api/v1/recordings/finalize').set('Authorization', `Bearer ${auth}`).send(body);
 
 describe('atomic recording finalize', () => {
+  it('keeps a legacy asset and recovers its receipt when commit succeeds but its ACK is lost', async () => {
+    const transaction = mongoose.connection.transaction.bind(mongoose.connection);
+    vi.spyOn(mongoose.connection, 'transaction').mockImplementationOnce(async (...args: Parameters<typeof transaction>) => {
+      await transaction(...args);
+      throw Object.assign(new Error('commit ACK lost'), { errorLabels: ['UnknownTransactionCommitResult'] });
+    });
+    vi.spyOn(storageService, 'uploadAudio').mockResolvedValue({ url: '/legacy.webm', publicId: 'operation-committed' });
+    const deleted: string[] = [];
+    vi.spyOn(storageService, 'deleteAudio').mockImplementation(async id => { deleted.push(id); return true; });
+    const result = await request(app).post('/api/v1/recordings').set('Authorization', `Bearer ${token}`).field('childId', childId)
+      .attach('audio', Buffer.from('voice'), { filename: 'recording.webm', contentType: 'audio/webm' });
+    expect(deleted).toEqual([]);
+    expect(result.status).toBe(201);
+    const saved = await Recording.findOne({ publicId: 'operation-committed' }).orFail();
+    expect(result.body.data.id).toBe(saved.id);
+    expect(await Recording.countDocuments()).toBe(1);
+  });
+  it('does not delete legacy audio when transaction outcome and reconciliation are unavailable', async () => {
+    vi.spyOn(mongoose.connection, 'transaction').mockRejectedValueOnce(Object.assign(new Error('commit unknown'), { errorLabels: ['UnknownTransactionCommitResult'] }));
+    vi.spyOn(Recording, 'findById').mockImplementationOnce(() => { throw new Error('DB unreachable'); });
+    vi.spyOn(storageService, 'uploadAudio').mockResolvedValue({ url: '/uncertain.webm', publicId: 'operation-unknown' });
+    const deleted: string[] = [];
+    vi.spyOn(storageService, 'deleteAudio').mockImplementation(async id => { deleted.push(id); return true; });
+    const result = await request(app).post('/api/v1/recordings').set('Authorization', `Bearer ${token}`).field('childId', childId)
+      .attach('audio', Buffer.from('voice'), { filename: 'recording.webm', contentType: 'audio/webm' });
+    expect(result.status).toBe(503);
+    expect(deleted).toEqual([]);
+  });
   it('returns one stable receipt across concurrent calls, expiry and intent TTL cleanup', async () => {
     const [one,two] = await Promise.all([finalize(),finalize()]);
     expect([one.status,two.status]).toEqual([201,201]);

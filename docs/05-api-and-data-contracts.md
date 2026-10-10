@@ -92,6 +92,8 @@ Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudin
 
 Giả định môi trường chưa xác minh: preset/metadata provider thực, IP qua rewrite, replica set/network/transaction, native build, cookie auth và webhook. Multipart legacy chỉ dùng local/Render/client cũ; không hứa file5MiB qua endpoint này trên Vercel.
 
+Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/quyền): cấp/reuse intent cũng ghi Child.__v trong transaction để phối hợp cascade. FE giữ Blob, hết hạn chỉ đổi requestId sau nút **Gửi lại bằng lượt mới**; không tự renew hoặc bypass404/503. Timer elapsed monotonic, auto-stop179s margin1s, dừng khi trang ẩn/pagehide; main thread bị khóa có thể overshoot, báo lỗi và không coi take đó hợp lệ; server vẫn giới hạn180s. Legacy Cloudinary UUID ngẫu nhiên/overwrite=false; Recording ID ổn định để reconcile commit mất ACK. DB503 hoặc kết quả commit không rõ không xóa provider asset, để đối soát thủ công; definite4xx business rejection mới compensation. Không bảo đảm legacy HTTP retry giữa hai request idempotent như direct intent.
+
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
 | GET | `/stories`, `/stories/:id` | Public | Đọc story (query `type`, `search` được escape regex và cắt tối đa 50 ký tự; limit 100) |

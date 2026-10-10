@@ -31,8 +31,12 @@ export class RecordingsService {
       return await persistOwnedRecording(parentId, context, { ...uploadRes,
         durationSec: data.durationSec ? Math.max(0, Math.min(180, Number(data.durationSec))) : 0 });
     } catch (error) {
-      // Only this legacy operation owns this asset; never clean up a direct receipt.
-      try { await storageService.deleteAudio(uploadRes.publicId); } catch { /* manual reconciliation */ }
+      // Only a definite business rejection is safe to compensate. A DB/commit
+      // failure can mean a durable Recording with a lost ACK; retain that audio.
+      const status = (error as { statusCode?: number }).statusCode;
+      if (status && status >= 400 && status < 500) {
+        try { await storageService.deleteAudio(uploadRes.publicId); } catch { /* manual reconciliation */ }
+      }
       throw error;
     }
   }

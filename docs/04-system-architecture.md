@@ -45,6 +45,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Finalize/legacy persist và xóa bé cùng write boundary trên Child; cascade DB và receipt atomic trên replica set. Intent cũng bị cascade. Không gọi Cloudinary trong transaction; xóa DB chưa đồng nghĩa xóa vật lý mọi asset audio.
 
 - Có abstraction `IStorageService`.
+- Review2026-10-10: issuance/reuse intent cũng cùng Child write transaction với delete. Legacy publicId UUID/overwrite=false; persist ID ổn định và reconcile commit mất ACK, không cleanup khi DB outcome chưa chắc chắn. FE explicit expiry resend giữ Blob; elapsed timer stop179s margin1s/background, server strict180s; hoàn toàn blocked main thread vẫn là giới hạn browser.
 - Production có thể dùng Cloudinary.
 - Local/dev fallback lưu Data URI trực tiếp trong MongoDB.
 - Fallback phù hợp demo nhỏ, không phù hợp lưu trữ production lâu dài vì phình dữ liệu và khó CDN/retention.

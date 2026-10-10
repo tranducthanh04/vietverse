@@ -30,13 +30,75 @@ async function record(hook: { result: { current: ReturnType<typeof useAudioRecor
   act(() => hook.result.current.stopRecording());
 }
 describe('recorder lifecycle', () => {
-  it('stops at 180 seconds and closes microphone tracks', async () => {
-    vi.useFakeTimers();
+  it('retains the same Blob for explicit expired-intent resend through the real hook', async () => {
+    vi.stubEnv('VITE_DIRECT_RECORDING_UPLOAD','true');
+    const previousAdapter = api.defaults.adapter;
+    let expired = true;
+    const requests: string[] = [], files: Blob[] = [];
+    api.defaults.adapter = async config => {
+      if (config.url?.endsWith('upload-intent')) {
+        requests.push(JSON.parse(config.data).requestId);
+        return { data: { data: { intentId:'abcdefabcdefabcdefabcdef', expiresAt:'2030-01-01', upload:{ url:'https://api.cloudinary.com/v1_1/test/video/upload', fields:{ public_id:'id',timestamp:'123',overwrite:'false',upload_preset:'signed',api_key:'key',signature:'sig' } } } },status:201,statusText:'Created',headers:{},config };
+      }
+      if (expired) throw { response:{ data:{ error:{ code:'UPLOAD_INTENT_EXPIRED' } } } };
+      return { data:{ data:{ id:'123456789012345678901234' } },status:201,statusText:'Created',headers:{},config };
+    };
+    vi.stubGlobal('fetch',vi.fn(async (_url,config: RequestInit) => { files.push((config.body as FormData).get('file') as Blob); return { ok:true }; }));
+    try {
+      const hook = renderHook(useAudioRecorder); await record(hook);
+      const retained = hook.result.current.audioBlob;
+      await expect(hook.result.current.uploadRecording({ childId:'child' })).rejects.toBeDefined();
+      act(() => hook.result.current.restartExpiredUpload());
+      expired = false;
+      await expect(hook.result.current.uploadRecording({ childId:'child' })).resolves.toMatchObject({ id:'123456789012345678901234' });
+      expect(hook.result.current.audioBlob).toBe(retained);
+      expect(requests[0]).not.toBe(requests[1]);
+      expect(files.map(file => file.size)).toEqual([5,5]);
+    } finally { api.defaults.adapter = previousAdapter; }
+  });
+  it('reports overshoot instead of pretending a blocked main thread produced a valid take', async () => {
+    let elapsed = 0, tick!: () => void;
+    vi.spyOn(performance,'now').mockImplementation(() => elapsed);
+    vi.spyOn(globalThis,'setInterval').mockImplementation(((callback: () => void) => { tick = callback; return 123; }) as never);
+    const hook = renderHook(useAudioRecorder);
+    await act(async () => hook.result.current.startRecording());
+    elapsed = 185000;
+    act(() => tick());
+    expect(hook.result.current.durationSec).toBe(185);
+    expect(hook.result.current.errorMessage).toContain('vượt 180 giây');
+    expect(hook.result.current.audioBlob).toBeInstanceOf(Blob);
+  });
+  it('measures elapsed time instead of callback count when timers are delayed', async () => {
+    let elapsed = 0, tick!: () => void;
+    vi.spyOn(performance, 'now').mockImplementation(() => elapsed);
+    vi.spyOn(globalThis, 'setInterval').mockImplementation(((callback: () => void) => { tick = callback; return 123; }) as never);
+    const hook = renderHook(useAudioRecorder);
+    await act(async () => hook.result.current.startRecording());
+    elapsed = 90000;
+    act(() => tick());
+    expect(hook.result.current.durationSec).toBe(90);
+    elapsed = 179000;
+    act(() => tick());
+    expect(hook.result.current.isRecording).toBe(false);
+    expect(hook.result.current.audioBlob).toBeInstanceOf(Blob);
+    expect(tracksStopped).toBe(1);
+  });
+  it('stops and retains audio when the recording page becomes hidden', async () => {
+    const hook = renderHook(useAudioRecorder);
+    await act(async () => hook.result.current.startRecording());
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    expect(hook.result.current.isRecording).toBe(false);
+    expect(hook.result.current.audioBlob).toBeInstanceOf(Blob);
+    expect(tracksStopped).toBe(1);
+  });
+  it('stops with a one-second safety margin and closes microphone tracks', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval','clearInterval','setTimeout','clearTimeout','performance'] });
     const hook = renderHook(useAudioRecorder);
     await act(async () => hook.result.current.startRecording());
     act(() => vi.advanceTimersByTime(181000));
     expect(hook.result.current.isRecording).toBe(false);
-    expect(hook.result.current.durationSec).toBe(180);
+    expect(hook.result.current.durationSec).toBe(179);
     expect(hook.result.current.audioBlob).toBeInstanceOf(Blob);
     expect(tracksStopped).toBe(1);
   });

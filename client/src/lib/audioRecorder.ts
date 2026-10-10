@@ -16,6 +16,7 @@ export interface UseAudioRecorderReturn {
   clearRecording: () => void;
   playRecording: () => void;
   uploadRecording: (params: RecordingContext) => Promise<RecordingReceipt>;
+  restartExpiredUpload: () => void;
 }
 const identity = () => ({ userId: useAuthStore.getState().user?.id, childId: useChildStore.getState().activeChild?._id });
 
@@ -28,6 +29,7 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
   const mounted = useRef(false), generation = useRef(0), duration = useRef(0);
   const recorderRef = useRef<MediaRecorder | null>(null), streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const deadlineRef = useRef<ReturnType<typeof setTimeout> | null>(null), startedAt = useRef<number | null>(null);
   const urlRef = useRef<string | null>(null), playerRef = useRef<HTMLAudioElement | null>(null);
   const sessionRef = useRef(sessionKey), previousSession = useRef(sessionKey);
   sessionRef.current = sessionKey;
@@ -36,6 +38,8 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
 
   const release = useCallback(() => {
     if (timerRef.current !== null) { clearInterval(timerRef.current); timerRef.current = null; }
+    if (deadlineRef.current !== null) { clearTimeout(deadlineRef.current); deadlineRef.current = null; }
+    startedAt.current = null;
     const recorder = recorderRef.current;
     if (recorder) {
       recorder.onstop = null; recorder.ondataavailable = null;
@@ -64,6 +68,13 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
     if (previousSession.current !== sessionKey) clearRecording();
     previousSession.current = sessionKey;
   },[sessionKey,clearRecording]);
+  useEffect(() => {
+    const stopForBackground = () => { if (recorderRef.current?.state === 'recording') recorderRef.current.stop(); };
+    const visibility = () => { if (document.visibilityState === 'hidden') stopForBackground(); };
+    document.addEventListener('visibilitychange',visibility);
+    window.addEventListener('pagehide',stopForBackground);
+    return () => { document.removeEventListener('visibilitychange',visibility); window.removeEventListener('pagehide',stopForBackground); };
+  },[]);
   const startRecording = useCallback(async () => {
     clearRecording(); duration.current = 0;
     const start = { ...identity(), generation: generation.current, sessionKey };
@@ -79,17 +90,22 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
       recorder.ondataavailable = event => { if (current() && event.data.size > 0) chunks.push(event.data); };
       recorder.onstop = () => {
         if (!current()) return;
+        duration.current = Math.ceil((performance.now() - (startedAt.current ?? performance.now())) / 1000);
+        setDurationSec(duration.current);
         const blob = new Blob(chunks,{ type:mimeType });
         const url = URL.createObjectURL(blob); urlRef.current = url;
         setAudioBlob(blob); setAudioUrl(url); setIsRecording(false);
         if (blob.size > 5 * 1024 * 1024) setErrorMessage('Bản thu âm vượt quá 5 MiB. Bé hãy thu âm ngắn hơn nhé!');
+        if (duration.current > 180) setErrorMessage('Trình duyệt đã trì hoãn dừng micro; bản thu vượt 180 giây. Vui lòng thu âm lại.');
         release();
       };
-      recorder.start(200); setIsRecording(true);
+      recorder.start(200); startedAt.current = performance.now(); setIsRecording(true);
+      // One-second margin for container/stop latency; server still enforces180s.
+      deadlineRef.current = setTimeout(() => { if (current() && recorder.state === 'recording') recorder.stop(); },179000);
       timerRef.current = setInterval(() => {
-        duration.current = Math.min(180,duration.current+1); setDurationSec(duration.current);
-        if (duration.current === 180 && recorder.state === 'recording') recorder.stop();
-      },1000);
+        duration.current = Math.floor((performance.now() - startedAt.current!) / 1000); setDurationSec(duration.current);
+        if (duration.current >= 179 && recorder.state === 'recording') recorder.stop();
+      },250);
     } catch (error) {
       if (!current()) return;
       release(); setIsRecording(false);
@@ -125,5 +141,9 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
     form.append('durationSec',String(durationSec));
     return postCurrentRecordingRequest<RecordingReceipt>('/recordings',form,current,{ headers:{ 'Content-Type':'multipart/form-data' } });
   },[audioBlob,durationSec]);
-  return { isRecording,isPlaying,audioBlob,audioUrl,durationSec,permissionStatus,errorMessage,startRecording,stopRecording,clearRecording,playRecording,uploadRecording };
+  const restartExpiredUpload = useCallback(() => {
+    if (!taskRef.current || taskRef.current.blob !== audioBlob) throw recordingContextChanged();
+    taskRef.current.task.restartExpired();
+  },[audioBlob]);
+  return { isRecording,isPlaying,audioBlob,audioUrl,durationSec,permissionStatus,errorMessage,startRecording,stopRecording,clearRecording,playRecording,uploadRecording,restartExpiredUpload };
 }

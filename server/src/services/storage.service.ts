@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { randomUUID } from 'node:crypto';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 
@@ -31,7 +32,8 @@ export class CloudinaryStorageService implements IStorageService {
         {
           resource_type: 'auto',
           folder: 'vietverse/recordings',
-          public_id: `${Date.now()}_${filename.replace(/\.[^/.]+$/, '')}`,
+          public_id: randomUUID(),
+          overwrite: false,
         },
         (error, result) => {
           if (error || !result) {

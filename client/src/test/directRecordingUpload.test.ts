@@ -26,6 +26,52 @@ afterEach(() => { api.defaults.adapter = previousAdapter; setApiAccessToken(null
 const make = (isCurrent = () => true, blob = new Blob(['voice'],{ type: 'audio/webm' })) => createDirectRecordingUpload(blob,{ childId: 'child', lessonId: 'lesson', activityId: 'voice', contentVersion: 3, durationSec: 1 },isCurrent);
 
 describe('direct recording workflow', () => {
+  it('can explicitly resend when the intent expired before any provider upload', async () => {
+    const receivedRequests: string[] = [];
+    let rejectExpired = true;
+    const adapter = api.defaults.adapter as Function;
+    api.defaults.adapter = async config => {
+      if (config.url?.endsWith('upload-intent')) {
+        receivedRequests.push(JSON.parse(config.data).requestId);
+        if (rejectExpired) throw { response: { data: { error: { code: 'UPLOAD_INTENT_EXPIRED' } } } };
+      }
+      return adapter(config);
+    };
+    const task = make();
+    await expect(task.submit()).rejects.toBeDefined();
+    await expect(task.submit()).rejects.toBeDefined();
+    expect(receivedRequests[1]).toBe(receivedRequests[0]);
+    expect(provider).toHaveLength(0);
+    task.restartExpired(); rejectExpired = false;
+    expect(await task.submit()).toEqual(receipt);
+    expect(receivedRequests[2]).not.toBe(receivedRequests[0]);
+    expect(provider).toHaveLength(1);
+  });
+  it('retains the audio and only creates a new requestId after explicit expired-intent restart', async () => {
+    const blob = new Blob(['retained voice'], { type: 'audio/webm' });
+    const task = make(() => true, blob);
+    const expired = { response: { status: 409, data: { error: { code: 'UPLOAD_INTENT_EXPIRED' } } } };
+    finalizeFailure = expired;
+    await expect(task.submit()).rejects.toEqual(expired);
+    finalizeFailure = expired;
+    await expect(task.submit()).rejects.toEqual(expired);
+    expect(provider).toHaveLength(1);
+    expect(calls.filter(c => c.path.endsWith('upload-intent'))).toHaveLength(1);
+    task.restartExpired();
+    expect(await task.submit()).toEqual(receipt);
+    const requests = calls.filter(c => c.path.endsWith('upload-intent'));
+    expect(requests[1].body.requestId).not.toBe(requests[0].body.requestId);
+    expect(provider).toHaveLength(2);
+    expect(((provider[1].body as FormData).get('file') as Blob).size).toBe(blob.size);
+  });
+  it('does not allow an explicit restart to bypass a non-expiry failure', async () => {
+    const task = make();
+    finalizeFailure = { response: { status: 503, data: { error: { code: 'DATABASE_UNAVAILABLE' } } } };
+    await expect(task.submit()).rejects.toBeDefined();
+    expect(() => task.restartExpired()).toThrow();
+    expect(await task.submit()).toEqual(receipt);
+    expect(provider).toHaveLength(1);
+  });
   it('only retries finalize after a saved upload, with no app credentials sent to Cloudinary', async () => {
     finalizeFailure = { response: { status: 503, data: { error: { code: 'DATABASE_UNAVAILABLE' } } } };
     const task = make();

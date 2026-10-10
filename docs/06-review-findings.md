@@ -9,6 +9,12 @@
 - Mongo transaction/readiness/native bcrypt, auth qua rewrite, IP giả/hai mạng, production webhook và rollback chưa được chứng minh bằng deployment. Chưa đổi proxy, seed/import/điểm/CMS publish/tiền thật. Xem [runbook](./vercel-deployment.md).
 - Lưu ý bảo mật của phiên kiểm thử: assertion mock trước khi sửa đã hiển thị Atlas URI từ env local; người dùng đã được nhắc rotate credential. Test DB dùng URI giả/DB memory, không gọi DB thật; không ghi secret vào docs.
 
+## Review toàn nhánh BE Vercel — 2026-10-10
+
+- Reviewer độc lập phát hiện5 Important: legacy cleanup sau commit mất ACK; publicId legacy trùng/overwrite; cấp intent sau xóa bé; thiếu resend explicit cho Blob có intent hết hạn; timer đếm callback thay vì elapsed. Không có Critical/Minor.
+- Regression đã tái hiện trước sửa: asset committed bị xóa, same-clock asset collision, intent/delete race, expiry UI/workflow và delayed/background recording. Fix: UUID/overwrite=false; stable Recording ID/reconciliation và giữ asset khi DB outcome unknown; issuance/reuse intent Child transaction; nút resend mới giữ Blob; monotonic179s margin/background stop. Bằng chứng suite cuối và các gate deployment được ghi ở runbook, không suy ra từ test giả là production an toàn.
+- Giới hạn thêm: main thread bị khóa có thể overshoot (báo lỗi, giữ Blob, không fake-valid); một số upload abort còn orphan để đối soát, không xóa khi chưa chắc. Không mở rộng thay đổi sang writer progress/points/exploration hoặc legacy MIME/clamp; chưa đóng các debt ngoài recording migration.
+
 ## ViVi Points theo tài liệu khách hàng — 2026-10-09
 
 - **Đã sửa — idempotency điểm thưởng chưa từng có index bảo vệ**: partial unique index `{ childId, reason, refId }` dùng `$nin` trong `partialFilterExpression`, MongoDB từ chối ("Expression not supported in partial index: $not") nên index chưa bao giờ được tạo; chống cộng trùng chỉ dựa vào `findOne` kiểm tra trước, có thể bị race. Đã đổi sang `$in` cho 5 reason thưởng một lần. **Trước khi deploy production**: xác nhận MongoDB Atlas ≥ 6.0 và quét bản ghi trùng `childId+reason+refId` của 5 reason này; nếu còn trùng, tạo index sẽ thất bại (chỉ báo lỗi log, app vẫn chạy nhưng không có index).

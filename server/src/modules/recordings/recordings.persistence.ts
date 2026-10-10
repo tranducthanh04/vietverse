@@ -33,6 +33,8 @@ export async function findOwnedRecordingReceipt(parentId: string, intentId: stri
 export async function persistOwnedRecording(parentId: string, context: RecordingContext,
   audio: { url: string; publicId?: string; durationSec: number }, intentId?: string): Promise<RecordingReceipt> {
   await assertRecordingContext(parentId, context);
+  // Stable across transaction retries and commit-acknowledgement loss.
+  const recordingId = new mongoose.Types.ObjectId();
   try {
     let attempts = 0;
     const options = { maxCommitTimeMS: 5000, timeoutMS: 15000 };
@@ -47,7 +49,7 @@ export async function persistOwnedRecording(parentId: string, context: Recording
         if (!intent) throw notFound();
         if (intent.expiresAt.getTime() <= Date.now()) throw intentExpired();
       }
-      const [recording] = await Recording.create([{ ...context, ...audio, ...(intentId ? { uploadIntentId: intentId } : {}) }], { session });
+      const [recording] = await Recording.create([{ _id: recordingId, ...context, ...audio, ...(intentId ? { uploadIntentId: intentId } : {}) }], { session });
       if (intentId) {
         const result = await RecordingUploadIntent.updateOne({ _id: intentId, parentId, status: 'pending' },
           { $set: { status: 'completed', recordingId: recording._id } }, { session });
@@ -61,6 +63,12 @@ export async function persistOwnedRecording(parentId: string, context: Recording
       if (existing) return existing;
     }
     if ((error as { statusCode?: number }).statusCode) throw error;
+    // A rejected commit may already be durable. Reconcile by our exact ID,
+    // never by URL/publicId supplied by a client. Failure to read is uncertainty.
+    try {
+      const committed = await Recording.findById(recordingId);
+      if (committed && await Child.exists({ _id: committed.childId, parentId })) return receipt(committed);
+    } catch { /* Retain provider asset for manual reconciliation. */ }
     throw databaseUnavailable();
   }
 }

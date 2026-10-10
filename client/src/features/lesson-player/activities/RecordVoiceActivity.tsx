@@ -39,11 +39,13 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     clearRecording,
     playRecording,
     uploadRecording,
+    restartExpiredUpload,
   } = useAudioRecorder(JSON.stringify([childId,lessonId,activity.id,contentVersion]));
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [intentExpired, setIntentExpired] = useState(false);
   const userId = useAuthStore(state => state.user?.id);
   const activeChildId = useChildStore(state => state.activeChild?._id);
   const contextKey = JSON.stringify([userId,activeChildId,childId,lessonId,activity.id,contentVersion]);
@@ -56,7 +58,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     const child = useChildStore.subscribe((state,previous) => { if (state.activeChild?._id !== previous.activeChild?._id) generation.current++; });
     return () => { mounted.current = false; generation.current++; auth(); child(); };
   },[]);
-  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); },[contextKey]);
+  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); setIntentExpired(false); },[contextKey]);
 
   const handleSubmit = async () => {
     if (!audioBlob) return;
@@ -64,6 +66,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     const current = () => mounted.current && epoch === generation.current && key === contextRef.current;
     try {
       setIsUploading(true);
+      if (intentExpired) { restartExpiredUpload(); setIntentExpired(false); }
       setUploadError(null);
       const res = await uploadRecording({
         childId,
@@ -81,6 +84,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       if (!current()) return;
       const msg = err.response?.data?.error?.message || err.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
       setUploadError(msg);
+      setIntentExpired(err.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED');
     } finally {
       if (current()) setIsUploading(false);
     }
@@ -169,7 +173,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
               <Button
                 variant="ghost"
                 size="md"
-                onClick={clearRecording}
+                onClick={() => { clearRecording(); setUploadError(null); setIntentExpired(false); }}
                 disabled={isUploading}
                 className="flex items-center space-x-2 text-stone-600"
               >
@@ -195,7 +199,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 onClick={handleSubmit}
                 className="w-full max-w-xs"
               >
-                {uploadError ? 'Thử gửi lại giọng đọc' : 'Gửi giọng đọc của bé'}
+                {intentExpired ? 'Gửi lại bằng lượt mới' : uploadError ? 'Thử gửi lại giọng đọc' : 'Gửi giọng đọc của bé'}
               </Button>
             ) : (
               <div className="text-emerald-600 font-bold flex items-center space-x-1">

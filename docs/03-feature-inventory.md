@@ -12,7 +12,7 @@
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |
 | Lesson | Lesson player | 7 loại cũ + multi_select/group_sort/fill_blanks/follow_steps | `GET /lessons/:id?activityContract=2`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Triển khai local 2026-10-09; loại mới ghi nhận trung tính, chấm server; chưa xác nhận deploy/content production |
 | Lesson | Tim/gợi ý/offline session | Có | IndexedDB + Offline Sync Queue localStorage | lesson session, queue | Hoàn thiện (P1.5) |
-| Recording | Thu âm | MediaRecorder dừng 180s, upload trực tiếp production, guard phiên và retry finalize | Multipart legacy; `/recordings/upload-intent`, `/recordings/finalize` | Recording, RecordingUploadIntent, Cloudinary | Triển khai local 2026-10-09; metadata/preset thật và rollout production chưa nghiệm thu |
+| Recording | Thu âm | MediaRecorder elapsed auto-stop179s margin1s/background, upload trực tiếp production, guard phiên/retry finalize/explicit expired resend | Multipart legacy; `/recordings/upload-intent`, `/recordings/finalize` | Recording, RecordingUploadIntent, Cloudinary | Triển khai local, review2026-10-10; server strict180s, metadata/preset thật và rollout production chưa nghiệm thu |
 | Stories | Kho truyện/đồng dao | Có | GET public, mark explored auth | Story, ExplorationLog | Hoàn thiện (P1.3 idempotency, P2.5 safe search) |
 | Culture | Bài văn hóa/narration | Có | GET public, quiz auth | CultureArticle, ExplorationLog | Hoàn thiện (P2.5 safe search) |
 | Culture | Quiz +5 điểm | Có | `POST /culture/:id/quiz` | PointTransaction, Child | Hoàn thiện (P1.3 idempotency & compensation) |
@@ -33,6 +33,8 @@
 | Platform | Health/deploy | FE Vercel giữ proxy hiện hữu; BE có native Express config | `/health`, `/ready`, Mongo rate limit chung; Render giữ rollback | Env, RateLimitBucket | Triển khai local 2026-10-09; chưa chuyển traffic production. Xem runbook Vercel |
 
 ## Mức hoàn thiện nội dung seed (đối chiếu 2026-10-08)
+
+Bổ sung review recording2026-10-10: explicit resend intent mới giữ Blob, monotonic auto-stop179s margin1s/background, stable legacy asset/commit reconciliation, intent/delete transaction. Project BE đã tạo nhưng chưa deploy/cutover; metadata/device/native/IP/cookie/webhook vẫn chờ staging. Không thay điểm, business unlock hoặc nội dung.
 
 Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/tám nhóm văn hóa tạo draft, không ghi đè seed/live. Xem [coverage](./customer-source/2026-10-09/coverage.md). Hoạt động không hỗ trợ và nội dung/media thiếu vẫn cần biên tập; số draft không phải số bài đủ điều kiện phát hành.
 

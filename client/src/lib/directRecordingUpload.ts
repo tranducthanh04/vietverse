@@ -29,9 +29,10 @@ function validateIntent(intent: UploadIntent) {
     || Object.keys(intent.upload.fields).some(key => !allowed.has(key))) throw new Error('Quyền gửi thu âm không hợp lệ.');
 }
 export function createDirectRecordingUpload(blob: Blob, context: RecordingContext & { durationSec?: number }, isCurrent: () => boolean) {
-  const requestId = crypto.randomUUID();
+  let requestId = crypto.randomUUID();
   let intent: UploadIntent | undefined, inFlight: Promise<RecordingReceipt> | undefined, receipt: RecordingReceipt | undefined;
   let uploaded = false, attemptedProvider = false;
+  let expired = false;
   const finalize = async () => {
     const result = await postCurrentRecordingRequest<RecordingReceipt>('/recordings/finalize',{ intentId: intent!.intentId },isCurrent);
     if (!result || !/^[a-f\d]{24}$/i.test(result.id)) throw new Error('Máy chủ chưa xác nhận bản thu âm.');
@@ -71,7 +72,18 @@ export function createDirectRecordingUpload(blob: Blob, context: RecordingContex
     }
     return finalize();
   };
-  return { submit(): Promise<RecordingReceipt> {
-    inFlight ??= run().finally(() => { inFlight = undefined; }); return inFlight;
-  } };
+  return {
+    restartExpired() {
+      assertCurrent(isCurrent);
+      if (!expired || inFlight || receipt) throw new Error('Chỉ gửi bằng lượt mới sau khi lượt cũ đã hết hạn.');
+      requestId = crypto.randomUUID(); intent = undefined;
+      uploaded = false; attemptedProvider = false; expired = false;
+    },
+    submit(): Promise<RecordingReceipt> {
+      inFlight ??= run().catch(error => {
+        if (error?.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED') expired = true;
+        throw error;
+      }).finally(() => { inFlight = undefined; }); return inFlight;
+    },
+  };
 }
