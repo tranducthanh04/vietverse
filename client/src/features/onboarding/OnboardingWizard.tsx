@@ -10,7 +10,7 @@ export const OnboardingWizard: React.FC = () => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [ageGroup, setAgeGroup] = useState<'5-6' | '6-8'>('5-6');
-  const [companionLanguage, setCompanionLanguage] = useState<string>('en');
+  const [companionLanguages, setCompanionLanguages] = useState<string[]>(['en']);
   const [avatarId, setAvatarId] = useState('mascot-star-1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -27,6 +27,10 @@ export const OnboardingWizard: React.FC = () => {
     } else if (step === 2) {
       setStep(3);
     } else if (step === 3) {
+      if (companionLanguages.length === 0) {
+        setErrorMsg('Ba mẹ vui lòng chọn ít nhất một ngôn ngữ.');
+        return;
+      }
       setStep(4);
     } else if (step === 4) {
       try {
@@ -34,7 +38,8 @@ export const OnboardingWizard: React.FC = () => {
         await createChild({
           name: name.trim(),
           ageGroup,
-          companionLanguage,
+          companionLanguages,
+          companionLanguage: companionLanguages[0],
           avatarId,
         });
         navigate('/kham-pha');
@@ -282,7 +287,7 @@ export const OnboardingWizard: React.FC = () => {
                   Ngôn ngữ thường ngày của bé là gì?
                 </h2>
                 <p className="text-sm text-on-surface-variant mt-2 font-medium">
-                  Sao Lí Lắc sẽ sử dụng ngôn ngữ này để hướng dẫn khi bé gặp thử thách từ vựng mới.
+                  Ba mẹ có thể chọn nhiều ngôn ngữ bé sử dụng thường ngày.
                 </p>
               </div>
 
@@ -295,12 +300,15 @@ export const OnboardingWizard: React.FC = () => {
                   { code: 'fr', flag: '🇫🇷', label: 'Français', sub: 'Tiếng Pháp' },
                   { code: 'other', flag: '🌏', label: 'Khác', sub: 'Ngôn ngữ khác' },
                 ].map((item) => {
-                  const isSelected = companionLanguage === item.code;
+                  const isSelected = companionLanguages.includes(item.code);
                   return (
                     <button
                       key={item.code}
                       type="button"
-                      onClick={() => setCompanionLanguage(item.code)}
+                      aria-pressed={isSelected}
+                      onClick={() => setCompanionLanguages((current) => current.includes(item.code)
+                        ? current.filter((code) => code !== item.code)
+                        : [...current, item.code])}
                       className={`p-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
                         isSelected
                           ? 'border-primary bg-primary-fixed/40 shadow-md ring-2 ring-primary'

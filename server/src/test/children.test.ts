@@ -4,7 +4,7 @@ import { app } from '../app.js';
 import { Child } from '../models/Child.js';
 import { AuthService } from '../modules/auth/auth.service.js';
 import { Recording, RecordingUploadIntent, Redemption } from '../models/index.js';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -109,6 +109,7 @@ describe('Children & Ownership API', () => {
     await RecordingUploadIntent.create({ parentId: parent.user.id, requestId: 'child-delete', childId: child.id,
       fingerprint: 'test', publicId: 'test-asset', timestamp: 1, expiresAt: new Date(), deleteAt: new Date(Date.now()+86400000) });
     await Redemption.create({ childId: child.id, itemId: new Types.ObjectId(), pointsSpent: 1, status: 'pending' });
+    await mongoose.connection.db!.collection('child_language_migration_preimages').insertOne({ _id: child._id, childId: child._id, companionLanguage: 'en' });
 
     // Delete child
     const delRes = await request(app)
@@ -135,6 +136,7 @@ describe('Children & Ownership API', () => {
     expect(remainingLogs.length).toBe(0);
     expect(await RecordingUploadIntent.countDocuments({ childId: child.id })).toBe(0);
     expect(await Redemption.countDocuments({ childId: child.id })).toBe(0);
+    expect(await mongoose.connection.db!.collection('child_language_migration_preimages').countDocuments({ childId: child._id })).toBe(0);
   });
   it('rolls back the entire cascade when one database delete fails', async () => {
     const parent = await AuthService.register({ email: 'delete-rollback@example.test', password: 'Password123!', displayName: 'Owner' });

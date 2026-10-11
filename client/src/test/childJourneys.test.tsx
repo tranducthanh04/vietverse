@@ -14,6 +14,7 @@ import { router } from '../app/router.js';
 import { ChildSessionGuard } from '../components/ChildSessionGuard.js';
 import { KidsLayout } from '../app/layouts/KidsLayout.js';
 import { CulturePage } from '../features/culture/CulturePage.js';
+import { OnboardingWizard } from '../features/onboarding/OnboardingWizard.js';
 
 const child: ChildProfile = { _id: 'child-a', parentId: 'parent-a', name: 'An', ageGroup: '5-6', companionLanguage: 'en', avatarId: 'star', viviPoints: 100, level: 1, badges: [], ownedItemIds: [], screenTimeLimit: 15 };
 const originalAdapter = api.defaults.adapter;
@@ -42,6 +43,28 @@ beforeEach(() => {
 });
 
 afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; vi.useRealTimers(); });
+
+describe('multilingual onboarding', () => {
+  it('keeps multiple selections, prevents empty selection, and sends all languages', async () => {
+    let body: Record<string, unknown> | undefined;
+    request = (config) => { body = JSON.parse(config.data as string); return { ...child, ...body }; };
+    show(<OnboardingWizard />);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'An' } });
+    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục cùng/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục bước/ }));
+    fireEvent.click(screen.getByRole('button', { name: /English/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Hoàn tất thiết lập/ }));
+    expect(screen.queryByRole('button', { name: /BẮT ĐẦU/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /English/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Tiếng Nhật/ }));
+    expect(screen.getByRole('button', { name: /English/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Tiếng Nhật/ })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /Hoàn tất thiết lập/ }));
+    fireEvent.click(screen.getByRole('button', { name: /BẮT ĐẦU/ }));
+    await waitFor(() => expect(body).toMatchObject({ companionLanguages: ['en', 'ja'], companionLanguage: 'en' }));
+    expect(useChildStore.getState().activeChild?.companionLanguages).toEqual(['en', 'ja']);
+  });
+});
 
 describe('parent gate recovery', () => {
   it('offers retry and prevents verification until a signed challenge loads', async () => {

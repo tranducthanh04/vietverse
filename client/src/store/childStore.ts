@@ -11,6 +11,7 @@ export interface ChildProfile {
   name: string;
   ageGroup: '5-6' | '6-8';
   companionLanguage: 'en' | 'ja' | 'ko' | 'zh' | 'fr' | 'other';
+  companionLanguages?: Array<'en' | 'ja' | 'ko' | 'zh' | 'fr' | 'other'>;
   avatarId: string;
   viviPoints: number;
   currentStageId?: any;
@@ -33,7 +34,8 @@ interface ChildState {
   createChild: (data: {
     name: string;
     ageGroup: '5-6' | '6-8';
-    companionLanguage: string;
+    companionLanguage?: string;
+    companionLanguages?: string[];
     avatarId?: string;
   }) => Promise<ChildProfile>;
   updatePointsLocally: (newPoints: number) => void;

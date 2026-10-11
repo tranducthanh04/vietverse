@@ -2,12 +2,14 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export type AgeGroup = '5-6' | '6-8';
 export type CompanionLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'fr' | 'other';
+export const companionLanguages = ['en', 'ja', 'ko', 'zh', 'fr', 'other'] as const;
 
 export interface IChild extends Document {
   parentId: Types.ObjectId;
   name: string;
   ageGroup: AgeGroup;
   companionLanguage: CompanionLanguage;
+  companionLanguages: CompanionLanguage[];
   avatarId: string;
   viviPoints: number;
   currentStageId?: Types.ObjectId;
@@ -43,8 +45,16 @@ const childSchema = new Schema<IChild>(
     },
     companionLanguage: {
       type: String,
-      enum: ['en', 'ja', 'ko', 'zh', 'fr', 'other'],
-      default: 'en',
+      enum: companionLanguages,
+    },
+    companionLanguages: {
+      type: [String],
+      enum: companionLanguages,
+      default: undefined,
+      validate: {
+        validator: (values: CompanionLanguage[]) => Array.isArray(values) && values.length > 0 && new Set(values).size === values.length,
+        message: 'companionLanguages must contain at least one unique language',
+      },
     },
     avatarId: {
       type: String,
@@ -91,5 +101,27 @@ const childSchema = new Schema<IChild>(
     timestamps: true,
   }
 );
+
+childSchema.pre('validate', function (next) {
+  const legacy = this.companionLanguage;
+  const values = this.companionLanguages;
+  if (values?.length && legacy && values[0] !== legacy) {
+    this.invalidate('companionLanguages', 'companionLanguage must match the first companion language');
+  } else if (values === undefined) {
+    this.companionLanguages = [legacy || 'en'];
+  }
+  if (!legacy && this.companionLanguages?.length) this.companionLanguage = this.companionLanguages[0];
+  next();
+});
+
+childSchema.set('toJSON', {
+  transform: (_doc, ret) => {
+    const values = ret.companionLanguages as CompanionLanguage[] | undefined;
+    const legacy = ret.companionLanguage as CompanionLanguage | undefined;
+    if (!values?.length && legacy) ret.companionLanguages = [legacy];
+    if (!legacy && values?.length) ret.companionLanguage = values[0];
+    return ret;
+  },
+});
 
 export const Child = model<IChild>('Child', childSchema);

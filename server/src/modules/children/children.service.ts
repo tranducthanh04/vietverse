@@ -43,6 +43,7 @@ export class ChildrenService {
       name: data.name,
       ageGroup: data.ageGroup,
       companionLanguage: data.companionLanguage,
+      companionLanguages: data.companionLanguages,
       avatarId: data.avatarId || 'mascot-star-1',
       currentStageId: stage1?._id,
       viviPoints: 0,
@@ -54,10 +55,13 @@ export class ChildrenService {
   }
 
   static async updateChild(childId: string, parentId: string, data: any) {
+    const update = { ...data };
+    if (update.companionLanguages) update.companionLanguage = update.companionLanguages[0];
+    if (update.companionLanguage && !update.companionLanguages) update.companionLanguages = [update.companionLanguage];
     const child = await Child.findOneAndUpdate(
       { _id: childId, parentId },
-      { $set: data },
-      { new: true }
+      { $set: update },
+      { new: true, runValidators: true }
     );
     if (!child) {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
@@ -80,6 +84,7 @@ export class ChildrenService {
         await ExplorationLog.deleteMany({ childId: child._id }, { session });
         await PointTransaction.deleteMany({ childId: child._id }, { session });
         await Redemption.deleteMany({ childId: child._id }, { session });
+        await mongoose.connection.db!.collection('child_language_migration_preimages').deleteMany({ childId: child._id }, { session });
         return child;
       }, options);
     } catch (error) {
