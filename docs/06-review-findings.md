@@ -1,5 +1,20 @@
 # 06 — Kết quả review senior BA/code
 
+## Catalog mới theo Docs — review bootstrap 2026-10-10
+
+Bổ sung 2026-10-11: owner duyệt `test`, migration ngôn ngữ và catalog. Lượt cuối đã apply Atlas và deploy FE/BE, có receipt/production smoke tại [journal](../plans/journals/2026-10-11-schema-catalog.md). Full test đầu có lỗi cạnh tranh recording finalize (201/503); chạy riêng và full lại qua, chưa khẳng định hết flakiness. Networking Atlas/least-privilege/bản quyền vẫn là gate riêng. Build FE phát hiện12 dependency advisories gồm2 critical; chưa đánh giá exploitability hoặc sửa dependencies trong lượt deploy.
+
+- Owner cho phép tự biên soạn phần thiếu; [ngoại lệ bootstrap](./cms-operations.md#ngoại-lệ-khởi-tạo-db-mới-theo-yêu-cầu-owner) không áp dụng cho catalog đã có dữ liệu. Lời nguồn giữ nguyên; bản bổ sung có provenance. Chưa coi test local là đã nạp Production; bằng chứng ở [journal](../plans/journals/2026-10-10-customer-bootstrap.md).
+- Reviewer phát hiện đoạn đọc/câu dài tràn thẻ chữ và ô sort cố định. Đã thích nghi catalog với renderer hiện hành, không sửa frontend: đoạn đọc ở subPrompt, thẻ chữ ngắn, câu dài chọn thứ tự mảnh đánh số. Regression đã RED → GREEN; desktop/mobile thật chưa nghiệm thu.
+- Snapshot empty gate không chặn CMS writer vì CMS không dùng seed lock. Bootstrap kiểm không có admin ứng dụng trước ghi và trong transaction, thêm owner xác nhận không còn admin JWT/session hợp lệ hoặc writer ngoài luồng. Middleware tin role JWT nên User admin rỗng không đủ bằng chứng; chưa rõ lịch sử token phải hủy. Cấm tạo/promote admin trong cửa sổ này, không tự đổi quyền hoặc tắt dịch vụ.
+- Không tạo audio, người dùng, tiến độ, ledger, đơn hàng hay tồn kho. Không đóng các gate quyền tác giả, chất lượng giáo dục, Cloudinary/PayOS, backup toàn DB hoặc Atlas network lâu dài.
+
+## MongoDB BE Production — kết nối đã qua, mạng tạm 2026-10-10
+
+- Owner yêu cầu gắn DB theo cluster trong ảnh vào BE; đã cấu hình `MONGODB_URI` sensitive đúng Production và redeploy source READY. Không lưu credential vào code/Git. URI không có database path: driver chọn `test`, là giả định đã thông báo, chưa xác nhận dữ liệu. Bằng chứng deployment hiện tại ở [runbook](./vercel-deployment.md).
+- Sau khi owner tự mở `0.0.0.0/0` tạm 6 giờ ở Atlas, GET smoke đã qua: BE health/readiness200; unknown API BE/FE404; FE auth/me không đăng nhập401; FE stories200, danh sách rỗng. Không đổi env/source/redeploy giữa kiểm lỗi và kiểm sau mở mạng. Bằng chứng TLS lỗi trước đây thuộc target URI cũ, không dùng để kết luận target mới lỗi TLS. Chi tiết kết quả hiện tại ở [journal](../plans/journals/2026-10-10-mongodb-production-blocker.md).
+- **Gate còn lại:** đường mạng production lâu dài chưa chốt; quyền tạm tự hết hạn, không tự gia hạn/mở vĩnh viễn. Tài khoản DB quyền admin rộng cần least-privilege; rotation credential đã lộ chưa xác minh. Cloudinary/PayOS, backup/indexes/transactions/auth đăng nhập/IP/cookies vẫn chưa nghiệm thu; không seed/import/test account/payment mutation trong lượt này.
+
 ## BE Vercel/signed audio — triển khai local 2026-10-09
 
 - Đã thêm cached pool, default Express entrypoint không listener/exit, readiness riêng và production limiter Mongo atomic/fail-closed. Không coi test local là chứng minh client IP qua FE rewrite.

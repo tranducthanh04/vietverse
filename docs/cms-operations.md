@@ -2,9 +2,32 @@
 
 Ngày 2026-10-09. Quyết định triển khai: admin dùng bản nháp chung, xuất bản chủ động, không ghi live bằng seed. Không đổi điểm, unlock, subscription hoặc ID học tập.
 
+## Ngoại lệ khởi tạo DB mới theo yêu cầu owner
+
+Owner đã bỏ phương án chuyển dữ liệu cũ và cho phép biên soạn phần còn thiếu theo Docs. Quyết định này chỉ cho phép khởi tạo catalog mới khi nội dung, nháp và lịch sử nội dung đều trống; không cho phép seed ghi đè hoặc bỏ qua CMS trên database đã có nội dung. Giáo án/văn hóa bổ sung phải phân biệt với lời nguồn; không giả dữ liệu tài khoản, tiến độ, điểm, thanh toán hoặc audio.
+
+Owner thực hiện bằng [launcher riêng](../server/scripts/bootstrap-production.cjs), mặc định dry-run; `--apply` chỉ dùng trong cửa sổ không có writer ngoài luồng. Credential nhập qua hộp thoại riêng và stdin, không lấy lại sensitive env hoặc dùng `.env` local. CLI từ chối target khác DB mới đã chọn; khi cần đổi target phải có yêu cầu và kiểm chứng mới. [Loader](../server/src/seeds/customer/bootstrapCustomer.ts) và [catalog](../server/src/seeds/customer/bootstrapCatalog.ts) sở hữu các gate và provenance; bằng chứng thực thi ở [journal bootstrap](../plans/journals/2026-10-10-customer-bootstrap.md).
+
+Tiền điều kiện: không có admin ứng dụng **và không còn admin JWT/session hợp lệ**, không tạo/promote admin hoặc chạy writer ngoài ứng dụng trong cửa sổ bootstrap. Chỉ đếm User admin không chứng minh token cũ đã hết hạn vì middleware tin role trong JWT. Owner phải xác nhận không có phiên admin hợp lệ ở checkbox riêng; nếu chưa rõ thì hủy. CMS không dùng khóa seed chung; nếu đã có admin thì loader dừng, cần phương án maintenance riêng được duyệt. Không tự khóa/xóa tài khoản hoặc đổi env CMS để vượt gate.
+
+Recovery: catalog rỗng là preimage của thao tác này, được ghi cùng receipt. Test replica set xác minh lỗi ghi receipt abort toàn bộ nội dung. Lỗi/mất ACK phải đối soát receipt và hash bằng dry-run; không xóa hoặc nạp lại cưỡng bức. Sau commit, giữ revisions và khôi phục nội dung bằng CMS/version mới, không quay về reader cũ hoặc rollback ledger. Chỉ nạp nội dung; chưa phải nghiệm thu backup toàn database, media, thanh toán hoặc quyền tác giả.
+
+**Giả định còn lại:** đây là bản học qua chữ, không thay thế đầy đủ giáo án nghe/nói; tuổi và chất lượng biên soạn cần content owner rà soát. Attribution/quyền sử dụng nguồn chưa xác minh độc lập. Atlas networking và quyền DB vẫn cần nghiệm thu riêng; bootstrap không tự mở mạng vĩnh viễn.
+
 Kế hoạch thực thi chi tiết cho người deploy: [nhập dữ liệu staging và production](./superpowers/plans/2026-10-09-customer-data-deployment.md). Bao gồm kiểm đúng DB/admin, backup/restore rehearsal, index prerequisites, report-bound apply, retry/rollback và biên bản. Đây là bàn giao chưa thực thi DB thật; không thay các gate bên dưới.
 
 ## Trước khi bật production
+
+### Schema hồ sơ bé — owner duyệt 2026-10-11
+
+- Đích được owner xác nhận là cluster `thanh.841ysjn.mongodb.net`, database `test`. Không dùng URI ngầm hoặc `.env` cũ. Giữ Cloudinary, thanh toán ngoài phạm vi và `CMS_PUBLISH_ENABLED=false`.
+- Launcher dry-run báo riêng `schemaMigration` (pending/invalid/migrated/preimage/fingerprint). Hash kế hoạch gắn cả catalog và preimage của các hồ sơ legacy cần backfill theo ID; thay đổi tập cần migrate giữa dry-run/apply hoặc trước transaction làm apply dừng. Hồ sơ đã có danh sách hợp lệ không bị migrate và không ảnh hưởng fingerprint. Fingerprint không phải secret và không in dữ liệu bé.
+- Cùng transaction: thêm `companionLanguages: [companionLanguage]` cho bản cũ hợp lệ, giữ mọi field và timestamp khác; ghi preimage tối thiểu và receipt `schema_migration_receipts/child-companion-languages-v1`. Bản đã có mảng hợp lệ giữ nguyên; mảng rỗng/trùng/mã lạ/mâu thuẫn hoặc thiếu cả hai trường dừng, không tự suy đoán.
+- Chạy lại chỉ xác minh catalog và schema receipt, không nhân dữ liệu. Nếu sau receipt xuất hiện document legacy mới (backend cũ còn chạy) thì dừng để đối soát, không bỏ qua. Cần phát hành backend tương thích trước khi mở ghi hồ sơ; FE chọn nhiều ngôn ngữ chỉ bật sau BE mới.
+- Cửa sổ độc quyền phải bao gồm mọi writer hồ sơ và catalog. Preflight đọc không khóa các writer ứng dụng; khóa seed chỉ phối hợp các loader. Không tự tắt site/xóa tài khoản để đạt gate.
+- Recovery trước commit: transaction abort cả schema/catalog/preimage/receipt. Sau commit ưu tiên giữ schema additive và deploy code tương thích; rollback code không cần xóa mảng. Nếu cần phục hồi field, phải dừng writers, đối soát từng ID với preimage và chỉ unset mảng khi vẫn đúng postimage một phần tử; không đụng field khác hoặc xóa catalog/history. Cần người duyệt riêng, không cung cấp lệnh reset hàng loạt. Preimage bị cascade khi chủ hồ sơ xóa bé; receipt thống kê không chứa PII được giữ.
+
+### Gate CMS thông thường
 
 1. Xác nhận đúng database đích, tài khoản admin và bản sao lưu. Các test/QA của đợt này chỉ dùng MongoMemoryReplSet riêng, không thay thế bước xác nhận đích.
 2. Deploy backend reader hiểu contentVersion cùng frontend mới. Giữ `CMS_PUBLISH_ENABLED=false` trong lúc kiểm chứng. MongoDB phải là replica set/sharded có transaction.

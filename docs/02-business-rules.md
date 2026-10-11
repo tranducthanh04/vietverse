@@ -18,11 +18,15 @@
 
 - Một hồ sơ thuộc đúng một `parentId`.
 - Nhóm tuổi hợp lệ: `5-6`, `6-8`.
+- **Quyết định nghiệp vụ (2026-10-11)**: hồ sơ bé có thể chọn một hoặc nhiều `companionLanguages` trong tập `en`, `ja`, `ko`, `zh`, `fr`, `other`. `companionLanguage` vẫn được giữ tạm thời như trường tương thích và luôn phản ánh phần tử đầu tiên; danh sách không được rỗng hoặc trùng.
+- **Giả định triển khai**: thứ tự danh sách là thứ tự ưu tiên hướng dẫn; chưa thay đổi nội dung lesson theo từng ngôn ngữ.
 - Hồ sơ bắt đầu ở stage 1, level 1, 0 điểm trong luồng tạo mới.
 - *Quyết định nghiệp vụ (Cascade Deletion)*: Khi phụ huynh xóa hồ sơ bé (`DELETE /children/:id`), hệ thống bắt buộc thực hiện xóa thác (cascade deletion) toàn bộ dữ liệu phụ thuộc gồm: `LessonProgress`, `Recording` (âm thanh bé đọc), `ExplorationLog`, `PointTransaction` và `Redemption`. Ngăn chặn hoàn toàn dữ liệu mồ côi và rò rỉ âm thanh của trẻ.
 - *Quyết định nghiệp vụ (Screen Time Limit)*: Phụ huynh thiết lập giới hạn phiên màn hình (`15`, `20`, `30` phút hoặc `0` là không giới hạn). Khi bé học đạt đến ngưỡng thời gian liên tục, hệ thống client kích hoạt `ScreenTimeLimitModal`, tạm dừng tương tác và hiển thị mascot nhắc nhở nghỉ ngơi cho mắt. Chỉ phụ huynh giải phép tính mở khóa Parent Gate mới được gia hạn thêm phiên.
 
 ## 3. Chặng và bài học
+
+- *Quyết định nghiệp vụ theo quyền owner (2026-10-10)*: khi khởi tạo DB mới, được biên soạn giáo án/văn hóa còn thiếu theo chủ đề Docs, gắn nhãn bổ sung và giữ lời bài đọc từ nguồn. Bản khởi tạo học qua chữ, không giả audio/thu âm hoặc kết quả người học. Đây không phải quyền tự sửa catalog/nháp cũ; giới hạn và recovery ở [vận hành CMS](./cms-operations.md#ngoại-lệ-khởi-tạo-db-mới-theo-yêu-cầu-owner).
 
 - Có 5 chặng, 20 bài theo seed (4 bài/chặng). Seed mới tạo nội dung mẫu theo 5 mục tiêu khách hàng; database cũ không bị thay thế lesson đã có.
 - Stage 1 mở cho tài khoản hợp lệ.

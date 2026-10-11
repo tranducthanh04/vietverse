@@ -20,6 +20,8 @@ Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, 
 
 ## CMS — lớp dữ liệu đang triển khai (2026-10-09)
 
+Ngoại lệ khởi tạo catalog rỗng theo quyền owner không thay API hoặc bật CMS publish. Bản khởi tạo dùng contentVersion 1 và provenance riêng; [loader](../server/src/seeds/customer/bootstrapCustomer.ts) sở hữu receipt `content_bootstrap_receipts`, [vận hành CMS](./cms-operations.md#ngoại-lệ-khởi-tạo-db-mới-theo-yêu-cầu-owner) sở hữu điều kiện và recovery. Không có publishedBy giả hoặc tài khoản admin demo.
+
 - Model nội dung bổ sung `contentVersion`, `publishedAt`, `publishedBy`; bản legacy thiếu version được hiểu là 0. Story/culture có `seedKey` và `visibility` tùy chọn, chưa đổi hành vi API đọc trong bước này.
 - `ContentDraft` tách khỏi live, định danh duy nhất `{kind, contentId}` và tăng `draftVersion` khi lưu. `ContentRevision` lưu snapshot bất biến theo `{kind, contentId, contentVersion}`. Chưa bật publish hoặc chạy migration/import.
 - Schema draft cho phép nội dung dở dang nhưng kiểm tra giới hạn và URL; publish kiểm tra tính khả dụng của 11 activity type, lyrics và quiz. Chi tiết ràng buộc tại thiết kế CMS và phần hoạt động bổ sung; đây chưa phải xác nhận toàn bộ CMS đã phát hành.
@@ -63,10 +65,12 @@ Quyết định bảo vệ phiên học khi xuất bản:
 
 ## Learning và child
 
+Quyết định tương thích 2026-10-11: `POST/PUT /children` nhận `companionLanguages` gồm 1–6 giá trị duy nhất thuộc `en/ja/ko/zh/fr/other`. Nếu gửi cả trường singular thì phải trùng phần tử đầu, không đúng trả 400. Chỉ gửi singular vẫn được chuẩn hóa thành mảng một phần tử; update không gửi hai trường thì giữ nguyên. Response đọc document legacy bổ sung mảng trong JSON, không ghi DB khi GET. Quyền/subscription/điểm không đổi.
+
 | Method | Path | Auth | Ownership/role |
 | --- | --- | --- | --- |
 | GET | `/children` | Auth | Chỉ children của user |
-| POST | `/children` | Auth | Kiểm tra subscription limit (free/monthly: 1, yearly: 3) |
+| POST | `/children` | Auth | Body nhận `companionLanguages` (1–6 giá trị duy nhất) hoặc legacy `companionLanguage`; server lưu cả danh sách và giá trị đầu tiên để tương thích; kiểm tra subscription limit (free/monthly: 1, yearly: 3) |
 | GET/PUT | `/children/:id` | Auth | `child.parentId === req.user.id` |
 | DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
@@ -188,6 +192,8 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 - Chính sách seed, dữ liệu mẫu và giới hạn rollback xem [đối chiếu khách hàng](./08-customer-alignment.md).
 
 - `childId` luôn phải được kiểm tra ownership thuộc về phụ huynh đang đăng nhập.
+- Migration `child-companion-languages-v1` chỉ backfill document còn trường singular hợp lệ, lưu preimage trong `child_language_migration_preimages`, chạy cùng transaction với bootstrap catalog và có receipt để retry an toàn; không tự suy đoán document thiếu cả hai trường.
+- Preimage chỉ giữ ID bé, ngôn ngữ cũ và thời điểm, không xuất ra API. Xóa hồ sơ cũng xóa preimage trong cùng cascade transaction.
 - Giao dịch điểm phải có `reason`, `delta`, `refId` và mô tả truy vết được.
 - Với mutation có thể retry, server luôn đảm bảo tính idempotent.
 - Không trả `passwordHash`, secret, refresh token hoặc dữ liệu admin nội bộ cho client.

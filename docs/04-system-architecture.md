@@ -52,7 +52,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Deploy và môi trường
 
-- Client: Vercel/Vite, proxy `/api` theo [`client/vercel.json`](../client/vercel.json). Theo yêu cầu owner, FE Production đã triển khai proxy BE Vercel trước khi bổ sung DB/storage. API503 do BE thiếu MongoDB, không phải SPA fallback; JWT mới không tương thích Render. Quy trình env đúng project/rollback và giới hạn nghiệm thu ở [runbook](./vercel-deployment.md).
+- Client: Vercel/Vite, proxy `/api` theo [`client/vercel.json`](../client/vercel.json). Theo yêu cầu owner, FE Production đã triển khai proxy BE Vercel trước khi bổ sung DB/storage. MongoDB readiness và GET qua FE đã qua sau khi owner mở quyền mạng Atlas tạm; mạng production lâu dài chưa chốt. JWT mới không tương thích Render. Quy trình env đúng project/rollback và bằng chứng kết nối ở [runbook](./vercel-deployment.md).
 - Vercel project dùng `client` làm Root Directory, build bằng `npm run build` và phát hành thư mục `dist`.
 - GitHub integration tự động deploy: push vào `main` tạo production deployment; push các branch khác hoặc mở Pull Request tạo preview deployment và bình luận vào PR.
 - Server: Render, health `/health`.
@@ -62,6 +62,8 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Node BE chọn22.x để khớp local verification. Native bcrypt/bundle trên Vercel là gate riêng. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
 - TypeScript emit ESM với ESNext/Bundler resolution để native builder và `tsc` cùng đọc nhánh ESM của dual packages; relative imports vẫn `.js` để compiled Node22/Render chạy được. Đây là quyết định kỹ thuật, không đổi API/nghiệp vụ.
 - Database: MongoDB local hoặc Atlas.
+- Hồ sơ `Child` lưu `companionLanguages` dạng mảng bounded (1–6) và giữ `companionLanguage` là compatibility field; migration backfill được thực hiện additive, không xóa trường cũ.
+- **Quyết định triển khai DB:** owner yêu cầu cấu hình sensitive ở BE Production/redeploy theo cluster trong ảnh, sau đó tự mở quyền mạng tạm để kiểm tra kết nối. **Giả định đã thông báo:** URI không có database path, driver chọn `test`; chưa xác nhận dữ liệu mong muốn nằm ở đó. Không seed/import/apply indexes thủ công hoặc đổi nghiệp vụ. Readiness đã qua; quyền mạng tạm hết hạn và least-privilege vẫn là gate vận hành, xem runbook.
 - Env qua Zod; production từ chối secret mặc định. `CMS_PUBLISH_ENABLED` mặc định false, chỉ bật sau khi reader/client phiên bản và MongoDB transaction được kiểm chứng. Xem `cms-operations.md`.
 
 ## Nguyên tắc thay đổi
