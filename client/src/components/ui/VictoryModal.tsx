@@ -9,6 +9,8 @@ export interface VictoryModalProps {
   stars: number;
   pointsEarned: number;
   totalPoints: number;
+  passed?: boolean;
+  scorePercent?: number;
   isOfflinePending?: boolean;
   onNextLesson?: () => void;
   onBackToMap: () => void;
@@ -20,13 +22,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   stars,
   pointsEarned,
   totalPoints,
+  passed = true,
+  scorePercent,
   isOfflinePending,
   onNextLesson,
   onBackToMap,
   onPlayAgain,
 }) => {
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && passed && !isOfflinePending) {
       try {
         confetti({
           particleCount: 100,
@@ -38,7 +42,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
         // Safe fallback in headless or non-canvas env
       }
     }
-  }, [isOpen]);
+  }, [isOpen, passed, isOfflinePending]);
 
   if (!isOpen) return null;
 
@@ -57,14 +61,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 
       <div className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase tracking-wider mb-2">
         <Sparkles className="w-3.5 h-3.5 text-secondary" />
-        <span>HOÀN THÀNH XUẤT SẮC!</span>
+        <span>{passed ? 'HOÀN THÀNH BÀI HỌC!' : 'CÙNG LUYỆN TẬP THÊM'}</span>
       </div>
 
       <h2 className="text-3xl font-display font-black text-primary mb-2">
-        {VI_LOCALES.victory.congrats}
+        {passed ? VI_LOCALES.victory.congrats : 'Bé hãy luyện tập thêm nhé!'}
       </h2>
       <p className="text-sm text-on-surface-variant max-w-sm mx-auto mb-4 font-medium">
-        Bé đã rất nỗ lực vượt qua các hoạt động bài học hôm nay!
+        {passed ? 'Bé đã rất nỗ lực vượt qua các hoạt động bài học hôm nay!'
+          : `Bài này chưa đạt mức hoàn thành.${typeof scorePercent === 'number' ? ` Bé đạt ${scorePercent}%; cần ít nhất 50%.` : ''} Mình cùng thử lại nhé!`}
       </p>
 
       {/* 3 Bouncing Stars */}
@@ -108,7 +113,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 
       {/* 3D Action Buttons */}
       <div className="flex flex-col gap-3 mt-6">
-        {onNextLesson && (
+        {onNextLesson && passed && (
           <button
             onClick={onNextLesson}
             className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-lg"
@@ -125,7 +130,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
               className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>{VI_LOCALES.victory.btnPlayAgain}</span>
+              <span>{passed ? VI_LOCALES.victory.btnPlayAgain : 'Luyện tập lại'}</span>
             </button>
           )}
 

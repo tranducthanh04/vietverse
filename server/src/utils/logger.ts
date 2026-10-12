@@ -4,7 +4,16 @@ import { env } from '../config/env.js';
 export const logger = pino({
   level: env.NODE_ENV === 'test' ? 'silent' : 'info',
   redact: {
-    paths: ['req.headers.authorization', 'req.headers.cookie', 'password', 'childName', 'name', 'pin'],
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'req.headers.x-parent-gate-token',
+      'res.headers.set-cookie',
+      'password',
+      'childName',
+      'name',
+      'pin',
+    ],
     remove: true,
   },
   transport:

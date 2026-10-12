@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart, HelpCircle, X, Check, ArrowRight } from 'lucide-react';
@@ -29,6 +29,11 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   const navigate = useNavigate();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const isCurrentSession = () => mounted.current
+    && useAuthStore.getState().user?.id === userId
+    && useChildStore.getState().activeChild?._id === childId;
   const {
     initSession,
     saveStepProgress,
@@ -53,14 +58,17 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   const [isSavingAnswer, setIsSavingAnswer] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
+  const [practiceAttempt, setPracticeAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [victoryData, setVictoryData] = useState<{
     stars: number;
     pointsEarned: number;
     totalPoints: number;
+    passed: boolean;
+    scorePercent?: number;
     isOfflinePending?: boolean;
-  }>({ stars: 3, pointsEarned: 10, totalPoints: 0, isOfflinePending: false });
+  }>({ stars: 0, pointsEarned: 0, totalPoints: 0, passed: false, isOfflinePending: false });
 
   // Fetch lesson details
   const { data: lesson, isLoading, error } = useQuery({
@@ -208,16 +216,18 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
           contentVersion: lesson.contentVersion,
         });
 
-        const { stars, pointsEarned, totalPoints } = res.data.data;
+        if (!isCurrentSession()) return;
+        const { stars, pointsEarned, totalPoints, passed, scorePercent } = res.data.data;
         updatePointsLocally(totalPoints);
         void queryClient.invalidateQueries({ queryKey: ['childPoints'] });
-        if (activeChild) {
-          await clearSession(lesson._id, activeChild._id);
+        if (passed === true) {
+          await clearSession(lesson._id, childId);
         }
-
-        setVictoryData({ stars, pointsEarned, totalPoints, isOfflinePending: false });
+        if (!isCurrentSession()) return;
+        setVictoryData({ stars, pointsEarned, totalPoints, passed: passed === true, scorePercent, isOfflinePending: false });
         setShowVictory(true);
       } catch (err: any) {
+        if (!isCurrentSession()) return;
         const isNetworkError = !err.response || err.code === 'ERR_NETWORK';
         if (isNetworkError) {
           try {
@@ -243,7 +253,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
           setSubmitError(msg);
         }
       } finally {
-        setIsSubmitting(false);
+        if (isCurrentSession()) setIsSubmitting(false);
       }
     } else {
       const nextStep = currentStep + 1;
@@ -304,7 +314,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       <main className="flex-1 flex flex-col justify-center items-center py-6 px-4">
         {ActivityComponent && activeChild && (
           <ActivityComponent
-            key={`${lesson.contentVersion}:${currentActivity.id}`}
+            key={`${practiceAttempt}:${lesson.contentVersion}:${currentActivity.id}`}
             activity={currentActivity}
             childId={activeChild?._id || 'preview_child'}
             lessonId={lesson._id}
@@ -385,14 +395,20 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         stars={victoryData.stars}
         pointsEarned={victoryData.pointsEarned}
         totalPoints={victoryData.totalPoints}
+        passed={victoryData.passed}
+        scorePercent={victoryData.scorePercent}
         isOfflinePending={victoryData.isOfflinePending}
         onBackToMap={() => navigate('/kham-pha')}
         onPlayAgain={async () => {
           try {
+            await clearSession(lessonId, childId);
+             if (!isCurrentSession()) return;
             await initSession(lessonId, childId, lesson.contentVersion);
+            if (!isCurrentSession()) return;
+            setPracticeAttempt(previous => previous + 1);
             setShowVictory(false); setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false); setLastAnswerCorrect(null);
             setPartialInputs({}); setInputError(null);
-          } catch { setShowVictory(false); setCacheError('Chưa lưu được phiên học mới. Vui lòng tải lại trang.'); }
+           } catch { if (isCurrentSession()) { setShowVictory(false); setCacheError('Chưa lưu được phiên học mới. Vui lòng tải lại trang.'); } }
         }}
       />
     </div>

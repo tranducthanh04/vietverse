@@ -41,6 +41,48 @@ describe('Children & Ownership API', () => {
     expect(res.body.success).toBe(false);
   });
 
+  it('does not let ordinary profile updates bypass the parent gate for screen time', async () => {
+    const parent = await AuthService.register({
+      email: 'screen-time-bypass@example.com',
+      password: 'Password123!',
+      displayName: 'Parent',
+    });
+    const child = await Child.create({
+      parentId: parent.user.id,
+      name: 'Bé',
+      ageGroup: '5-6',
+      companionLanguage: 'en',
+      screenTimeLimit: 20,
+    });
+
+    const res = await request(app)
+      .put(`/api/v1/children/${child.id}`)
+      .set('Authorization', `Bearer ${parent.accessToken}`)
+      .send({ screenTimeLimit: 0 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.screenTimeLimit).toBe(20);
+    expect((await Child.findById(child.id))?.screenTimeLimit).toBe(20);
+  });
+
+  it('enforces the child quota when two create requests race', async () => {
+    const parent = await AuthService.register({
+      email: 'child-quota-race@example.com',
+      password: 'Password123!',
+      displayName: 'Parent',
+    });
+    const body = { name: 'Bé', ageGroup: '5-6', companionLanguages: ['en'] };
+
+    const results = await Promise.all([
+      request(app).post('/api/v1/children').set('Authorization', `Bearer ${parent.accessToken}`).send(body),
+      request(app).post('/api/v1/children').set('Authorization', `Bearer ${parent.accessToken}`).send(body),
+    ]);
+
+    expect(results.filter(result => result.status === 201)).toHaveLength(1);
+    expect(results.filter(result => result.status === 403)).toHaveLength(1);
+    expect(await Child.countDocuments({ parentId: parent.user.id })).toBe(1);
+  });
+
   it('DELETE /children/:id cascades and removes progress, recordings, points and logs', async () => {
     const { LessonProgress } = await import('../models/LessonProgress.js');
     const { Recording } = await import('../models/Recording.js');

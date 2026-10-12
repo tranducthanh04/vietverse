@@ -1,5 +1,16 @@
 # 06 — Kết quả review senior BA/code
 
+## Khắc phục review toàn dự án — 2026-10-12, local
+
+- Đã sửa đường ghi refresh cookie/Parent Gate token vào HTTP log; regression dùng pino-http thật và token giả. Log đã lưu trước bản sửa cần operator kiểm retention/quyền đọc và quyết định thu hồi phiên nếu cần; chưa xử lý log/phiên production trong lượt này.
+- Nộp bài trước đây ghi completed trước ledger/balance, gây mất thưởng sau lỗi và retry; nay transaction bao trùm cả ba, khóa ghi trên bé trước đọc, `$max` điểm/sao. Regression tiêm lỗi ledger/balance và nộp đúng/sai đồng thời; không tự sửa dữ liệu lịch sử.
+- API sửa hồ sơ không còn đổi được screen time ngoài Parent Gate; tạo bé tuần tự hóa trên tài khoản trong transaction, chặn vượt quota do request đồng thời.
+- FE hiển thị đúng lượt học chưa đạt, quiz sai cho sửa/nộp lại; bỏ qua kết quả cũ sau đổi bé/tài khoản/nội dung. Đăng ký email thêm xác nhận mật khẩu trước gửi API.
+- Quyết định nghiệp vụ về số điểm, ngưỡng đỗ, quota/gói, ownership và unlock giữ nguyên. Transaction yêu cầu replica set; không fallback ghi nửa chừng. Không thay Cloudinary/thanh toán, không push/deploy hoặc ghi DB production trong đợt sửa local này.
+- Chưa đóng các gate: Google OAuth; nguồn audio/bản dịch/provider được duyệt; audit riêng tư Atlas (ledger/index/stock/progress) và xử lý dữ liệu lịch sử; dependency advisories; nghiệm thu mobile/giáo án. Kết quả kiểm thử cuối và phạm vi ở [journal](../plans/journals/2026-10-12-review-remediation.md).
+- Đã bổ sung Helmet cho lớp DB guard của entrypoint Vercel; response `503 DATABASE_UNAVAILABLE` trước đây bỏ qua security headers nay vẫn có `X-Content-Type-Options: nosniff`, có regression test serverless.
+- Đã nâng `bcrypt` lên `6.0.0`, loại bỏ chuỗi native `node-pre-gyp/tar`; `npm audit --omit=dev` hiện không còn advisory production. React Router nâng lên `7.18.2` để nhận bản vá runtime, `concurrently` nâng patch lên `9.2.5` (`shell-quote` 1.12.0); audit toolchain dev còn Vitest/Tailwind advisory và chưa dùng `npm audit fix --force`.
+
 ## Feedback giá và narration — 2026-10-12, local
 
 - Giá tháng 250.000đ ở FE/BE; năm 990.000đ, tiết kiệm 67% so với 12 tháng mua riêng. Đơn cũ giữ amount đã lưu; QR/PayOS chưa bật, không tạo giao dịch thật.
@@ -212,6 +223,8 @@ Ngày review: 2026-10-01. Phạm vi: toàn bộ `client/src`, `server/src`, seed
 ### P2.7 — `googleAuthPlaceholder` dễ gây hiểu nhầm [ĐÃ XỬ LÝ - 2026-10-01]
 
 - Đã chuyển phản hồi của endpoint `GET /api/v1/auth/google` sang HTTP 501 `NOT_IMPLEMENTED` với thông điệp rõ ràng thông báo tính năng đang tích hợp, loại bỏ việc trả 200 giả vờ thành công.
+- Cập nhật 2026-10-12: thay placeholder bằng Google Identity Services flow có challenge nonce/TTL, xác minh ID token server-side, liên kết email cũ bằng mật khẩu Vietverse và lỗi 503 trung thực khi thiếu `GOOGLE_CLIENT_ID`.
+- Review Google 2026-10-12: đã sửa phản hồi auth chậm ghi đè cookie lần login mới bằng hàng đợi request ghi cookie trong tab; hủy cũ không xóa cookie flow mới. Thêm test signature RSA thật, replay/expiry, giới hạn thử mật khẩu, transaction rollback/concurrent exchange, index readiness và điều hướng/Parent Gate. Chưa nghiệm thu popup/Google consent/cookie production; xem [thiết lập và rollback](./adr/2026-10-12-google-sign-in.md).
 
 ---
 

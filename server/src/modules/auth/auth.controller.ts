@@ -99,12 +99,4 @@ export class AuthController {
     }
   }
 
-  static async googleAuthPlaceholder(_req: Request, res: Response) {
-    return sendError(
-      res,
-      'Tính năng đăng nhập qua Google OAuth đang trong giai đoạn phát triển và chưa được kích hoạt',
-      501,
-      'NOT_IMPLEMENTED'
-    );
-  }
 }

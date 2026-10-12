@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Types } from 'mongoose';
 import { Recording, RecordingUploadIntent } from '../models/index.js';
 import { RateLimitBucket } from '../models/RateLimitBucket.js';
+import { User } from '../models/User.js';
+import { GoogleAuthFlow } from '../models/GoogleAuthFlow.js';
 import { prepareDeploymentIndexes } from '../seeds/prepareDeploymentIndexes.js';
 
 beforeEach(async () => {
-  await Promise.all([Recording.init(),RecordingUploadIntent.init(),RateLimitBucket.init()]);
+    await Promise.all([Recording.init(),RecordingUploadIntent.init(),RateLimitBucket.init(),User.init(),GoogleAuthFlow.init()]);
 });
 describe('additive deployment indexes', () => {
   it('does not mutate indexes/documents during dry-run, and apply preserves legacy indexes', async () => {
@@ -26,6 +28,8 @@ describe('additive deployment indexes', () => {
     expect((await RateLimitBucket.collection.indexes()).find(index => index.name==='resetAt_1')).toMatchObject({ expireAfterSeconds:0 });
     expect((await RecordingUploadIntent.collection.indexes()).find(index => index.name==='deleteAt_1')).toMatchObject({ expireAfterSeconds:0 });
     expect((await RecordingUploadIntent.collection.indexes()).find(index => index.name==='parentId_1_requestId_1')).toMatchObject({ unique:true });
+    expect((await User.collection.indexes()).find(index => index.name==='google_identity_unique')).toMatchObject({ unique:true });
+    expect((await GoogleAuthFlow.collection.indexes()).find(index => index.name==='expiresAt_1')).toMatchObject({ expireAfterSeconds:0 });
   });
   it('prevents duplicate receipts without requiring an intent ID on legacy recordings', async () => {
     await prepareDeploymentIndexes({ apply:true });

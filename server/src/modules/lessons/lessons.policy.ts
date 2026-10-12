@@ -3,6 +3,7 @@ import { Lesson } from '../../models/Lesson.js';
 import { Stage } from '../../models/Stage.js';
 import { LessonProgress } from '../../models/LessonProgress.js';
 import { Subscription } from '../../models/Subscription.js';
+import type { ClientSession } from 'mongoose';
 
 /**
  * Checks whether a user subscription is currently active, paid, and unexpired.
@@ -28,21 +29,22 @@ export function isSubscriptionPaid(subscription: any): boolean {
 export async function assertLessonUnlocked(
   childId: string,
   lessonId: string,
-  parentId: string
+  parentId: string,
+  session?: ClientSession
 ): Promise<{ child: any; lesson: any; stage: any }> {
   // 1. Verify child ownership
-  const child = await Child.findOne({ _id: childId, parentId });
+  const child = await Child.findOne({ _id: childId, parentId }).session(session ?? null);
   if (!child) {
     throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé hoặc không có quyền sở hữu' };
   }
 
   // 2. Verify lesson existence
-  const lesson = await Lesson.findById(lessonId);
+  const lesson = await Lesson.findById(lessonId).session(session ?? null);
   if (!lesson) {
     throw { statusCode: 404, message: 'Không tìm thấy bài học' };
   }
 
-  const stage = await Stage.findById(lesson.stageId);
+  const stage = await Stage.findById(lesson.stageId).session(session ?? null);
   if (!stage) {
     throw { statusCode: 404, message: 'Không tìm thấy chặng học' };
   }
@@ -51,13 +53,13 @@ export async function assertLessonUnlocked(
   const existingProgress = await LessonProgress.findOne({
     childId: child._id,
     lessonId: lesson._id,
-  });
+  }).session(session ?? null);
   if (existingProgress && existingProgress.status === 'completed') {
     return { child, lesson, stage };
   }
 
   // 4. Verify stage unlock condition
-  const subscription = await Subscription.findOne({ userId: parentId });
+  const subscription = await Subscription.findOne({ userId: parentId }).session(session ?? null);
   const isPaid = isSubscriptionPaid(subscription);
 
   if (stage.order > 1) {
@@ -68,15 +70,15 @@ export async function assertLessonUnlocked(
       };
     }
 
-    const prevStage = await Stage.findOne({ order: stage.order - 1 });
+    const prevStage = await Stage.findOne({ order: stage.order - 1 }).session(session ?? null);
     if (prevStage) {
-      const prevLessons = await Lesson.find({ stageId: prevStage._id });
+      const prevLessons = await Lesson.find({ stageId: prevStage._id }).session(session ?? null);
       const prevLessonIds = prevLessons.map((l) => l._id);
       const completedCount = await LessonProgress.countDocuments({
         childId: child._id,
         lessonId: { $in: prevLessonIds },
         status: 'completed',
-      });
+      }).session(session ?? null);
       if (completedCount < prevLessons.length) {
         throw {
           statusCode: 403,
@@ -87,7 +89,7 @@ export async function assertLessonUnlocked(
   }
 
   // 5. Verify lesson sequence in current stage
-  const stageLessons = await Lesson.find({ stageId: stage._id }).sort({ order: 1 });
+  const stageLessons = await Lesson.find({ stageId: stage._id }).sort({ order: 1 }).session(session ?? null);
   const lessonIndex = stageLessons.findIndex((l) => l._id.toString() === lesson._id.toString());
 
   if (lessonIndex > 0) {
@@ -96,7 +98,7 @@ export async function assertLessonUnlocked(
       childId: child._id,
       lessonId: prevLesson._id,
       status: 'completed',
-    });
+    }).session(session ?? null);
     if (!prevProgress) {
       throw {
         statusCode: 403,

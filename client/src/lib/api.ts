@@ -20,6 +20,19 @@ export function getApiAccessToken(): string | null {
   return inMemoryToken;
 }
 
+// Cookie-writing auth requests must finish in order, even after their page unmounts.
+// Ignoring a stale JS callback alone cannot undo a response's Set-Cookie header.
+let authRequestTail: Promise<unknown> = Promise.resolve();
+function enqueueAuthRequest<T>(work: () => Promise<T>): Promise<T> {
+  const result = authRequestTail.then(work, work);
+  authRequestTail = result.catch(() => undefined);
+  return result;
+}
+
+export function authPost(path: string, data: unknown = {}) {
+  return enqueueAuthRequest(() => api.post(path, data, { timeout: 20_000 }));
+}
+
 // Request interceptor: Attach access token and parent gate token to headers
 api.interceptors.request.use((config) => {
   if (inMemoryToken) {
@@ -59,7 +72,10 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/login') &&
-      !originalRequest.url?.includes('/auth/refresh')
+      !originalRequest.url?.includes('/auth/register') &&
+      !originalRequest.url?.includes('/auth/logout') &&
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !originalRequest.url?.includes('/auth/google')
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -76,11 +92,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(
+        const { data } = await enqueueAuthRequest(() => axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {},
-          { withCredentials: true }
-        );
+          { withCredentials: true, timeout: 20_000 }
+        ));
 
         const newAccessToken = data.data.accessToken;
         setApiAccessToken(newAccessToken);

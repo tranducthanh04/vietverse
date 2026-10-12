@@ -5,6 +5,20 @@ import { User } from '../models/User.js';
 import { Subscription } from '../models/Subscription.js';
 
 describe('Auth API Endpoints', () => {
+  it.each(['2a', '2b'])('logs in with an existing %s hash without rewriting the stored password', async prefix => {
+    // Public bcrypt compatibility vector, not an application credential.
+    const passwordHash = `$${prefix}$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9iqaG3vv1BD7WC`;
+    const user = await User.create({ email: 'legacy@example.test', displayName: 'Legacy', passwordHash });
+    const res = await request(app).post('/api/v1/auth/login')
+      .send({ email: user.email, password: 'envy1362987212538' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.user.id).toBe(user.id);
+    expect(res.body.data.accessToken).toBeDefined();
+    expect((await User.findById(user.id))?.passwordHash).toBe(passwordHash);
+    expect((await request(app).post('/api/v1/auth/login')
+      .send({ email: user.email, password: 'wrong-legacy-password' })).status).toBe(401);
+  });
+
   it('POST /api/v1/auth/register should create user and default free subscription', async () => {
     const res = await request(app)
       .post('/api/v1/auth/register')

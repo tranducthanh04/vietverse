@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import mongoose, { Types, type ClientSession } from 'mongoose';
 import { Lesson } from '../../models/Lesson.js';
 import { LessonProgress } from '../../models/LessonProgress.js';
 import { Child } from '../../models/Child.js';
@@ -19,49 +19,30 @@ interface AwardDraft {
   description: string;
 }
 
-interface BulkWriteErrorLike {
-  writeErrors?: Array<{ code?: number; err?: { code?: number } }>;
-  insertedDocs?: Array<{ _id: Types.ObjectId; delta: number }>;
+interface LessonSubmission {
+  childId: string;
+  contentVersion?: number;
+  scorePercent?: number;
+  durationSec?: number;
+  answers?: ActivitySubmission[];
 }
 
-/**
- * Inserts reward transactions with one read + one bulk insert. Rules set to 0 write nothing. Rows already
- * present (same child/reason/refId) fail with E11000 and are skipped, so only newly inserted
- * deltas count toward the balance. Any other write error removes this call's rows and rethrows.
- */
-async function insertNewAwards(childId: Types.ObjectId, drafts: AwardDraft[]) {
+// The caller serializes writes for this child and commits the ledger with the balance.
+async function insertNewAwards(childId: Types.ObjectId, drafts: AwardDraft[], session: ClientSession) {
   const positive = drafts.filter((draft) => draft.delta > 0);
-  if (positive.length === 0) return { insertedIds: [] as Types.ObjectId[], pointsEarned: 0 };
-  // One read skips known awards (defence in depth if the unique index is missing on a deployment);
-  // the unique index still decides concurrent races below.
+  if (positive.length === 0) return 0;
+  // Skip prior awards before inserting; the unique index remains a final safeguard.
   const existing = await PointTransaction.find({
     childId,
     $or: positive.map(({ reason, refId }) => ({ reason, refId })),
-  }).select('reason refId').lean();
+  }).select('reason refId').session(session).lean();
   const existingKeys = new Set(existing.map((tx) => `${tx.reason}|${tx.refId}`));
   const payable = positive.filter((draft) => !existingKeys.has(`${draft.reason}|${draft.refId}`));
-  if (payable.length === 0) return { insertedIds: [] as Types.ObjectId[], pointsEarned: 0 };
-  let inserted: Array<{ _id: Types.ObjectId; delta: number }>;
-  try {
-    inserted = await PointTransaction.insertMany(
-      payable.map((draft) => ({ childId, ...draft })),
-      { ordered: false }
-    );
-  } catch (error: unknown) {
-    const bulk = error as BulkWriteErrorLike;
-    const writeErrors = bulk.writeErrors ?? [];
-    inserted = bulk.insertedDocs ?? [];
-    const onlyDuplicates = writeErrors.length > 0
-      && writeErrors.every((writeError) => (writeError.code ?? writeError.err?.code) === 11000);
-    if (!onlyDuplicates) {
-      if (inserted.length) await PointTransaction.deleteMany({ _id: { $in: inserted.map((doc) => doc._id) } });
-      throw error;
-    }
-  }
-  return {
-    insertedIds: inserted.map((doc) => doc._id),
-    pointsEarned: inserted.reduce((sum, doc) => sum + doc.delta, 0),
-  };
+  if (payable.length === 0) return 0;
+  const inserted = await PointTransaction.insertMany(
+    payable.map((draft) => ({ childId, ...draft })), { session, ordered: true }
+  );
+  return inserted.reduce((sum, doc) => sum + doc.delta, 0);
 }
 
 export class LessonsService {
@@ -78,18 +59,27 @@ export class LessonsService {
   static async completeLesson(
     lessonId: string,
     parentId: string,
-    data: {
-      childId: string;
-      contentVersion?: number;
-      scorePercent?: number;
-      durationSec?: number;
-      answers?: ActivitySubmission[];
-    }
+    data: LessonSubmission
   ) {
+    try {
+      const options = { maxCommitTimeMS: 5000, timeoutMS: 15000 };
+      return await mongoose.connection.transaction(async session => {
+        // Serialize completions and conflict with child deletion before reading progress.
+        const locked = await Child.updateOne({ _id: data.childId, parentId }, { $inc: { __v: 1 } }, { session, timestamps: false });
+        if (!locked.matchedCount) throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé hoặc không có quyền sở hữu' };
+        return LessonsService.completeInTransaction(lessonId, parentId, data, session);
+      }, options);
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode) throw error;
+      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Chưa lưu được kết quả bài học. Vui lòng thử lại.' };
+    }
+  }
+
+  private static async completeInTransaction(lessonId: string, parentId: string, data: LessonSubmission, session: ClientSession) {
     // 1. Enforce unlock & ownership
-    const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId);
+    const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId, session);
     const contentVersion = resolveSubmissionVersion(data.contentVersion, lesson.contentVersion ?? 0);
-    const { payload } = await readPublished('lesson', lessonId, contentVersion);
+    const { payload } = await readPublished('lesson', lessonId, contentVersion, session);
     const submittedIds = (data.answers ?? []).map(answer => answer.activityId);
     if (new Set(submittedIds).size !== submittedIds.length) {
       throw { statusCode: 400, code: 'DUPLICATE_ACTIVITY_ANSWER', message: 'Mỗi hoạt động chỉ được gửi một câu trả lời.' };
@@ -118,7 +108,7 @@ export class LessonsService {
     const recordings = recordingIds.length ? await Recording.find({
       _id: { $in: recordingIds }, childId: child._id, lessonId,
       ...(contentVersion === 0 ? { $or: [{ contentVersion: 0 }, { contentVersion: { $exists: false } }] } : { contentVersion }),
-    }).select('_id activityId') : [];
+    }).select('_id activityId').session(session) : [];
     const recordingActivities = new Map(recordings.map(recording => [recording.id, recording.activityId]));
 
     if (totalActivities === 0) {
@@ -162,7 +152,7 @@ export class LessonsService {
     const existingProgress = await LessonProgress.findOne({
       childId: child._id,
       lessonId: lesson._id,
-    });
+    }).session(session);
 
     const isFirstTimeCompleted = !existingProgress || existingProgress.status !== 'completed';
 
@@ -173,20 +163,19 @@ export class LessonsService {
       {
         $set: {
           status: newStatus,
-          scorePercent: Math.max(existingProgress?.scorePercent || 0, computedScorePercent),
-          stars: Math.max(existingProgress?.stars || 0, stars),
           ...(passed ? { completedAt: new Date() } : {}),
         },
+        $max: { scorePercent: computedScorePercent, stars },
         $inc: { attempts: 1 },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true, session }
     );
 
     // Reward drafts; the partial unique index on (childId, reason, refId) makes each award one-time.
     const awards: AwardDraft[] = [];
     if (passed) {
       // D1: +ACTIVITY_COMPLETE per server-passed activity, only on a passed submission (assumption:
-      // keeps the existing 50% pass gate for all rewards). Already-awarded activities are skipped by the index.
+      // keeps the existing 50% pass gate for all rewards). Prior awards are filtered by insertNewAwards.
       const activityAmount = await getPointRuleAmount('ACTIVITY_COMPLETE');
       for (const activityId of passedActivityIds) {
         awards.push({
@@ -207,13 +196,13 @@ export class LessonsService {
       });
 
       // Stage bonus: every lesson of the stage has a completed progress for this child.
-      const stageLessonIds = await Lesson.distinct('_id', { stageId: lesson.stageId });
+      const stageLessonIds = await Lesson.distinct('_id', { stageId: lesson.stageId }).session(session);
       const completedLessonIds = stageLessonIds.length
         ? await LessonProgress.distinct('lessonId', {
             childId: child._id,
             lessonId: { $in: stageLessonIds },
             status: 'completed',
-          })
+          }).session(session)
         : [];
       if (stageLessonIds.length > 0 && completedLessonIds.length === stageLessonIds.length) {
         awards.push({
@@ -234,23 +223,19 @@ export class LessonsService {
       }
     }
 
-    const { insertedIds, pointsEarned } = await insertNewAwards(child._id, awards);
+    const pointsEarned = await insertNewAwards(child._id, awards, session);
 
-    // Atomically increment child's points; on failure remove this request's ledger rows (compensation)
+    // A failure aborts progress, ledger and balance together. Never compensate
+    // separately: the commit may have succeeded even if its acknowledgement was lost.
     let updatedChild = child;
     if (pointsEarned > 0) {
-      try {
-        const incremented = await Child.findByIdAndUpdate(
-          child._id,
-          { $inc: { viviPoints: pointsEarned } },
-          { new: true }
-        );
-        if (!incremented) throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
-        updatedChild = incremented;
-      } catch (err) {
-        await PointTransaction.deleteMany({ _id: { $in: insertedIds } });
-        throw err;
-      }
+      const incremented = await Child.findByIdAndUpdate(
+        child._id,
+        { $inc: { viviPoints: pointsEarned } },
+        { new: true, session }
+      );
+      if (!incremented) throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
+      updatedChild = incremented;
     }
 
     return {

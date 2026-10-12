@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { api } from "../../lib/api.js";
 import { useChildStore } from "../../store/childStore.js";
+import { useAuthStore } from "../../store/authStore.js";
 import { Card } from "../../components/ui/Card.js";
 import { Button } from "../../components/ui/Button.js";
 import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
@@ -25,16 +26,28 @@ import { useNarration } from "../../hooks/useNarration.js";
 
 export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const childId = useChildStore(state => state.activeChild?._id);
+  const userId = useAuthStore(state => state.user?.id);
+  return <CultureView key={`${userId}:${childId}:${id}`} id={id} childId={childId} userId={userId} />;
+};
+
+const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> = ({ id, childId, userId }) => {
   const navigate = useNavigate();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
   const [viewId] = useState(() => crypto.randomUUID());
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const isCurrentView = () => mounted.current
+    && useAuthStore.getState().user?.id === userId
+    && useChildStore.getState().activeChild?._id === childId;
 
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, number>
   >({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [pointsResult, setPointsResult] = useState<number | null>(null);
+  const [incorrectResult, setIncorrectResult] = useState<{ correct: number; total: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -97,7 +110,8 @@ export const CultureDetailPage: React.FC = () => {
   }
 
   const handleSelectOption = (questionIdx: number, optionIdx: number) => {
-    if (quizSubmitted) return;
+    if (quizSubmitted || isSubmitting) return;
+    setIncorrectResult(null);
     setSelectedAnswers((prev) => ({ ...prev, [questionIdx]: optionIdx }));
   };
 
@@ -122,20 +136,23 @@ export const CultureDetailPage: React.FC = () => {
         answers: formattedAnswers,
       });
 
-      const { pointsAwarded, totalPoints } = res.data.data;
+      if (!isCurrentView()) return;
+      const { pointsAwarded, totalPoints, isAllCorrect, correctCount, totalQuestions } = res.data.data;
       setPointsResult(pointsAwarded);
-      setQuizSubmitted(true);
+      setQuizSubmitted(isAllCorrect === true);
+      setIncorrectResult(isAllCorrect ? null : { correct: correctCount, total: totalQuestions });
       void queryClient.invalidateQueries({ queryKey: ["childPoints"] });
       if (pointsAwarded > 0) {
         updatePointsLocally(totalPoints);
       }
     } catch (err: any) {
+      if (!isCurrentView()) return;
       const msg =
         err.response?.data?.error?.message ||
         "Có lỗi kết nối khi gửi câu trả lời. Bé hãy thử bấm gửi lại nhé!";
       setSubmitError(msg);
     } finally {
-      setIsSubmitting(false);
+      if (isCurrentView()) setIsSubmitting(false);
     }
   };
 
@@ -312,7 +329,7 @@ export const CultureDetailPage: React.FC = () => {
                       <button
                         key={optIdx}
                         onClick={() => handleSelectOption(qIdx, optIdx)}
-                        disabled={quizSubmitted}
+                        disabled={quizSubmitted || isSubmitting}
                         className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
                           isSelected
                             ? "bg-culture/10 border-culture text-culture-dark font-bold"
@@ -336,6 +353,12 @@ export const CultureDetailPage: React.FC = () => {
               <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
               <span>{submitError}</span>
             </div>
+          )}
+
+          {incorrectResult && (
+            <p role="status" className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-900 font-semibold">
+              Bé đúng {incorrectResult.correct}/{incorrectResult.total} câu. Hãy chọn lại đáp án rồi thử thêm lần nữa nhé!
+            </p>
           )}
 
           {/* Submission action */}
@@ -386,7 +409,7 @@ export const CultureDetailPage: React.FC = () => {
                     <p className="text-xs text-emerald-600">
                       {pointsResult && pointsResult > 0
                         ? `Bé nhận được +${pointsResult} ViVi Points!`
-                        : "Bé đã từng nhận thưởng cho câu đố này trước đây."}
+                        : "Bé đã trả lời đúng. Lượt này không có điểm thưởng mới."}
                     </p>
                   </div>
                 </div>

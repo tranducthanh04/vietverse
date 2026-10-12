@@ -7,11 +7,15 @@ import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { api } from '../../lib/api.js';
+import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton.js';
+import { useGoogleDestination } from './useGoogleDestination.js';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useAuthStore();
+  const googleDestination = useGoogleDestination();
+  const [googleActive, setGoogleActive] = useState(false);
   const { fetchChildren } = useChildStore();
 
   const [email, setEmail] = useState('');
@@ -21,6 +25,7 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (googleActive) return;
     setErrorMsg('');
     try {
       setIsLoading(true);
@@ -110,11 +115,15 @@ export const LoginPage: React.FC = () => {
               variant="primary"
               size="lg"
               isLoading={isLoading}
+              disabled={googleActive}
               className="w-full font-bold text-lg mt-2"
             >
               {VI_LOCALES.auth.loginBtn}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-400"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
+          <GoogleSignInButton disabled={isLoading} onActiveChange={setGoogleActive} onSuccess={googleDestination} />
 
           {/* Quick Demo Accounts for Development / Testing Only */}
           {import.meta.env.DEV && (

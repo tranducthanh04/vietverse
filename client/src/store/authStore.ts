@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, setApiAccessToken } from '../lib/api.js';
+import { api, authPost, setApiAccessToken } from '../lib/api.js';
 
 export interface User {
   id: string;
@@ -23,6 +23,7 @@ interface AuthState {
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   setAccessToken: (token: string | null) => void;
+  acceptSession: (data: { user: User; accessToken: string }) => void;
 }
 
 function clearParentGate() {
@@ -41,8 +42,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ accessToken: token });
   },
 
+  acceptSession: ({ user, accessToken }) => {
+    clearParentGate();
+    setApiAccessToken(accessToken);
+    set({ user, accessToken, subscription: null });
+  },
+
   login: async (credentials) => {
-    const res = await api.post('/auth/login', credentials);
+    const res = await authPost('/auth/login', credentials);
     const { user, accessToken } = res.data.data;
     clearParentGate();
     setApiAccessToken(accessToken);
@@ -50,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   register: async (data) => {
-    const res = await api.post('/auth/register', data);
+    const res = await authPost('/auth/register', data);
     const { user, accessToken } = res.data.data;
     clearParentGate();
     setApiAccessToken(accessToken);
@@ -59,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      await authPost('/auth/logout');
     } catch (err) {
       // ignore
     } finally {

@@ -6,22 +6,32 @@ import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { api } from '../../lib/api.js';
+import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton.js';
+import { useGoogleDestination } from './useGoogleDestination.js';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { register } = useAuthStore();
+  const googleDestination = useGoogleDestination();
+  const [googleActive, setGoogleActive] = useState(false);
   const selectedPlan = searchParams.get('plan');
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (googleActive) return;
     setErrorMsg('');
+    if (password !== confirmPassword) {
+      setErrorMsg('Mật khẩu xác nhận chưa khớp. Vui lòng nhập lại.');
+      return;
+    }
     try {
       setIsLoading(true);
       await register({ displayName, email, password });
@@ -59,17 +69,18 @@ export const RegisterPage: React.FC = () => {
 
         <Card variant="kid" className="p-8 bg-white border-3 border-cream-border">
           {errorMsg && (
-            <div className="bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
+            <div role="alert" className="bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
               {errorMsg}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-stone-700 font-bold text-sm mb-2">
+              <label htmlFor="register-name" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.displayNameLabel}
               </label>
               <input
+                id="register-name"
                 type="text"
                 required
                 value={displayName}
@@ -80,10 +91,11 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-stone-700 font-bold text-sm mb-2">
+              <label htmlFor="register-email" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.emailLabel}
               </label>
               <input
+                id="register-email"
                 type="email"
                 required
                 value={email}
@@ -94,15 +106,33 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-stone-700 font-bold text-sm mb-2">
+              <label htmlFor="register-password" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.passwordLabel}
               </label>
               <input
+                id="register-password"
                 type="password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={VI_LOCALES.auth.passwordPlaceholder}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="register-confirm-password" className="block text-stone-700 font-bold text-sm mb-2">
+                Xác nhận mật khẩu
+              </label>
+              <input
+                id="register-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Nhập lại mật khẩu"
                 className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
@@ -112,11 +142,15 @@ export const RegisterPage: React.FC = () => {
               variant="primary"
               size="lg"
               isLoading={isLoading}
+              disabled={googleActive}
               className="w-full font-bold text-lg mt-2"
             >
               {VI_LOCALES.auth.registerBtn}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-400"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
+          <GoogleSignInButton disabled={isLoading} onActiveChange={setGoogleActive} onSuccess={googleDestination} />
 
           <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.hasAccount} </span>

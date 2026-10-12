@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -10,11 +10,11 @@ import { useLessonSessionStore } from '../store/lessonSessionStore.js';
 import { LessonPlayerPage } from '../features/lesson-player/LessonPlayerPage.js';
 import { CultureDetailPage } from '../features/culture/CultureDetailPage.js';
 import { PendingSubmissions } from '../features/lesson-player/PendingSubmissions.js';
-import { set } from 'idb-keyval';
+import { del, set } from 'idb-keyval';
 
 const cache = vi.hoisted(() => new Map<string, unknown>());
 vi.mock('canvas-confetti', () => ({ default: () => {} }));
-vi.mock('idb-keyval', () => ({ get: async (key: string) => cache.get(key), set: vi.fn(async (key: string, value: unknown) => { cache.set(key, value); }), del: async (key: string) => { cache.delete(key); } }));
+vi.mock('idb-keyval', () => ({ get: async (key: string) => cache.get(key), set: vi.fn(async (key: string, value: unknown) => { cache.set(key, value); }), del: vi.fn(async (key: string) => { cache.delete(key); }) }));
 const original = api.defaults.adapter;
 let client: QueryClient;
 let calls: Array<{ url?: string; method?: string; body: any }>;
@@ -51,9 +51,15 @@ describe('versioned learning client', () => {
     await screen.findByText('Đã ghi câu trả lời');
     expect(useLessonSessionStore.getState().currentSession?.hearts).toBe(3);
     expect(useLessonSessionStore.getState().currentSession?.answers).toEqual([{activityId:'m',userAnswer:['m1','m2']}]);
-    respond = () => ({stars:0,pointsEarned:0,totalPoints:0,passed:false});
+    respond = () => ({stars:0,pointsEarned:0,totalPoints:0,scorePercent:0,passed:false});
     fireEvent.click(screen.getByRole('button',{name:'Hoàn thành bài'}));
     await waitFor(() => expect(calls.find(call=>call.method==='post')?.body).toEqual({childId:'child',contentVersion:2,answers:[{activityId:'m',userAnswer:['m1','m2']}]}));
+    expect(await screen.findByText('Bé hãy luyện tập thêm nhé!')).toBeInTheDocument();
+    expect(screen.queryByText('HOÀN THÀNH XUẤT SẮC!')).not.toBeInTheDocument();
+    expect(cache.get('vietverse_session_child_lesson')).toMatchObject({ answers: [{activityId:'m',userAnswer:['m1','m2']}] });
+    fireEvent.click(screen.getByRole('button', { name: 'Luyện tập lại' }));
+    await waitFor(() => expect(cache.get('vietverse_session_child_lesson')).toMatchObject({ answers: [], partialInputs: {} }));
+    expect(screen.getByRole('checkbox', { name: 'Chữ M, vị trí 1' })).not.toBeChecked();
   });
   it('retains input and disables advance until failed storage is retried', async () => {
     respond = () => ({_id:'lesson',contentVersion:2,activities:[{id:'f',type:'fill_blanks',prompt:'Điền',template:'Bé {{v}} {{o}}.',blankSlots:[{id:'v',label:'Hành động'},{id:'o',label:'Đồ vật'}]}]});
@@ -103,6 +109,27 @@ describe('versioned learning client', () => {
     fireEvent.click(again);
     await waitFor(() => expect(cache.get('vietverse_session_child_lesson')).toMatchObject({ contentVersion: 2, answers: [] }));
   });
+  it('does not reactivate an old child session when replay storage finishes after switching child', async () => {
+    const lesson = { _id: 'lesson', contentVersion: 2, activities: [{ id: 'card', type: 'word_card', prompt: 'New lesson', targetWord: 'A' }] };
+    respond = (_url, method) => method === 'post'
+      ? { stars: 0, pointsEarned: 0, totalPoints: 0, passed: false, scorePercent: 0 }
+      : lesson;
+    show(); await screen.findByText('New lesson');
+    fireEvent.click(screen.getByRole('button', { name: 'Hoàn thành bài' }));
+    await screen.findByRole('button', { name: 'Luyện tập lại' });
+    let finishDelete!: () => void;
+    const pendingDelete = new Promise<void>(resolve => { finishDelete = resolve; });
+    vi.mocked(del).mockImplementationOnce(async key => { await pendingDelete; cache.delete(String(key)); });
+    fireEvent.click(screen.getByRole('button', { name: 'Luyện tập lại' }));
+    await waitFor(() => expect(del).toHaveBeenCalledWith('vietverse_session_child_lesson'));
+    act(() => useChildStore.getState().setActiveChild({ ...useChildStore.getState().activeChild!, _id: 'other-child' }));
+    await screen.findByText('New lesson');
+    expect(useLessonSessionStore.getState().currentSession?.childId).toBe('other-child');
+    await act(async () => { finishDelete(); await pendingDelete; });
+    expect(useLessonSessionStore.getState().currentSession?.childId).toBe('other-child');
+    expect(cache.has('vietverse_session_child_lesson')).toBe(false);
+  });
+
   it('shows pending state only for the current child/account and never exposes answers', () => {
     localStorage.setItem('vietverse_offline_completions', JSON.stringify([
       { id: 'one', userId: 'parent', childId: 'child', lessonId: 'lesson', savedAt: 1, status: 'needs_attention', errorCode: 'HTTP_403', answers: ['private answer'] },
@@ -147,5 +174,56 @@ describe('versioned learning client', () => {
     fireEvent.click(screen.getByText('A'));
     fireEvent.click(screen.getByRole('button', { name: 'Gửi đáp án & Nhận điểm' }));
     await waitFor(() => expect(calls.some(call => call.method === 'post' && call.body.contentVersion === 3)).toBe(true));
+  });
+
+  it('shows a wrong culture result honestly and lets the child correct it', async () => {
+    respond = (_url, method) => method === 'post'
+      ? { isAllCorrect: false, correctCount: 0, totalQuestions: 1, pointsAwarded: 0, totalPoints: 0 }
+      : { _id: 'article', title: 'Culture', intro: 'Intro', contentVersion: 3, quiz: [{ question: 'Question?', options: ['A', 'B'], correctAnswer: 0 }] };
+    show('/culture/article'); await screen.findByText(/Question\?/);
+    fireEvent.click(screen.getByText('B'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi đáp án & Nhận điểm' }));
+    expect(await screen.findByText(/Bé đúng 0\/1 câu/)).toBeInTheDocument();
+    expect(screen.queryByText(/đã từng nhận thưởng/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'A' })).toBeEnabled();
+    fireEvent.click(screen.getByText('A'));
+    respond = () => ({ isAllCorrect: true, correctCount: 1, totalQuestions: 1, pointsAwarded: 0, totalPoints: 0 });
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi đáp án & Nhận điểm' }));
+    expect(await screen.findByText(/Lượt này không có điểm thưởng mới/)).toBeInTheDocument();
+    expect(screen.queryByText(/đã từng nhận thưởng/)).not.toBeInTheDocument();
+  });
+
+  it.each(['culture', 'lesson'])('ignores a late %s result after switching child and back', async kind => {
+    let resolve!: (value: unknown) => void;
+    const pending = new Promise(done => { resolve = done; });
+    const current = useChildStore.getState().activeChild!;
+    if (kind === 'culture') {
+      respond = (_url, method) => method === 'post' ? pending
+        : { _id: 'article', title: 'Culture', intro: 'Intro', contentVersion: 3, quiz: [{ question: 'Question?', options: ['A', 'B'], correctAnswer: 0 }] };
+      show('/culture/article'); await screen.findByText(/Question\?/);
+      fireEvent.click(screen.getByText('A'));
+      fireEvent.click(screen.getByRole('button', { name: 'Gửi đáp án & Nhận điểm' }));
+    } else {
+      show(); await screen.findByText('New lesson');
+      respond = (_url, method) => method === 'post' ? pending
+        : { _id: 'lesson', contentVersion: 2, activities: [{ id: 'card', type: 'word_card', prompt: 'New lesson', targetWord: 'A' }] };
+      fireEvent.click(screen.getByRole('button', { name: 'Hoàn thành bài' }));
+    }
+    await waitFor(() => expect(calls.some(call => call.method === 'post')).toBe(true));
+    act(() => useChildStore.getState().setActiveChild({ ...current, _id: 'other-child', viviPoints: 77 }));
+    await screen.findByText(kind === 'culture' ? /Question\?/ : 'New lesson');
+    await act(async () => {
+      resolve({ isAllCorrect: true, correctCount: 1, totalQuestions: 1, pointsAwarded: 5, totalPoints: 5, passed: true, stars: 3, pointsEarned: 5 });
+      await pending;
+    });
+    expect(useChildStore.getState().activeChild?.viviPoints).toBe(77);
+    expect(screen.queryByText(/Bé nhận được \+5/)).not.toBeInTheDocument();
+    act(() => useChildStore.getState().setActiveChild(current));
+    if (kind === 'culture') {
+      expect(await screen.findByRole('button', { name: 'Gửi đáp án & Nhận điểm' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'A' })).toBeEnabled();
+    } else {
+      await screen.findByText('New lesson');
+    }
   });
 });

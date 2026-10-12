@@ -12,6 +12,7 @@ describe('serverless entrypoint', () => {
     const result = await request(handler).get('/api/v1/children');
     expect(result.status).toBe(503);
     expect(result.body.error.code).toBe('DATABASE_UNAVAILABLE');
+    expect(result.headers['x-content-type-options']).toBe('nosniff');
     expect(JSON.stringify(result.body)).not.toContain('credentials');
   });
 

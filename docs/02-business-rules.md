@@ -14,6 +14,10 @@
 - *Quyết định vận hành (2026-10-05)*: Phụ huynh đã đăng nhập (và admin) có thể mở trang thanh toán thử, tạo giao dịch PayOS production cố định 10.000đ. Đơn lưu riêng trong `PaymentTestOrder`; webhook hợp lệ chỉ cập nhật đơn test, tuyệt đối không tạo/cập nhật subscription hay quyền học. PayOS hiện không có sandbox; UI phải báo rõ đây là khoản chuyển thật trước khi phụ huynh bấm tạo giao dịch.
 - *Quyết định nghiệp vụ*: Hàm kiểm tra quyền học trả phí `isSubscriptionPaid` bắt buộc kiểm tra đồng thời: (1) `subscription.active === true`, (2) `subscription.plan` thuộc `['monthly', 'yearly']`, và (3) `subscription.expiresAt` còn hạn (lớn hơn thời điểm hiện tại).
 - Giới hạn tạo bé được kiểm tra nghiêm ngặt tại server (`ChildrenService.createChild`).
+- *Quyết định kỹ thuật (2026-10-12)*: tạo hồ sơ khóa ghi trên tài khoản chủ trong transaction trước khi đếm bé và tạo mới; các yêu cầu đồng thời không được vượt quota. Không đổi số bé của từng gói và không tự xóa hồ sơ cũ vượt giới hạn.
+- *Quyết định giao diện (2026-10-12)*: đăng ký bằng email phải nhập xác nhận mật khẩu trùng khớp trước khi gửi. Trường xác nhận chỉ ở client, không lưu hoặc gửi thêm vào API.
+- *Quyết định Google Sign-In đã duyệt (2026-10-12)*: người mới nhận tài khoản parent/free; tài khoản email cũ phải xác nhận mật khẩu Vietverse một lần trước khi liên kết Google. Giữ nguyên ID, quyền, gói, hồ sơ bé và tiến độ. Các lần sau đăng nhập bằng Google subject đã liên kết. Google-only dùng hash từ giá trị ngẫu nhiên không tiết lộ để giữ tương thích model; chưa có luồng đặt mật khẩu/recovery cho Google-only.
+- *Giả định triển khai*: dùng OAuth Web Client và origin chính `CLIENT_ORIGIN`; thiếu Client ID hoặc unique index thì từ chối riêng Google, đăng nhập email vẫn hoạt động.
 
 ## 2. Hồ sơ bé
 
@@ -24,6 +28,7 @@
 - Hồ sơ bắt đầu ở stage 1, level 1, 0 điểm trong luồng tạo mới.
 - *Quyết định nghiệp vụ (Cascade Deletion)*: Khi phụ huynh xóa hồ sơ bé (`DELETE /children/:id`), hệ thống bắt buộc thực hiện xóa thác (cascade deletion) toàn bộ dữ liệu phụ thuộc gồm: `LessonProgress`, `Recording` (âm thanh bé đọc), `ExplorationLog`, `PointTransaction` và `Redemption`. Ngăn chặn hoàn toàn dữ liệu mồ côi và rò rỉ âm thanh của trẻ.
 - *Quyết định nghiệp vụ (Screen Time Limit)*: Phụ huynh thiết lập giới hạn phiên màn hình (`15`, `20`, `30` phút hoặc `0` là không giới hạn). Khi bé học đạt đến ngưỡng thời gian liên tục, hệ thống client kích hoạt `ScreenTimeLimitModal`, tạm dừng tương tác và hiển thị mascot nhắc nhở nghỉ ngơi cho mắt. Chỉ phụ huynh giải phép tính mở khóa Parent Gate mới được gia hạn thêm phiên.
+- *Siết thực thi (2026-10-12)*: sửa hồ sơ thông thường không được đổi `screenTimeLimit`; chỉ endpoint có Parent Gate được thay đổi giới hạn.
 
 ## 3. Chặng và bài học
 
@@ -67,7 +72,8 @@ Tiêu chí chấp nhận và bounds chi tiết: [spec đã duyệt](./superpower
 Nguyên tắc bắt buộc:
 
 - `PointTransaction` là sổ cái; số dư trên `Child.viviPoints` phải khớp với giao dịch.
-- Thưởng/trừ điểm và record nghiệp vụ có cơ chế rollback bù lỗi tự động (compensation).
+- *Quyết định kỹ thuật (2026-10-12)*: riêng nộp bài, tiến độ, sổ cái và số dư commit trong cùng MongoDB transaction; lỗi trước commit rollback toàn bộ. Tuần tự hóa qua ghi trên hồ sơ bé; nộp sai hoặc nộp đồng thời không được hạ trạng thái `completed`, điểm cao nhất hoặc số sao đã đạt. Các luồng điểm khác giữ cơ chế hiện hữu, không suy ra đều đã transactional.
+- Khi kết quả commit chưa rõ, không xóa ledger bằng compensation ngoài transaction; retry vẫn không thưởng trùng. Không tự bù điểm lịch sử đã mất từ phiên bản cũ; cần đối soát và owner duyệt riêng.
 - Idempotency key phải xác định được cho từng sự kiện thưởng, bảo vệ qua MongoDB unique compound indexes.
 - Không tin `scorePercent` hoặc `isCorrect` do client gửi; server chấm điểm độc lập hoàn toàn.
 
@@ -87,6 +93,7 @@ Nguyên tắc bắt buộc:
 ## 5. Quiz và khám phá
 
 - Quiz văn hóa chỉ thưởng khi mọi câu trong bài đều đúng.
+- *Quyết định hiển thị (2026-10-12)*: quiz sai hiển thị số câu đúng và cho sửa/nộp lại; đúng nhưng không có điểm mới không được suy đoán là đã từng nhận thưởng. Bài học chưa đạt không hiển thị chiến thắng, giữ phiên tới khi bé chọn luyện lại. Phản hồi muộn của phiên đã đổi bé/tài khoản/nội dung không được cập nhật màn hình hoặc số dư của phiên mới.
 - Câu trả lời phải đúng schema: chỉ số câu hợp lệ, một lựa chọn hợp lệ, không dư dữ liệu không dùng.
 - Khám phá story/culture ghi một lần cho mỗi bé/nội dung qua compound unique index `{ childId: 1, kind: 1, refId: 1 }`.
 - Log khám phá dùng cho dashboard phụ huynh không bị đếm trùng lặp.

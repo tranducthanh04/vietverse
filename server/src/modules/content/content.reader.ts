@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ClientSession } from 'mongoose';
 import { ContentRevision } from '../../models/ContentRevision.js';
 import { contentError, contentModel, notFound } from './content.store.js';
 import { toContentPayload } from './content.dto.js';
@@ -14,13 +15,13 @@ export function resolveSubmissionVersion(requested: number | undefined, liveVers
 }
 
 // Callers enforce current learning permissions; a snapshot never grants access.
-export async function readPublished<K extends ContentKind>(kind: K, id: string, requestedVersion?: number): Promise<PublishedView<K>> {
-  const live = await contentModel(kind).findById(id);
+export async function readPublished<K extends ContentKind>(kind: K, id: string, requestedVersion?: number, session?: ClientSession): Promise<PublishedView<K>> {
+  const live = await contentModel(kind).findById(id).session(session ?? null);
   if (!live || (kind !== 'lesson' && live.visibility === 'withdrawn')) throw notFound();
   const liveVersion = live.contentVersion ?? 0;
   const version = requestedVersion === undefined ? liveVersion : contentVersionSchema.parse(requestedVersion);
   if (version === liveVersion) return { kind, contentId: id, contentVersion: version, payload: toContentPayload(kind, live) };
-  const revision = await ContentRevision.findOne({ kind, contentId: id, contentVersion: version });
+  const revision = await ContentRevision.findOne({ kind, contentId: id, contentVersion: version }).session(session ?? null);
   if (!revision) throw contentError(404, 'CONTENT_VERSION_NOT_FOUND', 'Không tìm thấy phiên bản nội dung đã xuất bản.');
   return { kind, contentId: id, contentVersion: version, payload: toContentPayload(kind, revision.payload) };
 }

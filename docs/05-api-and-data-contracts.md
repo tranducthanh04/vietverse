@@ -61,7 +61,17 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | POST | `/auth/refresh` | Refresh cookie/body | Cấp access token mới + xoay vòng (rotate) refresh token, phát hiện và ngăn chặn token reuse |
 | POST | `/auth/logout` | Public | Thu hồi phiên refresh token / token family trên server và xóa refresh cookie |
 | GET | `/auth/me` | Auth | Lấy user/subscription |
-| GET | `/auth/google` | Public | Trả mã 501 `NOT_IMPLEMENTED` (tính năng đang phát triển) |
+| GET | `/auth/google` | Public | Trả `clientId` public hoặc 503 `GOOGLE_NOT_CONFIGURED` |
+| POST | `/auth/google/start` | Public + trusted Origin | Tạo challenge nonce dùng một lần trong cookie HttpOnly 5 phút; trả `clientId`, `nonce` |
+| POST | `/auth/google` | Public + trusted Origin | Nhận Google ID token; xác minh server-side rồi cấp JWT + refresh cookie, tạo parent/free subscription; trùng email trả `{ linkRequired, email }` |
+| POST | `/auth/google/link` | Public + trusted Origin | Nhận mật khẩu Vietverse để liên kết flow Google đang chờ; tối đa 5 lần thử, giữ nguyên role/subscription/dữ liệu |
+| POST | `/auth/google/cancel` | Public + trusted Origin | Body `{nonce}` hủy đúng flow, không clear cookie của flow mới khác tab; cookie/bản ghi hết hạn sau 5 phút |
+
+Google payload: `/start` nhận `{}`; `/google` nhận strict `{credential, nonce}` (credential <= 12000 ký tự); `/link` nhận strict `{password, nonce}` (password 1..256). Nonce 64 ký tự hex. Các POST kiểm tra `Origin` đúng origin của `CLIENT_ORIGIN`, chịu auth rate limit và trả `Cache-Control: no-store`. ID token/mật khẩu không vào URL/localStorage.
+
+`GoogleAuthFlow` lưu SHA256 của cookie token ngẫu nhiên, nonce, trạng thái `fresh|link`, userId/googleId khi chờ liên kết, số lần thử và expiresAt. Unique `tokenHash_1`, TTL `expiresAt_1`; server vẫn kiểm tra hạn trực tiếp. Cookie Google HttpOnly 5 phút, production Secure/SameSite=None/host-only prefix `__Host-`, path `/`. Collection mới không lưu ID token hoặc mật khẩu.
+
+`User.googleId` dùng unique partial index `google_identity_unique`; thiếu index khiến `/start` trả 503 `GOOGLE_STORAGE_NOT_READY`. `deploy:indexes` bổ sung index không xóa legacy. Tạo user/free subscription và tiêu thụ challenge cùng transaction; liên kết password dùng compare-and-set cùng transaction. Replay/hết hạn trả 401 `GOOGLE_FLOW_INVALID`; token lỗi 401 `GOOGLE_TOKEN_INVALID`; mật khẩu sai 401 `GOOGLE_LINK_PASSWORD_INVALID`; liên kết xung đột 409 `GOOGLE_LINK_CONFLICT`.
 
 ## Learning và child
 
@@ -172,6 +182,16 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 - Zod error được format trả về mảng `{ field, message }` thân thiện và an toàn.
 
 ## Contract cần giữ ổn định
+
+### Sửa lỗi sau review — 2026-10-12, local
+
+- `PUT /children/:id` không còn nhận `screenTimeLimit`: Zod loại bỏ trường này như các trường lạ, không đổi giới hạn và không trả 403 chỉ vì payload có trường đó. Thay đổi hợp lệ dùng `PATCH /parent/screen-time` với Parent Gate và các giá trị `0/15/20/30`.
+- `POST /children` khóa ghi `User.__v` trước khi đọc quota trong cùng transaction tạo bé; không thêm field quota hoặc migration schema. Hết quota vẫn 403; lỗi transaction trả 503 `DATABASE_UNAVAILABLE`.
+- `POST /lessons/:id/complete` giữ payload/response; tất cả đọc trạng thái bài/phiên bản/quyền và ghi progress/ledger/balance dùng cùng session. Khóa ghi `Child.__v` trước đọc progress, phối hợp với cascade delete; giữ điểm/sao cao nhất và không hạ `completed`. Cần MongoDB replica set hỗ trợ transaction; lỗi DB trả 503 `DATABASE_UNAVAILABLE`, không fallback ghi từng phần trên standalone.
+- `passed`, `scorePercent`, `stars` trong response mô tả lượt nộp hiện tại; `progress` giữ thành tích cao nhất. FE phân biệt chưa đạt với hoàn thành, không xóa phiên chưa đạt cho tới khi bé chủ động luyện lại. Không backfill thưởng bị mất ở dữ liệu cũ.
+- Quiz văn hóa tiếp tục trả HTTP 200 cả khi sai; FE phải đọc `isAllCorrect`, `correctCount`, `totalQuestions`, không suy diễn kết quả từ `pointsEarned`.
+- Xác nhận mật khẩu đăng ký vẫn là validation FE; Google Sign-In đã có route xác minh ID token và liên kết có xác nhận mật khẩu Vietverse. Khi thiếu `GOOGLE_CLIENT_ID`, server trả lỗi cấu hình rõ ràng và giữ luồng email hoạt động.
+- HTTP logger che cả request `x-parent-gate-token` và response `set-cookie`, ngoài authorization/cookie đã có. Bản sửa không xóa log lịch sử hoặc tự thu hồi phiên.
 
 ### Dashboard phụ huynh — bổ sung 2026-10-09
 

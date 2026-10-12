@@ -33,5 +33,4 @@ export const updateChildSchema = withCanonicalLanguages(z.object({
   ageGroup: z.enum(['5-6', '6-8']).optional(),
   ...languageFields,
   avatarId: z.string().optional(),
-  screenTimeLimit: z.number().min(0).max(120).optional(),
 }));

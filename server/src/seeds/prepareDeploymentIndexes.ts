@@ -4,6 +4,8 @@ import { env } from '../config/env.js';
 import { Recording } from '../models/Recording.js';
 import { RecordingUploadIntent } from '../models/RecordingUploadIntent.js';
 import { RateLimitBucket } from '../models/RateLimitBucket.js';
+import { User } from '../models/User.js';
+import { GoogleAuthFlow } from '../models/GoogleAuthFlow.js';
 
 const required: Array<{ collection: mongoose.mongo.Collection; indexes: mongoose.mongo.IndexDescription[] }> = [
   { collection: RateLimitBucket.collection, indexes: [{ key: { resetAt: 1 }, name: 'resetAt_1', expireAfterSeconds: 0 }] },
@@ -13,6 +15,11 @@ const required: Array<{ collection: mongoose.mongo.Collection; indexes: mongoose
     { key: { childId: 1 }, name: 'childId_1' },
   ] },
   { collection: Recording.collection, indexes: [{ key: { uploadIntentId: 1 }, name: 'uploadIntentId_1', unique: true, sparse: true }] },
+  { collection: User.collection, indexes: [{ key: { googleId: 1 }, name: 'google_identity_unique', unique: true, partialFilterExpression: { googleId: { $type: 'string' } } }] },
+  { collection: GoogleAuthFlow.collection, indexes: [
+    { key: { tokenHash: 1 }, name: 'tokenHash_1', unique: true },
+    { key: { expiresAt: 1 }, name: 'expiresAt_1', expireAfterSeconds: 0 },
+  ] },
 ];
 
 // Dry-run is a pure plan: no DB connection or auto-index initialization.

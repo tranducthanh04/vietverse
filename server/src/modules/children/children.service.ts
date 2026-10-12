@@ -8,6 +8,7 @@ import { PointTransaction } from '../../models/PointTransaction.js';
 import { Redemption } from '../../models/Redemption.js';
 import mongoose, { Types } from 'mongoose';
 import { RecordingUploadIntent } from '../../models/RecordingUploadIntent.js';
+import { User } from '../../models/User.js';
 
 export class ChildrenService {
   static async getChildrenByParent(parentId: string) {
@@ -23,35 +24,41 @@ export class ChildrenService {
   }
 
   static async createChild(parentId: string, data: any) {
-    // Check subscription limit
-    const subscription = await Subscription.findOne({ userId: parentId });
-    const maxAllowed = subscription?.maxChildren ?? 1;
-
-    const currentCount = await Child.countDocuments({ parentId });
-    if (currentCount >= maxAllowed) {
-      throw {
-        statusCode: 403,
-        message: `Gói tài khoản hiện tại cho phép tối đa ${maxAllowed} hồ sơ bé. Vui lòng nâng cấp gói để thêm bé.`,
-      };
+    try {
+      const options = { maxCommitTimeMS: 5000, timeoutMS: 15000 };
+      return await mongoose.connection.transaction(async session => {
+        // A shared write serializes quota allocation even when both callers see
+        // an empty child collection. A count inside a transaction alone does not.
+        const owner = await User.updateOne({ _id: parentId }, { $inc: { __v: 1 } }, { session, timestamps: false });
+        if (!owner.matchedCount) throw { statusCode: 404, message: 'Không tìm thấy tài khoản phụ huynh.' };
+        const subscription = await Subscription.findOne({ userId: parentId }).session(session);
+        const maxAllowed = subscription?.maxChildren ?? 1;
+        const currentCount = await Child.countDocuments({ parentId }).session(session);
+        if (currentCount >= maxAllowed) {
+          throw {
+            statusCode: 403,
+            message: `Gói tài khoản hiện tại cho phép tối đa ${maxAllowed} hồ sơ bé. Vui lòng nâng cấp gói để thêm bé.`,
+          };
+        }
+        const stage1 = await Stage.findOne({ order: 1 }).session(session);
+        const [child] = await Child.create([{
+          parentId: new Types.ObjectId(parentId),
+          name: data.name,
+          ageGroup: data.ageGroup,
+          companionLanguage: data.companionLanguage,
+          companionLanguages: data.companionLanguages,
+          avatarId: data.avatarId || 'mascot-star-1',
+          currentStageId: stage1?._id,
+          viviPoints: 0,
+          level: 1,
+          badges: ['tan-binh-vietverse'],
+        }], { session });
+        return child;
+      }, options);
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode) throw error;
+      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể tạo hồ sơ lúc này. Vui lòng thử lại.' };
     }
-
-    // Default stage 1
-    const stage1 = await Stage.findOne({ order: 1 });
-
-    const child = await Child.create({
-      parentId: new Types.ObjectId(parentId),
-      name: data.name,
-      ageGroup: data.ageGroup,
-      companionLanguage: data.companionLanguage,
-      companionLanguages: data.companionLanguages,
-      avatarId: data.avatarId || 'mascot-star-1',
-      currentStageId: stage1?._id,
-      viviPoints: 0,
-      level: 1,
-      badges: ['tan-binh-vietverse'],
-    });
-
-    return child;
   }
 
   static async updateChild(childId: string, parentId: string, data: any) {

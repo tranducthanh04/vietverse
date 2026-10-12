@@ -11,6 +11,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 ## Frontend
 
 - `client/src/app/router.tsx`: route tree và guard.
+- React Router `7.18.2` (vá security, 2026-10-12), giữ React18 và Data Router/SPA hiện hữu; Node build tối thiểu20, môi trường đang dùng22. Không bật SSR/RSC hoặc thay route/guard.
 - Layouts: public, kids, parent, admin.
 - Feature folders chứa màn hình theo nghiệp vụ.
 - `authStore` giữ access token trong memory; refresh token ở httpOnly cookie.
@@ -21,6 +22,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 ## Backend
 
 - `httpApp.ts` gắn security middleware, CORS, rate limit, route và error handler; `app.ts` chỉ re-export tương thích, không cạnh tranh native Express entrypoint `index.ts`.
+- `index.ts` cũng áp Helmet trước cold-connect DB guard để response503 sớm giữ baseline security headers như app chính; không thay quyền hay payload lỗi.
 - Module theo domain: auth, children, stages, lessons, recordings, stories, culture, points, parent, admin.
 - Controller parse input và gọi service.
 - Service thực hiện nghiệp vụ và truy cập model.
@@ -35,6 +37,7 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Refresh token JWT 7 ngày trong cookie httpOnly.
 - API đọc Bearer token hoặc cookie access token nếu có.
 - Admin API dùng `authMiddleware` + `requireRole(admin)`.
+- Google Sign-In dùng Google Identity Services ID token: server xác minh chữ ký/audience/issuer/expiry/email đã xác minh và nonce một lần trước khi cấp JWT hiện tại. Google-only users vẫn là parent và nhận subscription free; tài khoản cùng email phải xác nhận mật khẩu Vietverse để liên kết, không tự gộp theo email.
 - Các route parent/child xác định ownership bằng `req.user.id` và `child.parentId`.
 - CORS production chỉ cho origin trong allowlist; development cho phép origin local khác phục vụ QA.
 
@@ -59,12 +62,13 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - BE Vercel riêng, Root Directory `server`, native Express default export `src/index.ts`. Đã deploy Preview và Production shell theo yêu cầu owner trước DB/Cloudinary: health200, DB-backed API/readiness503; FE proxy đã chuyển sang shell, Render vẫn giữ rollback/webhook chưa đổi. Deployment đầu auto-promote Production lỗi thiếu JWT/origin; sau owner cho phép sửa, đã cấu hình5 env tối thiểu/JWT random riêng và deploy source lại. Domain `vietverse-backend.vercel.app` trỏ shell đã kiểm chứng, `/health`200, `/`404/NOT_FOUND (không có giao diện BE). JWT shell không tương thích Render; chính sách token/auth/DB vẫn là gate riêng. `src/server.ts` giữ listener local/Render. Không có legacy builds hoặc seed khi deploy.
 - Mongo connection warm/in-flight được cache (pool max5/min0, selection5s). `/ready` connect+ping, không chứng minh transaction/storage/PayOS. API cold connect lỗi trả503; không disconnect theo request.
 - Production rate limit MongoDB chung: auth30/15 phút, API120/phút, window từ request đầu và reset atomic theo DB clock; store lỗi503. Vercel chỉ đọc single provider-normalized `x-vercel-forwarded-for` khi `VERCEL=1`; Render `RENDER=true` dùng immediate proxy. Không tin XFF ở host khác; chuẩn hóa/băm IP. Qua FE rewrite và giả header vẫn cần staging thật.
-- Node BE chọn22.x để khớp local verification. Native bcrypt/bundle trên Vercel là gate riêng. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
+- Node BE chọn22.x để khớp local verification. `bcrypt` đã nâng lên6.0.0 (loại chuỗi `node-pre-gyp/tar` cũ); native addon vẫn cần được build/kiểm chứng trên Vercel Linux. Quy trình env/preset/index/proxy/webhook tại [runbook](./vercel-deployment.md).
 - TypeScript emit ESM với ESNext/Bundler resolution để native builder và `tsc` cùng đọc nhánh ESM của dual packages; relative imports vẫn `.js` để compiled Node22/Render chạy được. Đây là quyết định kỹ thuật, không đổi API/nghiệp vụ.
 - Database: MongoDB local hoặc Atlas.
 - Hồ sơ `Child` lưu `companionLanguages` dạng mảng bounded (1–6) và giữ `companionLanguage` là compatibility field; migration backfill được thực hiện additive, không xóa trường cũ.
 - **Quyết định triển khai DB:** owner yêu cầu cấu hình sensitive ở BE Production/redeploy theo cluster trong ảnh, sau đó tự mở quyền mạng tạm để kiểm tra kết nối. **Giả định đã thông báo:** URI không có database path, driver chọn `test`; chưa xác nhận dữ liệu mong muốn nằm ở đó. Không seed/import/apply indexes thủ công hoặc đổi nghiệp vụ. Readiness đã qua; quyền mạng tạm hết hạn và least-privilege vẫn là gate vận hành, xem runbook.
 - Env qua Zod; production từ chối secret mặc định. `CMS_PUBLISH_ENABLED` mặc định false, chỉ bật sau khi reader/client phiên bản và MongoDB transaction được kiểm chứng. Xem `cms-operations.md`.
+- Google activation cần `GOOGLE_CLIENT_ID` ở backend và Authorized JavaScript origins trùng `CLIENT_ORIGIN` trong Google Cloud Console; không yêu cầu Google client secret hoặc mật khẩu tài khoản Google.
 
 ## Nguyên tắc thay đổi
 

@@ -28,7 +28,6 @@ const userSchema = new Schema<IUser>(
     },
     googleId: {
       type: String,
-      sparse: true,
     },
     role: {
       type: String,
@@ -49,5 +48,9 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
   }
 );
+
+userSchema.index({ googleId: 1 }, {
+  name: 'google_identity_unique', unique: true, partialFilterExpression: { googleId: { $type: 'string' } },
+});
 
 export const User = model<IUser>('User', userSchema);
