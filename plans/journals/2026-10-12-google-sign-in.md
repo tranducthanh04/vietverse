@@ -24,7 +24,7 @@ Implemented the approved Google Identity Services flow on login/register with se
 
 ## Remaining activation
 
-Configure Google OAuth Web Client ID and authorized frontend origins, prepare indexes against a verified database, deploy and smoke-test real consent/popup/cookies. See docs/adr/2026-10-12-google-sign-in.md. Google-only password recovery/link removal is out of scope.
+Google Cloud project `vietverse`, OAuth Web Client ID, backend Vercel Production env and authorized frontend origin are configured. Commit `ef1c300` is Ready on FE/BE. Production smoke passed config, challenge start/cancel, health/readiness, login page and catalog; production start=200 also passed the Google flow storage/index gate through `User`/`GoogleAuthFlow` initialization. A new Google account signed in successfully and reached `/bat-dau`; no child, learning or payment data was created. Existing-email password linking remains covered by local tests only; Google-only password recovery/link removal is out of scope.
 
 ## Workflow fallback
 

@@ -21,6 +21,13 @@
 4. Kiểm tra index bằng `npm run deploy:indexes -w server -- --dry-run`; sau khi xác nhận đúng DB và backup, chạy `--apply` với URI đích đã xác minh. Lệnh chỉ thêm indexes, không xóa dữ liệu/index cũ; duplicate googleId phải xử lý thủ công.
 5. Build/deploy và nghiệm thu sign-in mới, link tài khoản cũ, hủy/retry và callback không còn hiệu lực.
 
+### Trạng thái kích hoạt — 2026-10-12
+
+- Project Google Cloud `vietverse` đã tạo; OAuth Web Client ID đã cấu hình ở backend Vercel Production dưới tên `GOOGLE_CLIENT_ID` (không lưu giá trị trong Git/tài liệu).
+- `CLIENT_ORIGIN` Production là `https://vietverse-nine.vercel.app`; Authorized JavaScript origin tương ứng đã được khai báo trong OAuth client.
+- Commit `ef1c300` đã deploy Ready ở cả FE `https://vietverse-nine.vercel.app` và BE `https://vietverse-backend.vercel.app` (FE deployment `dpl_Ag1Ph3Rbee4x38YDinwes6u7d5Mf`, BE deployment `dpl_9yFdZUYNwmE7WbZYA9EDV25UJa9M`).
+- Smoke production đã xác nhận `GET /auth/google` trả cấu hình, `POST /auth/google/start` tạo challenge, `POST /auth/google/cancel` hủy challenge; trang đăng nhập hiển thị nút Google. Đăng nhập bằng tài khoản Google mới đã thành công và chuyển tới `/bat-dau`; chưa tạo hồ sơ bé hoặc dữ liệu học/thanh toán. Liên kết email hiện có bằng mật khẩu Vietverse mới được kiểm thử local.
+
 Ưu tiên FE proxy `/api` cùng origin để tránh trình duyệt chặn third-party cookies. Nếu FE host đặt COOP strict, cần kiểm tra popup Google và cân nhắc `same-origin-allow-popups`. Chưa thay các header deployment trong đợt này.
 
 ## Phiên và rollback
@@ -30,4 +37,4 @@
 - Nhiều tab vẫn dùng chung cookie như email auth hiện tại, không hỗ trợ nhiều tài khoản riêng từng tab. Xóa Parent Gate và cache subscription khi chấp nhận đăng nhập Google; subscription thực trên DB không thay đổi.
 - Rollback: bỏ `GOOGLE_CLIENT_ID`, redeploy BE để khóa Google mới; không xóa User/googleId/subscription/indexes. JWT đã cấp giữ vòng đời hiện tại. Tài khoản Google-only không đăng nhập mới khi tắt provider; tài khoản đã có mật khẩu vẫn dùng email. Chưa triển khai đổi/hủy liên kết hoặc đặt mật khẩu Google-only.
 
-Chưa cấu hình/xác minh OAuth Client ID thật, chưa apply DB hoặc deploy production trong đợt này; chưa thể xác nhận Google browser flow production.
+Google Client ID, deployment, origin và challenge/index readiness production đã được xác minh; popup Google mới đã sign-in thành công trên trình duyệt owner. Không lưu credential hoặc mã xác thực trong repo/chat.

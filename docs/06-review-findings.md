@@ -7,7 +7,7 @@
 - API sửa hồ sơ không còn đổi được screen time ngoài Parent Gate; tạo bé tuần tự hóa trên tài khoản trong transaction, chặn vượt quota do request đồng thời.
 - FE hiển thị đúng lượt học chưa đạt, quiz sai cho sửa/nộp lại; bỏ qua kết quả cũ sau đổi bé/tài khoản/nội dung. Đăng ký email thêm xác nhận mật khẩu trước gửi API.
 - Quyết định nghiệp vụ về số điểm, ngưỡng đỗ, quota/gói, ownership và unlock giữ nguyên. Transaction yêu cầu replica set; không fallback ghi nửa chừng. Không thay Cloudinary/thanh toán, không push/deploy hoặc ghi DB production trong đợt sửa local này.
-- Chưa đóng các gate: Google OAuth; nguồn audio/bản dịch/provider được duyệt; audit riêng tư Atlas (ledger/index/stock/progress) và xử lý dữ liệu lịch sử; dependency advisories; nghiệm thu mobile/giáo án. Kết quả kiểm thử cuối và phạm vi ở [journal](../plans/journals/2026-10-12-review-remediation.md).
+- Đã đóng gate cấu hình Google OAuth production ngày 2026-10-12: Client ID ở backend Vercel, FE/BE deploy từ commit `ef1c300`, challenge start/cancel và popup Google tài khoản mới đã smoke pass, chuyển tới `/bat-dau`. Chưa tạo hồ sơ bé hoặc dữ liệu học/thanh toán; liên kết email hiện có bằng mật khẩu Vietverse mới được kiểm thử local. Các gate khác (nguồn audio/bản dịch/provider được duyệt; audit riêng tư Atlas và dữ liệu lịch sử; dependency advisories; nghiệm thu mobile/giáo án) vẫn mở. Kết quả kiểm thử cuối và phạm vi ở [journal](../plans/journals/2026-10-12-review-remediation.md).
 - Đã bổ sung Helmet cho lớp DB guard của entrypoint Vercel; response `503 DATABASE_UNAVAILABLE` trước đây bỏ qua security headers nay vẫn có `X-Content-Type-Options: nosniff`, có regression test serverless.
 - Đã nâng `bcrypt` lên `6.0.0`, loại bỏ chuỗi native `node-pre-gyp/tar`; `npm audit --omit=dev` hiện không còn advisory production. React Router nâng lên `7.18.2` để nhận bản vá runtime, `concurrently` nâng patch lên `9.2.5` (`shell-quote` 1.12.0); audit toolchain dev còn Vitest/Tailwind advisory và chưa dùng `npm audit fix --force`.
 
@@ -223,8 +223,8 @@ Ngày review: 2026-10-01. Phạm vi: toàn bộ `client/src`, `server/src`, seed
 ### P2.7 — `googleAuthPlaceholder` dễ gây hiểu nhầm [ĐÃ XỬ LÝ - 2026-10-01]
 
 - Đã chuyển phản hồi của endpoint `GET /api/v1/auth/google` sang HTTP 501 `NOT_IMPLEMENTED` với thông điệp rõ ràng thông báo tính năng đang tích hợp, loại bỏ việc trả 200 giả vờ thành công.
-- Cập nhật 2026-10-12: thay placeholder bằng Google Identity Services flow có challenge nonce/TTL, xác minh ID token server-side, liên kết email cũ bằng mật khẩu Vietverse và lỗi 503 trung thực khi thiếu `GOOGLE_CLIENT_ID`.
-- Review Google 2026-10-12: đã sửa phản hồi auth chậm ghi đè cookie lần login mới bằng hàng đợi request ghi cookie trong tab; hủy cũ không xóa cookie flow mới. Thêm test signature RSA thật, replay/expiry, giới hạn thử mật khẩu, transaction rollback/concurrent exchange, index readiness và điều hướng/Parent Gate. Chưa nghiệm thu popup/Google consent/cookie production; xem [thiết lập và rollback](./adr/2026-10-12-google-sign-in.md).
+- Cập nhật 2026-10-12: thay placeholder bằng Google Identity Services flow có challenge nonce/TTL, xác minh ID token server-side, liên kết email cũ bằng mật khẩu Vietverse và lỗi 503 trung thực khi thiếu `GOOGLE_CLIENT_ID`. Client ID production đã cấu hình ở Vercel backend; FE/BE commit `ef1c300` Ready và smoke challenge start/cancel đã qua. Popup Google tài khoản mới cũng đã sign-in thành công tới `/bat-dau`; liên kết email hiện có vẫn chỉ có bằng chứng test local.
+- Review Google 2026-10-12: đã sửa phản hồi auth chậm ghi đè cookie lần login mới bằng hàng đợi request ghi cookie trong tab; hủy cũ không xóa cookie flow mới. Thêm test signature RSA thật, replay/expiry, giới hạn thử mật khẩu, transaction rollback/concurrent exchange, index readiness và điều hướng/Parent Gate. Production start trả 200 qua gate index/User+Flow init; xem [thiết lập và rollback](./adr/2026-10-12-google-sign-in.md).
 
 ---
 
