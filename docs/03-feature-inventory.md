@@ -1,5 +1,12 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Feedback 2026-10-12 — triển khai local, chưa deploy
+
+- Giá tháng mới 250.000đ, năm giữ 990.000đ; QR/PayOS hoãn theo owner.
+- Lesson word card có nút đọc đoạn `subPrompt` riêng với audio từ ngắn. Hướng dẫn bốn activity mới dùng chung điều khiển audio/TTS; không đổi câu trả lời/điểm.
+- Story/đồng dao có fallback đọc từng dòng; culture đọc title/intro/funFacts. Ưu tiên asset thật, phân biệt giọng thiết bị, dừng khi đổi nguồn/nội dung/unmount; TTS không có timeline giả.
+- Chưa có UI song ngữ hoặc bản dịch ngoại ngữ trong catalog. `lang` của bộ đọc là chuẩn bị kỹ thuật, không đồng nghĩa đã triển khai nội dung đa ngôn ngữ. Xem [đầu vào cần khách hàng cung cấp](./customer-audio-translations.md).
+
 | Nhóm | Tính năng | UI | API/server | Dữ liệu chính | Trạng thái |
 | --- | --- | --- | --- | --- | --- |
 | Auth | Đăng ký/đăng nhập | Có | Có JWT + refresh cookie | User, Subscription | Hoàn thiện |

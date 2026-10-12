@@ -6,7 +6,8 @@
 - Tài khoản đăng ký mới có role `parent`, subscription `free`, tối đa 1 hồ sơ bé.
 - Seed có tài khoản `admin` và `parent` demo; mật khẩu chỉ dùng local/demo và không được dùng production.
 - Plan hiện có: `free`, `monthly`, `yearly`.
-- *Quyết định nghiệp vụ thanh toán (2026-10-03)*: Gói tháng là 149.000đ, tối đa 1 hồ sơ bé; gói năm là 990.000đ, tối đa 3 hồ sơ bé. Giá hiển thị ở FE và giá do server tạo payment link phải luôn khớp; server là nguồn quyết định số tiền.
+- *Quyết định nghiệp vụ thanh toán (2026-10-12, feedback khách hàng thay giá tháng cũ 149.000đ)*: Gói tháng là 250.000đ, tối đa 1 hồ sơ bé; gói năm là 990.000đ, tối đa 3 hồ sơ bé. Giá hiển thị FE và giá server tạo payment link phải khớp; server quyết định số tiền. Gói năm tiết kiệm 67% so với 12 tháng mua riêng (3.000.000đ), không phải giá niêm yết năm giả. Đơn cũ giữ số tiền đã lưu; không migrate hoặc tính lại đơn cũ.
+- *Quyết định phạm vi (2026-10-12)*: hoãn QR/PayOS theo owner, chưa cấu hình hoặc kích hoạt giao dịch thật trong lượt feedback này.
 - PayOS hiện xử lý thanh toán một lần cho thời hạn tháng/năm; không tự động trừ tiền định kỳ.
 - Chỉ kích hoạt/gia hạn subscription sau webhook PayOS hợp lệ: chữ ký phải được SDK xác minh và số tiền webhook phải khớp đơn hàng. `returnUrl` chỉ phục vụ trải nghiệm UI, không được dùng để xác nhận đã trả tiền.
 - Mỗi đơn chỉ có thể chuyển từ `pending` sang `completed` một lần. Cập nhật đơn và subscription phải nằm trong cùng MongoDB transaction; môi trường production phải dùng MongoDB replica set hỗ trợ transaction.

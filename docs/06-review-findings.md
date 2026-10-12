@@ -1,5 +1,12 @@
 # 06 — Kết quả review senior BA/code
 
+## Feedback giá và narration — 2026-10-12, local
+
+- Giá tháng 250.000đ ở FE/BE; năm 990.000đ, tiết kiệm 67% so với 12 tháng mua riêng. Đơn cũ giữ amount đã lưu; QR/PayOS chưa bật, không tạo giao dịch thật.
+- AudioButton trước đây bỏ qua mọi `/audio/`, fallback trùng từ error/play rejection, đọc cả label khi thiếu nội dung. Story không có TTS; culture có callback muộn và cancel toàn cục khi unmount. Bộ đọc chung xử lý asset trước, giọng thiết bị đúng locale, ownership và invalidation khi đổi nguồn/nội dung/unmount; không autoplay từ lỗi preload.
+- TTS chia đoạn ngắn, story tô dòng theo speech event, không giả duration/karaoke. Voice thiếu thông báo rõ sau chờ `voiceschanged` tối đa 1,5 giây; không dùng voice ngôn ngữ khác. Chất lượng/khả dụng vẫn phụ thuộc trình duyệt và thiết bị; chưa nghiệm thu giọng nói thật trên iOS/Android.
+- Chưa tích hợp provider, chưa tạo audio hoặc bản dịch, không publish CMS hay ghi DB production. Cần xác nhận dịch vụ được gọi là “Evernote” và nội dung được duyệt; xem [hướng dẫn nguồn](./customer-audio-translations.md). Không coi test giả lập Web Speech là đã đạt giọng studio.
+
 ## Catalog mới theo Docs — review bootstrap 2026-10-10
 
 Bổ sung 2026-10-11: owner duyệt `test`, migration ngôn ngữ và catalog. Lượt cuối đã apply Atlas và deploy FE/BE, có receipt/production smoke tại [journal](../plans/journals/2026-10-11-schema-catalog.md). Full test đầu có lỗi cạnh tranh recording finalize (201/503); chạy riêng và full lại qua, chưa khẳng định hết flakiness. Networking Atlas/least-privilege/bản quyền vẫn là gate riêng. Build FE phát hiện12 dependency advisories gồm2 critical; chưa đánh giá exploitability hoặc sửa dependencies trong lượt deploy.
