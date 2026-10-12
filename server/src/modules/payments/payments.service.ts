@@ -8,7 +8,7 @@ import { env } from '../../config/env.js';
 import mongoose, { Types } from 'mongoose';
 
 const PLAN_PRICES: Record<PaidPlanType, number> = {
-  monthly: 149000,
+  monthly: 250000,
   yearly: 990000,
 };
 

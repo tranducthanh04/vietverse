@@ -53,7 +53,7 @@ export const PricingPage: React.FC = () => {
     {
       id: 'monthly',
       name: 'Gói Tiêu Chuẩn (Tháng)',
-      price: '149.000đ',
+      price: '250.000đ',
       period: '/ tháng',
       description: 'Chinh phục toàn diện 5 chặng học và tích lũy ViVi Points đổi quà.',
       features: [
@@ -71,7 +71,7 @@ export const PricingPage: React.FC = () => {
       id: 'yearly',
       name: 'Gói Gia Đình (Năm)',
       price: '990.000đ',
-      period: '/ năm (tiết kiệm 45%)',
+      period: '/ năm (tiết kiệm 67% so với 12 tháng)',
       description: 'Đồng hành dài hạn cho tối đa 3 bé trong gia đình, tặng kèm quà hiện vật.',
       features: [
         'Tất cả tính năng của gói Tháng',

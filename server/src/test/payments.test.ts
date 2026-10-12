@@ -49,7 +49,7 @@ describe('Payments & Subscription Webhook API', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.amount).toBe(149000);
+    expect(res.body.data.amount).toBe(250000);
     expect(res.body.data.planType).toBe('monthly');
     expect(res.body.data.orderCode).toMatch(/^VV/);
     expect(res.body.data.checkoutUrl).toContain('payos.test');
@@ -58,6 +58,7 @@ describe('Payments & Subscription Webhook API', () => {
     const dbOrder = await PaymentOrder.findOne({ orderCode: res.body.data.orderCode });
     expect(dbOrder).not.toBeNull();
     expect(dbOrder?.status).toBe('pending');
+    expect(dbOrder?.amount).toBe(250000);
   });
 
   it('2. POST /api/v1/payments/create-checkout - Từ chối khi planType không hợp lệ', async () => {
@@ -82,6 +83,7 @@ describe('Payments & Subscription Webhook API', () => {
       });
 
     const orderCode = checkoutRes.body.data.orderCode;
+    expect(checkoutRes.body.data.amount).toBe(990000);
 
     // 2. Simulate Webhook callback from Payment Gateway
     const payosPayload = {
