@@ -30,7 +30,10 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
       </h2>
 
       {activity.subPrompt && (
-        <p className="text-stone-600 text-kid-base mb-6">{activity.subPrompt}</p>
+        <div className="mb-6 space-y-3">
+          <p className="text-stone-600 text-kid-base">{activity.subPrompt}</p>
+          <AudioButton contentKey={activity.id} textToSpeak={activity.subPrompt} label="Đọc đoạn văn" size="sm" />
+        </div>
       )}
 
       {/* Big 3D Flashcard */}
@@ -47,6 +50,7 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
 
         <div className="mt-4">
           <AudioButton
+            contentKey={activity.id}
             audioUrl={activity.audioUrl}
             textToSpeak={activity.targetWord}
             size="lg"

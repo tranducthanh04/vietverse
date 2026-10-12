@@ -67,13 +67,18 @@ it('records ordered self-report rather than completion boolean or click order', 
   expect(submit).toHaveBeenCalledWith({ status: 'self_reported', userAnswer: ['stand','sit'] });
 });
 it('keeps instructions readable after media failure without autoplay', () => {
+  const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
   const { container } = mount(FollowStepsActivity, { id: 's', type: 'follow_steps', prompt: 'Thực hiện',
     audioUrl: '/audio/source.mp3', steps: [{ id: 'stand', text: 'Đứng lên' }] });
   const audio = container.querySelector('audio')!;
   expect(audio.autoplay).toBe(false);
-  expect(audio.controls).toBe(true);
+  expect(container.querySelectorAll('audio')).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'Nghe hướng dẫn' })).toBeEnabled();
   fireEvent.error(audio);
-  expect(screen.getByRole('alert')).toHaveTextContent('Chưa phát được audio');
+  expect(screen.getByRole('status')).toHaveTextContent('Chưa phát được audio');
+  expect(play).not.toHaveBeenCalled();
+  expect(screen.getByRole('button', { name: 'Nghe hướng dẫn' })).toBeDisabled();
   expect(screen.getByRole('checkbox', { name: 'Bước 1: Đứng lên' })).toBeInTheDocument();
 });
 it('fails closed when renderer input is incomplete', () => {

@@ -40,6 +40,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
       {/* Audio speaker prompt */}
       <div className="mb-6">
         <AudioButton
+          contentKey={activity.id}
           audioUrl={activity.audioUrl}
           textToSpeak={activity.prompt}
           size="lg"

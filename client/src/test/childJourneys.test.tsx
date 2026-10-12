@@ -42,7 +42,7 @@ beforeEach(() => {
   api.defaults.adapter = async (config) => ({ data: { data: await request(config) }, status: 200, statusText: 'OK', headers: {}, config });
 });
 
-afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; vi.useRealTimers(); });
+afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; vi.restoreAllMocks(); vi.useRealTimers(); });
 
 describe('multilingual onboarding', () => {
   it('keeps multiple selections, prevents empty selection, and sends all languages', async () => {
@@ -241,6 +241,7 @@ describe('honest story audio', () => {
   });
 
   it('stops offering playback when the supplied audio asset fails', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     request = () => ({ _id: 'story', title: 'A story', audioUrl: '/broken.mp3', lyrics: [{ timeSec: 0, text: 'Story text' }], durationSec: 40 });
     const memoryRouter = createMemoryRouter([{ path: '/stories/:id', element: <StoryDetailPage /> }], { initialEntries: ['/stories/story'] });
     const { container } = render(<QueryClientProvider client={queryClient}><RouterProvider router={memoryRouter} /></QueryClientProvider>);
