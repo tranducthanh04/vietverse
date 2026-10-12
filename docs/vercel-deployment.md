@@ -1,5 +1,13 @@
 # Rollout backend Vercel — Vietverse
 
+## CMS cover image release — 2026-10-12
+
+- Commit `4d58dde3eacb4a90ccad04ebf0660cb836c33c8f` is deployed to both production projects.
+- Backend deployment `dpl_DiVucxhrRbozLoatYaBAV3xFPNNk` is Ready at `https://vietverse-backend.vercel.app`; frontend deployment `dpl_DLzGCo6eMX88JZD7EEqtQHCXrzBq` is Ready at `https://vietverse-nine.vercel.app`.
+- Read-only smoke checks returned 200 for backend `/health`, `/ready`, frontend `/`, and frontend `/api/v1/stories`.
+- Cloudinary image preset `vietverse_content_images_signed` and backend Production variable `CLOUDINARY_IMAGE_UPLOAD_PRESET` are configured. The app enforces the 5 MiB JPG/PNG/WebP limit; real upload/finalize remains an unexecuted production gate.
+- No customer image, draft mutation, publish action, audio change, or PayOS/payment action was performed during release verification.
+
 ## QA fix production release — 2026-10-12
 
 - Commit `928d406b427f8121ec2bddb7d793df843ff41235` đã push fast-forward lên main. FE Git deployment `dpl_B3TvNmfL1pLRaPWhQ8Hs6pMqRGZK` Ready và alias `vietverse-nine.vercel.app` đã cập nhật.

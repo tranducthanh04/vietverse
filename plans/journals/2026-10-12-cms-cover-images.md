@@ -20,4 +20,13 @@ Provider account limit is 10 MB / 25 MP; 5 MiB is enforced by client/backend. No
 
 ## Tooling and remaining gates
 
-`ak` CLI is unavailable, so this local journal was written directly; AgentWiki publish skipped. Deployment revision and smoke evidence will be recorded in the deployment runbook after release. Existing audio/device, orphan cleanup, CMS publishing and payment gates remain separate.
+`ak` CLI is unavailable, so this local journal was written directly; AgentWiki publish skipped. Deployment revision and smoke evidence are recorded below and in the deployment runbook. Existing audio/device, orphan cleanup, CMS publishing and payment gates remain separate.
+
+## Production release evidence
+
+- Backend: `dpl_DiVucxhrRbozLoatYaBAV3xFPNNk`, Ready, alias `https://vietverse-backend.vercel.app`.
+- Frontend: `dpl_DLzGCo6eMX88JZD7EEqtQHCXrzBq`, Ready, alias `https://vietverse-nine.vercel.app`.
+- GET `/health`, `/ready`, `/`, and `/api/v1/stories` each returned HTTP 200 after release.
+- The real Cloudinary upload/finalize flow was intentionally not exercised with customer data; production readiness is limited to code, configuration, build, and read-only smoke evidence.
+- Browser `/admin` redirected to `/kham-pha` with the existing non-admin session; no role change or new account was attempted. Admin UI smoke requires an authorized admin session.
+- Vercel frontend build also reported dependency advisories (3 moderate, 5 high, 2 critical) and a Node 24 / backend-workspace Node 22 engine warning; the frontend build succeeded. These warnings are not evidence that the entire website is production-ready and remain separate remediation work.
