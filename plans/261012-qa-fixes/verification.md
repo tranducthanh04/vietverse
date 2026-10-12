@@ -36,3 +36,9 @@ Không deploy, push, tạo giao dịch tiền thật, seed DB thật hoặc đ�
 User yêu cầu tiếp tục tới production. Metadata Vercel xác nhận FE `vietverse` (root client), BE `vietverse-backend` (root server). `vercel env ls production` đúng project BE chỉ có GOOGLE_CLIENT_ID, MONGODB_URI, JWT_REFRESH_SECRET, JWT_SECRET, CLIENT_ORIGIN, CMS_PUBLISH_ENABLED và NODE_ENV; chưa có biến CLOUDINARY_* nào. Không đọc giá trị secret.
 
 GET mới tới BE /health, /ready, FE / và FE /api/v1/stories đều200. Đây là availability check, không chứng minh recording. Chưa deploy code fix vì gate Cloudinary thật chưa đủ. Owner cần cấu hình Cloudinary qua secret store đúng project và xác nhận môi trường/account test; không gửi API secret trong chat. Không thay PayOS, env, alias, dữ liệu hoặc network access.
+
+### Kết quả phát hành tiếp theo
+
+Đã phát hành phần code fix độc lập, không coi Cloudinary đã kích hoạt: commit928d406 push main thành công sau một lỗi GitHub commit_refs. BE archive deploy Ready `dpl_FN4dXGsrwYYtkfyLWrasdtPHoUZP`; FE Git Ready `dpl_B3TvNmfL1pLRaPWhQ8Hs6pMqRGZK`. BE Git song song lỗi git_info_fail, alias chính vẫn là bản archive Ready cùng source. Vercel API xác nhận sourceCommit/ githubCommitSha đúng928d406.
+
+GET sau release: health200/readiness200/FE200/catalog200. Browser production xác nhận F01/F02/F03 và copy pricing: 4 footer labels unavailable, 21 story cards Bản đọc, 5 stage tabs không lặp. Browser dùng phiên đã có, chỉ xem list/map, không submit lesson, upload hoặc payment. Cấu hình Cloudinary production còn thiếu đủ4 biến; gate upload thật vẫn mở. Không thay env/DB/indexes/network/PayOS. Chi tiết rollback/deployment ở docs/vercel-deployment.md.

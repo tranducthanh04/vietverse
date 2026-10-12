@@ -1,5 +1,13 @@
 # Rollout backend Vercel — Vietverse
 
+## QA fix production release — 2026-10-12
+
+- Commit `928d406b427f8121ec2bddb7d793df843ff41235` đã push fast-forward lên main. FE Git deployment `dpl_B3TvNmfL1pLRaPWhQ8Hs6pMqRGZK` Ready và alias `vietverse-nine.vercel.app` đã cập nhật.
+- BE source archive từ cùng commit (không env/build local) đã build trên Vercel, deployment `dpl_FN4dXGsrwYYtkfyLWrasdtPHoUZP` Ready, alias `vietverse-backend.vercel.app`. Git deployment song song `dpl_6WUUJKnbcTkn1zy5MDmg4ZWrHzvo` lỗi `git_info_fail` trước build, không thay alias chính đang Ready. Push lần đầu cũng gặp GitHub `commit_refs`; thử lại fast-forward một lần thành công. Không force-push.
+- Sau release, BE health/readiness và FE root/catalog đều200. Browser production xác nhận footer unavailable, pricing copy mới, 21 story cards `Bản đọc`, và tab 5 chặng không lặp prefix. Không submit bài học, tạo recording hoặc giao dịch thật.
+- Cloudinary chưa bật: metadata env BE Production không có cả bốn CLOUDINARY_*; không đổi secret/preset/DB/PayOS. Code retry fix đã lên production nhưng upload/metadata thật vẫn chưa nghiệm thu. Owner cần cung cấp cấu hình qua secret store và môi trường/account test được duyệt; không gửi secret trong chat.
+- Mốc rollback trước release: BE `dpl_Ae4mHxx9fJRAP2wpWdkptMB4SX8v` (`vietverse-backend-9phgw0tre.vercel.app`), FE `dpl_4vKE3yqavge4h5ZngKMtoiPwKm46` (`vietverse-3l5wpiiqf-tranducthanh31102004-gmailcoms-projects.vercel.app`). Chỉ rollback code theo target đã xác nhận, không rollback dữ liệu hay env.
+
 ## Backend Git auto-deploy — 2026-10-12
 
 - Project `vietverse-backend` is now linked to GitHub repository `tranducthanh04/vietverse`, production branch `main`, with Git deployments enabled. Root Directory remains `server` and the existing Production environment variables/database are unchanged.
