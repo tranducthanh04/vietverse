@@ -62,7 +62,9 @@ function Editor({
   const [value, setValue] = useState<Payload | null>(
     initial.draft?.state === "editing" ? initial.draft.payload : null,
   );
-  const [busy, setBusy] = useState(false);
+  const [requestBusy, setBusy] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
+  const busy = requestBusy || imageBusy;
   const [allowTyping, setAllowTyping] = useState(false);
   const busyRef = useRef(false);
   const [message, setMessage] = useState("");
@@ -281,7 +283,7 @@ function Editor({
           <EditorialNotesContext.Provider value={loaded.editorialNotes}>
             <fieldset
               ref={form}
-              disabled={Boolean(confirmation) || (busy && !allowTyping)}
+              disabled={Boolean(confirmation) || imageBusy || (busy && !allowTyping)}
             >
               <legend>Nội dung nháp</legend>
               <TextField
@@ -299,12 +301,18 @@ function Editor({
               )}
               {kind === "story" && (
                 <StoryEditor
+                  uploadContext={{ kind: 'story', contentId: id, draftVersion: loaded.draftVersion }}
+                  uploadDisabled={requestBusy}
+                  onUploadBusy={setImageBusy}
                   value={value as StoryContent}
                   onChange={setValue}
                 />
               )}
               {kind === "culture" && (
                 <CultureEditor
+                  uploadContext={{ kind: 'culture', contentId: id, draftVersion: loaded.draftVersion }}
+                  uploadDisabled={requestBusy}
+                  onUploadBusy={setImageBusy}
                   value={value as CultureContent}
                   onChange={setValue}
                 />

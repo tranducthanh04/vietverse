@@ -4,12 +4,19 @@ import { TextField, NumberField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import type { CoverUploadContext } from './CoverImageUpload.js';
 export function StoryEditor({
   value,
   onChange,
+  uploadContext,
+  onUploadBusy,
+  uploadDisabled,
 }: {
   value: StoryContent;
   onChange: (value: StoryContent) => void;
+  uploadContext?: CoverUploadContext;
+  onUploadBusy?: (busy: boolean) => void;
+  uploadDisabled?: boolean;
 }) {
   const patch = (change: Partial<StoryContent>) =>
     onChange({ ...value, ...change });
@@ -51,6 +58,9 @@ export function StoryEditor({
         multiline
       />
       <MediaFields
+        uploadContext={uploadContext}
+        onUploadBusy={onUploadBusy}
+        uploadDisabled={uploadDisabled}
         imageName="coverImage"
         value={{ audioUrl: value.audioUrl, imageUrl: value.coverImage }}
         onChange={(change) =>

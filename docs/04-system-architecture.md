@@ -53,6 +53,13 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 - Local/dev fallback lưu Data URI trực tiếp trong MongoDB.
 - Fallback phù hợp demo nhỏ, không phù hợp lưu trữ production lâu dài vì phình dữ liệu và khó CDN/retention.
 
+## Storage ảnh CMS
+
+- Quyết định triển khai: ảnh bìa của story/đồng dao và bài văn hóa chỉ do admin tải trong bản nháp; không upload từ trang bé và không làm thay đổi live content, điểm hoặc publish state.
+- `POST /admin/content-images/intent` cấp ticket JWT 10 phút và chữ ký Cloudinary qua preset ảnh riêng trên cùng account. Browser gửi trực tiếp tới `image/upload` với `credentials=omit`, không gửi JWT, cookie hoặc Parent Gate.
+- `POST /admin/content-images/finalize` kiểm tra lại admin/role, draft kind/id/version và đọc metadata provider ngoài transaction. Chỉ nhận JPG/PNG/WebP tĩnh, HTTPS đúng Cloudinary account, tối đa 5 MiB và tối đa 40 MP; URL trả về dùng delivery transform giới hạn 1920px và auto format/quality.
+- Retry dùng cùng request declaration/public ID, chỉ cập nhật URL vào form local; admin phải bấm Lưu nháp. Không tự publish, không ghi `ContentDraft` trong upload và không xóa asset provider khi request bị gián đoạn; orphan cần đối soát vận hành.
+
 ## Deploy và môi trường
 
 - Client: Vercel/Vite, proxy `/api` theo [`client/vercel.json`](../client/vercel.json). Theo yêu cầu owner, FE Production đã triển khai proxy BE Vercel trước khi bổ sung DB/storage. MongoDB readiness và GET qua FE đã qua sau khi owner mở quyền mạng Atlas tạm; mạng production lâu dài chưa chốt. JWT mới không tương thích Render. Quy trình env đúng project/rollback và bằng chứng kết nối ở [runbook](./vercel-deployment.md).

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TextField } from "./FormFields.js";
+import { CoverImageUpload, type CoverUploadContext } from './CoverImageUpload.js';
 function allowedMediaUrl(value: string) {
   if (!value) return true;
   if (
@@ -62,11 +63,17 @@ export function MediaFields({
   onChange,
   prefix = "",
   imageName = `${prefix}imageUrl`,
+  uploadContext,
+  onUploadBusy,
+  uploadDisabled,
 }: {
   value: { audioUrl?: string; imageUrl?: string };
   onChange: (patch: { audioUrl?: string; imageUrl?: string }) => void;
   prefix?: string;
   imageName?: string;
+  uploadContext?: CoverUploadContext;
+  onUploadBusy?: (busy: boolean) => void;
+  uploadDisabled?: boolean;
 }) {
   return (
     <div>
@@ -79,6 +86,7 @@ export function MediaFields({
       <MediaAsset audio url={value.audioUrl ?? ""} />
       {"imageUrl" in value && (
         <>
+          {uploadContext && onUploadBusy && <CoverImageUpload key={`${uploadContext.kind}:${uploadContext.contentId}:${uploadContext.draftVersion}`} context={uploadContext} disabled={uploadDisabled} onBusyChange={onUploadBusy} onUploaded={imageUrl => onChange({ imageUrl })} />}
           <TextField
             label={`URL ảnh${prefix ? ` ${prefix}` : ""}`}
             name={imageName}

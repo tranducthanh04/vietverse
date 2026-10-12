@@ -356,6 +356,7 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - F03: card truyện phân biệt bản đọc, audio thiếu duration và duration hợp lệ; không hiện `0 giây` hoặc duration stale khi không có audio.
 - O01: bỏ hứa hẹn dùng thử 7 ngày/trọn đời và catalog 23 bài karaoke chưa được xác nhận. Không đổi giá, checkout hoặc quyền subscription.
 - Cloudinary: nhận diện lỗi404 lồng SDK đúng contract retry; lỗi provider khác vẫn503 an toàn. Live upload/preset chưa nghiệm thu do thiếu cấu hình local. Bằng chứng và giới hạn: `plans/261012-qa-fixes/verification.md`.
+- CMS cover image: đã thêm signed upload riêng cho admin story/culture, JPG/PNG/WebP tối đa 5 MiB, retry cùng asset ID và xác minh metadata; chỉ cập nhật form nháp, không tự publish. Cần preset `vietverse_content_images_signed` và env Production; chưa upload ảnh thật.
 
 ## Thanh toán PayOS — rà soát và triển khai 2026-10-03
 

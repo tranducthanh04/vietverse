@@ -5,11 +5,13 @@ import { requireRole } from '../../middlewares/role.middleware.js';
 import { ROLES } from '../../constants/roles.js';
 import contentRouter from './content/content.routes.js';
 import pointRulesRouter from './pointRules.routes.js';
+import contentImagesRouter from './content/contentImages.routes.js';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole(ROLES.ADMIN));
+router.use('/content-images', contentImagesRouter);
 router.use('/content', contentRouter);
 router.use('/point-rules', pointRulesRouter);
 

@@ -108,6 +108,16 @@ Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudin
 
 Giả định môi trường chưa xác minh: preset/metadata provider thực, IP qua rewrite, replica set/network/transaction, native build, cookie auth và webhook. Multipart legacy chỉ dùng local/Render/client cũ; không hứa file5MiB qua endpoint này trên Vercel.
 
+### Signed CMS cover-image upload — 2026-10-12
+
+Quyết định nghiệp vụ: chỉ admin được tải ảnh bìa cho story/đồng dao và culture; upload chỉ cập nhật form nháp sau khi xác minh, không tự lưu nháp, publish, điểm hoặc tiến độ. Đây là cấu hình tách biệt với upload audio.
+
+- `POST /admin/content-images/intent` (JWT + admin): body strict `{kind:'story'|'culture', contentId:ObjectId, draftVersion:positive integer, bytes:1..5242880, mimeType:'image/jpeg'|'image/png'|'image/webp', requestId:UUID}`. Server recheck User role và `ContentDraft` đang `editing` đúng version, rồi trả `201 {ticket, upload:{url,fields}}`.
+- Upload URL cố định HTTPS tới Cloudinary image account; fields gồm public ID dẫn xuất không chứa dữ liệu người dùng, timestamp, `overwrite=false`, signed image preset, public API key và signature. Browser dùng client HTTP riêng với `credentials=omit`, không gửi app headers/cookies.
+- `POST /admin/content-images/finalize` (JWT + admin): JSON strict `{ticket}`. Ticket có audience/purpose, admin, kind/id/version và hết hạn sau 10 phút. Server đọc resource provider theo public ID rồi kiểm tra resource type/upload, HTTPS đúng account, format JPG/PNG/WebP, bytes thực `1..5242880`, width/height hợp lệ, tối đa 40 MP và không phải ảnh nhiều trang.
+- Trả `200 {publicId,url,bytes,width,height}` với URL delivery `c_limit,w_1920,h_1920/f_auto,q_auto`. Finalize idempotent khi asset đã tồn tại; lỗi asset chưa có là `404 IMAGE_ASSET_NOT_FOUND`, quá cỡ `413 IMAGE_TOO_LARGE`, metadata không hợp lệ `422 IMAGE_INVALID`, storage/provider lỗi `503 IMAGE_STORAGE_UNAVAILABLE`.
+- Upload không ghi `ContentDraft`; admin phải dùng CMS save draft để persist và publish riêng. Provider max-file-size nếu preset không hiển thị không được coi là gate; client/backend vẫn là rào cứng 5 MiB.
+
 Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/quyền): cấp/reuse intent cũng ghi Child.__v trong transaction để phối hợp cascade. FE giữ Blob, hết hạn chỉ đổi requestId sau nút **Gửi lại bằng lượt mới**; không tự renew hoặc bypass404/503. Timer elapsed monotonic, auto-stop179s margin1s, dừng khi trang ẩn/pagehide; main thread bị khóa có thể overshoot, báo lỗi và không coi take đó hợp lệ; server vẫn giới hạn180s. Legacy Cloudinary UUID ngẫu nhiên/overwrite=false; Recording ID ổn định để reconcile commit mất ACK. DB503 hoặc kết quả commit không rõ không xóa provider asset, để đối soát thủ công; definite4xx business rejection mới compensation. Không bảo đảm legacy HTTP retry giữa hai request idempotent như direct intent.
 
 | Method | Path | Auth | Mục đích |

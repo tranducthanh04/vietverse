@@ -31,7 +31,15 @@ Cả bốn biến Cloudinary local còn thiếu/placeholder: CLOUDINARY_CLOUD_NA
 
 Không deploy, push, tạo giao dịch tiền thật, seed DB thật hoặc đổi network whitelist. Full suite có payment tests cô lập hiện hữu nhưng không sửa chúng và không gọi PayOS thật. CLI ak không có; file kế hoạch là trạng thái chuẩn, không tuyên bố sync index.
 
-## Production follow-up
+## Production follow-up (lịch sử trước cấu hình Cloudinary)
+
+### CMS cover-image upload — 2026-10-12
+
+- Đã thêm luồng signed upload riêng cho cover story/đồng dao và culture: admin-only intent/finalize, draft kind/id/version binding, retry cùng public ID, provider metadata verification, JPG/PNG/WebP và 5 MiB ở client/backend.
+- Upload trực tiếp dùng `credentials=omit`, không gửi JWT/cookie/Parent Gate; finalize chỉ trả delivery URL và không mutate draft/live/publish. Audio, PayOS và payment env không thay đổi.
+- Cần cấu hình preset signed `vietverse_content_images_signed` và `CLOUDINARY_IMAGE_UPLOAD_PRESET` ở Vercel Production. Nếu preset UI không có max file size, giới hạn 5 MiB vẫn do ứng dụng enforce.
+- Bằng chứng cuối: image client 8/8, image server 19/19; full server 417/417 (45 suites), full client 215/215 (27 suites). Build FE/BE exit0, lint0 errors/87 warnings (debt hiện có), chunk JS khoảng716 kB. Mongo test dùng system binary8.2.3/replica set cô lập vì binary download7.0.24 vướng sandbox rồi timeout60s; không test DB production.
+- Review độc lập phát hiện thiếu `pages:true` và race upload trong lúc save draft; đã sửa và thêm tests. Chưa upload file thật trên production để tránh tạo asset customer/orphan. Preset ảnh signed đã lưu trên Cloudinary; provider plan hiển thị max image10MB/25MP, không phải application gate5MiB.
 
 User yêu cầu tiếp tục tới production. Metadata Vercel xác nhận FE `vietverse` (root client), BE `vietverse-backend` (root server). `vercel env ls production` đúng project BE chỉ có GOOGLE_CLIENT_ID, MONGODB_URI, JWT_REFRESH_SECRET, JWT_SECRET, CLIENT_ORIGIN, CMS_PUBLISH_ENABLED và NODE_ENV; chưa có biến CLOUDINARY_* nào. Không đọc giá trị secret.
 
@@ -41,4 +49,6 @@ GET mới tới BE /health, /ready, FE / và FE /api/v1/stories đều200. Đây
 
 Đã phát hành phần code fix độc lập, không coi Cloudinary đã kích hoạt: commit928d406 push main thành công sau một lỗi GitHub commit_refs. BE archive deploy Ready `dpl_FN4dXGsrwYYtkfyLWrasdtPHoUZP`; FE Git Ready `dpl_B3TvNmfL1pLRaPWhQ8Hs6pMqRGZK`. BE Git song song lỗi git_info_fail, alias chính vẫn là bản archive Ready cùng source. Vercel API xác nhận sourceCommit/ githubCommitSha đúng928d406.
 
-GET sau release: health200/readiness200/FE200/catalog200. Browser production xác nhận F01/F02/F03 và copy pricing: 4 footer labels unavailable, 21 story cards Bản đọc, 5 stage tabs không lặp. Browser dùng phiên đã có, chỉ xem list/map, không submit lesson, upload hoặc payment. Cấu hình Cloudinary production còn thiếu đủ4 biến; gate upload thật vẫn mở. Không thay env/DB/indexes/network/PayOS. Chi tiết rollback/deployment ở docs/vercel-deployment.md.
+GET sau release: health200/readiness200/FE200/catalog200. Browser production xác nhận F01/F02/F03 và copy pricing: 4 footer labels unavailable, 21 story cards Bản đọc, 5 stage tabs không lặp. Browser dùng phiên đã có, chỉ xem list/map, không submit lesson, upload hoặc payment. Sau đó owner đã cấu hình đủ4 biến Cloudinary Production trong Vercel và redeploy từ source `928d406`; deployment `dpl_5pk9NByjMfj17s6UTpKwgcz7qjhj` Ready, health/readiness/catalog tiếp tục 200. Preset signed `vietverse_recordings_signed` đã được kiểm tra trên account `dh947pv3u` với metadata audio bật, `overwrite=false` và allowed formats đã duyệt. Chưa tạo recording/payment thật; live upload/finalize, microphone/device và orphan cleanup vẫn là gate riêng. Không thay PayOS, DB/indexes/network. Chi tiết rollback/deployment ở docs/vercel-deployment.md.
+
+Xác minh sau cấu hình lúc 21:24 +07:00: GET health200/ready200/catalog200. CLI chỉ đọc metadata env xác nhận đủ4 tên biến; API key/secret lưu dạng Secret, không pull env. Redeploy dùng source deployment Ready `dpl_FN4dXGsrwYYtkfyLWrasdtPHoUZP`, không dùng bản Git lỗi. Hash backend source archive khớp commit928d406 sau chuẩn hóa line ending của Git. Mốc rollback trước thêm env là deployment Ready trên; rollback code không xóa env. Giao diện preset không hiển thị max_file_size nên giới hạn provider5MiB còn chưa xác minh; không tuyên bố nghiệm thu audio production đầy đủ.

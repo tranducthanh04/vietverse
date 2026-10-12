@@ -5,7 +5,8 @@
 - Commit `928d406b427f8121ec2bddb7d793df843ff41235` đã push fast-forward lên main. FE Git deployment `dpl_B3TvNmfL1pLRaPWhQ8Hs6pMqRGZK` Ready và alias `vietverse-nine.vercel.app` đã cập nhật.
 - BE source archive từ cùng commit (không env/build local) đã build trên Vercel, deployment `dpl_FN4dXGsrwYYtkfyLWrasdtPHoUZP` Ready, alias `vietverse-backend.vercel.app`. Git deployment song song `dpl_6WUUJKnbcTkn1zy5MDmg4ZWrHzvo` lỗi `git_info_fail` trước build, không thay alias chính đang Ready. Push lần đầu cũng gặp GitHub `commit_refs`; thử lại fast-forward một lần thành công. Không force-push.
 - Sau release, BE health/readiness và FE root/catalog đều200. Browser production xác nhận footer unavailable, pricing copy mới, 21 story cards `Bản đọc`, và tab 5 chặng không lặp prefix. Không submit bài học, tạo recording hoặc giao dịch thật.
-- Cloudinary chưa bật: metadata env BE Production không có cả bốn CLOUDINARY_*; không đổi secret/preset/DB/PayOS. Code retry fix đã lên production nhưng upload/metadata thật vẫn chưa nghiệm thu. Owner cần cung cấp cấu hình qua secret store và môi trường/account test được duyệt; không gửi secret trong chat.
+- Cloudinary đã được cấu hình trong Vercel project `vietverse-backend` → Production: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_RECORDING_UPLOAD_PRESET`; image upload additionally uses `CLOUDINARY_IMAGE_UPLOAD_PRESET`. Secret chỉ lưu trong Vercel; không ghi credential vào repo hoặc tài liệu.
+- Sau khi thêm env, redeploy từ source QA Ready tạo deployment `dpl_5pk9NByjMfj17s6UTpKwgcz7qjhj` Ready và alias `vietverse-backend.vercel.app` vẫn hoạt động. GET `/health`, `/ready` và FE `/api/v1/stories` trả 200. Chưa tạo recording/payment thật; live upload/finalize, microphone/device và orphan cleanup vẫn là gate riêng.
 - Mốc rollback trước release: BE `dpl_Ae4mHxx9fJRAP2wpWdkptMB4SX8v` (`vietverse-backend-9phgw0tre.vercel.app`), FE `dpl_4vKE3yqavge4h5ZngKMtoiPwKm46` (`vietverse-3l5wpiiqf-tranducthanh31102004-gmailcoms-projects.vercel.app`). Chỉ rollback code theo target đã xác nhận, không rollback dữ liệu hay env.
 
 ## Backend Git auto-deploy — 2026-10-12
@@ -78,7 +79,13 @@ Preview/staging phải có DB/credentials riêng hoặc protection phù hợp, k
 
 QA local 2026-10-12: sửa nhận diện404 lồng của SDK để retry đúng contract. Cả bốn biến Cloudinary local còn thiếu/placeholder; không thay cấu hình Vercel trong lượt sửa này. Test provider double không chứng minh preset/metadata/upload thật; owner cần cấu hình môi trường staging được duyệt và chạy các gate bên dưới trước phát hành.
 
-Preset **signed** (không unsigned); giới hạn max_file_size5242880, allowed_formats webm/mp4/m4a/ogg/mp3/wav, không overwrite. Endpoint resource_type=video dùng cho audio; preset format không đảm bảo audio-only. Cấu hình cụ thể cần đối chiếu account/preset thật, không mặc định đã có.
+Preset **signed** (không unsigned); yêu cầu giới hạn max_file_size5242880, allowed_formats webm/mp4/m4a/ogg/mp3/wav, không overwrite. Endpoint resource_type=video dùng cho audio; preset format không đảm bảo audio-only. Preset Production đã xác minh mode/formats/overwrite/metadata, nhưng giao diện không hiển thị `max_file_size`; chưa xác minh giới hạn 5MiB tại provider. Không coi validation bytes khi finalize là bằng chứng provider chặn upload quá cỡ.
+
+### Ảnh CMS
+
+Tạo preset signed riêng `vietverse_content_images_signed` trên account `dh947pv3u`: image upload, `overwrite=false`, public ID tự sinh/không giữ tên file, allowed formats `jpg,png,webp`, media metadata bật nếu có. Backend/FE vẫn chặn 5 MiB; giao diện Cloudinary hiện không lộ `max_file_size` nên đây là gate ứng dụng, không tuyên bố provider limit đã được bật. Vercel Production cần thêm `CLOUDINARY_IMAGE_UPLOAD_PRESET` với đúng tên preset, sau đó redeploy backend. Không đổi preset audio hoặc PayOS.
+
+Đã cấu hình 2026-10-12: preset trên Cloudinary đã được lưu với các option trên; Vercel xác nhận thêm `CLOUDINARY_IMAGE_UPLOAD_PRESET` tại project `vietverse-backend`, Production. Chưa nghiệm thu upload/finalize file thật. Account hiện giới hạn image10MB/25MP; app vẫn áp5MiB.
 
 Sign field public_id ngẫu nhiên không chứa dữ liệu bé, timestamp, overwrite=false, upload_preset. Không cho browser chọn đích/public ID/preset; API secret ở BE. Intent pending finalize10 phút; TTL DB7 ngày. Cloudinary signature có expiry riêng (thường dài hơn intent); intent hết hạn **không thu hồi** quyền upload phía provider. Cần quota/rate limit/đối soát orphan.
 

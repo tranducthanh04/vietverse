@@ -20,8 +20,8 @@
 | Lesson | Lesson player | 7 loại cũ + multi_select/group_sort/fill_blanks/follow_steps | `GET /lessons/:id?activityContract=2`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Triển khai local 2026-10-09; loại mới ghi nhận trung tính, chấm server; chưa xác nhận deploy/content production |
 | Lesson | Tim/gợi ý/offline session | Có | IndexedDB + Offline Sync Queue localStorage | lesson session, queue | Hoàn thiện (P1.5) |
 | Recording | Thu âm | MediaRecorder elapsed auto-stop179s margin1s/background, upload trực tiếp production, guard phiên/retry finalize/explicit expired resend | Multipart legacy; `/recordings/upload-intent`, `/recordings/finalize` | Recording, RecordingUploadIntent, Cloudinary | Triển khai local, review2026-10-10; server strict180s, metadata/preset thật và rollout production chưa nghiệm thu |
-| Stories | Kho truyện/đồng dao | Có | GET public, mark explored auth | Story, ExplorationLog | Hoàn thiện (P1.3 idempotency, P2.5 safe search) |
-| Culture | Bài văn hóa/narration | Có | GET public, quiz auth | CultureArticle, ExplorationLog | Hoàn thiện (P2.5 safe search) |
+| Stories | Kho truyện/đồng dao | Có | GET public, mark explored auth; admin draft cover upload | Story, ExplorationLog, ContentDraft | Hoàn thiện (P1.3 idempotency, P2.5 safe search); cover upload production gate riêng |
+| Culture | Bài văn hóa/narration | Có | GET public, quiz auth; admin draft cover upload | CultureArticle, ExplorationLog, ContentDraft | Hoàn thiện (P2.5 safe search); cover upload production gate riêng |
 | Culture | Quiz +5 điểm | Có | `POST /culture/:id/quiz` | PointTransaction, Child | Hoàn thiện (P1.3 idempotency & compensation) |
 | Points | Lịch sử điểm | Bảng cộng/trừ, Hôm nay/Hôm qua, Xem thêm | `GET /points/children/:childId` | PointTransaction | Mở rộng 2026-10-09: phân trang cursor, `totalEarned` |
 | Points | Điểm theo hoạt động | +1 mỗi hoạt động đạt lần đầu | Nộp bài | PointTransaction, Child | Mới 2026-10-09 (giả định chỉ khi đỗ) |
@@ -36,7 +36,7 @@
 | Admin | KPI | Có | `GET /admin/kpi` | Nhiều collection | Hoàn thiện |
 | Admin | Provision tài khoản | Hộp nhập riêng trên Windows | Offline, không có endpoint cấp quyền public | User, seed_locks | Đã tạo một admin trên `test` và kiểm tra login/RBAC production 2026-10-11; xem `admin-provisioning.md` |
 | Admin | Learners | Có | `GET /admin/learners` | Child/User | Hoàn thiện (Limit 100) |
-| Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, publish/ẩn có xác nhận | `/admin/content/:kind` | ContentDraft, ContentRevision, live, AdminAuditLog | Đã triển khai local 2026-10-09; publish mặc định tắt, chưa import production |
+| Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, signed cover upload, publish/ẩn có xác nhận | `/admin/content/:kind`, `/admin/content-images/*` | ContentDraft, ContentRevision, live, AdminAuditLog, Cloudinary image | Đã triển khai local 2026-10-12; cover upload cần preset/env/deploy; publish mặc định tắt, chưa import production |
 | Admin | Redemptions | Có | GET/PATCH admin | Redemption | Hoàn thiện (P1.7 Zod validation, P2.5 limit 100) |
 | Platform | Health/deploy | FE Vercel giữ proxy hiện hữu; BE có native Express config | `/health`, `/ready`, Mongo rate limit chung; Render giữ rollback | Env, RateLimitBucket | Triển khai local 2026-10-09; chưa chuyển traffic production. Xem runbook Vercel |
 

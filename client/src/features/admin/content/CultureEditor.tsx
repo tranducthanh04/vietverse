@@ -4,12 +4,19 @@ import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import type { CoverUploadContext } from './CoverImageUpload.js';
 export function CultureEditor({
   value,
   onChange,
+  uploadContext,
+  onUploadBusy,
+  uploadDisabled,
 }: {
   value: CultureContent;
   onChange: (value: CultureContent) => void;
+  uploadContext?: CoverUploadContext;
+  onUploadBusy?: (busy: boolean) => void;
+  uploadDisabled?: boolean;
 }) {
   const patch = (change: Partial<CultureContent>) =>
     onChange({ ...value, ...change });
@@ -61,6 +68,9 @@ export function CultureEditor({
         onChange={(tags) => patch({ tags })}
       />
       <MediaFields
+        uploadContext={uploadContext}
+        onUploadBusy={onUploadBusy}
+        uploadDisabled={uploadDisabled}
         imageName="coverImage"
         value={{ audioUrl: value.audioUrl, imageUrl: value.coverImage }}
         onChange={(change) =>

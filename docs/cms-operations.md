@@ -67,6 +67,14 @@ Preview bốn dạng dùng renderer thuần và state local, phản hồi trung 
 
 Ảnh bìa minh họa từ Wikimedia Commons được tự host ở `client/public/images/covers/`; nguồn, tác giả, giấy phép ở [`content-image-credits.md`](./content-image-credits.md) và `server/src/seeds/contentCovers.ts`. Script `server/src/seeds/applyContentCovers.ts` (dry-run mặc định, `--apply` để ghi) chỉ điền `coverImage` đang trống cho nội dung legacy (contentVersion trống/0, chưa có ContentRevision và không có ContentDraft chưa discarded); bản đã qua CMS bị bỏ qua và phải gán qua nháp → xuất bản. Đây là **quyết định triển khai** cho DB demo/local, không phải seed ghi đè live. Không tạo revision/audit vì nội dung legacy chưa có phiên bản; snapshot legacy 0 sẽ chứa ảnh khi publish lần đầu. **Giả định chờ duyệt**: content team duyệt ảnh và cách hiển thị ghi công (CC BY/BY-SA) trước production. Client hiển thị khối gradient + icon theo type/category khi không có `coverImage`, không còn ảnh fallback dùng chung.
 
+## Upload ảnh bìa qua CMS (2026-10-12)
+
+Đây là **quyết định triển khai** cho story/đồng dao và văn hóa: admin chọn JPG/PNG/WebP tối đa 5 MiB trong form nháp. Backend cấp signed intent và kiểm tra lại role, draft version, public ID và metadata Cloudinary; browser upload thẳng Cloudinary image preset tách khỏi audio. Sau finalize, URL chỉ nằm trong form local; admin phải bấm **Lưu nháp**, còn publish/visibility vẫn qua CAS và cờ `CMS_PUBLISH_ENABLED`.
+
+- Preset production đề xuất: `vietverse_content_images_signed`, Signed, `overwrite=false`, public ID tự sinh, discard original filename, chỉ `jpg,png,webp`, image upload type.
+- Nếu Cloudinary UI không có `max_file_size`, 5 MiB vẫn được chặn ở client/backend; không ghi nhận provider đã chặn vượt cỡ nếu chưa có bằng chứng thật.
+- Không upload ảnh khách hàng để smoke test nếu chưa có yêu cầu riêng. Asset mồ côi do mất response cần đối soát theo public ID; không xóa wildcard.
+
 ## Rollback
 
 Tắt `CMS_PUBLISH_ENABLED` để ngừng publish/visibility. Giữ backend reader phiên bản và client/session/outbox hiểu version. Không hạ về grader chỉ đọc live sau khi đã xuất bản revisions. Không xóa revisions, drafts, progress, recording hay ledger. Khôi phục nội dung cũ bằng lần xuất bản mới có kiểm tra từ snapshot; chưa có nút khôi phục một chạm.
