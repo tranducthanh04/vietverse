@@ -1,5 +1,11 @@
 # Rollout backend Vercel — Vietverse
 
+## Backend Git auto-deploy — 2026-10-12
+
+- Project `vietverse-backend` is now linked to GitHub repository `tranducthanh04/vietverse`, production branch `main`, with Git deployments enabled. Root Directory remains `server` and the existing Production environment variables/database are unchanged.
+- The first Git-sourced Production deployment after the link used commit `8a6325c` and is Ready under alias `https://vietverse-backend.vercel.app`. Vercel build/runtime remains Express on Node 22.x. Health/readiness and FE proxy smoke returned 200; unauthenticated `/api/v1/auth/me` returned 401 as expected.
+- Future pushes to `main` should create BE deployments automatically. If a source change must be checked without promoting it, use a Preview deployment or inspect the Vercel project before changing aliases. Rollback remains `vercel rollback <deployment-url>` after owner approval; do not alter env, MongoDB data or indexes as part of rollback.
+
 ## Schema/catalog đã duyệt — 2026-10-11
 
 Owner xác nhận database `test`, migrate schema/nạp catalog và deploy FE/BE. Lượt cuối đã nhận credential riêng, preflight rỗng, transaction `applied` và receipt được xác minh. FE/BE mới đều Production Ready, catalog đọc được qua proxy FE; bằng chứng, deployment IDs và giới hạn ở [journal](../plans/journals/2026-10-11-schema-catalog.md). Các mục bên dưới là lịch sử triển khai trước lượt này. Cloudinary/thanh toán tiếp tục hoãn; không đổi CMS publish, JWT, networking hoặc quyền DB.
