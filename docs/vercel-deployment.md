@@ -68,6 +68,8 @@ Preview/staging phải có DB/credentials riêng hoặc protection phù hợp, k
 
 ## Cloudinary signed preset và metadata
 
+QA local 2026-10-12: sửa nhận diện404 lồng của SDK để retry đúng contract. Cả bốn biến Cloudinary local còn thiếu/placeholder; không thay cấu hình Vercel trong lượt sửa này. Test provider double không chứng minh preset/metadata/upload thật; owner cần cấu hình môi trường staging được duyệt và chạy các gate bên dưới trước phát hành.
+
 Preset **signed** (không unsigned); giới hạn max_file_size5242880, allowed_formats webm/mp4/m4a/ogg/mp3/wav, không overwrite. Endpoint resource_type=video dùng cho audio; preset format không đảm bảo audio-only. Cấu hình cụ thể cần đối chiếu account/preset thật, không mặc định đã có.
 
 Sign field public_id ngẫu nhiên không chứa dữ liệu bé, timestamp, overwrite=false, upload_preset. Không cho browser chọn đích/public ID/preset; API secret ở BE. Intent pending finalize10 phút; TTL DB7 ngày. Cloudinary signature có expiry riêng (thường dài hơn intent); intent hết hạn **không thu hồi** quyền upload phía provider. Cần quota/rate limit/đối soát orphan.

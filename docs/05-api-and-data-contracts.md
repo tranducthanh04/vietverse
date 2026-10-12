@@ -92,6 +92,8 @@ Quyết định tương thích 2026-10-11: `POST/PUT /children` nhận `companio
 
 ### Signed recording upload — triển khai local 2026-10-09, chưa cutover
 
+QA 2026-10-12 (quyết định kỹ thuật): adapter nhận cả `error.http_code` lồng của SDK và `http_code` phẳng. Chỉ provider404 trả `UPLOAD_ASSET_NOT_FOUND` cho retry; lỗi khác vẫn503 `UPLOAD_STORAGE_UNAVAILABLE`, không xuất đối tượng SDK chứa credentials. Không đổi quyền, điểm hoặc schema.
+
 Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudinary trực tiếp để không đưa file qua giới hạn function Vercel4,5MB. Không đổi ownership, contentVersion/unlock hoặc điểm.
 
 - POST `/recordings/upload-intent` (JWT): JSON strict `{requestId: UUID, childId, lessonId?, activityId?, contentVersion?:number, wordOrPrompt?:string<=5000, byteLength:1..5242880, mimeType, durationSec:0..180}`. Lesson/activity phải có cùng nhau; standalone không có version. MIME chấp nhận audio/webm/mp4/ogg/mpeg/wav/x-wav và application/ogg; bỏ tham số codec trước kiểm tra. Client metadata chỉ kiểm sớm, không là bằng chứng audio thực.

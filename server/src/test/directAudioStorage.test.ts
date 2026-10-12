@@ -34,4 +34,22 @@ describe('server provider verification', () => {
     await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 404, code: 'UPLOAD_ASSET_NOT_FOUND' });
     await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 503, code: 'UPLOAD_STORAGE_UNAVAILABLE' });
   });
+  it('recognizes the Admin SDK nested 404 so a missing upload can be retried', async () => {
+    vi.spyOn(cloudinary.api, 'resource').mockRejectedValue({
+      error: { http_code: 404, message: 'Resource not found' },
+      request_options: { auth: 'private-provider-credentials' },
+    });
+    await expect(directAudioStorage.inspect('random-asset')).rejects.toEqual({
+      statusCode: 404, code: 'UPLOAD_ASSET_NOT_FOUND', message: 'Chưa tìm thấy tập tin đã gửi.',
+    });
+  });
+  it.each([401, 403, 429, 500])('does not permit reupload or expose SDK credentials on nested %s', async http_code => {
+    vi.spyOn(cloudinary.api, 'resource').mockRejectedValue({
+      error: { http_code, message: 'private-provider-details' },
+      request_options: { auth: 'private-provider-credentials' },
+    });
+    await expect(directAudioStorage.inspect('random-asset')).rejects.toEqual({
+      statusCode: 503, code: 'UPLOAD_STORAGE_UNAVAILABLE', message: 'Lưu trữ thu âm chưa sẵn sàng. Vui lòng thử lại.',
+    });
+  });
 });

@@ -349,6 +349,14 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - **Luồng Admin**: Đăng nhập → redirect đúng `/admin` → Dashboard KPI hiển thị data thực ✅.
 - **Việc còn lại quan trọng nhất**: (1) Code-splitting lazy-load theo route để giảm JS bundle < 300KB, (2) Playwright E2E smoke test cho luồng login/lesson/redemption, (3) axe accessibility scan.
 
+## Follow-up QA presentation và Cloudinary — 2026-10-12
+
+- F01: bốn mục chính sách chưa có tài liệu được duyệt ghi rõ `Chưa khả dụng`, bỏ affordance click giả. Quyết định UX, không tự công bố chính sách pháp lý mới.
+- F02: tab chặng chỉ hiện một prefix, tương thích title có/không có `Chặng N:`.
+- F03: card truyện phân biệt bản đọc, audio thiếu duration và duration hợp lệ; không hiện `0 giây` hoặc duration stale khi không có audio.
+- O01: bỏ hứa hẹn dùng thử 7 ngày/trọn đời và catalog 23 bài karaoke chưa được xác nhận. Không đổi giá, checkout hoặc quyền subscription.
+- Cloudinary: nhận diện lỗi404 lồng SDK đúng contract retry; lỗi provider khác vẫn503 an toàn. Live upload/preset chưa nghiệm thu do thiếu cấu hình local. Bằng chứng và giới hạn: `plans/261012-qa-fixes/verification.md`.
+
 ## Thanh toán PayOS — rà soát và triển khai 2026-10-03
 
 - Đã sửa các chặn ở code: FE tạo checkout theo gói, PayOS SDK v2 tạo link, webhook dùng payload chuẩn + xác minh chữ ký, so khớp số tiền, chỉ parent được tạo checkout, và đơn/subscription được ghi trong transaction.

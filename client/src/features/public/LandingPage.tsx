@@ -70,7 +70,7 @@ export const LandingPage: React.FC = () => {
 
                 <div className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-surface-container-high text-on-surface-variant font-semibold text-sm">
                   <ShieldCheck className="w-5 h-5 text-tertiary" />
-                  <span>Hoàn toàn miễn phí trải nghiệm 7 ngày</span>
+                  <span>Bắt đầu khám phá với gói miễn phí</span>
                 </div>
               </div>
 

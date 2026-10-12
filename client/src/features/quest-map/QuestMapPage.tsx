@@ -98,7 +98,7 @@ export const QuestMapPage: React.FC = () => {
               ) : (
                 <Compass className="w-4 h-4 text-secondary-container" />
               )}
-              <span>Chặng {stage.order}: {stage.title}</span>
+              <span>Chặng {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
             </button>
           );
         })}

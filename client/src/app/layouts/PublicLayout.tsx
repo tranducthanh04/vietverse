@@ -208,18 +208,17 @@ export const PublicLayout: React.FC = () => {
             <div className="space-y-4">
               <h4 className="text-base font-bold text-on-surface">Quy Định & Quyền Riêng Tư</h4>
               <ul className="space-y-2.5 text-sm">
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <span>Điều khoản dịch vụ</span>
-                </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <span>Chính sách bảo mật dữ liệu</span>
-                </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <span>Bảo vệ quyền riêng tư trẻ em</span>
-                </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <span>Cẩm nang dành cho phụ huynh</span>
-                </li>
+                {[
+                  'Điều khoản dịch vụ',
+                  'Chính sách bảo mật dữ liệu',
+                  'Bảo vệ quyền riêng tư trẻ em',
+                  'Cẩm nang dành cho phụ huynh',
+                ].map((label) => (
+                  <li key={label}>
+                    <span>{label}</span>
+                    <span className="block text-xs mt-0.5">Chưa khả dụng</span>
+                  </li>
+                ))}
               </ul>
             </div>
 

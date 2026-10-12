@@ -26,7 +26,11 @@ export const directAudioStorage = {
     try {
       resource = await cloudinary.api.resource(publicId, { ...config, resource_type: 'video', media_metadata: true });
     } catch (error) {
-      if ((error as { http_code?: number })?.http_code === 404) throw { statusCode: 404, code: 'UPLOAD_ASSET_NOT_FOUND', message: 'Chưa tìm thấy tập tin đã gửi.' };
+      // Cloudinary JSON errors nest the status; transport errors may expose it directly.
+      const providerError = error as { http_code?: number; error?: { http_code?: number } } | null;
+      if ((providerError?.error?.http_code ?? providerError?.http_code) === 404) {
+        throw { statusCode: 404, code: 'UPLOAD_ASSET_NOT_FOUND', message: 'Chưa tìm thấy tập tin đã gửi.' };
+      }
       throw unavailable();
     }
     let url: URL;

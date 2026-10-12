@@ -38,7 +38,7 @@ export const PricingPage: React.FC = () => {
       id: 'free',
       name: 'Gói Khởi Động (Starter)',
       price: 'Miễn phí',
-      period: 'trọn đời',
+      period: '',
       description: 'Làm quen bảng chữ cái và trải nghiệm thế giới tiếng Việt cùng Sao Lí Lắc.',
       features: [
         'Mở khóa toàn bộ Chặng 1 (4 bài học cơ bản)',
@@ -58,7 +58,7 @@ export const PricingPage: React.FC = () => {
       description: 'Chinh phục toàn diện 5 chặng học và tích lũy ViVi Points đổi quà.',
       features: [
         'Mở khóa toàn bộ 5 Chặng (20 bài học)',
-        'Kho truyện 23 bài hát và cổ tích karaoke',
+        'Kho truyện đồng dao và cổ tích',
         'Toàn bộ bài viết văn hóa và đố vui',
         'Đổi quà tặng hiện vật và số',
         '1 hồ sơ bé',

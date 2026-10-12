@@ -140,8 +140,13 @@ export const StoriesPage: React.FC = () => {
 
               <div className="flex items-center justify-between pt-3 border-t border-cream-border">
                 <span className="text-xs text-stone-500 flex items-center space-x-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{story.durationSec} giây</span>
+                  {!story.audioUrl?.trim() ? (
+                    <><BookOpen className="w-3.5 h-3.5" /><span>Bản đọc</span></>
+                  ) : Number.isFinite(story.durationSec) && story.durationSec > 0 ? (
+                    <><Clock className="w-3.5 h-3.5" /><span>{story.durationSec} giây</span></>
+                  ) : (
+                    <><Music className="w-3.5 h-3.5" /><span>Có bản thu</span></>
+                  )}
                 </span>
 
                 <Button variant="accent" size="sm" className="px-4 py-1.5 text-xs">
