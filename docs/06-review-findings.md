@@ -1,5 +1,12 @@
 # 06 — Kết quả review senior BA/code
 
+## Tự host — Pha 1 code, 2026-10-13, local
+
+- IP cho rate limit khi tự host: chỉ tin đúng `TRUST_PROXY_HOPS` proxy (mặc định 2) khi `SELF_HOSTED=1`; XFF giả mạo phía trái bị bỏ qua (test đơn vị 1/2 hop). Rủi ro còn lại **[GĐ]**: thêm CDN/proxy trước nginx host mà không tăng hop sẽ gộp mọi người dùng vào một bucket; nginx host phải ghi đè XFF như file mẫu.
+- API không nhận mật khẩu root/backup Mongo (biến được liệt kê tường minh, không `env_file`); user app chỉ `readWrite` DB `vietverse`, user backup chỉ `read`. Mật khẩu không xuất hiện trên argv.
+- JWT sinh mới trên máy chủ → phiên Vercel cũ không dùng được sau cutover trừ khi owner chép secret cũ (quyết định của owner).
+- Chưa kiểm chứng: build image/compose thật trên Linux (bcrypt musl, healthcheck, `nginx -t`), cutover, backup offsite (D6). Xem [self-host-deployment.md](./self-host-deployment.md).
+
 ## Bảo mật sau chuyển BE sang Vercel — 2026-10-13, local
 
 Nguồn: [review 2026-10-13](../plans/reports/review-261013-0835-post-vercel-audit.md). Sửa trên nhánh `fix/post-vercel-audit`, chưa deploy; cần operator cấu hình env bên dưới trước khi phát hành.

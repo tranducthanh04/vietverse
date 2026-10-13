@@ -1,0 +1,19 @@
+# BuildKit reads <Dockerfile>.dockerignore next to the Dockerfile (context = repo root).
+# Local client/.env may set VITE_API_URL to a dev server; it must never reach the build.
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/coverage
+**/*.log
+.git
+.github
+.claude
+.vercel
+**/.vercel
+docs
+plans
+server/src
+server/scripts
+deploy
+!deploy/selfhost/web.nginx.conf

@@ -1,6 +1,6 @@
 import { app } from './app.js';
 import { env } from './config/env.js';
-import { connectDB } from './config/db.js';
+import { connectDB, disconnectDB } from './config/db.js';
 import { logger } from './utils/logger.js';
 
 async function bootstrap() {
@@ -17,7 +17,10 @@ async function bootstrap() {
       logger.info(`Received ${signal}. Gracefully shutting down...`);
       server.close(() => {
         logger.info('HTTP server closed.');
-        process.exit(0);
+        // Long-running hosts (self-host/Render) release the Mongo pool before exiting.
+        disconnectDB()
+          .catch(() => logger.error('MongoDB disconnect failed during shutdown'))
+          .finally(() => process.exit(0));
       });
     };
 

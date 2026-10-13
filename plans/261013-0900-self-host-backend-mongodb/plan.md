@@ -1,6 +1,6 @@
 ---
 title: Chuyển toàn bộ Vietverse (frontend + backend + MongoDB) sang máy chủ vật lý riêng, cô lập hoàn toàn với các dự án khác
-status: draft — Pha 0 xong (2026-10-13); đã chốt chuyển cả FE (D2); chờ chốt D1, D4, D5, D6 trước Pha 1
+status: in-progress — Pha 0 xong; D1/D2 đã chốt; Pha 1 (code) xong local 2026-10-13, chưa build/chạy trên máy chủ; chờ D4, D5, D6 trước Pha 4
 created: 2026-10-13
 depends_on: nhánh fix/post-vercel-audit (CORS, cookie Lax, audio, hiệu năng) nên merge trước
 ---
@@ -81,7 +81,7 @@ sudo certbot delete --cert-name <domain-vietverse>
 
 | # | Câu hỏi | Trạng thái |
 |---|---|---|
-| D1 | Domain cho Vietverse trên máy chủ? | **Cần chốt.** Một domain cho cả FE + API (ví dụ domain riêng của Vietverse hoặc subdomain). Domain hiện tại `vietverse-nine.vercel.app` không trỏ về máy riêng được |
+| D1 | Domain cho Vietverse trên máy chủ? | **Đã chốt 2026-10-13: `vietverse.io.vn`** (FE + API cùng origin); `www.vietverse.io.vn` redirect 301 về apex ở nginx host |
 | D2 | FE để Vercel hay chuyển về máy chủ? | **Đã chốt 2026-10-13: chuyển cả FE về máy chủ** |
 | D3 | Máy chủ đặt ở đâu? | **Đã rõ (Pha 0): Việt Nam** |
 | D4 | Cửa sổ bảo trì để chuyển dữ liệu? | Cần chốt: 30–60 phút giờ ít người dùng |
@@ -103,6 +103,16 @@ sudo certbot delete --cert-name <domain-vietverse>
 
 # Pha 1 — Chuẩn bị code (PR riêng trong repo)
 
+**Trạng thái: ĐÃ XONG (local, 2026-10-13, nhánh `feat/self-host`).** Runbook: `docs/self-host-deployment.md`. Khác biệt so với mô tả gốc bên dưới:
+- Image dùng **Node 22** (khớp `engines.node` = 22.x của server), không phải Node 20.
+- `compose.yml` có thêm 2 service one-shot `vietverse-mongo-keyfile` (tạo keyfile một lần) và `vietverse-mongo-init` (rs.initiate một lần + tạo/cập nhật user app/backup) — idempotent, `restart: "no"`.
+- API nhận env tường minh trong `compose.yml` (không `env_file`) để không thấy mật khẩu root/backup; `MONGODB_URI` được ghép từ `MONGO_APP_*`.
+- nginx web dùng `resolver 127.0.0.11` + biến upstream để API tạo lại container (IP mới) không làm web hỏng.
+- nginx host ghi đè `X-Forwarded-For` bằng `$remote_addr` (edge), API tin 2 hop.
+- `up.sh` giữ image tag hiện tại **và tag trước** (rollback không cần build lại).
+- Script backup thủ công tên `backup-now.sh`; lịch hằng ngày chạy trong container `vietverse-backup`.
+- Đã kiểm local: typecheck, unit test, shellcheck và `bash -n`, compose-spec JSON schema, `npm ci -w`, init/dump/restore trên mongod local. **Chưa** chạy docker build hay compose up (máy dev không có Docker) — nghiệm thu ở Pha 2.
+
 1. **`deploy/selfhost/api.Dockerfile`**: multi-stage Node 20 alpine; cài deps theo lockfile; build `server`; chạy `node dist/server.js` bằng user không phải root; `HEALTHCHECK` `/health`.
 2. **`deploy/selfhost/web.Dockerfile`**: stage 1 build `client` (Node 20); stage 2 `nginx:alpine` chứa `dist` + `deploy/selfhost/web.nginx.conf`:
    - SPA fallback `try_files $uri /index.html`; `/assets/` cache `max-age=31536000, immutable`; `/images/` 1 ngày; `index.html` no-cache; gzip.
@@ -116,6 +126,8 @@ sudo certbot delete --cert-name <domain-vietverse>
 8. Tài liệu `docs/self-host-deployment.md`, cập nhật `docs/04-system-architecture.md`.
 
 # Pha 2 — Dựng môi trường trên máy chủ (chưa có traffic thật)
+
+> Sau Pha 1: dùng `init.sh` + `up.sh` theo `docs/self-host-deployment.md` mục 1 thay cho các bước thủ công bên dưới (giữ lại để tham chiếu).
 
 ```bash
 ./check-isolation.sh before           # ghi trạng thái dự án khác

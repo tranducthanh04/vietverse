@@ -1,0 +1,18 @@
+# BuildKit reads <Dockerfile>.dockerignore next to the Dockerfile (context = repo root).
+# Never send local secrets, installs or builds into the image context.
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/coverage
+**/*.log
+.git
+.github
+.claude
+.vercel
+**/.vercel
+docs
+plans
+deploy
+client/src
+client/public

@@ -45,6 +45,14 @@ describe('database connection options', () => {
   it('never auto-builds indexes or collections in production', () => {
     expect(connectionOptions('production')).toMatchObject({ autoIndex: false, autoCreate: false, socketTimeoutMS: 45000, maxPoolSize: 5 });
   });
+  it('keeps the small serverless pool unless self-hosted', () => {
+    expect(connectionOptions('production', false)).toMatchObject({ maxPoolSize: 5, minPoolSize: 0 });
+  });
+  it('uses a warm long-running pool when self-hosted and still never auto-indexes in production', () => {
+    expect(connectionOptions('production', true)).toMatchObject({
+      maxPoolSize: 20, minPoolSize: 2, autoIndex: false, autoCreate: false, serverSelectionTimeoutMS: 5000,
+    });
+  });
   it('keeps auto-indexing for local development and tests', () => {
     expect(connectionOptions('test')).toMatchObject({ autoIndex: true, autoCreate: true });
     expect(connectionOptions('development')).toMatchObject({ autoIndex: true, autoCreate: true });
