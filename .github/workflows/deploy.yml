@@ -1,0 +1,40 @@
+name: Deploy to self-host
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Hai lần deploy chạy chồng nhau sẽ tranh nhau cùng một .env (VIETVERSE_TAG) và cùng một
+# bộ image, nên phải xếp hàng. Không hủy bản đang chạy: cắt ngang giữa lúc build hoặc lúc
+# `compose up` để lại stack ở trạng thái nửa vời.
+concurrency:
+  group: vietverse-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          # up.sh build cả hai image rồi chờ ba container healthy; 10 phút mặc định là thiếu.
+          command_timeout: 25m
+          script: |
+            set -euo pipefail
+
+            # Ghim cây làm việc đúng main. Dùng `checkout -B` chứ không `git pull`: máy chủ
+            # có thể đang đứng ở nhánh khác (nó từng ở feat/self-host), và `pull` khi đó sẽ
+            # merge main vào nhánh ấy rồi deploy ra một thứ không khớp commit nào trên main.
+            cd ~/vietverse/app
+            git fetch origin main --prune
+            git checkout -f -B main origin/main
+
+            # lib.sh:30 bắt buộc chạy từ chính thư mục này, nếu không nó dừng ngay.
+            cd ~/vietverse/app/deploy/selfhost
+            bash ./up.sh
