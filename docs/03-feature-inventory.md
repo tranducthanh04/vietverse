@@ -34,6 +34,7 @@
 | Parent | Screen time | Có Modal nhắc nhở mắt + đếm giờ | `PATCH /parent/screen-time` | Child | Hoàn thiện (P1.4 real-time enforcement & override) |
 | Parent | Parent Gate | Có Modal toán / PIN | `GET /challenge`, `POST /verify` | Step-up Token 15m | Hoàn thiện (P0.4 server-side token) |
 | Admin | KPI | Có | `GET /admin/kpi` | Nhiều collection | Hoàn thiện |
+| Admin | Doanh thu | Có | `GET /admin/revenue`, `/admin/doanh-thu` | PaymentOrder | Hoàn thiện local 2026-10-13; chỉ tính đơn subscription đã completed, không tính giao dịch test |
 | Admin | Provision tài khoản | Hộp nhập riêng trên Windows | Offline, không có endpoint cấp quyền public | User, seed_locks | Đã tạo một admin trên `test` và kiểm tra login/RBAC production 2026-10-11; xem `admin-provisioning.md` |
 | Admin | Learners | Có | `GET /admin/learners` | Child/User | Hoàn thiện (Limit 100) |
 | Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, signed cover upload, publish/ẩn có xác nhận | `/admin/content/:kind`, `/admin/content-images/*` | ContentDraft, ContentRevision, live, AdminAuditLog, Cloudinary image | Đã triển khai local 2026-10-12; cover upload cần preset/env/deploy; publish mặc định tắt, chưa import production |

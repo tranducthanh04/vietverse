@@ -8,8 +8,22 @@ import {
   createInventorySchema,
 } from './admin.validation.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
+import { getRevenue, revenueQuerySchema } from './revenue.js';
+import { User } from '../../models/User.js';
 
 export class AdminController {
+  static async getRevenue(req: Request, res: Response, next: NextFunction) {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      if (!await User.exists({ _id: req.user!.id, role: 'admin' })) {
+        throw { statusCode: 403, code: 'FORBIDDEN', message: 'Chỉ quản trị viên được xem doanh thu' };
+      }
+      return sendSuccess(res, await getRevenue(revenueQuerySchema.parse(req.query)));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getKPIs(_req: Request, res: Response, next: NextFunction) {
     try {
       const kpis = await AdminService.getKPIs();

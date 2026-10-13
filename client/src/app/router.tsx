@@ -30,6 +30,7 @@ import { ParentRecordingsPage } from '../features/parent/ParentRecordingsPage.js
 import { ParentSettingsPage } from '../features/parent/ParentSettingsPage.js';
 import { PaymentResultPage } from '../features/parent/PaymentResultPage.js';
 import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
+import { AdminRevenuePage } from '../features/admin/AdminRevenuePage.js';
 import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
 import { ContentEditorPage } from '../features/admin/content/ContentEditorPage.js';
 import { ContentListPage } from '../features/admin/content/ContentListPage.js';
@@ -146,6 +147,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <AdminDashboardPage /> },
+      { path: 'doanh-thu', element: <AdminRevenuePage /> },
       { path: 'bai-hoc', element: <AdminLessonsPage /> },
       { path: 'bai-hoc/:id', element: <ContentEditorPage kind="lesson" /> },
       { path: 'bai-hoc/:id/xem-truoc', element: <ContentPreviewPage kind="lesson" /> },

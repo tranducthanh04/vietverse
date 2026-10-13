@@ -8,6 +8,8 @@ import { Stage } from '../models/Stage.js';
 import { ShopItem } from '../models/ShopItem.js';
 import { Redemption } from '../models/Redemption.js';
 import { PointTransaction } from '../models/PointTransaction.js';
+import { PaymentOrder } from '../models/PaymentOrder.js';
+import { PaymentTestOrder } from '../models/PaymentTestOrder.js';
 import { AuthService } from '../modules/auth/auth.service.js';
 import { ROLES } from '../constants/roles.js';
 
@@ -94,6 +96,94 @@ describe('Admin API & Schema Validation (P1.7)', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.totalUsers).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('GET /api/v1/admin/revenue', () => {
+    it('counts only completed subscription orders and excludes test or unpaid orders', async () => {
+      const paidAt = new Date('2026-10-05T10:00:00.000Z');
+      await PaymentOrder.create([
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-PAID-MONTH', planType: 'monthly', amount: 250000, status: 'completed', paymentMethod: 'payos', paidAt },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-PAID-YEAR', planType: 'yearly', amount: 990000, status: 'completed', paymentMethod: 'payos', paidAt: new Date('2026-10-06T10:00:00.000Z') },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-PENDING', planType: 'monthly', amount: 250000, status: 'pending' },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-FAILED', planType: 'monthly', amount: 250000, status: 'failed', paidAt },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-CANCELLED', planType: 'yearly', amount: 990000, status: 'cancelled', paidAt },
+      ]);
+      await PaymentTestOrder.create({ userId: new mongoose.Types.ObjectId(), orderCode: 'VT-TEST', amount: 10000, status: 'completed', paidAt });
+
+      const res = await request(app)
+        .get('/api/v1/admin/revenue')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.totalRevenue).toBe(1_240_000);
+      expect(res.body.data.paidOrders).toBe(2);
+      expect(res.body.data.byPlan).toEqual({
+        monthly: { orders: 1, revenue: 250000 },
+        yearly: { orders: 1, revenue: 990000 },
+      });
+      expect(res.body.data.series).toEqual([
+        { month: '2026-10', orders: 2, revenue: 1_240_000 },
+      ]);
+    });
+
+    it('supports an inclusive date range for completed orders', async () => {
+      await PaymentOrder.create([
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-IN-RANGE', planType: 'monthly', amount: 250000, status: 'completed', paymentMethod: 'payos', paidAt: new Date('2026-10-05T10:00:00.000Z') },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-OUT-RANGE', planType: 'yearly', amount: 990000, status: 'completed', paymentMethod: 'payos', paidAt: new Date('2026-11-05T10:00:00.000Z') },
+      ]);
+
+      const res = await request(app)
+        .get('/api/v1/admin/revenue?from=2026-10-01&to=2026-10-31')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.totalRevenue).toBe(250000);
+      expect(res.body.data.paidOrders).toBe(1);
+      expect(res.body.data.series).toEqual([
+        { month: '2026-10', orders: 1, revenue: 250000 },
+      ]);
+    });
+
+    it('uses Vietnam midnight boundaries and stored historic prices, without changing orders', async () => {
+      await PaymentOrder.create([
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-BEFORE', planType: 'monthly', amount: 250000, status: 'completed', paidAt: new Date('2026-09-30T16:59:59.999Z') },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-START', planType: 'monthly', amount: 149000, status: 'completed', paidAt: new Date('2026-09-30T17:00:00.000Z') },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-END', planType: 'yearly', amount: 990000, status: 'completed', paidAt: new Date('2026-10-31T16:59:59.999Z') },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-AFTER', planType: 'monthly', amount: 250000, status: 'completed', paidAt: new Date('2026-10-31T17:00:00.000Z') },
+      ]);
+      const before = await PaymentOrder.find().lean();
+      const res = await request(app).get('/api/v1/admin/revenue?from=2026-10-01&to=2026-10-31').set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.totalRevenue).toBe(1139000);
+      expect(res.body.data.series).toEqual([{ month: '2026-10', orders: 2, revenue: 1139000 }]);
+      expect(await PaymentOrder.find().lean()).toEqual(before);
+      expect(res.headers['cache-control']).toContain('no-store');
+    });
+
+    it('returns zero for empty data and rejects unauthenticated, non-admin and revoked admins', async () => {
+      expect((await request(app).get('/api/v1/admin/revenue')).status).toBe(401);
+      expect((await request(app).get('/api/v1/admin/revenue').set('Authorization', `Bearer ${parentToken}`)).status).toBe(403);
+      const res = await request(app).get('/api/v1/admin/revenue').set('Authorization', `Bearer ${adminToken}`);
+      expect(res.body.data).toMatchObject({ totalRevenue: 0, paidOrders: 0, currentMonthRevenue: 0, series: [], undatedOrders: 0 });
+      await User.updateOne({ role: 'admin' }, { $set: { role: 'parent' } });
+      expect((await request(app).get('/api/v1/admin/revenue').set('Authorization', `Bearer ${adminToken}`)).status).toBe(403);
+    });
+
+    it.each(['from=2026-02-30', 'from=nope', 'from=2026-11-01&to=2026-10-01', 'from=2026-01-01&from=2026-02-01', 'extra=1'])('rejects invalid query %s', async (query) => {
+      const res = await request(app).get(`/api/v1/admin/revenue?${query}`).set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('does not invent payment dates for legacy orders and keeps current month independent of filters', async () => {
+      await PaymentOrder.create([
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-UNDATED', planType: 'monthly', amount: 149000, status: 'completed' },
+        { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-NOW', planType: 'monthly', amount: 250000, status: 'completed', paidAt: new Date() },
+      ]);
+      const all = await request(app).get('/api/v1/admin/revenue').set('Authorization', `Bearer ${adminToken}`);
+      expect(all.body.data).toMatchObject({ totalRevenue: 399000, paidOrders: 2, undatedOrders: 1, currentMonthRevenue: 250000 });
+      const filtered = await request(app).get('/api/v1/admin/revenue?to=2000-01-01').set('Authorization', `Bearer ${adminToken}`);
+      expect(filtered.body.data).toMatchObject({ totalRevenue: 0, paidOrders: 0, undatedOrders: 1, currentMonthRevenue: 250000 });
     });
   });
 

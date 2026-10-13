@@ -16,6 +16,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { to: '/admin', end: true, label: VI_LOCALES.admin.tabDashboard, icon: <LayoutDashboard className="w-5 h-5" /> },
+    { to: '/admin/doanh-thu', label: 'Doanh thu', icon: <Wallet className="w-5 h-5" /> },
     { to: '/admin/bai-hoc', label: VI_LOCALES.admin.tabLessons, icon: <BookOpen className="w-5 h-5" /> },
     { to: '/admin/truyen', label: 'Truyện / đồng dao', icon: <BookOpen className="w-5 h-5" /> },
     { to: '/admin/van-hoa', label: 'Văn hóa', icon: <BookOpen className="w-5 h-5" /> },

@@ -17,6 +17,7 @@ router.use('/point-rules', pointRulesRouter);
 
 // KPI & Analytics
 router.get('/kpi', AdminController.getKPIs);
+router.get('/revenue', AdminController.getRevenue);
 router.get('/audit-logs', AdminController.getAuditLogs);
 
 // Learners

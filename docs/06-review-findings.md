@@ -360,6 +360,12 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 
 ## Thanh toán PayOS — rà soát và triển khai 2026-10-03
 
+### Admin revenue reporting — 2026-10-13
+
+- Đã thêm endpoint và màn hình chỉ đọc để tổng hợp `PaymentOrder` đã completed theo kỳ, gói và tháng; kiểm tra role admin lại ở server.
+- `PaymentTestOrder` và đơn chưa completed không được tính. Đơn thiếu `paidAt` không bị đoán ngày; được đếm riêng để đối soát.
+- PayOS production, phí, thuế, hoàn tiền và đối soát ngân hàng vẫn là gate vận hành riêng; báo cáo không tự tạo hoặc sửa đơn.
+
 - Đã sửa các chặn ở code: FE tạo checkout theo gói, PayOS SDK v2 tạo link, webhook dùng payload chuẩn + xác minh chữ ký, so khớp số tiền, chỉ parent được tạo checkout, và đơn/subscription được ghi trong transaction.
 - Đã thống nhất giá/quyền lợi với bảng giá: tháng 149.000đ/1 bé, năm 990.000đ/3 bé. Đã bỏ QR ngân hàng mẫu; thiếu cấu hình trả lỗi thay vì tạo đơn giả.
 - Đã thêm kiểm tra HTTPS cho `CLIENT_ORIGIN`, kiểm tra cấu hình PayOS nếu có khai báo phải đủ bộ, biến môi trường Render, trang kết quả thanh toán và kiểm thử chữ ký đúng/sai. Thiếu PayOS không được làm sập auth/API; riêng checkout trả 503 cho đến khi credentials được cấu hình.
