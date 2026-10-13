@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { connectDB } from '../config/db.js';
+import { connectDB, connectionOptions } from '../config/db.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -38,5 +38,15 @@ describe('database connection cache', () => {
       expect(await connectDB('mongodb://test-only/retry')).toBe(mongoose);
       expect(network).toHaveBeenCalledTimes(2);
     } finally { Reflect.set(mongoose.connection, '_readyState', originalState); }
+  });
+});
+
+describe('database connection options', () => {
+  it('never auto-builds indexes or collections in production', () => {
+    expect(connectionOptions('production')).toMatchObject({ autoIndex: false, autoCreate: false, socketTimeoutMS: 45000, maxPoolSize: 5 });
+  });
+  it('keeps auto-indexing for local development and tests', () => {
+    expect(connectionOptions('test')).toMatchObject({ autoIndex: true, autoCreate: true });
+    expect(connectionOptions('development')).toMatchObject({ autoIndex: true, autoCreate: true });
   });
 });

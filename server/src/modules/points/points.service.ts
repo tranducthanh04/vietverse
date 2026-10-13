@@ -23,9 +23,11 @@ export class PointsService {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé' };
     }
 
+    // "Xem thêm" pages (with `before`) reuse the first page's total, so skip the aggregate there.
+    // `totalEarned` is omitted (undefined) on those pages.
     const [historyPage, totalEarned] = await Promise.all([
       PointsService.getHistoryPage(child._id as Types.ObjectId, page),
-      PointsService.getTotalEarned(child._id as Types.ObjectId),
+      page.before ? undefined : PointsService.getTotalEarned(child._id as Types.ObjectId),
     ]);
 
     return {

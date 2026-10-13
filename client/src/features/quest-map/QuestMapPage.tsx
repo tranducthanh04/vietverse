@@ -50,7 +50,7 @@ export const QuestMapPage: React.FC = () => {
           <div className="flex items-center gap-4 shrink-0">
             <div className="bg-surface/95 backdrop-blur-md rounded-2xl p-4 border border-outline-variant/40 flex items-center space-x-3 text-on-surface shadow-md">
               <div className="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container shadow-md">
-                <span className="material-symbols-outlined text-2xl font-bold">stars</span>
+                <Star className="w-6 h-6 fill-current" strokeWidth={2.5} aria-hidden="true" />
               </div>
               <div>
                 <span className="text-[11px] text-on-surface-variant block uppercase font-bold tracking-wider">
@@ -66,7 +66,10 @@ export const QuestMapPage: React.FC = () => {
               <img
                 alt="Sao Lí Lắc"
                 className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuACRIKtBgTG9wCgUeSYdyWpma7WYksVA2By9zjzUZxgvQNqG-5quighNiQxXB0OJzqvLPYs54owlcewfvrgMPHqCmKQfGTls5UmT_2_wSa6MDuQLq5Qzq9BivE3mfi9KCo01y07vYxdjaA8a6K1hDT51Ijl_7_DyuP-H3k7GkCh7uJ9b1bbTcHiKa1Y-12L4zuFM7GDTy_VoL8TxCtbXPDUWzH5YKOSDPyw3Jx2BPMrrNlLEM42-wID"
+                src="/images/mascot/sao-li-lac-avatar.webp"
+                width={256}
+                height={256}
+                decoding="async"
               />
             </div>
           </div>

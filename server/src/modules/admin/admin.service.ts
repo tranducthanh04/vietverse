@@ -28,14 +28,15 @@ export class AdminService {
       totalLessons,
       totalShopItems,
     ] = await Promise.all([
-      User.countDocuments(),
-      Child.countDocuments(),
+      // Unfiltered totals come from collection metadata (O(1)); filtered counts still use the index.
+      User.estimatedDocumentCount(),
+      Child.estimatedDocumentCount(),
       LessonProgress.countDocuments({ status: 'completed' }),
-      Redemption.countDocuments(),
+      Redemption.estimatedDocumentCount(),
       Redemption.countDocuments({ status: 'pending' }),
-      Recording.countDocuments(),
-      Lesson.countDocuments(),
-      ShopItem.countDocuments(),
+      Recording.estimatedDocumentCount(),
+      Lesson.estimatedDocumentCount(),
+      ShopItem.estimatedDocumentCount(),
     ]);
 
     return {
@@ -69,19 +70,26 @@ export class AdminService {
 
     const [progress, recordings, transactions, redemptions] = await Promise.all(
       [
+        // Bounded, read-only views: plain objects (lean) and a cap on every list.
         LessonProgress.find({ childId: id })
           .populate('lessonId', 'title order stageId')
-          .sort({ updatedAt: -1 }),
+          .sort({ updatedAt: -1 })
+          .limit(200)
+          .lean(),
         Recording.find({ childId: id })
           .populate('lessonId', 'title')
           .sort({ createdAt: -1 })
-          .limit(30),
+          .limit(30)
+          .lean(),
         PointTransaction.find({ childId: id })
           .sort({ createdAt: -1 })
-          .limit(50),
+          .limit(50)
+          .lean(),
         Redemption.find({ childId: id })
           .populate('itemId', 'name type costPoints assetUrl')
-          .sort({ createdAt: -1 }),
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .lean(),
       ]
     );
 
