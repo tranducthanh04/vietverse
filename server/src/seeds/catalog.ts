@@ -33,8 +33,44 @@ const exercises: Exercise[] = [
   { title: 'Báu vật tiếng Việt', words: [['hạt', 'Có thể nảy thành cây khi đủ điều kiện'], ['chăm sóc', 'Quan tâm và làm việc giúp cây hoặc người khỏe hơn']], reading: 'Bé gieo hạt, tưới nước và chờ mầm xanh. Bé nhờ bạn cùng chăm cây.', question: 'Làm gì để cùng chăm cây tốt hơn?', choices: ['Chia nhau tưới vừa đủ nước', 'Giẫm lên mầm', 'Bẻ hết lá'], blank: ['Tiếng má có dấu __.', 'sắc', 'huyền', 'nặng'], order: ['Bé', 'chăm', 'cây'], speak: 'Bé kể hai câu về một việc tốt đã làm và mời bạn cùng tham gia.' },
 ];
 
-export const lessons = exercises.map((exercise, index) => {
-  const order = index + 1;
+// Mở rộng chương trình: 4 bài nữa cho mỗi chặng, nối tiếp thứ tự 21–40.
+// Chặng phải ghi tường minh. Bài 1–20 lấy chặng từ `Math.floor(index / 4) + 1`; nếu nối thêm
+// vào cùng mảng thì bài 21 rơi vào chặng 6 — một chặng không tồn tại — và seed sẽ bỏ qua lặng
+// lẽ vì nó `continue` khi không tra được stageId.
+type ExtraExercise = Exercise & { stage: number };
+const extraExercises: ExtraExercise[] = [
+  // Chặng 1 — Làm quen tiếng Việt
+  { stage: 1, title: 'Chào cô, chào bác', words: [['cô', 'Cách gọi người phụ nữ lớn tuổi hơn bé'], ['ạ', 'Tiếng thêm vào cuối câu cho lễ phép']], reading: 'Bé gặp cô giáo ở cổng. Bé khoanh tay và nói: Con chào cô ạ!', question: 'Bé nói gì khi gặp cô giáo?', choices: ['Con chào cô ạ!', 'Đi ra chỗ khác!', 'Không nói gì cả'], blank: ['Con chào cô __.', 'ạ', 'à', 'a'], order: ['Con', 'chào', 'cô'], speak: 'Bé chào một người lớn mà bé quen, nhớ thêm tiếng ạ ở cuối câu.' },
+  { stage: 1, title: 'Đồ dùng trong bếp', words: [['bát', 'Đồ dùng để đựng cơm hoặc canh'], ['đũa', 'Hai que dài dùng để gắp thức ăn']], reading: 'Mẹ dọn cơm. Bé xếp bát và đũa ngay ngắn lên bàn.', question: 'Bé xếp những gì lên bàn?', choices: ['Bát và đũa', 'Giày và dép', 'Bút và vở'], blank: ['Bé xếp __ lên bàn.', 'bát', 'bóng', 'bút'], order: ['Bé', 'xếp', 'bát'], speak: 'Bé gọi tên ba đồ dùng bé thấy trong bếp nhà mình.' },
+  { stage: 1, title: 'Con vật quanh nhà', words: [['gà', 'Con vật thường gáy vào buổi sáng'], ['chó', 'Con vật trông nhà, hay vẫy đuôi']], reading: 'Sáng sớm, gà gáy vang. Chó chạy ra sân đón bé.', question: 'Con vật nào gáy vào buổi sáng?', choices: ['Gà', 'Cá', 'Ốc'], blank: ['Con __ gáy sáng sớm.', 'gà', 'cá', 'cua'], order: ['Con', 'gà', 'gáy'], speak: 'Bé kể tên một con vật bé từng thấy và nói con vật ấy kêu thế nào.' },
+  { stage: 1, title: 'Trời nắng trời mưa', words: [['nắng', 'Khi có ánh sáng mặt trời chiếu xuống'], ['mưa', 'Khi nước từ trên trời rơi xuống']], reading: 'Trời nắng, bé đội mũ. Trời mưa, bé mang áo mưa.', question: 'Trời mưa thì bé mang gì?', choices: ['Áo mưa', 'Quạt giấy', 'Kính râm'], blank: ['Trời nắng bé đội __.', 'mũ', 'mưa', 'mây'], order: ['Trời', 'mưa', 'rồi'], speak: 'Bé nói hôm nay trời thế nào và bé cần mang theo thứ gì.' },
+
+  // Chặng 2 — Âm, chữ, thanh và vần
+  { stage: 2, title: 'Chữ c và chữ h', words: [['c', 'Chữ đầu của tiếng cá'], ['h', 'Chữ đầu của tiếng hoa']], reading: 'Cá bơi dưới ao. Hoa nở trên bờ. Tiếng cá có chữ c, tiếng hoa có chữ h.', question: 'Chữ nào đứng đầu tiếng hoa?', choices: ['h', 'c', 'm'], blank: ['__oa', 'h', 'c', 'b'], order: ['h', 'oa'], speak: 'Bé đọc chậm hai tiếng: cá, hoa.' },
+  { stage: 2, title: 'Dấu huyền và dấu nặng', words: [['bà', 'Tiếng có dấu huyền'], ['bạ', 'Tiếng có dấu nặng']], reading: 'Ba, bà, bá, bạ: cùng chữ b và a, chỉ khác dấu thanh.', question: 'Tiếng nào có dấu huyền?', choices: ['bà', 'bá', 'ba'], blank: ['Bé thương __ lắm.', 'bà', 'bá', 'bạ'], order: ['b', 'à'], speak: 'Bé đọc chậm: ba, bà, bá, bạ.' },
+  { stage: 2, title: 'Vần on và ôn', words: [['on', 'Vần trong tiếng con'], ['ôn', 'Vần trong tiếng bốn']], reading: 'Con mèo có bốn chân. Tiếng con có vần on, tiếng bốn có vần ôn.', question: 'Tiếng nào có vần ôn?', choices: ['bốn', 'con', 'cá'], blank: ['b__', 'ôn', 'on', 'an'], order: ['b', 'ốn'], speak: 'Bé đọc hai tiếng: con, bốn.' },
+  { stage: 2, title: 'Vần ao và eo', words: [['ao', 'Vần trong tiếng sao'], ['eo', 'Vần trong tiếng mèo']], reading: 'Mèo nằm nhìn sao. Tiếng sao có vần ao, tiếng mèo có vần eo.', question: 'Tiếng nào có vần eo?', choices: ['mèo', 'sao', 'bàn'], blank: ['m__', 'èo', 'ao', 'an'], order: ['s', 'ao'], speak: 'Bé đọc hai tiếng: sao, mèo.' },
+
+  // Chặng 3 — Ghép tiếng và tập đọc
+  { stage: 3, title: 'Ghép tiếng bà, bé', words: [['bà', 'Người thân thế hệ trước bố mẹ'], ['bé', 'Cách gọi trẻ nhỏ']], reading: 'Bà dắt bé đi chơi. Bé nắm tay bà thật chặt.', question: 'Ai dắt bé đi chơi?', choices: ['Bà', 'Mèo', 'Gà'], blank: ['__ dắt bé đi chơi.', 'Bà', 'Bàn', 'Bát'], order: ['Bà', 'dắt', 'bé'], speak: 'Bé đọc: Bà dắt bé đi chơi.' },
+  { stage: 3, title: 'Đọc từ về bữa sáng', words: [['xôi', 'Món ăn nấu từ gạo nếp'], ['sữa', 'Thức uống màu trắng, thường uống buổi sáng']], reading: 'Sáng nay bé ăn xôi. Bé uống thêm một cốc sữa.', question: 'Bé uống gì vào buổi sáng?', choices: ['Sữa', 'Nước ao', 'Mực'], blank: ['Bé ăn __ buổi sáng.', 'xôi', 'xe', 'xô'], order: ['Bé', 'ăn', 'xôi'], speak: 'Bé kể bữa sáng hôm nay bé ăn gì.' },
+  { stage: 3, title: 'Đọc câu ngoài sân', words: [['sân', 'Khoảng đất trống trước nhà'], ['bóng', 'Quả tròn dùng để chơi']], reading: 'Bé ra sân chơi bóng. Bé chuyền bóng cho bạn.', question: 'Bé chơi gì ngoài sân?', choices: ['Chơi bóng', 'Nấu cơm', 'Đọc báo'], blank: ['Bé chuyền __ cho bạn.', 'bóng', 'bàn', 'bát'], order: ['Bé', 'chơi', 'bóng'], speak: 'Bé đọc: Bé ra sân chơi bóng.' },
+  { stage: 3, title: 'Đọc đoạn về lớp học', words: [['lớp', 'Nơi các bạn cùng học'], ['bảng', 'Tấm phẳng để cô giáo viết chữ']], reading: 'Lớp bé có bảng xanh. Cô viết chữ a lên bảng. Cả lớp cùng đọc.', question: 'Cô viết chữ gì lên bảng?', choices: ['Chữ a', 'Chữ số 9', 'Hình con cá'], blank: ['Cô viết lên __.', 'bảng', 'bàn', 'bát'], order: ['Cả', 'lớp', 'cùng', 'đọc'], speak: 'Bé kể hai câu về lớp học của bé.' },
+
+  // Chặng 4 — Nói và kể chuyện
+  { stage: 4, title: 'Hỏi đường lịch sự', words: [['làm ơn', 'Lời nói lịch sự khi nhờ ai đó'], ['chỉ', 'Cho người khác biết hướng hoặc chỗ']], reading: 'Bé muốn tìm nhà sách. Bé hỏi: Bác làm ơn chỉ giúp cháu đường tới nhà sách ạ.', question: 'Bé nên nói gì khi nhờ người lớn?', choices: ['Bác làm ơn chỉ giúp cháu ạ', 'Chỉ ngay đi', 'Không hỏi, cứ đi bừa'], blank: ['Bác __ ơn chỉ giúp cháu.', 'làm', 'lấy', 'lăn'], order: ['Bác', 'chỉ', 'giúp', 'cháu'], speak: 'Bé hỏi đường tới một nơi quen thuộc bằng lời lịch sự.' },
+  { stage: 4, title: 'Tả con vật em thích', words: [['lông', 'Phần phủ ngoài thân nhiều con vật'], ['đuôi', 'Phần dài phía sau thân con vật']], reading: 'Mèo nhà bé có bộ lông vàng. Đuôi mèo dài và hay ngoe nguẩy.', question: 'Bộ lông mèo nhà bé màu gì?', choices: ['Màu vàng', 'Màu xanh lá', 'Trong suốt'], blank: ['Mèo có bộ __ vàng.', 'lông', 'lá', 'lưng'], order: ['Mèo', 'có', 'lông', 'vàng'], speak: 'Bé tả một con vật bé thích: màu gì, to hay nhỏ, kêu thế nào.' },
+  { stage: 4, title: 'Kể một ngày của bé', words: [['buổi sáng', 'Khoảng thời gian đầu ngày'], ['buổi tối', 'Khoảng thời gian cuối ngày']], reading: 'Buổi sáng bé đi học. Buổi chiều bé chơi với bạn. Buổi tối bé nghe mẹ đọc truyện.', question: 'Buổi tối bé làm gì?', choices: ['Nghe mẹ đọc truyện', 'Đi học', 'Chơi bóng ngoài sân'], blank: ['__ sáng bé đi học.', 'Buổi', 'Bưởi', 'Buồn'], order: ['Sáng', 'Chiều', 'Tối'], speak: 'Bé kể ba việc trong ngày hôm nay theo thứ tự sáng, chiều, tối.' },
+  { stage: 4, title: 'Kể chuyện kiến và lá', words: [['kiến', 'Con vật rất nhỏ, thường đi thành hàng'], ['trôi', 'Bị nước đưa đi']], reading: 'Kiến rơi xuống vũng nước. Một chiếc lá trôi tới. Kiến bò lên lá và vào bờ an toàn.', question: 'Nhờ đâu kiến vào được bờ?', choices: ['Nhờ chiếc lá', 'Nhờ cơn mưa', 'Nhờ hòn đá'], blank: ['Kiến bò lên chiếc __.', 'lá', 'là', 'lạ'], order: ['Kiến', 'bò', 'lên', 'lá'], speak: 'Bé kể lại chuyện con kiến và nói bé học được điều gì.' },
+
+  // Chặng 5 — Hiểu và vận dụng
+  { stage: 5, title: 'Hiểu biển báo quen thuộc', words: [['vạch', 'Đường kẻ trắng để người đi bộ qua đường'], ['đèn đỏ', 'Tín hiệu báo phải dừng lại']], reading: 'Đèn đỏ bật lên. Mọi người dừng lại. Khi đèn xanh, bé đi trên vạch cùng người lớn.', question: 'Thấy đèn đỏ thì phải làm gì?', choices: ['Dừng lại', 'Chạy thật nhanh', 'Nhắm mắt đi tiếp'], blank: ['Đèn đỏ thì phải __.', 'dừng', 'chạy', 'nhảy'], order: ['Đèn', 'đỏ', 'dừng', 'lại'], speak: 'Bé nói bé làm gì khi qua đường cùng người lớn.' },
+  { stage: 5, title: 'Chọn việc an toàn', words: [['nóng', 'Có nhiệt độ cao, chạm vào sẽ bỏng'], ['nhờ', 'Xin người khác giúp một việc']], reading: 'Nồi canh còn nóng. Bé không tự bê mà nhờ người lớn giúp.', question: 'Thấy nồi canh nóng, bé nên làm gì?', choices: ['Nhờ người lớn giúp', 'Tự bê một mình', 'Thò tay vào nồi'], blank: ['Bé __ người lớn giúp.', 'nhờ', 'nhớ', 'nhà'], order: ['Bé', 'nhờ', 'người', 'lớn'], speak: 'Bé kể một việc bé cần nhờ người lớn giúp cho an toàn.' },
+  { stage: 5, title: 'Giúp bạn khi bạn buồn', words: [['buồn', 'Cảm thấy không vui'], ['an ủi', 'Nói hoặc làm điều gì đó cho người khác đỡ buồn']], reading: 'Lan làm rơi hộp màu và thấy buồn. Bé tới ngồi cạnh, nhặt giúp và nói: Mình giúp bạn nhé.', question: 'Bé làm gì khi thấy bạn buồn?', choices: ['Ngồi cạnh và giúp bạn', 'Cười chê bạn', 'Bỏ đi chỗ khác'], blank: ['Mình __ bạn nhé.', 'giúp', 'giấu', 'giành'], order: ['Mình', 'giúp', 'bạn'], speak: 'Bé nói một câu an ủi khi bạn buồn.' },
+  { stage: 5, title: 'Giữ lời hứa', words: [['hứa', 'Nói chắc rằng mình sẽ làm một việc'], ['trả', 'Đưa lại đồ cho người đã cho mượn']], reading: 'Bé mượn bút của bạn và hứa trả sau giờ học. Tan học, bé nhớ trả bút và nói cảm ơn.', question: 'Mượn đồ của bạn thì bé nên làm gì?', choices: ['Trả lại đúng hẹn', 'Giữ luôn không trả', 'Cho người khác mượn tiếp'], blank: ['Bé __ bút cho bạn.', 'trả', 'trèo', 'trốn'], order: ['Bé', 'trả', 'bút'], speak: 'Bé kể một lần bé đã giữ đúng lời hứa.' },
+];
+
+const buildLesson = (exercise: Exercise, order: number, stageOrder: number, variant: number, freeInStarterPlan: boolean) => {
   const choice = (type: 'listen_choose' | 'review', prompt: string, choices: string[]): IActivity => ({ id: '', type, prompt, options: choices.map((text, i) => ({ id: `option-${i}`, text })), correctAnswer: 'option-0', audioUrl: '' });
   const reading: IActivity = { id: '', type: 'word_card', prompt: 'Cùng đọc và tìm hiểu.', targetWord: exercise.reading, audioUrl: '' };
   const listen = choice('listen_choose', `Nghe đoạn đọc: ${exercise.reading} ${exercise.question}`, exercise.choices);
@@ -43,10 +79,16 @@ export const lessons = exercises.map((exercise, index) => {
   const sort: IActivity = { id: '', type: 'sort_order', prompt: `Xếp để đọc: ${exercise.order.join(' ')}.`, orderedItems: exercise.order, correctAnswer: exercise.order };
   const speak: IActivity = { id: '', type: 'record_voice', prompt: exercise.speak, targetWord: exercise.reading, audioUrl: '' };
   const review = choice('review', exercise.question, exercise.choices);
-  const activities = order === 20 ? [listen, fill, sort, speak, review] : [reading, listen, index % 2 ? match : fill, sort, speak, review];
+  const activities = order === 20 ? [listen, fill, sort, speak, review] : [reading, listen, variant % 2 ? match : fill, sort, speak, review];
   activities.forEach((activity, i) => { activity.id = `act-${order}-${i + 1}`; });
-  return { stageOrder: Math.floor(index / 4) + 1, order, title: `Bài ${order}: ${exercise.title}`, description: `Bài mẫu biên soạn cho trẻ 5–8 tuổi. ${exercise.reading}`, vocabulary: exercise.words.map(([word, meaning]) => ({ word, meaning, audioUrl: '' })), freeInStarterPlan: index < 4, totalActivities: activities.length, activities };
-});
+  return { stageOrder, order, title: `Bài ${order}: ${exercise.title}`, description: `Bài mẫu biên soạn cho trẻ 5–8 tuổi. ${exercise.reading}`, vocabulary: exercise.words.map(([word, meaning]) => ({ word, meaning, audioUrl: '' })), freeInStarterPlan, totalActivities: activities.length, activities };
+};
+
+export const lessons = [
+  ...exercises.map((exercise, index) => buildLesson(exercise, index + 1, Math.floor(index / 4) + 1, index, index < 4)),
+  // Bài mở rộng không miễn phí ở gói Starter: 4 bài đầu của chặng 1 đã giữ vai trò dùng thử.
+  ...extraExercises.map(({ stage, ...exercise }, index) => buildLesson(exercise, 21 + index, stage, index, false)),
+];
 
 const storyReadings = [
   ['Trồng nụ trồng hoa', 'Bé ngắm nụ hoa nhỏ. Bé tưới nhẹ quanh gốc và chờ hoa nở.', 'nụ', 'hoa'],
