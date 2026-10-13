@@ -6,11 +6,13 @@ import { logger } from '../utils/logger.js';
 export interface UploadResult {
   url: string;
   publicId: string;
+  /** Provider resource type actually assigned (legacy uploads use auto detection). */
+  resourceType?: string;
 }
 
 export interface IStorageService {
   uploadAudio(buffer: Buffer, mimetype: string, filename?: string): Promise<UploadResult>;
-  deleteAudio(publicId: string): Promise<boolean>;
+  deleteAudio(publicId: string, resourceType?: string): Promise<boolean>;
 }
 
 export class CloudinaryStorageService implements IStorageService {
@@ -43,6 +45,7 @@ export class CloudinaryStorageService implements IStorageService {
           resolve({
             url: result.secure_url,
             publicId: result.public_id,
+            resourceType: result.resource_type,
           });
         }
       );
@@ -51,9 +54,11 @@ export class CloudinaryStorageService implements IStorageService {
     });
   }
 
-  async deleteAudio(publicId: string): Promise<boolean> {
+  async deleteAudio(publicId: string, resourceType = 'video'): Promise<boolean> {
     try {
-      await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+      // resource_type must match the upload: 'auto' may have produced video, image or raw.
+      const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType, invalidate: true });
+      if (result?.result !== 'ok' && result?.result !== 'not found') throw new Error(`Unexpected destroy result: ${String(result?.result)}`);
       return true;
     } catch (err) {
       logger.warn({ err, publicId }, 'Failed to delete audio from Cloudinary');
@@ -89,7 +94,7 @@ export class FallbackDataUriStorageService implements IStorageService {
     };
   }
 
-  async deleteAudio(_publicId: string): Promise<boolean> {
+  async deleteAudio(_publicId: string, _resourceType?: string): Promise<boolean> {
     return true;
   }
 }

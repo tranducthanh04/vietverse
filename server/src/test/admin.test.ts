@@ -181,7 +181,8 @@ describe('Admin API & Schema Validation (P1.7)', () => {
         { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-NOW', planType: 'monthly', amount: 250000, status: 'completed', paidAt: new Date() },
       ]);
       const all = await request(app).get('/api/v1/admin/revenue').set('Authorization', `Bearer ${adminToken}`);
-      expect(all.body.data).toMatchObject({ totalRevenue: 399000, paidOrders: 2, undatedOrders: 1, currentMonthRevenue: 250000 });
+      // Undated orders are reported separately so the total always equals the monthly series.
+      expect(all.body.data).toMatchObject({ totalRevenue: 250000, paidOrders: 1, undatedOrders: 1, currentMonthRevenue: 250000 });
       const filtered = await request(app).get('/api/v1/admin/revenue?to=2000-01-01').set('Authorization', `Bearer ${adminToken}`);
       expect(filtered.body.data).toMatchObject({ totalRevenue: 0, paidOrders: 0, undatedOrders: 1, currentMonthRevenue: 250000 });
     });

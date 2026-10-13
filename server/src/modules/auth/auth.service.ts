@@ -138,7 +138,7 @@ export class AuthService {
 
       // Rotate with a new refresh token within the same family
       const tokens = await this.generateTokens(user, tokenRecord.family);
-      return tokens;
+      return { ...tokens, ...(await this.profile(user)) };
     } catch (err: any) {
       if (err.statusCode) throw err;
       throw { statusCode: 401, message: 'Mã làm mới (refresh token) không hợp lệ hoặc đã hết hạn' };
@@ -163,7 +163,11 @@ export class AuthService {
     if (!user) {
       throw { statusCode: 404, message: 'Không tìm thấy người dùng' };
     }
+    return this.profile(user);
+  }
 
+  /** Public account shape shared by GET /auth/me and POST /auth/refresh. */
+  private static async profile(user: IUser) {
     const subscription = await Subscription.findOne({ userId: user._id });
 
     return {

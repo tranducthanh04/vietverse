@@ -9,6 +9,8 @@ import { Redemption } from '../../models/Redemption.js';
 import mongoose, { Types } from 'mongoose';
 import { RecordingUploadIntent } from '../../models/RecordingUploadIntent.js';
 import { User } from '../../models/User.js';
+import { collectChildAudioAssets, destroyAudioAssets, type AudioAsset } from '../../services/audioAssetCleanup.js';
+import { mapTransactionError } from '../../utils/dbErrors.js';
 
 export class ChildrenService {
   static async getChildrenByParent(parentId: string) {
@@ -56,8 +58,7 @@ export class ChildrenService {
         return child;
       }, options);
     } catch (error) {
-      if ((error as { statusCode?: number }).statusCode) throw error;
-      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể tạo hồ sơ lúc này. Vui lòng thử lại.' };
+      throw mapTransactionError(error, () => ({ statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể tạo hồ sơ lúc này. Vui lòng thử lại.' }));
     }
   }
 
@@ -77,15 +78,20 @@ export class ChildrenService {
   }
 
   static async deleteChild(childId: string, parentId: string) {
+    // Provider assets are read inside the deleting transaction (exactly what is
+    // removed) and destroyed only after commit; storage failures never fail the delete.
+    let audioAssets: AudioAsset[] = [];
+    let deleted: IChild;
     try {
       let attempts = 0;
       const options = { maxCommitTimeMS: 5000, timeoutMS: 15000 };
-      return await mongoose.connection.transaction(async session => {
+      deleted = await mongoose.connection.transaction(async session => {
         if (++attempts > 3) throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể xóa hồ sơ lúc này. Vui lòng thử lại.' };
         const child = await Child.findOneAndDelete({ _id: childId, parentId }, { session });
         if (!child) throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
         // Sequential session operations; a failure rolls the entire cascade back.
         await LessonProgress.deleteMany({ childId: child._id }, { session });
+        audioAssets = await collectChildAudioAssets(child._id, session);
         await Recording.deleteMany({ childId: child._id }, { session });
         await RecordingUploadIntent.deleteMany({ childId: child._id }, { session });
         await ExplorationLog.deleteMany({ childId: child._id }, { session });
@@ -95,9 +101,10 @@ export class ChildrenService {
         return child;
       }, options);
     } catch (error) {
-      if ((error as { statusCode?: number }).statusCode) throw error;
-      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể xóa hồ sơ lúc này. Vui lòng thử lại.' };
+      throw mapTransactionError(error, () => ({ statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể xóa hồ sơ lúc này. Vui lòng thử lại.' }));
     }
+    await destroyAudioAssets(audioAssets, { source: 'child_deletion', childId: deleted._id as Types.ObjectId });
+    return deleted;
   }
 
   static async selectChild(childId: string, parentId: string) {

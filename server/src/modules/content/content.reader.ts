@@ -14,9 +14,16 @@ export function resolveSubmissionVersion(requested: number | undefined, liveVers
   throw contentError(409, 'CONTENT_VERSION_REQUIRED', 'Nội dung đã thay đổi. Cần phiên bản bài đã mở để nộp bài.');
 }
 
+/** A live document the caller already loaded in the same session/snapshot; reused to skip a second read. */
+export interface PreloadedLive { _id: unknown; contentVersion?: number; visibility?: string }
+
 // Callers enforce current learning permissions; a snapshot never grants access.
-export async function readPublished<K extends ContentKind>(kind: K, id: string, requestedVersion?: number, session?: ClientSession): Promise<PublishedView<K>> {
-  const live = await contentModel(kind).findById(id).session(session ?? null);
+export async function readPublished<K extends ContentKind>(
+  kind: K, id: string, requestedVersion?: number, session?: ClientSession, preloaded?: PreloadedLive,
+): Promise<PublishedView<K>> {
+  // Only reuse a full document for the same id; anything else falls back to a fresh read.
+  const reusable = preloaded && String(preloaded._id) === id ? preloaded : undefined;
+  const live = reusable ?? await contentModel(kind).findById(id).session(session ?? null);
   if (!live || (kind !== 'lesson' && live.visibility === 'withdrawn')) throw notFound();
   const liveVersion = live.contentVersion ?? 0;
   const version = requestedVersion === undefined ? liveVersion : contentVersionSchema.parse(requestedVersion);

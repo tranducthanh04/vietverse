@@ -1,5 +1,5 @@
 import { randomInt } from 'node:crypto';
-import { PayOS, type Webhook } from '@payos/node';
+import type { PayOS, Webhook } from '@payos/node';
 import { PaymentOrder, type PaidPlanType } from '../../models/PaymentOrder.js';
 import { PaymentTestOrder } from '../../models/PaymentTestOrder.js';
 import { Subscription } from '../../models/Subscription.js';
@@ -17,17 +17,31 @@ const PLAN_MAX_CHILDREN: Record<PaidPlanType, number> = {
   yearly: 3,
 };
 
-const payos = env.PAYOS_CLIENT_ID
-  ? new PayOS({
+let payosClient: Promise<PayOS> | undefined;
+
+/**
+ * The PayOS SDK is loaded on first payment use instead of at cold start; most requests never
+ * touch payments. Returns null when PayOS is not configured. A failed load is not cached.
+ */
+async function getPayOS(): Promise<PayOS | null> {
+  if (!env.PAYOS_CLIENT_ID) return null;
+  payosClient ??= import('@payos/node')
+    .then(({ PayOS: Client }) => new Client({
       clientId: env.PAYOS_CLIENT_ID,
       apiKey: env.PAYOS_API_KEY,
       checksumKey: env.PAYOS_CHECKSUM_KEY,
-    })
-  : null;
+    }))
+    .catch((error: unknown) => {
+      payosClient = undefined;
+      throw error;
+    });
+  return payosClient;
+}
 
 export class PaymentsService {
   /** Creates a fixed-value production gateway test for an authenticated parent/admin; no subscription is changed. */
   static async createTestCheckout(userId: string) {
+    const payos = await getPayOS();
     if (!payos) {
       throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
     }
@@ -118,6 +132,7 @@ export class PaymentsService {
       throw { statusCode: 400, message: 'Gói thanh toán không hợp lệ' };
     }
 
+    const payos = await getPayOS();
     if (!payos) {
       throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
     }
@@ -167,6 +182,7 @@ export class PaymentsService {
    * Xác minh payload PayOS rồi cập nhật đơn và subscription trong một transaction.
    */
   static async handleWebhook(payload: Webhook) {
+    const payos = await getPayOS();
     if (!payos) {
       throw { statusCode: 503, message: 'PayOS chưa được cấu hình; từ chối webhook' };
     }

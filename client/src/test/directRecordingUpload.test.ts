@@ -97,6 +97,36 @@ describe('direct recording workflow', () => {
     expect(provider).toHaveLength(1);
     expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
   });
+  it('times out a stalled provider upload and checks finalize first on the next submit', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => {
+      provider.push(config);
+      expect(config.signal).toBeInstanceOf(AbortSignal);
+      throw new DOMException('signal timed out', 'TimeoutError');
+    }));
+    const task = make();
+    await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_TIMEOUT' });
+    expect(await task.submit()).toEqual(receipt);
+    expect(provider).toHaveLength(1);
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
+  });
+  it('aborts the provider upload after 60 seconds even without AbortSignal.timeout', async () => {
+    vi.useFakeTimers();
+    const native = AbortSignal.timeout;
+    Object.defineProperty(AbortSignal, 'timeout', { value: undefined, configurable: true, writable: true });
+    try {
+      vi.stubGlobal('fetch', vi.fn((_url, config: RequestInit) => { provider.push(config); return new Promise((_resolve, reject) => {
+        config.signal!.addEventListener('abort', () => reject(config.signal!.reason));
+      }); }));
+      const pending = make().submit();
+      const outcome = expect(pending).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_TIMEOUT' });
+      await vi.waitFor(() => expect(provider).toHaveLength(1));
+      await vi.advanceTimersByTimeAsync(60_000);
+      await outcome;
+    } finally {
+      Object.defineProperty(AbortSignal, 'timeout', { value: native, configurable: true, writable: true });
+      vi.useRealTimers();
+    }
+  });
   it('uploads again only after an ambiguous upload is confirmed missing', async () => {
     let attempts = 0;
     vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); if (++attempts===1) throw new TypeError('lost'); return { ok: true }; }));

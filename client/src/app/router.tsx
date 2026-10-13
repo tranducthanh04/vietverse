@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 // Layouts
@@ -9,40 +9,47 @@ import { AdminLayout } from './layouts/AdminLayout.js';
 
 // Guard
 import { ProtectedRoute } from '../components/ui/ProtectedRoute.js';
+import { PageLoader } from '../components/ui/PageLoader.js';
 
 // Pages
 import { LandingPage } from '../features/public/LandingPage.js';
-import { PricingPage } from '../features/public/PricingPage.js';
 import { NotFoundPage } from '../features/public/NotFoundPage.js';
 import { LoginPage } from '../features/auth/LoginPage.js';
 import { RegisterPage } from '../features/auth/RegisterPage.js';
-import { OnboardingWizard } from '../features/onboarding/OnboardingWizard.js';
-import { QuestMapPage } from '../features/quest-map/QuestMapPage.js';
-import { LessonPlayerPage } from '../features/lesson-player/LessonPlayerPage.js';
-import { StoriesPage } from '../features/stories/StoriesPage.js';
-import { StoryDetailPage } from '../features/stories/StoryDetailPage.js';
-import { CulturePage } from '../features/culture/CulturePage.js';
-import { CultureDetailPage } from '../features/culture/CultureDetailPage.js';
-import { PointsShopPage } from '../features/points/PointsShopPage.js';
-import { TreasureRoomPage } from '../features/points/TreasureRoomPage.js';
-import { ParentDashboardPage } from '../features/parent/ParentDashboardPage.js';
-import { ParentRecordingsPage } from '../features/parent/ParentRecordingsPage.js';
-import { ParentSettingsPage } from '../features/parent/ParentSettingsPage.js';
-import { PaymentResultPage } from '../features/parent/PaymentResultPage.js';
-import { AdminDashboardPage } from '../features/admin/AdminDashboardPage.js';
-import { AdminRevenuePage } from '../features/admin/AdminRevenuePage.js';
-import { AdminLessonsPage } from '../features/admin/AdminLessonsPage.js';
-import { ContentEditorPage } from '../features/admin/content/ContentEditorPage.js';
-import { ContentListPage } from '../features/admin/content/ContentListPage.js';
-import { ContentPreviewPage } from '../features/admin/content/ContentPreviewPage.js';
-import { ContentCreatePage } from '../features/admin/content/ContentCreatePage.js';
-import { AdminLearnersPage } from '../features/admin/AdminLearnersPage.js';
-import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
-import { AdminPointRulesPage } from '../features/admin/AdminPointRulesPage.js';
-import { PaymentTestPage } from '../features/parent/PaymentTestPage.js';
 
 import { AdaptiveContentLayout } from './layouts/AdaptiveContentLayout.js';
 import { ChildSessionGuard } from '../components/ChildSessionGuard.js';
+
+// Route-level code splitting: layouts and entry pages (landing, login, register, 404) stay in the
+// main bundle; every other page loads on the first visit to its route.
+const PricingPage = lazy(() => import('../features/public/PricingPage.js').then((m) => ({ default: m.PricingPage })));
+const StoriesPage = lazy(() => import('../features/stories/StoriesPage.js').then((m) => ({ default: m.StoriesPage })));
+const CulturePage = lazy(() => import('../features/culture/CulturePage.js').then((m) => ({ default: m.CulturePage })));
+const QuestMapPage = lazy(() => import('../features/quest-map/QuestMapPage.js').then((m) => ({ default: m.QuestMapPage })));
+const OnboardingWizard = lazy(() => import('../features/onboarding/OnboardingWizard.js').then((m) => ({ default: m.OnboardingWizard })));
+const LessonPlayerPage = lazy(() => import('../features/lesson-player/LessonPlayerPage.js').then((m) => ({ default: m.LessonPlayerPage })));
+const StoryDetailPage = lazy(() => import('../features/stories/StoryDetailPage.js').then((m) => ({ default: m.StoryDetailPage })));
+const CultureDetailPage = lazy(() => import('../features/culture/CultureDetailPage.js').then((m) => ({ default: m.CultureDetailPage })));
+const PointsShopPage = lazy(() => import('../features/points/PointsShopPage.js').then((m) => ({ default: m.PointsShopPage })));
+const TreasureRoomPage = lazy(() => import('../features/points/TreasureRoomPage.js').then((m) => ({ default: m.TreasureRoomPage })));
+const ParentDashboardPage = lazy(() => import('../features/parent/ParentDashboardPage.js').then((m) => ({ default: m.ParentDashboardPage })));
+const ParentRecordingsPage = lazy(() => import('../features/parent/ParentRecordingsPage.js').then((m) => ({ default: m.ParentRecordingsPage })));
+const ParentSettingsPage = lazy(() => import('../features/parent/ParentSettingsPage.js').then((m) => ({ default: m.ParentSettingsPage })));
+const PaymentResultPage = lazy(() => import('../features/parent/PaymentResultPage.js').then((m) => ({ default: m.PaymentResultPage })));
+const PaymentTestPage = lazy(() => import('../features/parent/PaymentTestPage.js').then((m) => ({ default: m.PaymentTestPage })));
+const AdminDashboardPage = lazy(() => import('../features/admin/AdminDashboardPage.js').then((m) => ({ default: m.AdminDashboardPage })));
+const AdminRevenuePage = lazy(() => import('../features/admin/AdminRevenuePage.js').then((m) => ({ default: m.AdminRevenuePage })));
+const AdminLessonsPage = lazy(() => import('../features/admin/AdminLessonsPage.js').then((m) => ({ default: m.AdminLessonsPage })));
+const ContentEditorPage = lazy(() => import('../features/admin/content/ContentEditorPage.js').then((m) => ({ default: m.ContentEditorPage })));
+const ContentListPage = lazy(() => import('../features/admin/content/ContentListPage.js').then((m) => ({ default: m.ContentListPage })));
+const ContentPreviewPage = lazy(() => import('../features/admin/content/ContentPreviewPage.js').then((m) => ({ default: m.ContentPreviewPage })));
+const ContentCreatePage = lazy(() => import('../features/admin/content/ContentCreatePage.js').then((m) => ({ default: m.ContentCreatePage })));
+const AdminLearnersPage = lazy(() => import('../features/admin/AdminLearnersPage.js').then((m) => ({ default: m.AdminLearnersPage })));
+const AdminRedemptionsPage = lazy(() => import('../features/admin/AdminRedemptionsPage.js').then((m) => ({ default: m.AdminRedemptionsPage })));
+const AdminPointRulesPage = lazy(() => import('../features/admin/AdminPointRulesPage.js').then((m) => ({ default: m.AdminPointRulesPage })));
+
+/** Wraps a lazily loaded page so its chunk download shows the shared loader. */
+const withSuspense = (page: React.ReactNode) => <Suspense fallback={<PageLoader />}>{page}</Suspense>;
 
 export const router = createBrowserRouter([
   // Public Landing & Pricing
@@ -51,7 +58,7 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <LandingPage /> },
-      { path: 'gia', element: <PricingPage /> },
+      { path: 'gia', element: withSuspense(<PricingPage />) },
       { path: 'dang-nhap', element: <LoginPage /> },
       { path: 'dang-ky', element: <RegisterPage /> },
     ],
@@ -61,10 +68,10 @@ export const router = createBrowserRouter([
   {
     element: <AdaptiveContentLayout />,
     children: [
-      { path: 'kho-truyen', element: <StoriesPage /> },
-      { path: 'kho-truyen/:id', element: <StoryDetailPage /> },
-      { path: 'van-hoa', element: <CulturePage /> },
-      { path: 'van-hoa/:id', element: <CultureDetailPage /> },
+      { path: 'kho-truyen', element: withSuspense(<StoriesPage />) },
+      { path: 'kho-truyen/:id', element: withSuspense(<StoryDetailPage />) },
+      { path: 'van-hoa', element: withSuspense(<CulturePage />) },
+      { path: 'van-hoa/:id', element: withSuspense(<CultureDetailPage />) },
     ],
   },
 
@@ -73,7 +80,7 @@ export const router = createBrowserRouter([
     path: '/thanh-toan',
     element: (
       <ProtectedRoute>
-        <PaymentResultPage />
+        {withSuspense(<PaymentResultPage />)}
       </ProtectedRoute>
     ),
   },
@@ -81,7 +88,7 @@ export const router = createBrowserRouter([
     path: '/thanh-toan-thu',
     element: (
       <ProtectedRoute>
-        <PaymentTestPage />
+        {withSuspense(<PaymentTestPage />)}
       </ProtectedRoute>
     ),
   },
@@ -91,7 +98,7 @@ export const router = createBrowserRouter([
     path: '/bat-dau',
     element: (
       <ProtectedRoute>
-        <OnboardingWizard />
+        {withSuspense(<OnboardingWizard />)}
       </ProtectedRoute>
     ),
   },
@@ -101,7 +108,7 @@ export const router = createBrowserRouter([
     path: '/hoc/:lessonId',
     element: (
       <ProtectedRoute>
-        <ChildSessionGuard><LessonPlayerPage /></ChildSessionGuard>
+        <ChildSessionGuard>{withSuspense(<LessonPlayerPage />)}</ChildSessionGuard>
       </ProtectedRoute>
     ),
   },
@@ -114,9 +121,9 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: 'kham-pha', element: <QuestMapPage /> },
-      { path: 'diem-thuong', element: <PointsShopPage /> },
-      { path: 'phong-bau-vat', element: <TreasureRoomPage /> },
+      { path: 'kham-pha', element: withSuspense(<QuestMapPage />) },
+      { path: 'diem-thuong', element: withSuspense(<PointsShopPage />) },
+      { path: 'phong-bau-vat', element: withSuspense(<TreasureRoomPage />) },
     ],
   },
 
@@ -130,10 +137,10 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/phu-huynh/tien-do" replace /> },
-      { path: 'tien-do', element: <ParentDashboardPage /> },
-      { path: 'ban-thu-am', element: <ParentRecordingsPage /> },
-      { path: 'cai-dat', element: <ParentSettingsPage /> },
-      { path: 'thanh-toan-thu', element: <PaymentTestPage /> },
+      { path: 'tien-do', element: withSuspense(<ParentDashboardPage />) },
+      { path: 'ban-thu-am', element: withSuspense(<ParentRecordingsPage />) },
+      { path: 'cai-dat', element: withSuspense(<ParentSettingsPage />) },
+      { path: 'thanh-toan-thu', element: withSuspense(<PaymentTestPage />) },
     ],
   },
 
@@ -146,23 +153,23 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: 'doanh-thu', element: <AdminRevenuePage /> },
-      { path: 'bai-hoc', element: <AdminLessonsPage /> },
-      { path: 'bai-hoc/:id', element: <ContentEditorPage kind="lesson" /> },
-      { path: 'bai-hoc/:id/xem-truoc', element: <ContentPreviewPage kind="lesson" /> },
-      { path: 'truyen', element: <ContentListPage kind="story" /> },
-      { path: 'truyen/moi', element: <ContentCreatePage kind="story" /> },
-      { path: 'truyen/:id', element: <ContentEditorPage kind="story" /> },
-      { path: 'truyen/:id/xem-truoc', element: <ContentPreviewPage kind="story" /> },
-      { path: 'van-hoa', element: <ContentListPage kind="culture" /> },
-      { path: 'van-hoa/moi', element: <ContentCreatePage kind="culture" /> },
-      { path: 'van-hoa/:id', element: <ContentEditorPage kind="culture" /> },
-      { path: 'van-hoa/:id/xem-truoc', element: <ContentPreviewPage kind="culture" /> },
-      { path: 'hoc-vien', element: <AdminLearnersPage /> },
-      { path: 'doi-qua', element: <AdminRedemptionsPage /> },
-      { path: 'quy-tac-diem', element: <AdminPointRulesPage /> },
-      { path: 'test-thanh-toan', element: <PaymentTestPage /> },
+      { index: true, element: withSuspense(<AdminDashboardPage />) },
+      { path: 'doanh-thu', element: withSuspense(<AdminRevenuePage />) },
+      { path: 'bai-hoc', element: withSuspense(<AdminLessonsPage />) },
+      { path: 'bai-hoc/:id', element: withSuspense(<ContentEditorPage kind="lesson" />) },
+      { path: 'bai-hoc/:id/xem-truoc', element: withSuspense(<ContentPreviewPage kind="lesson" />) },
+      { path: 'truyen', element: withSuspense(<ContentListPage kind="story" />) },
+      { path: 'truyen/moi', element: withSuspense(<ContentCreatePage kind="story" />) },
+      { path: 'truyen/:id', element: withSuspense(<ContentEditorPage kind="story" />) },
+      { path: 'truyen/:id/xem-truoc', element: withSuspense(<ContentPreviewPage kind="story" />) },
+      { path: 'van-hoa', element: withSuspense(<ContentListPage kind="culture" />) },
+      { path: 'van-hoa/moi', element: withSuspense(<ContentCreatePage kind="culture" />) },
+      { path: 'van-hoa/:id', element: withSuspense(<ContentEditorPage kind="culture" />) },
+      { path: 'van-hoa/:id/xem-truoc', element: withSuspense(<ContentPreviewPage kind="culture" />) },
+      { path: 'hoc-vien', element: withSuspense(<AdminLearnersPage />) },
+      { path: 'doi-qua', element: withSuspense(<AdminRedemptionsPage />) },
+      { path: 'quy-tac-diem', element: withSuspense(<AdminPointRulesPage />) },
+      { path: 'test-thanh-toan', element: withSuspense(<PaymentTestPage />) },
     ],
   },
 

@@ -184,7 +184,8 @@ describe('Children & Ownership API', () => {
     const parent = await AuthService.register({ email: 'delete-rollback@example.test', password: 'Password123!', displayName: 'Owner' });
     const child = await Child.create({ parentId: parent.user.id, name: 'Child', ageGroup: '5-6', companionLanguage: 'en' });
     await Recording.create({ childId: child.id, url: '/test.webm' });
-    vi.spyOn(Recording, 'deleteMany').mockRejectedValueOnce(new Error('injected cascade failure'));
+    // A transient driver failure maps to 503; the whole cascade must still roll back.
+    vi.spyOn(Recording, 'deleteMany').mockRejectedValueOnce(Object.assign(new Error('injected cascade failure'), { name: 'MongoNetworkError' }));
     expect((await request(app).delete(`/api/v1/children/${child.id}`).set('Authorization', `Bearer ${parent.accessToken}`)).status).toBe(503);
     expect(await Child.exists({ _id: child.id })).not.toBeNull();
     expect(await Recording.countDocuments({ childId: child.id })).toBe(1);

@@ -23,7 +23,10 @@ export async function getRevenue(query: z.infer<typeof revenueQuerySchema>, now 
   const paidAt: { $gte?: Date; $lt?: Date } = {};
   if (query.from) paidAt.$gte = new Date(Date.parse(`${query.from}T00:00:00Z`) - offsetMs);
   if (query.to) paidAt.$lt = new Date(Date.parse(`${query.to}T00:00:00Z`) - offsetMs + dayMs);
-  const range = Object.keys(paidAt).length ? { paidAt } : {};
+  // Totals, plans and series share one filter: only orders with a real paidAt date are counted,
+  // so totalRevenue always equals the sum of series. Undated orders are reported separately.
+  const isDated = { $expr: { $eq: [{ $type: '$paidAt' }, 'date'] } };
+  const dated = { ...(Object.keys(paidAt).length ? { paidAt } : {}), ...isDated };
   const month = new Date(now.getTime() + offsetMs).toISOString().slice(0, 7);
   const monthStart = new Date(`${month}-01T00:00:00+07:00`);
   const sums = { revenue: { $sum: '$amount' }, orders: { $sum: 1 } };
@@ -31,9 +34,9 @@ export async function getRevenue(query: z.infer<typeof revenueQuerySchema>, now 
   const [result] = await PaymentOrder.aggregate<Aggregation>([
     { $match: { status: 'completed' } },
     { $facet: {
-      total: [{ $match: range }, { $group: { _id: null, ...sums } }],
-      plans: [{ $match: range }, { $group: { _id: '$planType', ...sums } }],
-      months: [{ $match: { ...range, $expr: { $eq: [{ $type: '$paidAt' }, 'date'] } } },
+      total: [{ $match: dated }, { $group: { _id: null, ...sums } }],
+      plans: [{ $match: dated }, { $group: { _id: '$planType', ...sums } }],
+      months: [{ $match: dated },
         { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$paidAt', timezone: 'Asia/Ho_Chi_Minh' } }, ...sums } },
         { $sort: { _id: 1 } }],
       currentMonth: [{ $match: { paidAt: { $gte: monthStart, $lte: now } } }, { $group: { _id: null, ...sums } }],

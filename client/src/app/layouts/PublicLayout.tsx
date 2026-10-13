@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Clock, Flower2, Heart, Mail, Menu, Phone, Sparkles, Star, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
@@ -35,9 +35,7 @@ export const PublicLayout: React.FC = () => {
                 <span className="font-display text-2xl lg:text-3xl text-primary tracking-tight font-extrabold select-none">
                   VIETVERSE
                 </span>
-                <span className="material-symbols-outlined text-secondary-container text-[22px] select-none">
-                  star
-                </span>
+                <Star className="w-[22px] h-[22px] text-secondary-container select-none" aria-hidden="true" />
               </div>
               <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden sm:inline">
                 CÙNG CON MỞ KHO BÁU, TIẾNG VIỆT THÊM NHIỆM MÀU
@@ -176,13 +174,13 @@ export const PublicLayout: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <span className="font-display text-2xl text-primary font-extrabold">VIETVERSE</span>
-                <span className="material-symbols-outlined text-secondary-container text-xl">auto_awesome</span>
+                <Sparkles className="w-5 h-5 text-secondary-container" aria-hidden="true" />
               </div>
               <p className="text-sm text-on-surface-variant leading-relaxed">
                 Cùng con giữ gìn tiếng Việt diệu kỳ. Không gian nuôi dưỡng tình yêu cội nguồn qua truyện tranh dân gian và trò chơi ngôn ngữ giàu bản sắc.
               </p>
               <div className="flex items-center gap-2 pt-2 text-secondary">
-                <span className="material-symbols-outlined">local_florist</span>
+                <Flower2 className="w-6 h-6" aria-hidden="true" />
                 <span className="text-xs font-semibold">Văn hóa truyền thống & Công nghệ hiện đại</span>
               </div>
             </div>
@@ -226,15 +224,15 @@ export const PublicLayout: React.FC = () => {
               <h4 className="text-base font-bold text-on-surface">Liên Hệ VietVerse</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl">mail</span>
+                  <Mail className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
                   <span>hotro@vietverse.edu.vn</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl">call</span>
+                  <Phone className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
                   <span>1900 6868 (Tư vấn giáo dục)</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl">schedule</span>
+                  <Clock className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
                   <span>Thứ 2 - Thứ 7: 8:00 - 20:00</span>
                 </div>
               </div>
@@ -244,7 +242,7 @@ export const PublicLayout: React.FC = () => {
           <div className="mt-12 pt-8 border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
             <p>Bản quyền © 2026 VietVerse Foundation. Tất cả các quyền được bảo lưu.</p>
             <p className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-primary text-base">favorite</span>
+              <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
               <span>Nuôi dưỡng tiếng mẹ đẻ cho thế hệ tương lai</span>
             </p>
           </div>

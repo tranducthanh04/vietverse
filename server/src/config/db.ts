@@ -4,14 +4,28 @@ import { logger } from '../utils/logger.js';
 
 let pending: Promise<typeof mongoose> | undefined;
 
-export async function connectDB(uri = env.MONGODB_URI): Promise<typeof mongoose> {
-  if (mongoose.connection.readyState === 1) return mongoose;
-  mongoose.set('strictQuery', true);
-  pending ??= mongoose.connect(uri, {
+/**
+ * Production never builds indexes or collections on connect: on serverless every cold start
+ * would re-run index builds/checks against Atlas. Indexes are applied explicitly with
+ * `npm run deploy:indexes -w server -- --apply` (see docs/vercel-deployment.md).
+ * Development/test keep Mongoose auto-indexing so local unique constraints still hold.
+ */
+export function connectionOptions(nodeEnv: string = env.NODE_ENV): mongoose.ConnectOptions {
+  const production = nodeEnv === 'production';
+  return {
     maxPoolSize: 5,
     minPoolSize: 0,
     serverSelectionTimeoutMS: 5000,
-  }).catch(error => {
+    socketTimeoutMS: 45000,
+    autoIndex: !production,
+    autoCreate: !production,
+  };
+}
+
+export async function connectDB(uri = env.MONGODB_URI): Promise<typeof mongoose> {
+  if (mongoose.connection.readyState === 1) return mongoose;
+  mongoose.set('strictQuery', true);
+  pending ??= mongoose.connect(uri, connectionOptions()).catch(error => {
     // Connection errors can contain credentials. Do not log the raw error.
     logger.error('MongoDB connection unavailable');
     throw error;

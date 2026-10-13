@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { sendError } from '../utils/apiResponse.js';
-import { UserRole } from '../constants/roles.js';
+import { ROLES, UserRole } from '../constants/roles.js';
 
 export interface AuthUserPayload {
   id: string;
@@ -16,6 +16,17 @@ declare global {
       user?: AuthUserPayload;
     }
   }
+}
+
+/**
+ * JWT_SECRET also signs purpose-bound tokens (Parent Gate, gate challenge, CMS image tickets).
+ * Access tokens carry neither `aud` nor `purpose`, so any token with them is not a session.
+ */
+function isAccessTokenPayload(decoded: string | JwtPayload): decoded is JwtPayload & AuthUserPayload {
+  if (typeof decoded !== 'object' || decoded === null) return false;
+  if (decoded.aud !== undefined || 'purpose' in decoded) return false;
+  return typeof decoded.id === 'string' && decoded.id.length > 0 &&
+    (Object.values(ROLES) as string[]).includes(decoded.role);
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -35,7 +46,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as AuthUserPayload;
+    const decoded = jwt.verify(token, env.JWT_SECRET);
+    if (!isAccessTokenPayload(decoded)) {
+      sendError(res, 'Mã xác thực không hợp lệ', 401, 'INVALID_TOKEN');
+      return;
+    }
     req.user = decoded;
     next();
   } catch (error: any) {

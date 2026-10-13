@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, History, ShoppingBag, Sparkles } from 'lucide-react';
+import { Check, Gift, History, PiggyBank, ShoppingBag, Sparkles } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
@@ -172,7 +172,7 @@ export const PointsShopPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div className="flex items-center gap-3 bg-surface/90 px-4 py-2.5 rounded-2xl shadow-sm border border-secondary-container/20">
-                <span className="material-symbols-outlined text-secondary-container text-2xl" aria-hidden="true">savings</span>
+                <PiggyBank className="w-6 h-6 text-secondary-container shrink-0" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-[11px] text-on-surface-variant font-bold">Tổng tích lũy</span>
                   <span className="text-sm font-extrabold text-on-surface" data-testid="points-total-earned">
@@ -181,7 +181,7 @@ export const PointsShopPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-surface/90 px-4 py-2.5 rounded-2xl shadow-sm border border-secondary-container/20">
-                <span className="material-symbols-outlined text-primary text-2xl" aria-hidden="true">redeem</span>
+                <Gift className="w-6 h-6 text-primary shrink-0" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-[11px] text-on-surface-variant font-bold">Vật phẩm có thể đổi</span>
                   <span className="text-sm font-extrabold text-primary" data-testid="points-available-items">

@@ -9,6 +9,7 @@ import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import { apiLimiter } from './middlewares/rateLimiter.middleware.js';
 import { sendSuccess, sendError } from './utils/apiResponse.js';
 import { connectDB } from './config/db.js';
+import { originPolicy } from './middlewares/originPolicy.js';
 
 // Route imports
 import authRouter from './modules/auth/auth.routes.js';
@@ -37,29 +38,9 @@ app.use(
   })
 );
 
-const allowedOrigins = [
-  env.CLIENT_ORIGIN,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'https://vietverse.vercel.app',
-  'https://vietverse-nine.vercel.app',
-];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else if (env.NODE_ENV === 'development') {
-        callback(null, true); // Permissive only in local development
-      } else {
-        callback(new Error(`CORS blocked: Origin '${origin}' không được phép truy cập API.`));
-      }
-    },
-    credentials: true,
-  })
-);
+// Production trusts only CLIENT_ORIGIN/CLIENT_ORIGINS; unknown browser origins get a clean 403.
+app.use(originPolicy.guard);
+app.use(cors(originPolicy.cors));
 
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));

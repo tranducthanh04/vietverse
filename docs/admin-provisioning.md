@@ -12,12 +12,16 @@
 Trong thư mục repo trên Windows:
 
 ```powershell
+# Đích DB do operator khai báo trong phiên shell, không commit vào repo public.
+$env:VIETVERSE_DB_HOST = '<cluster-host>.mongodb.net'
+$env:VIETVERSE_DB_USER = '<db-user>'
+$env:VIETVERSE_DB_NAME = '<db-name>'
 node server/scripts/provision-admin.cjs
 ```
 
-Hộp nhập riêng yêu cầu mật khẩu Database User `binhlqhe181123_db_user` (không phải mật khẩu website Atlas), email/tên, mật khẩu admin mới và xác nhận. Mật khẩu mới tối thiểu 12 ký tự, tối đa 72 byte UTF-8 để không bị bcrypt cắt ngầm. Không dùng mật khẩu demo hay PIN parent mặc định.
+Hộp nhập riêng yêu cầu mật khẩu Database User `<db-user>` (không phải mật khẩu website Atlas), email/tên, mật khẩu admin mới và xác nhận. Mật khẩu mới tối thiểu 12 ký tự, tối đa 72 byte UTF-8 để không bị bcrypt cắt ngầm. Không dùng mật khẩu demo hay PIN parent mặc định.
 
-Target cố định: `thanh.841ysjn.mongodb.net`, database `test`. Chỉ chạy khi không có bootstrap/import/provision khác. Công cụ lấy cùng khóa `vietverse-catalog-seed` với bootstrap, chỉ nhả khóa do chính lượt chạy tạo. Không tự gỡ khóa của lượt crash.
+Target lấy từ `VIETVERSE_DB_HOST`/`VIETVERSE_DB_USER`/`VIETVERSE_DB_NAME` (host phải là `*.mongodb.net`, không nhận DB `admin`/`local`/`config`); hộp nhập hiển thị đúng host/DB/user để operator xác nhận và CLI con chỉ chấp nhận URI khớp đúng target đã khai báo, không tham số kết nối lạ. Thiếu/sai biến dừng với `ADMIN_TARGET_INVALID`. *Quyết định 2026-10-13*: bỏ host/user/DB cứng khỏi repo public (review M1); lịch sử git vẫn chứa giá trị cũ nên owner cần siết network allowlist Atlas và quyền tối thiểu của DB user. Chỉ chạy khi không có bootstrap/import/provision khác. Công cụ lấy cùng khóa `vietverse-catalog-seed` với bootstrap, chỉ nhả khóa do chính lượt chạy tạo. Không tự gỡ khóa của lượt crash.
 
 Credentials đi qua pipe riêng giữa các tiến trình, không qua argv, `.env`, file hoặc log. **Không chạy trực tiếp `input-admin-password.ps1`**, vì stdout của helper dành cho launcher riêng. Công cụ không đọc lại sensitive env trên Vercel.
 
@@ -31,7 +35,7 @@ Credentials đi qua pipe riêng giữa các tiến trình, không qua argv, `.en
 
 ## Kết quả thực thi 2026-10-11
 
-- Launcher exit 0: `target=thanh/test`, `status=created`, email `admin@vietverse.edu.vn`, `passwordVerified=true`.
+- Launcher exit 0: `target=<cluster>/<db-name>`, `status=created`, email `admin@vietverse.edu.vn`, `passwordVerified=true`.
 - Production auth verification `passed`: đăng nhập qua `https://vietverse-nine.vercel.app`, API `/admin/kpi` trả thành công, phiên kiểm thử đã logout. Không lưu mật khẩu, cookie, token hoặc dữ liệu KPI.
 - Kiểm chứng local: 368/368 backend và 164/164 frontend tests qua; backend typecheck qua; PowerShell parser và Node syntax check qua. FE vẫn có React Router future-flag warnings.
 - Chỉ công cụ offline và docs thay đổi trong lượt tạo admin, không cần redeploy runtime. Cloudinary, thanh toán, CMS publish giữ nguyên trạng thái trước đó.

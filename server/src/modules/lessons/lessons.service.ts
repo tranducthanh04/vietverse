@@ -11,6 +11,7 @@ import { Recording } from '../../models/Recording.js';
 import { readPublished, resolveSubmissionVersion } from '../content/content.reader.js';
 import { toLearnerLessonPayload } from '../content/content.dto.js';
 import { isNewActivityType } from '../content/newActivity.contract.js';
+import { mapTransactionError } from '../../utils/dbErrors.js';
 
 interface AwardDraft {
   delta: number;
@@ -48,8 +49,8 @@ async function insertNewAwards(childId: Types.ObjectId, drafts: AwardDraft[], se
 export class LessonsService {
   static async getLessonById(lessonId: string, parentId?: string, childId?: string, contentVersion?: number, activityContract?: 2) {
     if (!parentId || !childId) throw { statusCode: 400, message: 'Thiếu hồ sơ bé để mở bài học.' };
-    const { stage } = await assertLessonUnlocked(childId, lessonId, parentId);
-    const published = await readPublished('lesson', lessonId, contentVersion);
+    const { stage, lesson } = await assertLessonUnlocked(childId, lessonId, parentId);
+    const published = await readPublished('lesson', lessonId, contentVersion, undefined, lesson);
     if (activityContract !== 2 && published.payload.activities.some(activity => isNewActivityType(activity.type))) {
       throw { statusCode: 409, code: 'ACTIVITY_CLIENT_UPDATE_REQUIRED', message: 'Vui lòng cập nhật trang để học hoạt động mới.' };
     }
@@ -70,8 +71,7 @@ export class LessonsService {
         return LessonsService.completeInTransaction(lessonId, parentId, data, session);
       }, options);
     } catch (error) {
-      if ((error as { statusCode?: number }).statusCode) throw error;
-      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Chưa lưu được kết quả bài học. Vui lòng thử lại.' };
+      throw mapTransactionError(error, () => ({ statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Chưa lưu được kết quả bài học. Vui lòng thử lại.' }));
     }
   }
 
@@ -79,7 +79,7 @@ export class LessonsService {
     // 1. Enforce unlock & ownership
     const { child, lesson } = await assertLessonUnlocked(data.childId, lessonId, parentId, session);
     const contentVersion = resolveSubmissionVersion(data.contentVersion, lesson.contentVersion ?? 0);
-    const { payload } = await readPublished('lesson', lessonId, contentVersion, session);
+    const { payload } = await readPublished('lesson', lessonId, contentVersion, session, lesson);
     const submittedIds = (data.answers ?? []).map(answer => answer.activityId);
     if (new Set(submittedIds).size !== submittedIds.length) {
       throw { statusCode: 400, code: 'DUPLICATE_ACTIVITY_ANSWER', message: 'Mỗi hoạt động chỉ được gửi một câu trả lời.' };

@@ -32,13 +32,18 @@ export function NewActivityFrame({
         size="sm"
       />
       {!activity.audioUrl && activity.type === "follow_steps" && (
-        <p>
-          Chưa có audio nguồn. Bé có thể dùng giọng đọc thiết bị hoặc đọc hướng
-          dẫn bên dưới.
-        </p>
+        <MissingSourceAudioNotice hint="đọc hướng dẫn bên dưới" />
       )}
       {children}
     </section>
+  );
+}
+// Honest notice when content has no recorded source audio: device speech only.
+export function MissingSourceAudioNotice({ hint }: { hint: string }) {
+  return (
+    <p className="text-sm text-stone-600">
+      Chưa có audio nguồn. Bé có thể dùng giọng đọc thiết bị hoặc {hint}.
+    </p>
   );
 }
 export function IncompleteActivity() {

@@ -1,5 +1,5 @@
 # Internal helper: stdout goes only to bootstrap-production.cjs, never run alone.
-param([switch]$Apply)
+param([Parameter(Mandatory = $true)][string]$TargetHost, [Parameter(Mandatory = $true)][string]$TargetDb, [Parameter(Mandatory = $true)][string]$DbUser, [switch]$Apply)
 $ErrorActionPreference = 'Stop'
 try {
     [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
@@ -18,7 +18,7 @@ try {
     $info.Location = New-Object System.Drawing.Point(20, 15)
     $info.Size = New-Object System.Drawing.Size(535, 90)
     $mode = if ($Apply) { 'Validate, migrate child languages, then load empty catalog.' } else { 'Dry-run only: no schema or catalog writes.' }
-    $info.Text = "Target: thanh.841ysjn.mongodb.net / test`r`nDB user: binhlqhe181123_db_user`r`n$mode`r`nPassword stays in a private pipe; no Vercel env changes."
+    $info.Text = "Target: $TargetHost / $TargetDb`r`nDB user: $DbUser`r`n$mode`r`nPassword stays in a private pipe; no Vercel env changes."
     $form.Controls.Add($info)
     $label = New-Object System.Windows.Forms.Label
     $label.Location = New-Object System.Drawing.Point(20, 108)

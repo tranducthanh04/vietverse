@@ -110,18 +110,23 @@ export class ParentService {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ của bé hoặc không có quyền truy cập' };
     }
 
-    const progresses = await LessonProgress.find({ childId: child._id });
-    const completedProgresses = progresses.filter((p) => p.status === 'completed');
+    // Independent reads run together; only ids/counts are needed, never whole documents.
+    const [completedProgresses, recordingsCount, storiesExploredCount, cultureExploredCount, journey, recentActivities] = await Promise.all([
+      LessonProgress.find({ childId: child._id, status: 'completed' }).select('lessonId').lean(),
+      Recording.countDocuments({ childId: child._id }),
+      ExplorationLog.countDocuments({ childId: child._id, kind: 'story' }),
+      ExplorationLog.countDocuments({ childId: child._id, kind: 'culture' }),
+      getParentJourney(parentId, childId),
+      getParentRecentActivities(childId),
+    ]);
     const completedLessonIds = completedProgresses.map((p) => p.lessonId);
-
-    const completedLessons = await Lesson.find({ _id: { $in: completedLessonIds } });
-    const recordingsCount = await Recording.countDocuments({ childId: child._id });
-    const storiesExploredCount = await ExplorationLog.countDocuments({ childId: child._id, kind: 'story' });
-    const cultureExploredCount = await ExplorationLog.countDocuments({ childId: child._id, kind: 'culture' });
+    // Count only lessons that still exist, as before.
+    const completedCount = completedLessonIds.length
+      ? await Lesson.countDocuments({ _id: { $in: completedLessonIds } })
+      : 0;
 
     // Target benchmark for MVP Phase: 4 foundational lessons in Stage 1
     const baseLessonsCount = 4;
-    const completedCount = completedLessons.length;
 
     // 1. Nghe hiểu (Listening):
     // Based on listen_choose activities & story listens
@@ -175,11 +180,6 @@ export class ParentService {
         description: 'Gắn kết ngôn ngữ với hình ảnh văn hóa, sự tích và nếp sống truyền thống Việt Nam.',
       },
     ];
-
-    const [journey, recentActivities] = await Promise.all([
-      getParentJourney(parentId, childId),
-      getParentRecentActivities(childId),
-    ]);
 
     return {
       journey,

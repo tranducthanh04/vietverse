@@ -15,7 +15,11 @@ describe('server provider verification', () => {
   });
   it.each([
     { video: { codec: 'h264' } }, { audio: undefined }, { audio: {} },
-    { duration: undefined }, { duration: NaN }, { duration: 180.1 },
+    { duration: 180.1 }, { duration: Infinity }, { duration: '12' },
+    { video: { codec: 'h264', width: 640, height: 480 }, is_audio: true },
+    { video: { codec: 'h264' }, width: 640, height: 480, is_audio: true },
+    { video: { codec: 'h264', nb_frames: '250' }, is_audio: true },
+    { duration: undefined, bytes: 5242881 }, { duration: undefined, audio: {} }, { duration: undefined, format: 'mkv' },
     { bytes: 0 }, { bytes: 5242881 }, { format: 'jpg' },
     { resource_type: 'image' }, { public_id: 'other' },
     { secure_url: 'https://attacker.test/audio' },
@@ -43,7 +47,7 @@ describe('server provider verification', () => {
       statusCode: 404, code: 'UPLOAD_ASSET_NOT_FOUND', message: 'Chưa tìm thấy tập tin đã gửi.',
     });
   });
-  it.each([401, 403, 429, 500])('does not permit reupload or expose SDK credentials on nested %s', async http_code => {
+  it.each([401, 403, 500])('does not permit reupload or expose SDK credentials on nested %s', async http_code => {
     vi.spyOn(cloudinary.api, 'resource').mockRejectedValue({
       error: { http_code, message: 'private-provider-details' },
       request_options: { auth: 'private-provider-credentials' },
@@ -51,5 +55,27 @@ describe('server provider verification', () => {
     await expect(directAudioStorage.inspect('random-asset')).rejects.toEqual({
       statusCode: 503, code: 'UPLOAD_STORAGE_UNAVAILABLE', message: 'Lưu trữ thu âm chưa sẵn sàng. Vui lòng thử lại.',
     });
+  });
+it.each([{ duration: undefined }, { duration: null }, { duration: 0 }, { duration: NaN }])('accepts audio whose provider metadata lacks a duration %j', async change => {
+    vi.spyOn(cloudinary.api, 'resource').mockResolvedValue({ ...metadata(), ...change } as never);
+    expect(await directAudioStorage.inspect('random-asset')).toMatchObject({ durationSec: 0, hasAudio: true, hasVideo: false });
+  });
+  it('treats an iOS mp4 placeholder video stream as audio only when Cloudinary flags it as audio', async () => {
+    const ios = { ...metadata(), format: 'mp4', audio: { codec: 'aac' }, video: { codec: 'h264', pix_format: 'yuv420p' } };
+    vi.spyOn(cloudinary.api, 'resource').mockResolvedValueOnce({ ...ios, is_audio: true } as never).mockResolvedValueOnce(ios as never);
+    expect(await directAudioStorage.inspect('random-asset')).toMatchObject({ format: 'mp4', hasVideo: false });
+    await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 422, code: 'UPLOAD_AUDIO_INVALID' });
+  });
+  it.each([420, 429])('maps provider rate limiting %s to a distinct retryable code', async http_code => {
+    vi.spyOn(cloudinary.api, 'resource').mockRejectedValue({ error: { http_code, message: 'private-provider-details' }, request_options: { auth: 'private-provider-credentials' } });
+    const failure = await directAudioStorage.inspect('random-asset').catch(error => error);
+    expect(failure).toMatchObject({ statusCode: 503, code: 'UPLOAD_STORAGE_RATE_LIMITED' });
+    expect(failure.retryAfterSec).toBeGreaterThanOrEqual(30);
+    expect(failure.retryAfterSec).toBeLessThanOrEqual(3600);
+    expect(JSON.stringify(failure)).not.toContain('private');
+  });
+  it('back-dates the signed timestamp so provider permission lapses ~15 minutes after issuance', () => {
+    const now = Date.UTC(2026, 9, 13, 2, 0, 0);
+    expect(directAudioStorage.signatureTimestamp(now)).toBe(now / 1000 - 45 * 60);
   });
 });

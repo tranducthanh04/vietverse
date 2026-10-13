@@ -6,6 +6,14 @@ export type RecordingReceipt = { id: string; _id?: string; url?: string; duratio
 type UploadIntent = { intentId: string; expiresAt: string; upload: { url: string; fields: Record<string,string> } };
 export const recordingContextChanged = () => Object.assign(new Error('Phiên thu âm đã thay đổi. Vui lòng thu âm lại cho hồ sơ hiện tại.'), { code: 'RECORDING_CONTEXT_CHANGED' });
 const assertCurrent = (isCurrent: () => boolean) => { if (!isCurrent()) throw recordingContextChanged(); };
+export const PROVIDER_UPLOAD_TIMEOUT_MS = 60_000;
+// AbortSignal.timeout is missing on older Safari/Android WebViews; fall back to a controller.
+function providerTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => void } {
+  if (typeof AbortSignal.timeout === 'function') return { signal: AbortSignal.timeout(ms), clear: () => {} };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new DOMException('Upload timed out', 'TimeoutError')), ms);
+  return { signal: controller.signal, clear: () => clearTimeout(timer) };
+}
 
 // Guard dispatch, including refresh/queued retries, not only the api.post call.
 export async function postCurrentRecordingRequest<T>(path: string, body: unknown, isCurrent: () => boolean, config: AxiosRequestConfig = {}): Promise<T> {
@@ -61,14 +69,21 @@ export function createDirectRecordingUpload(blob: Blob, context: RecordingContex
     for (const [key,value] of Object.entries(intent.upload.fields)) form.append(key,value);
     const extension = blob.type.includes('mp4') ? 'mp4' : blob.type.includes('ogg') ? 'ogg' : 'webm';
     form.append('file',blob,`recording.${extension}`); attemptedProvider = true;
+    // A weak network must not leave "Gửi" spinning forever. attemptedProvider is
+    // already set, so the next submit asks finalize first before re-uploading.
+    const timeout = providerTimeoutSignal(PROVIDER_UPLOAD_TIMEOUT_MS);
     try {
-      const response = await fetch(intent.upload.url,{ method:'POST',body:form,credentials:'omit',redirect:'error' });
+      const response = await fetch(intent.upload.url,{ method:'POST',body:form,credentials:'omit',redirect:'error',signal:timeout.signal });
       assertCurrent(isCurrent);
       if (!response.ok) throw new Error('Provider rejected upload');
       uploaded = true;
-    } catch {
+    } catch (error) {
       assertCurrent(isCurrent);
+      const name = (error as { name?: string } | null)?.name;
+      if (name === 'TimeoutError' || name === 'AbortError') throw Object.assign(new Error('Mạng chậm nên chưa gửi xong bản thu. Bé bấm gửi lại nhé; bản thu vẫn được giữ.'), { code: 'RECORDING_UPLOAD_TIMEOUT' });
       throw new Error('Không gửi được bản thu âm. Vui lòng thử lại; bản thu vẫn được giữ.');
+    } finally {
+      timeout.clear();
     }
     return finalize();
   };

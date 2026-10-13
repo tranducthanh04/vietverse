@@ -120,4 +120,21 @@ describe('recording upload permission', () => {
     expect((await request(app).get('/api/v1/auth/me').set('Authorization', `Bearer ${token}`)).status).toBe(200);
     expect(await RecordingUploadIntent.countDocuments()).toBe(0);
   });
+it('limits signed upload permissions per account, not globally', async () => {
+    const ids = Array.from({ length: 11 }, (_, index) => `df1a4398-a090-451c-86aa-f6aa3c9b10${String(index).padStart(2, '0')}`);
+    for (const id of ids.slice(0, 10)) expect((await post({ ...input(), requestId: id })).status).toBe(201);
+    const limited = await post({ ...input(), requestId: ids[10] });
+    expect(limited.status).toBe(429);
+    expect(limited.body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+    const other = await AuthService.register({ email: 'limit-other@example.test', password: 'Password123!', displayName: 'Other' });
+    const otherChild = await Child.create({ parentId: other.user.id, name: 'Other', ageGroup: '5-6', companionLanguage: 'en' });
+    expect((await post({ ...input(), childId: otherChild.id, lessonId: undefined, activityId: undefined, contentVersion: undefined }, other.accessToken)).status).toBe(201);
+  });
+  it('signs with a back-dated timestamp so the provider permission ends ~15 minutes after issuance', async () => {
+    const result = await post(input());
+    expect(result.status).toBe(201);
+    const lagSec = Math.floor(Date.now() / 1000) - Number(result.body.data.upload.fields.timestamp);
+    expect(lagSec).toBeGreaterThanOrEqual(45 * 60);
+    expect(lagSec).toBeLessThan(45 * 60 + 30);
+  });
 });

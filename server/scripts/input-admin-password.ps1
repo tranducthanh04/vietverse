@@ -1,4 +1,5 @@
 # Internal helper. Run provision-admin.cjs, NEVER this script alone: stdout is a private pipe.
+param([Parameter(Mandatory = $true)][string]$TargetHost, [Parameter(Mandatory = $true)][string]$TargetDb, [Parameter(Mandatory = $true)][string]$DbUser)
 $ErrorActionPreference = 'Stop'
 try {
     [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
@@ -29,7 +30,7 @@ try {
         $form.Controls.Add($box)
         return $box
     }
-    Add-Label "Target: thanh.841ysjn.mongodb.net / test`r`nCreates ONE app admin. No reset/promotion of existing accounts." 15 45
+    Add-Label "Target: $TargetHost / $TargetDb (DB user: $DbUser)`r`nCreates ONE app admin. No reset/promotion of existing accounts." 15 45
     Add-Label 'Database User password (NOT your Atlas website password):' 65
     $dbPassword = Add-Box 90 $true
     Add-Label 'Admin email:' 125

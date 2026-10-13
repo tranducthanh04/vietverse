@@ -39,3 +39,29 @@ describe('additive deployment indexes', () => {
     expect(await Recording.countDocuments()).toBe(3);
   });
 });
+
+describe('schema-wide deployment indexes (production runs with autoIndex=false)', () => {
+  it('plans every schema index, including ViVi Points, rules, shop and revenue indexes, without connecting', async () => {
+    const { planned } = await prepareDeploymentIndexes({ apply: false });
+    const find = (collection: string) => planned.find(entry => entry.collection === collection)?.indexes ?? [];
+    expect(find('pointtransactions')).toEqual(expect.arrayContaining([
+      expect.objectContaining({ key: { childId: 1, createdAt: -1 } }),
+      expect.objectContaining({ key: { childId: 1, reason: 1, refId: 1 }, unique: true, partialFilterExpression: expect.any(Object) }),
+    ]));
+    expect(find('pointrules')).toEqual(expect.arrayContaining([expect.objectContaining({ key: { key: 1 }, unique: true })]));
+    expect(find('shopitems').length).toBeGreaterThan(0);
+    expect(find('paymentorders')).toEqual(expect.arrayContaining([expect.objectContaining({ key: { status: 1, paidAt: 1 }, name: 'status_1_paidAt_1' })]));
+    expect(find('refreshtokens')).toEqual(expect.arrayContaining([expect.objectContaining({ key: { expiresAt: 1 } })]));
+  });
+
+  it('applies the indexes on collections that do not exist yet and is idempotent', async () => {
+    const { PointTransaction } = await import('../models/PointTransaction.js');
+    const { PaymentOrder } = await import('../models/PaymentOrder.js');
+    await PointTransaction.collection.drop().catch(() => undefined);
+    await prepareDeploymentIndexes({ apply: true });
+    await prepareDeploymentIndexes({ apply: true });
+    const names = (await PointTransaction.collection.indexes()).map(index => index.name);
+    expect(names).toEqual(expect.arrayContaining(['childId_1_createdAt_-1', 'childId_1_reason_1_refId_1']));
+    expect((await PaymentOrder.collection.indexes()).map(index => index.name)).toContain('status_1_paidAt_1');
+  });
+});

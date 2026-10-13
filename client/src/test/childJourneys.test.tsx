@@ -98,7 +98,7 @@ describe('child route hydration and session limits', () => {
     sessionStorage.setItem('vietverse_parent_gate_token', 'gate');
     sessionStorage.setItem('vietverse_parent_gate_unlocked', String(Date.now() + 60000));
     request = (config) => {
-      if (config.url === '/auth/me') return { user: { id: 'parent-a', email: 'a@example.test', displayName: 'Parent', role: 'parent' }, subscription: { plan: 'free', maxChildren: 1 } };
+      if (config.url === '/auth/refresh') return { accessToken: 'access', user: { id: 'parent-a', email: 'a@example.test', displayName: 'Parent', role: 'parent' }, subscription: { plan: 'free', maxChildren: 1 } };
       if (config.url === '/children') return [child];
       if (config.url === '/stages') return [];
       return { overview: { totalLessonsCompleted: 7, totalRecordings: 2, storiesExplored: 3, cultureExplored: 4 }, competencies: [] };

@@ -39,7 +39,8 @@ it('caps wrong linking attempts and never changes the original account', async (
 
 it('rolls back account creation and nonce consumption when subscription creation fails', async () => {
   const flow = await start();
-  vi.spyOn(Subscription, 'create').mockRejectedValueOnce(new Error('DB failure') as never);
+  // A transient driver failure maps to 503; the account and nonce must still roll back.
+  vi.spyOn(Subscription, 'create').mockRejectedValueOnce(Object.assign(new Error('DB failure'), { name: 'MongoNetworkError' }) as never);
   await expect(GoogleAuthService.signIn(flow.token, flow.nonce, 'credential')).rejects.toMatchObject({ statusCode: 503 });
   expect(await User.countDocuments()).toBe(0);
   expect(await Subscription.countDocuments()).toBe(0);

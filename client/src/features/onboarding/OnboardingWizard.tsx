@@ -143,7 +143,10 @@ export const OnboardingWizard: React.FC = () => {
                     <img
                       className="w-full h-full object-cover"
                       alt="Sao Lí Lắc"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuACRIKtBgTG9wCgUeSYdyWpma7WYksVA2By9zjzUZxgvQNqG-5quighNiQxXB0OJzqvLPYs54owlcewfvrgMPHqCmKQfGTls5UmT_2_wSa6MDuQLq5Qzq9BivE3mfi9KCo01y07vYxdjaA8a6K1hDT51Ijl_7_DyuP-H3k7GkCh7uJ9b1bbTcHiKa1Y-12L4zuFM7GDTy_VoL8TxCtbXPDUWzH5YKOSDPyw3Jx2BPMrrNlLEM42-wID"
+                      src="/images/mascot/sao-li-lac-avatar.webp"
+                      width={256}
+                      height={256}
+                      decoding="async"
                     />
                   </div>
                   <span className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center shadow-md">
@@ -344,7 +347,10 @@ export const OnboardingWizard: React.FC = () => {
                   <img
                     alt="Sao Lí Lắc"
                     className="w-full h-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuACRIKtBgTG9wCgUeSYdyWpma7WYksVA2By9zjzUZxgvQNqG-5quighNiQxXB0OJzqvLPYs54owlcewfvrgMPHqCmKQfGTls5UmT_2_wSa6MDuQLq5Qzq9BivE3mfi9KCo01y07vYxdjaA8a6K1hDT51Ijl_7_DyuP-H3k7GkCh7uJ9b1bbTcHiKa1Y-12L4zuFM7GDTy_VoL8TxCtbXPDUWzH5YKOSDPyw3Jx2BPMrrNlLEM42-wID"
+                    src="/images/mascot/sao-li-lac-avatar.webp"
+                    width={256}
+                    height={256}
+                    decoding="async"
                   />
                 </div>
                 <span className="absolute -bottom-2 -right-2 bg-secondary-container text-on-secondary-container font-black px-3 py-1 rounded-full text-xs shadow-md">

@@ -15,7 +15,10 @@ import {
   Lightbulb,
   ArrowRight,
   Headphones,
-  HeartHandshake
+  HeartHandshake,
+  Compass,
+  Map as MapIcon,
+  LockOpen
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
@@ -111,7 +114,10 @@ export const LandingPage: React.FC = () => {
                     <img
                       alt="Linh vật Sao Lí Lắc đội nón lá cầm cuốn thư nhiệm màu bay trên làng quê Việt Nam"
                       className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700 ease-out"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1NU71V84VUv2s7B4P8vRso08qdIBhss093d9mshiQV421NF12DYwQ11gtSCL_EYULpCasWFbceI5_DZVo0mBRBAT6aFzfNS-wbUHIj4C19D9SDVYUi6EreoFmMk7vD1YxeORyvNPHDBvW7L88Mw4As5TBn8rVxx-iXxfSIYVy4aryZYKXibHklkF9Gl7UN4v040VDEoymXSWRZNEvrUdglb9ZkIfEMM3cNcGT0ht6wUhEZXIjmlze"
+                      src="/images/mascot/sao-li-lac-river-journey.webp"
+                      width={512}
+                      height={286}
+                      decoding="async"
                     />
 
                     {/* Nhãn trang trí góc dưới */}
@@ -141,7 +147,7 @@ export const LandingPage: React.FC = () => {
       <section className="w-full py-16 lg:py-24 bg-surface-container-low relative">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed mb-4">
-            <span className="material-symbols-outlined text-[16px] text-tertiary">explore</span>
+            <Compass className="w-4 h-4 text-tertiary" aria-hidden="true" />
             <span className="text-xs uppercase font-bold tracking-wide">KHÔNG GIAN HỌC DIỆU KỲ</span>
           </div>
 
@@ -301,7 +307,7 @@ export const LandingPage: React.FC = () => {
       <section className="w-full py-16 lg:py-24 bg-surface-container-low relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed mb-4">
-            <span className="material-symbols-outlined text-[16px] text-secondary">map</span>
+            <MapIcon className="w-4 h-4 text-secondary" aria-hidden="true" />
             <span className="text-xs uppercase font-bold tracking-wide">BẢN ĐỒ THÁM HIỂM</span>
           </div>
 
@@ -384,7 +390,7 @@ export const LandingPage: React.FC = () => {
             onClick={() => navigate('/kham-pha')}
             className="btn-3d-accent inline-flex items-center gap-3 px-10 py-5 rounded-full font-display text-xl font-bold select-none cursor-pointer"
           >
-            <span className="material-symbols-outlined text-2xl">lock_open</span>
+            <LockOpen className="w-6 h-6" aria-hidden="true" />
             <span>KHÁM PHÁ BÁU VẬT NƯỚC NAM</span>
             <Sparkles className="w-6 h-6" />
           </button>

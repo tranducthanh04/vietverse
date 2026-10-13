@@ -1,6 +1,7 @@
 // Windows launcher; credentials stay in private pipes and never enter argv/.env.
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
+const { readOperatorTarget, buildTargetUri } = require('./operator-target.cjs');
 const api = 'https://vietverse-nine.vercel.app/api/v1';
 
 async function verifyLogin(email, password) {
@@ -40,30 +41,32 @@ async function verifyLogin(email, password) {
 
 async function main() {
   if (process.platform !== 'win32' || process.argv.length !== 2) throw new Error('ADMIN_ARGUMENTS_INVALID');
+  // Operator declares the target in the shell session (VIETVERSE_DB_HOST/USER/NAME); nothing is hard-coded.
+  const target = readOperatorTarget(process.env, 'ADMIN_TARGET_INVALID');
   const dialog = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-STA', '-ExecutionPolicy', 'Bypass',
-    '-File', path.join(__dirname, 'input-admin-password.ps1')], {
+    '-File', path.join(__dirname, 'input-admin-password.ps1'), '-TargetHost', target.host, '-TargetDb', target.dbName, '-DbUser', target.user], {
     encoding: 'utf8', windowsHide: false, timeout: 610000, maxBuffer: 8192,
   });
   if (dialog.status !== 0) throw new Error('ADMIN_INPUT_CANCELLED_OR_FAILED');
   const credential = JSON.parse(dialog.stdout);
   dialog.stdout = '';
   if (!credential.dbPassword || !credential.password || credential.exclusiveWindowConfirmed !== true) throw new Error('ADMIN_INPUT_INVALID');
-  const uri = `mongodb+srv://binhlqhe181123_db_user:${encodeURIComponent(credential.dbPassword)}@thanh.841ysjn.mongodb.net/test?retryWrites=true&w=majority&appName=VietverseAdminProvision`;
+  const uri = buildTargetUri(target, credential.dbPassword, 'VietverseAdminProvision');
   credential.dbPassword = '';
   const child = spawnSync(process.execPath, ['--import', 'tsx', 'src/seeds/provisionAdmin.ts'], {
     cwd: path.resolve(__dirname, '..'),
-    input: JSON.stringify({ uri, ...credential }), encoding: 'utf8', windowsHide: true,
+    input: JSON.stringify({ uri, target: { host: target.host, user: target.user, dbName: target.dbName }, ...credential }), encoding: 'utf8', windowsHide: true,
     timeout: 120000, maxBuffer: 8192,
   });
   let report;
   try { report = JSON.parse(child.stdout.trim()); } catch { /* No raw output. */ }
   if (child.status !== 0 || !report || !['created', 'already_admin'].includes(report.status) ||
-    report.target !== 'thanh/test' || typeof report.email !== 'string') {
+    report.target !== target.label || typeof report.email !== 'string') {
     let code;
     try { code = JSON.parse(child.stderr.trim()).error; } catch { /* No raw output. */ }
     throw new Error(typeof code === 'string' && /^ADMIN_[A-Z_]+$/.test(code) ? code : 'ADMIN_PROVISION_FAILED');
   }
-  console.log(JSON.stringify({ target: 'thanh/test', status: report.status, email: report.email, passwordVerified: report.passwordVerified === true }));
+  console.log(JSON.stringify({ target: target.label, status: report.status, email: report.email, passwordVerified: report.passwordVerified === true }));
   const verification = report.passwordVerified === true
     ? await verifyLogin(report.email, credential.password) : 'existing_password_unchanged';
   credential.password = '';

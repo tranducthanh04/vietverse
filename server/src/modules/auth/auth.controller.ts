@@ -2,20 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthService } from './auth.service.js';
 import { registerSchema, loginSchema } from './auth.validation.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
-import { env } from '../../config/env.js';
+import { refreshCookieMaxAgeMs, sessionCookieOptions } from './auth.cookies.js';
+
+function setRefreshCookie(res: Response, refreshToken: string) {
+  res.cookie('refreshToken', refreshToken, { ...sessionCookieOptions, maxAge: refreshCookieMaxAgeMs });
+}
 
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
       const validated = registerSchema.parse(req.body);
       const result = await AuthService.register(validated);
-
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      setRefreshCookie(res, result.refreshToken);
 
       return sendSuccess(
         res,
@@ -34,13 +32,7 @@ export class AuthController {
     try {
       const validated = loginSchema.parse(req.body);
       const result = await AuthService.login(validated);
-
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      setRefreshCookie(res, result.refreshToken);
 
       return sendSuccess(res, {
         user: result.user,
@@ -53,37 +45,33 @@ export class AuthController {
 
   static async refresh(req: Request, res: Response, next: NextFunction) {
     try {
+      res.setHeader('Cache-Control', 'no-store');
       const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
       if (!refreshToken) {
         return sendError(res, 'Mã làm mới (refresh token) không tồn tại', 401, 'NO_REFRESH_TOKEN');
       }
 
       const result = await AuthService.refresh(refreshToken);
+      setRefreshCookie(res, result.refreshToken);
 
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      return sendSuccess(res, { accessToken: result.accessToken });
+      // One-request bootstrap: same user/subscription shape as GET /auth/me, plus the access token.
+      return sendSuccess(res, { accessToken: result.accessToken, user: result.user, subscription: result.subscription });
     } catch (error) {
       next(error);
     }
   }
 
-  static async logout(req: Request, res: Response) {
-    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
-    const userId = req.user?.id;
-    await AuthService.logout(refreshToken, userId);
+  static async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+      const userId = req.user?.id;
+      await AuthService.logout(refreshToken, userId);
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
-    return sendSuccess(res, { message: 'Đăng xuất thành công' });
+      res.clearCookie('refreshToken', sessionCookieOptions);
+      return sendSuccess(res, { message: 'Đăng xuất thành công' });
+    } catch (error) {
+      next(error);
+    }
   }
 
   static async getMe(req: Request, res: Response, next: NextFunction) {

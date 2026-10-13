@@ -19,7 +19,11 @@ export class RecordingsController {
   static async finalize(req: Request, res: Response, next: NextFunction) {
     try {
       return sendSuccess(res, await DirectRecordingsService.finalize(req.user!.id, finalizeSchema.parse(req.body).intentId), 201);
-    } catch (error) { next(error); }
+    } catch (error) {
+      const retryAfterSec = (error as { retryAfterSec?: unknown } | null)?.retryAfterSec;
+      if (typeof retryAfterSec === 'number' && Number.isFinite(retryAfterSec)) res.set('Retry-After', String(Math.ceil(retryAfterSec)));
+      next(error);
+    }
   }
 
   static async createIntent(req: Request, res: Response, next: NextFunction) {

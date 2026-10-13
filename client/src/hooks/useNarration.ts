@@ -1,6 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 let activeStop: (() => void) | undefined;
+// Media players outside this hook (e.g. parent recordings) share the single-reader rule.
+export function claimPlayback(stop: () => void) {
+  if (activeStop !== stop) activeStop?.();
+  activeStop = stop;
+}
+export function releasePlayback(stop: () => void) {
+  if (activeStop === stop) activeStop = undefined;
+}
+// iOS blocks TTS that is not started inside a user gesture and then never fires onstart.
+export const SPEECH_START_TIMEOUT_MS = 2500;
+const SPEECH_BLOCKED =
+  "Thiết bị chưa phát được giọng đọc. Hãy bấm nghe lại hoặc đọc nội dung trên màn hình.";
+// Android reports "vi_VN"; BCP 47 uses "vi-VN".
+export const normalizeVoiceLang = (value: string) =>
+  value.replace(/_/g, "-").toLowerCase();
+let speechUnlocked = false;
+const isIOS = () =>
+  typeof navigator !== "undefined" &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
 export function useNarration({
   audioUrl,
@@ -20,6 +40,9 @@ export function useNarration({
   const failedAsset = useRef(false);
   const usingSpeech = useRef(false);
   const cancelVoiceWait = useRef<(() => void) | undefined>(undefined);
+  const speechWatchdog = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const [isPlaying, setPlaying] = useState(false);
   const [mode, setMode] = useState<"asset" | "tts">(audioUrl ? "asset" : "tts");
   const [error, setError] = useState("");
@@ -38,6 +61,8 @@ export function useNarration({
     running.current = false;
     cancelVoiceWait.current?.();
     cancelVoiceWait.current = undefined;
+    clearTimeout(speechWatchdog.current);
+    speechWatchdog.current = undefined;
     audioRef.current?.pause();
     // An old component must never cancel the voice now owned by another reader.
     if (activeStop === stop) {
@@ -101,28 +126,48 @@ export function useNarration({
         utterance.lang = lang;
         utterance.voice = voice;
         utterance.rate = 0.85;
+        let started = false;
+        const settle = () => {
+          started = true;
+          clearTimeout(speechWatchdog.current);
+        };
         utterance.onstart = () => {
+          settle();
           if (token === session.current) setSegmentIndex(chunks[index].index);
         };
-        utterance.onend = () => read(index + 1);
-        utterance.onerror = () =>
+        utterance.onend = () => {
+          settle();
+          read(index + 1);
+        };
+        utterance.onerror = () => {
+          settle();
           fail("Không phát được giọng đọc thiết bị. Hãy thử lại.");
+        };
         try {
           synth.speak(utterance);
         } catch {
           fail("Không phát được giọng đọc thiết bị.");
+          return;
+        }
+        // Watchdog: a blocked engine never starts; release the "Dừng đọc" state.
+        if (!started) {
+          clearTimeout(speechWatchdog.current);
+          speechWatchdog.current = setTimeout(() => {
+            if (!started && token === session.current) fail(SPEECH_BLOCKED);
+          }, SPEECH_START_TIMEOUT_MS);
         }
       };
       read(0);
     };
     const findVoice = () => {
       const voices = synth.getVoices();
-      const locale = lang.toLowerCase();
+      const locale = normalizeVoiceLang(lang);
       return (
-        voices.find((voice) => voice.lang.toLowerCase() === locale) ??
+        voices.find((voice) => normalizeVoiceLang(voice.lang) === locale) ??
         voices.find(
           (voice) =>
-            voice.lang.toLowerCase().split("-")[0] === locale.split("-")[0],
+            normalizeVoiceLang(voice.lang).split("-")[0] ===
+            locale.split("-")[0],
         )
       );
     };
@@ -169,8 +214,19 @@ export function useNarration({
       stop();
       return;
     }
-    activeStop?.();
-    activeStop = stop;
+    claimPlayback(stop);
+    // Must run synchronously inside the click: later speak() calls (voice
+    // discovery, asset fallback) are then allowed by iOS Safari.
+    if (!speechUnlocked && speechAvailable && hasText && isIOS()) {
+      speechUnlocked = true;
+      try {
+        const unlock = new SpeechSynthesisUtterance("");
+        unlock.volume = 0;
+        window.speechSynthesis.speak(unlock);
+      } catch {
+        /* Unlock is best effort; the watchdog reports a blocked engine. */
+      }
+    }
     const token = ++session.current;
     running.current = true;
     usingSpeech.current = false;

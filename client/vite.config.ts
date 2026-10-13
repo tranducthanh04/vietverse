@@ -10,6 +10,20 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Vendor code changes rarely: separate chunks stay cached (immutable /assets) across app deploys.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          // Libraries used only by lazily loaded pages stay with those pages.
+          if (/node_modules[\\/](canvas-confetti|idb-keyval)[\\/]/.test(id)) return undefined;
+          if (/node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) return 'vendor-react';
+          return 'vendor';
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
