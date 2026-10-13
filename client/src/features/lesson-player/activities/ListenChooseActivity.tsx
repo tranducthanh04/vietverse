@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { cn } from '../../../lib/utils.js';
+import { MissingSourceAudioNotice } from './NewActivityFrame.js';
 
 export interface ListenChooseActivityProps {
   activity: {
@@ -44,8 +45,10 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
           audioUrl={activity.audioUrl}
           textToSpeak={activity.prompt}
           size="lg"
-          label="Bấm để nghe âm thanh"
+          label={activity.audioUrl ? 'Bấm để nghe âm thanh' : 'Nghe đọc câu hỏi'}
         />
+        {/* Without source audio, device speech can only read the prompt; do not imply a listening clip exists. */}
+        {!activity.audioUrl && <MissingSourceAudioNotice hint="đọc câu hỏi phía trên" />}
       </div>
 
       {/* Options grid with large touchable cards */}

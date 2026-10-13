@@ -1,8 +1,13 @@
 import { Recording } from '../../models/Recording.js';
 import { Child } from '../../models/Child.js';
 import { storageService } from '../../services/storage.service.js';
+import { queueAudioCleanup } from '../../services/audioAssetCleanup.js';
 import { assertRecordingContext } from './recordings.policy.js';
 import { persistOwnedRecording } from './recordings.persistence.js';
+
+// Parent list view; the newest recordings are what the page shows. Bounded to
+// keep the response and query cost predictable for long-lived profiles.
+export const RECORDING_LIST_LIMIT = 200;
 
 export class RecordingsService {
   static async uploadRecording(
@@ -35,20 +40,25 @@ export class RecordingsService {
       // failure can mean a durable Recording with a lost ACK; retain that audio.
       const status = (error as { statusCode?: number }).statusCode;
       if (status && status >= 400 && status < 500) {
-        try { await storageService.deleteAudio(uploadRes.publicId); } catch { /* manual reconciliation */ }
+        // Legacy uploads use resource_type 'auto'; delete with the type the provider assigned.
+        let removed = false;
+        try { removed = await storageService.deleteAudio(uploadRes.publicId, uploadRes.resourceType); } catch { /* queued below */ }
+        if (!removed) await queueAudioCleanup([{ publicId: uploadRes.publicId, resourceType: uploadRes.resourceType }], 'legacy_compensation', 'compensation_failed', context.childId);
       }
       throw error;
     }
   }
 
   static async getRecordingsByChild(childId: string, parentId: string) {
-    const child = await Child.findOne({ _id: childId, parentId });
+    const child = await Child.exists({ _id: childId, parentId });
     if (!child) {
       throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé hoặc không có quyền truy cập' };
     }
 
     return Recording.find({ childId: child._id })
       .populate('lessonId', 'title order')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(RECORDING_LIST_LIMIT)
+      .lean();
   }
 }

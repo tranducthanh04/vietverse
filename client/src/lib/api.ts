@@ -5,6 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,6 +32,27 @@ function enqueueAuthRequest<T>(work: () => Promise<T>): Promise<T> {
 
 export function authPost(path: string, data: unknown = {}) {
   return enqueueAuthRequest(() => api.post(path, data, { timeout: 20_000 }));
+}
+
+export interface RefreshedSession<TUser = unknown, TSubscription = unknown> {
+  accessToken: string;
+  user: TUser;
+  subscription: TSubscription;
+}
+
+/**
+ * Rotates the refresh cookie and stores the new access token. The server also returns the same
+ * user/subscription shape as GET /auth/me, so a page reload needs only this one request.
+ * `/auth/refresh` is excluded from the 401 retry interceptor below.
+ */
+export async function refreshSession<TUser = unknown, TSubscription = unknown>(): Promise<RefreshedSession<TUser, TSubscription>> {
+  const { data } = await authPost('/auth/refresh');
+  const session = data?.data as RefreshedSession<TUser, TSubscription> | undefined;
+  if (!session || typeof session.accessToken !== 'string' || !session.accessToken) {
+    throw new Error('Phiên đăng nhập không hợp lệ');
+  }
+  setApiAccessToken(session.accessToken);
+  return session;
 }
 
 // Request interceptor: Attach access token and parent gate token to headers
@@ -92,14 +114,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await enqueueAuthRequest(() => axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {},
-          { withCredentials: true, timeout: 20_000 }
-        ));
-
-        const newAccessToken = data.data.accessToken;
-        setApiAccessToken(newAccessToken);
+        const { accessToken: newAccessToken } = await refreshSession();
         processQueue(null, newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);

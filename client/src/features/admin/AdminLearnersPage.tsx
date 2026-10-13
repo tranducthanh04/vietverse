@@ -338,8 +338,8 @@ export const AdminLearnersPage: React.FC = () => {
                               {new Date(rec.createdAt).toLocaleString('vi-VN')} (Bài: {rec.lessonId?.title || 'Bài học'})
                             </span>
                           </div>
-                          {rec.audioUrl && (
-                            <audio controls src={rec.audioUrl} className="h-8 w-full sm:w-56" />
+                          {rec.url && (
+                            <audio controls src={rec.url} className="h-8 w-full sm:w-56" />
                           )}
                         </div>
                       ))}

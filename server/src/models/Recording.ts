@@ -7,6 +7,7 @@ export interface IRecording extends Document {
   contentVersion?: number;
   url: string;
   publicId?: string;
+  resourceType?: string;
   uploadIntentId?: Types.ObjectId;
   durationSec: number;
   wordOrPrompt?: string;
@@ -35,6 +36,8 @@ const recordingSchema = new Schema<IRecording>(
       required: true,
     },
     publicId: String,
+    // Provider resource type for physical deletion; legacy uploads used 'auto'.
+    resourceType: { type: String, select: false },
     uploadIntentId: { type: Schema.Types.ObjectId, select: false },
     contentVersion: { type: Number, min: 0 },
     durationSec: {

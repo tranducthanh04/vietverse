@@ -387,3 +387,44 @@ describe("narration in learning journeys", () => {
     expect(submit).not.toHaveBeenCalled();
   });
 });
+
+describe("device speech robustness", () => {
+  it("matches Android voices that report vi_VN", () => {
+    voices = [{ ...voices[0], lang: "vi_VN" }];
+    render(<AudioButton textToSpeak="Xin chao" />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(spoken).toHaveLength(1);
+    expect(spoken[0].voice).toBe(voices[0]);
+  });
+
+  it("releases a speech engine that never starts and shows the error", () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("speechSynthesis", {
+      cancel,
+      getVoices: () => voices,
+      speak: (utterance: SpeechSynthesisUtterance) => {
+        spoken.push(utterance); // blocked engine: no onstart
+      },
+      addEventListener: speechEvents.addEventListener.bind(speechEvents),
+      removeEventListener: speechEvents.removeEventListener.bind(speechEvents),
+    });
+    render(<AudioButton textToSpeak="Xin chao" />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(cancel).toHaveBeenCalled();
+    expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("status")).toHaveTextContent(/chưa phát được giọng đọc/i);
+  });
+
+  it("unlocks iOS speech synchronously inside the tap before reading", () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
+    );
+    render(<AudioButton textToSpeak="Xin chao" />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(spoken.map((item) => item.text)).toEqual(["", "Xin chao"]);
+  });
+});

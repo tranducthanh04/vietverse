@@ -1,5 +1,11 @@
 import { Schema, model } from 'mongoose';
 
+// Pending intents keep their publicId long enough for a monthly orphan
+// reconciliation (an upload may have reached the provider without finalize).
+// Completed intents are redundant with the Recording receipt and expire sooner.
+export const PENDING_INTENT_RETENTION_MS = 30 * 86400000;
+export const COMPLETED_INTENT_RETENTION_MS = 7 * 86400000;
+
 const schema = new Schema({
   parentId: { type: Schema.Types.ObjectId, required: true },
   requestId: { type: String, required: true },
@@ -13,7 +19,11 @@ const schema = new Schema({
   timestamp: { type: Number, required: true },
   expiresAt: { type: Date, required: true },
   deleteAt: { type: Date, required: true },
-  status: { type: String, enum: ['pending', 'completed'], default: 'pending', required: true },
+  // `finalizing` is a leased claim: one finalize request owns provider inspection
+  // and persistence; concurrent requests wait for its receipt.
+  status: { type: String, enum: ['pending', 'finalizing', 'completed'], default: 'pending', required: true },
+  claimToken: String,
+  claimedAt: Date,
   recordingId: Schema.Types.ObjectId,
 }, { timestamps: true });
 schema.index({ parentId: 1, requestId: 1 }, { unique: true });

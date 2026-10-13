@@ -82,7 +82,13 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       onComplete(true, recordingId);
     } catch (err: any) {
       if (!current()) return;
-      const msg = err.response?.data?.error?.message || err.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
+      // Timeouts end the spinner; the upload task keeps its intent, so "Thử gửi lại" asks finalize first.
+      const timedOut = err?.code === 'ECONNABORTED' || err?.code === 'ETIMEDOUT' || err?.code === 'RECORDING_UPLOAD_TIMEOUT';
+      const offline = err?.code === 'ERR_NETWORK';
+      const msg = err.response?.data?.error?.message
+        || (timedOut ? 'Mạng chậm nên chưa gửi xong. Bé bấm "Thử gửi lại" hoặc thu âm lại nhé; bản thu vẫn được giữ.' : undefined)
+        || (offline ? 'Mất kết nối mạng. Bé kiểm tra mạng rồi bấm "Thử gửi lại" nhé.' : undefined)
+        || err.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
       setUploadError(msg);
       setIntentExpired(err.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED');
     } finally {

@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Mic, Play, Pause, Calendar, Clock } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { claimPlayback, releasePlayback } from '../../hooks/useNarration.js';
 
 export const ParentRecordingsPage: React.FC = () => {
   const { activeChild } = useChildStore();
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Stable identity: registered as the single active player shared with narration.
+  const stopPlayback = useCallback(() => {
+    const audio = audioRef.current;
+    audioRef.current = null;
+    if (audio) {
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+    }
+    releasePlayback(stopPlayback);
+    setPlayingId(null);
+  }, []);
+  useEffect(() => () => stopPlayback(), [stopPlayback]);
 
   const { data: recordings = [], isLoading } = useQuery({
     queryKey: ['childRecordings', activeChild?._id],
@@ -22,16 +37,23 @@ export const ParentRecordingsPage: React.FC = () => {
 
   const handleTogglePlay = (id: string, url: string) => {
     if (playingId === id) {
-      audioEl?.pause();
-      setPlayingId(null);
-    } else {
-      if (audioEl) audioEl.pause();
-      const newAudio = new Audio(url);
-      setAudioEl(newAudio);
-      setPlayingId(id);
-      newAudio.play();
-      newAudio.onended = () => setPlayingId(null);
-      newAudio.onerror = () => setPlayingId(null);
+      stopPlayback();
+      return;
+    }
+    stopPlayback();
+    claimPlayback(stopPlayback); // Stops narration or any other active reader.
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    setPlayingId(id);
+    const ended = () => {
+      if (audioRef.current === audio) stopPlayback();
+    };
+    audio.onended = ended;
+    audio.onerror = ended;
+    try {
+      void audio.play().catch(ended);
+    } catch {
+      ended();
     }
   };
 

@@ -8,8 +8,10 @@ import { AuthService } from '../modules/auth/auth.service.js';
 import { ChildrenService } from '../modules/children/children.service.js';
 import { storageService } from '../services/storage.service.js';
 import mongoose from 'mongoose';
+import { AudioCleanupTask } from '../models/AudioCleanupTask.js';
 
 const original = { ...env };
+let destroyed: Array<[string, string]> = [];
 let token: string, parentId: string, childId: string, lessonId: string, intentId: string, publicId: string;
 const resource = () => ({ public_id: publicId, resource_type: 'video', type: 'upload', secure_url: `https://res.cloudinary.com/test-cloud/video/upload/v1/${publicId}.webm`, bytes: 123, duration: 1.25, format: 'webm', audio: { codec: 'opus', frequency: 48000, channels: 1 }, video: {} });
 beforeEach(async () => {
@@ -22,6 +24,9 @@ beforeEach(async () => {
   const intent = await request(app).post('/api/v1/recordings/upload-intent').set('Authorization', `Bearer ${token}`).send({ requestId: 'df1a4398-a090-451c-86aa-f6aa3c9b1087', childId, lessonId, activityId: 'voice', contentVersion: 0, byteLength: 100, mimeType: 'audio/webm', durationSec: 99 }).expect(201);
   intentId = intent.body.data.intentId; publicId = intent.body.data.upload.fields.public_id;
   vi.spyOn(cloudinary.api, 'resource').mockImplementation(async () => resource() as never);
+  // Child deletion destroys provider assets after commit; never reach the network.
+  destroyed = [];
+  vi.spyOn(cloudinary.uploader, 'destroy').mockImplementation((async (id: string, options: { resource_type?: string }) => { destroyed.push([id, options.resource_type ?? '']); return { result: 'ok' }; }) as never);
 });
 afterEach(() => { Object.assign(env, original); vi.restoreAllMocks(); });
 const finalize = (auth = token, body: unknown = { intentId }) => request(app).post('/api/v1/recordings/finalize').set('Authorization', `Bearer ${auth}`).send(body);
@@ -136,5 +141,97 @@ describe('atomic recording finalize', () => {
     expect(result.status).toBe(404);
     expect(await Recording.countDocuments()).toBe(0);
     expect(deleted).toEqual(['this-operation-only']);
+  });
+  it('returns one receipt to many overlapping finalize calls without a 503', async () => {
+    vi.mocked(cloudinary.api.resource).mockImplementation(async () => { await new Promise(resolve => setTimeout(resolve, 40)); return resource() as never; });
+    const results = await Promise.all([finalize(), finalize(), finalize(), finalize()]);
+    expect(results.map(result => result.status)).toEqual([201, 201, 201, 201]);
+    expect(new Set(results.map(result => result.body.data.id)).size).toBe(1);
+    expect(await Recording.countDocuments()).toBe(1);
+    expect((await RecordingUploadIntent.findById(intentId))?.status).toBe('completed');
+  });
+  it('takes over an abandoned finalize claim after its lease', async () => {
+    await RecordingUploadIntent.updateOne({ _id: intentId }, { status: 'finalizing', claimToken: 'crashed', claimedAt: new Date(Date.now() - 60_000) });
+    expect((await finalize()).status).toBe(201);
+  });
+  it('accepts Chrome WebM whose provider metadata has no duration', async () => {
+    vi.mocked(cloudinary.api.resource).mockResolvedValue({ ...resource(), duration: undefined } as never);
+    const result = await finalize();
+    expect(result.status).toBe(201);
+    expect(result.body.data.durationSec).toBe(0);
+  });
+  it('reports provider rate limiting with a distinct retryable code and keeps the intent', async () => {
+    vi.mocked(cloudinary.api.resource).mockRejectedValueOnce({ error: { http_code: 420, message: 'Rate Limit Exceeded' } });
+    const limited = await finalize();
+    expect(limited.status).toBe(503);
+    expect(limited.body.error.code).toBe('UPLOAD_STORAGE_RATE_LIMITED');
+    expect(Number(limited.headers['retry-after'])).toBeGreaterThanOrEqual(30);
+    expect((await RecordingUploadIntent.findById(intentId))?.status).toBe('pending');
+    expect((await finalize()).status).toBe(201);
+  });
+  it('refuses the legacy multipart endpoint when the flag disables it', async () => {
+    const previous = process.env.LEGACY_RECORDING_UPLOAD_ENABLED;
+    process.env.LEGACY_RECORDING_UPLOAD_ENABLED = 'false';
+    try {
+      const upload = vi.spyOn(storageService, 'uploadAudio');
+      const result = await request(app).post('/api/v1/recordings').set('Authorization', `Bearer ${token}`).field('childId', childId)
+        .attach('audio', Buffer.from('voice'), { filename: 'recording.webm', contentType: 'audio/webm' });
+      expect(result.status).toBe(410);
+      expect(result.body.error.code).toBe('LEGACY_RECORDING_UPLOAD_DISABLED');
+      expect(upload).not.toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete process.env.LEGACY_RECORDING_UPLOAD_ENABLED;
+      else process.env.LEGACY_RECORDING_UPLOAD_ENABLED = previous;
+    }
+  });
+  it('compensates a rejected legacy upload with the resource type the provider assigned', async () => {
+    vi.spyOn(storageService, 'uploadAudio').mockImplementationOnce(async () => {
+      await ChildrenService.deleteChild(childId, parentId);
+      return { url: 'https://res.cloudinary.com/test-cloud/raw/upload/v1/odd', publicId: 'legacy-raw', resourceType: 'raw' };
+    });
+    const deleted: Array<[string, string | undefined]> = [];
+    vi.spyOn(storageService, 'deleteAudio').mockImplementation(async (id, type) => { deleted.push([id, type]); return false; });
+    const result = await request(app).post('/api/v1/recordings').set('Authorization', `Bearer ${token}`).field('childId', childId)
+      .attach('audio', Buffer.from('audio'), { filename: 'voice.webm', contentType: 'audio/webm' });
+    expect(result.status).toBe(404);
+    expect(deleted).toEqual([['legacy-raw', 'raw']]);
+    // A failed compensation stays traceable for reconciliation.
+    expect(await AudioCleanupTask.countDocuments({ publicId: 'legacy-raw', source: 'legacy_compensation', status: 'pending' })).toBe(1);
+  });
+  it('destroys the child audio with the right resource type after the delete commits', async () => {
+    expect((await finalize()).status).toBe(201);
+    const pending = await request(app).post('/api/v1/recordings/upload-intent').set('Authorization', `Bearer ${token}`).send({ requestId: '0b9f3a52-1f7e-4c35-9a11-4b3f0f1f2a10', childId, lessonId, activityId: 'voice', contentVersion: 0, byteLength: 100, mimeType: 'audio/webm', durationSec: 1 }).expect(201);
+    await Recording.create({ childId, url: 'https://res.cloudinary.com/test-cloud/image/upload/v1/legacy-image', publicId: 'legacy-image' });
+    await Recording.create({ childId, url: 'https://example.test/unknown.webm', publicId: 'legacy-unknown' });
+    await Recording.create({ childId, url: 'data:audio/webm;base64,AA==', publicId: 'mock_local' });
+    vi.mocked(cloudinary.uploader.destroy).mockImplementation((async (id: string, options: { resource_type?: string }) => {
+      destroyed.push([id, options.resource_type ?? '']);
+      return { result: id === 'legacy-unknown' && options.resource_type !== 'raw' ? 'not found' : 'ok' };
+    }) as never);
+    await ChildrenService.deleteChild(childId, parentId);
+    expect(destroyed).toEqual(expect.arrayContaining([[publicId, 'video'], [pending.body.data.upload.fields.public_id, 'video'],
+      ['legacy-image', 'image'], ['legacy-unknown', 'video'], ['legacy-unknown', 'raw']]));
+    expect(destroyed.some(([id]) => id === 'mock_local')).toBe(false);
+    expect(await AudioCleanupTask.countDocuments()).toBe(0);
+    expect(await Recording.countDocuments({ childId })).toBe(0);
+  });
+  it('lists the newest owned recordings with the same response shape and without internal fields', async () => {
+    expect((await finalize()).status).toBe(201);
+    const list = await request(app).get(`/api/v1/recordings/children/${childId}`).set('Authorization', `Bearer ${token}`);
+    expect(list.status).toBe(200);
+    expect(list.body.data).toHaveLength(1);
+    expect(list.body.data[0]).toMatchObject({ _id: expect.any(String), url: expect.stringContaining('res.cloudinary.com'), durationSec: 1.25, lessonId: { title: 'Speak' } });
+    expect(list.body.data[0].uploadIntentId).toBeUndefined();
+    expect(list.body.data[0].resourceType).toBeUndefined();
+    const stranger = await AuthService.register({ email: 'list-other@example.test', password: 'Password123!', displayName: 'Other' });
+    expect((await request(app).get(`/api/v1/recordings/children/${childId}`).set('Authorization', `Bearer ${stranger.accessToken}`)).status).toBe(404);
+  });
+  it('keeps the child delete successful and queues audio the provider failed to destroy', async () => {
+    expect((await finalize()).status).toBe(201);
+    vi.mocked(cloudinary.uploader.destroy).mockRejectedValue({ error: { http_code: 500, message: 'private-provider-details' } });
+    await expect(ChildrenService.deleteChild(childId, parentId)).resolves.toBeDefined();
+    expect(await Child.countDocuments({ _id: childId })).toBe(0);
+    const task = await AudioCleanupTask.findOne({ publicId }).orFail();
+    expect(task).toMatchObject({ source: 'child_deletion', status: 'pending', resourceType: 'video', lastError: 'http_500' });
   });
 });
