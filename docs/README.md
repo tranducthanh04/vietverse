@@ -36,6 +36,7 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 | `cms-operations.md` | Quy tắc vận hành CMS, import nháp và publish riêng |
 | `admin-provisioning.md` | Tạo admin offline theo yêu cầu owner, nhập mật khẩu riêng và kiểm chứng quyền production |
 | `vercel-deployment.md` | Rollout BE Vercel, signed upload, indexes additive, các gate môi trường và rollback Render |
+| `self-host-deployment.md` | Tự host FE + API + MongoDB bằng Docker Compose trên máy chủ riêng (`vietverse.io.vn`): init, cập nhật, backup/restore, cô lập, gỡ bỏ, bước sudo của chủ máy |
 | `content-image-credits.md` | Ghi công/giấy phép ảnh bìa demo story/culture và script gán ảnh |
 | `customer-audio-translations.md` | Feedback giá/narration 2026-10-12, giới hạn giọng thiết bị và đầu vào bản dịch/audio đang chờ khách |
 | `superpowers/plans/2026-10-09-customer-data-deployment.md` | Bàn giao deploy: staging → backup/restore → dry-run → import → đối soát → production |

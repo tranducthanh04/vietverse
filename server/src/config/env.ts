@@ -20,6 +20,14 @@ const envSchema = z.object({
   // Optional extra trusted browser origins, comma-separated (for example a custom FE domain).
   CLIENT_ORIGINS: z.string().trim().default(''),
   GOOGLE_CLIENT_ID: z.string().trim().default(''),
+  // Self-hosted Docker stack (deploy/selfhost): host nginx -> web nginx -> API.
+  // Only '1' enables it; Vercel/Render deployments leave it unset.
+  SELF_HOSTED: z.enum(['', '0', '1']).default('0').transform((value) => value === '1'),
+  // Number of reverse proxies in front of the API when SELF_HOSTED=1 (Express `trust proxy`).
+  TRUST_PROXY_HOPS: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.coerce.number().int().min(1).max(5).default(2),
+  ),
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/vietverse'),
   JWT_SECRET: z.string().min(16).default('vietverse_jwt_access_secret_super_key_2026'),
   JWT_REFRESH_SECRET: z.string().min(16).default('vietverse_jwt_refresh_secret_super_key_2026'),

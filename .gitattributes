@@ -3,3 +3,5 @@ docs/customer-source/** text eol=lf
 docs/customer-source/2026-10-09/explore.md whitespace=-blank-at-eol
 docs/customer-source/2026-10-09/stories.md whitespace=-blank-at-eol
 docs/customer-source/2026-10-09/culture.md whitespace=-blank-at-eol
+# Self-host scripts/configs run on Linux (bash, nginx, mongosh): always LF.
+deploy/selfhost/** text eol=lf

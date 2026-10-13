@@ -10,6 +10,7 @@ import { apiLimiter } from './middlewares/rateLimiter.middleware.js';
 import { sendSuccess, sendError } from './utils/apiResponse.js';
 import { connectDB } from './config/db.js';
 import { originPolicy } from './middlewares/originPolicy.js';
+import { trustProxySetting } from './middlewares/clientIp.js';
 
 // Route imports
 import authRouter from './modules/auth/auth.routes.js';
@@ -26,9 +27,10 @@ import paymentsRouter from './modules/payments/payments.routes.js';
 
 export const app = express();
 
-// Render uses the immediate proxy; Vercel limiter keys use its normalized header.
+// Render uses the immediate proxy; Vercel limiter keys use its normalized header;
+// self-hosted (SELF_HOSTED=1) trusts exactly TRUST_PROXY_HOPS nginx hops.
 // Arbitrary XFF is never used for limiter keys outside those runtimes.
-app.set('trust proxy', 1);
+app.set('trust proxy', trustProxySetting());
 
 // Security and utility middlewares
 app.use(
