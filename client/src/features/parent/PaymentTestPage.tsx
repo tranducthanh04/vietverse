@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Wallet } from 'lucide-react';
+import {
+  TriangleAlert,
+  CircleCheck,
+  ExternalLink,
+  RefreshCw,
+  DomainIcon,
+} from '../../components/ui/icons.js';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
@@ -52,15 +58,15 @@ export const PaymentTestPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header>
-        <h1 className="flex items-center gap-2 text-2xl font-black text-stone-800">
-          <Wallet className="h-7 w-7 text-primary" /> Test thanh toán PayOS
-        </h1>
+        <h2 className="flex items-center gap-2 text-2xl font-black text-stone-800">
+          <DomainIcon.paymentTest className="h-7 w-7 text-primary" /> Test thanh toán PayOS
+        </h2>
         <p className="mt-2 text-sm text-stone-600">Phụ huynh có thể kiểm tra luồng chuyển khoản PayOS tại đây. Giao dịch thử không mua hoặc kích hoạt gói học.</p>
       </header>
 
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
         <div className="flex gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <TriangleAlert className="h-5 w-5 shrink-0" />
           <div>
             <p className="font-black">Đây là thanh toán production bằng tiền thật</p>
             <p className="mt-1">PayOS hiện không có sandbox. Nếu tiếp tục, bạn sẽ chuyển khoản thật <strong>10.000đ</strong>. Khoản này không tự động hoàn lại và không kích hoạt gói học.</p>
@@ -103,7 +109,7 @@ export const PaymentTestPage: React.FC = () => {
           )}
           {order?.status === 'completed' && (
             <div className="rounded-xl bg-green-50 p-4 text-sm text-green-900">
-              <p className="flex items-center gap-2 font-black"><CheckCircle2 className="h-5 w-5" /> PayOS đã xác nhận giao dịch thật</p>
+              <p className="flex items-center gap-2 font-black"><CircleCheck className="h-5 w-5" /> PayOS đã xác nhận giao dịch thật</p>
               <p className="mt-1">Số tiền: {order.amount.toLocaleString('vi-VN')}đ{order.transactionRef ? ` · Mã ngân hàng: ${order.transactionRef}` : ''}</p>
               <p className="mt-1">Đơn test chỉ lưu kết quả giao dịch; subscription và quyền học không thay đổi.</p>
             </div>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { cn } from '../../../lib/utils.js';
-import { CheckCircle2 } from 'lucide-react';
+import {
+  CircleCheck,
+} from '../../../components/ui/icons.js';
 
 export interface DragMatchActivityProps {
   activity: {
@@ -72,7 +74,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 )}
               >
                 <span>{p.left}</span>
-                {isMatched && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+                {isMatched && <CircleCheck className="w-5 h-5 text-emerald-600" />}
               </button>
             );
           })}
@@ -99,7 +101,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 )}
               >
                 <span>{p.right}</span>
-                {isMatched && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+                {isMatched && <CircleCheck className="w-5 h-5 text-emerald-600" />}
               </button>
             );
           })}

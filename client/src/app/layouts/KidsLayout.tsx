@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Map, BookOpen, Compass, Gift, Award, Lock, Shield } from 'lucide-react';
+import {
+  DomainIcon,
+  Lock,
+  Shield,
+} from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
@@ -31,11 +35,11 @@ export const KidsLayout: React.FC = () => {
   };
 
   const navItems = [
-    { to: '/kham-pha', label: 'Bản đồ', icon: <Map className="w-6 h-6" /> },
-    { to: '/kho-truyen', label: 'Kho truyện', icon: <BookOpen className="w-6 h-6" /> },
-    { to: '/van-hoa', label: 'Văn hóa', icon: <Compass className="w-6 h-6" /> },
-    { to: '/diem-thuong', label: 'Đổi quà', icon: <Gift className="w-6 h-6" /> },
-    { to: '/phong-bau-vat', label: 'Báu vật', icon: <Award className="w-6 h-6" /> },
+    { to: '/kham-pha', label: 'Bản đồ', icon: <DomainIcon.questMap className="w-6 h-6" /> },
+    { to: '/kho-truyen', label: 'Kho truyện', icon: <DomainIcon.stories className="w-6 h-6" /> },
+    { to: '/van-hoa', label: 'Văn hóa', icon: <DomainIcon.culture className="w-6 h-6" /> },
+    { to: '/diem-thuong', label: 'Đổi quà', icon: <DomainIcon.rewardsShop className="w-6 h-6" /> },
+    { to: '/phong-bau-vat', label: 'Báu vật', icon: <DomainIcon.treasure className="w-6 h-6" /> },
   ];
 
   return (
@@ -59,7 +63,7 @@ export const KidsLayout: React.FC = () => {
 
             {/* Child Switcher Dropdown */}
             {showChildPicker && (
-              <div className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in">
                 <span className="text-xs font-bold text-stone-400 px-3 py-1 block">Chọn hồ sơ bé:</span>
                 {children.map((c) => (
                   <button
@@ -94,7 +98,8 @@ export const KidsLayout: React.FC = () => {
           {/* Points Pill & Parent Gate Link */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="flex items-center space-x-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
-              <Award className="w-5 h-5 text-accent-dark shrink-0" />
+              <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
+              <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
                 {activeChild?.viviPoints || 0}
               </span>

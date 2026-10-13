@@ -1,13 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   Key,
   ShieldCheck,
   Star,
-  BookOpen,
   Gamepad2,
-  Scroll,
   Clock,
   BookX,
   SmilePlus,
@@ -17,9 +15,11 @@ import {
   Headphones,
   HeartHandshake,
   Compass,
-  Map as MapIcon,
-  LockOpen
-} from 'lucide-react';
+  MapIcon,
+  LockOpen,
+  Gem,
+  DomainIcon,
+} from '../../components/ui/icons.js';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -135,7 +135,8 @@ export const LandingPage: React.FC = () => {
 
                 {/* Huy hiệu treo góc */}
                 <div className="absolute -top-4 -right-4 bg-secondary-container text-on-secondary-container text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 transform rotate-6 animate-bounce">
-                  <span>💎 Học mà vui!</span>
+                  <Gem className="w-4 h-4" />
+                  <span>Học mà vui!</span>
                 </div>
               </div>
             </div>
@@ -162,12 +163,12 @@ export const LandingPage: React.FC = () => {
           {/* Lưới 3 Thẻ Tính Năng Bo Góc 24px */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
             {/* Thẻ 1 */}
-            <div
-              onClick={() => navigate('/kho-truyen')}
+            <Link
+              to="/kho-truyen"
               className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary">
-                <BookOpen className="w-8 h-8" />
+                <DomainIcon.stories className="w-8 h-8" />
               </div>
               <div className="inline-block px-3 py-1 rounded-md bg-primary-fixed-dim/40 text-on-primary-fixed-variant text-xs font-bold mb-3">
                 Kho tàng dân gian
@@ -182,11 +183,11 @@ export const LandingPage: React.FC = () => {
                 <span>Đọc thử truyện cổ</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
 
             {/* Thẻ 2 */}
-            <div
-              onClick={() => navigate('/kham-pha')}
+            <Link
+              to="/kham-pha"
               className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-secondary">
@@ -205,15 +206,15 @@ export const LandingPage: React.FC = () => {
                 <span>Chơi thử trò đố chữ</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
 
             {/* Thẻ 3 */}
-            <div
-              onClick={() => navigate('/van-hoa')}
+            <Link
+              to="/van-hoa"
               className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-tertiary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-tertiary">
-                <Scroll className="w-8 h-8" />
+                <DomainIcon.culture className="w-8 h-8" />
               </div>
               <div className="inline-block px-3 py-1 rounded-md bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant text-xs font-bold mb-3">
                 Cội nguồn văn hóa
@@ -228,7 +229,7 @@ export const LandingPage: React.FC = () => {
                 <span>Mở rương báu vật</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -433,11 +434,11 @@ export const LandingPage: React.FC = () => {
                   <Headphones className="w-4 h-4 text-secondary-fixed" />
                   Hãy liên hệ với VietVerse:
                 </span>
-                <a className="hover:underline flex items-center gap-1.5 hover:text-secondary-fixed transition-colors" href="mailto:hotro@vietverse.edu.vn">
+                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="mailto:hotro@vietverse.edu.vn">
                   hotro@vietverse.edu.vn
                 </a>
                 <span className="hidden sm:inline opacity-40">•</span>
-                <a className="hover:underline flex items-center gap-1.5 hover:text-secondary-fixed transition-colors" href="tel:19006868">
+                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="tel:19006868">
                   1900 6868
                 </a>
               </div>

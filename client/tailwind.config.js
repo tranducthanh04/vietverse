@@ -117,6 +117,15 @@ export default {
         'kid-xl': ['1.75rem', { lineHeight: '2.25rem' }],
         'kid-2xl': ['2rem', { lineHeight: '2.5rem' }],
       },
+      borderWidth: {
+        '3': '3px',
+      },
+      spacing: {
+        '18': '4.5rem',
+      },
+      scale: {
+        '102': '1.02',
+      },
       minHeight: {
         'touch': '48px',
       },
@@ -144,6 +153,10 @@ export default {
           '0%, 100%': { transform: 'rotate(-3deg)' },
           '50%': { transform: 'rotate(3deg)' },
         },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
         pop: {
           '0%': { transform: 'scale(0.8)', opacity: '0' },
           '70%': { transform: 'scale(1.1)' },
@@ -153,6 +166,7 @@ export default {
       animation: {
         'bounce-subtle': 'bounceSubtle 2s infinite ease-in-out',
         'wiggle': 'wiggle 1s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.2s ease-out both',
         'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
       }
     },

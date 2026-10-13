@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Heart, HelpCircle, X, Check, ArrowRight } from 'lucide-react';
+import {
+  Heart,
+  CircleHelp,
+  X,
+  Check,
+  ArrowRight,
+  Lightbulb,
+  TriangleAlert,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { useLessonSessionStore, readCachedSession, type CachedLessonSession, ActivityAnswer } from '../../store/lessonSessionStore.js';
@@ -271,6 +279,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     <div className="min-h-screen bg-cream flex flex-col justify-between">
       {/* Top Header Bar */}
       <header className="px-6 py-4 bg-white/80 backdrop-blur-md border-b-2 border-cream-border sticky top-0 z-30 flex items-center justify-between">
+        <h1 className="sr-only">{lesson.title}</h1>
         <button
           onClick={() => navigate('/kham-pha')}
           className="p-2 text-stone-500 hover:text-primary rounded-full hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -297,7 +306,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
               className="p-2 text-amber-500 hover:text-amber-600 rounded-full hover:bg-amber-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Gợi ý"
             >
-              <HelpCircle className="w-7 h-7" />
+              <CircleHelp className="w-7 h-7" />
             </button>
           )}
         </div>
@@ -306,7 +315,8 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       {/* Hint Alert */}
       {showHint && currentActivity?.hints && (
         <div className="bg-amber-100 border-b border-amber-300 px-6 py-3 text-center text-amber-900 font-bold animate-fade-in flex items-center justify-center space-x-2">
-          <span>💡 Gợi ý: {currentActivity.hints[0]}</span>
+          <Lightbulb className="w-5 h-5 shrink-0" />
+          <span>Gợi ý: {currentActivity.hints[0]}</span>
         </div>
       )}
 
@@ -339,8 +349,11 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
 
       {/* Error alert banner if submission failed */}
       {submitError && (
-        <div role="alert" className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fadeIn">
-          <span>⚠️ {submitError}</span>
+        <div role="alert" className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fade-in">
+          <span className="flex items-center gap-2">
+            <TriangleAlert className="w-4 h-4 shrink-0" />
+            {submitError}
+          </span>
           <Button
             type="button"
             size="sm"

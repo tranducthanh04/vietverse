@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import {
+  DomainIcon,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
@@ -127,7 +129,7 @@ export const AdminPointRulesPage: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold font-display text-stone-800 flex items-center space-x-2">
-          <Sparkles className="w-7 h-7 text-primary" />
+          <DomainIcon.pointRules className="w-7 h-7 text-primary" />
           <span>Quy tắc điểm ViVi</span>
         </h1>
         <p className="text-sm text-stone-500">

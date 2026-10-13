@@ -1,5 +1,8 @@
 import React from "react";
-import { Volume2, Square } from "lucide-react";
+import {
+  Volume2,
+  Square,
+} from './icons.js';
 import { cn } from "../../lib/utils.js";
 import { useNarration } from "../../hooks/useNarration.js";
 

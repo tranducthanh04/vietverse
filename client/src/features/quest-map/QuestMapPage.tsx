@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Lock, Star, Play, CheckCircle2, Award, Sparkles, MapPin, Compass } from 'lucide-react';
+import {
+  Lock,
+  Star,
+  Play,
+  CircleCheck,
+  Sparkles,
+  MapPin,
+  Compass,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
@@ -50,7 +58,7 @@ export const QuestMapPage: React.FC = () => {
           <div className="flex items-center gap-4 shrink-0">
             <div className="bg-surface/95 backdrop-blur-md rounded-2xl p-4 border border-outline-variant/40 flex items-center space-x-3 text-on-surface shadow-md">
               <div className="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container shadow-md">
-                <Star className="w-6 h-6 fill-current" strokeWidth={2.5} aria-hidden="true" />
+                <Sparkles className="w-6 h-6" strokeWidth={2.5} />
               </div>
               <div>
                 <span className="text-[11px] text-on-surface-variant block uppercase font-bold tracking-wider">
@@ -97,7 +105,7 @@ export const QuestMapPage: React.FC = () => {
               {isLocked ? (
                 <Lock className="w-4 h-4 opacity-70" />
               ) : stage.isCompleted ? (
-                <CheckCircle2 className="w-4 h-4 text-tertiary-fixed-dim" />
+                <CircleCheck className="w-4 h-4 text-tertiary-fixed-dim" />
               ) : (
                 <Compass className="w-4 h-4 text-secondary-container" />
               )}
@@ -166,7 +174,7 @@ export const QuestMapPage: React.FC = () => {
                     </span>
 
                     {/* Stars */}
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1" role="img" aria-label={`${lesson.stars || 0}/3 sao`}>
                       {[1, 2, 3].map((s) => (
                         <Star
                           key={s}
@@ -190,7 +198,7 @@ export const QuestMapPage: React.FC = () => {
 
                 <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
                   <div className="flex items-center space-x-1.5 text-xs font-bold text-secondary">
-                    <Award className="w-4 h-4 text-secondary-container" />
+                    <Sparkles className="w-4 h-4" />
                     <span>+10 ViVi Points</span>
                   </div>
 

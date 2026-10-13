@@ -79,7 +79,16 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-unused-vars': 'off', // Handled by @typescript-eslint/no-unused-vars
       'no-undef': 'off', // TypeScript handles this
+      'no-restricted-imports': ['error', {
+        paths: [{ name: 'lucide-react', message: 'Import icons from src/components/ui/icons.tsx (decorative aria-hidden default, one icon per domain concept).' }],
+      }],
     },
+  },
+
+  // The icon module is the only place allowed to import lucide-react directly.
+  {
+    files: ['src/components/ui/icons.tsx'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 
   // Test files — relax some rules

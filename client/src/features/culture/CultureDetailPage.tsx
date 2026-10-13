@@ -4,16 +4,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Sparkles,
-  CheckCircle2,
-  Award,
+  CircleCheck,
   Lightbulb,
-  Volume2,
   Pause,
   PartyPopper,
   BookOpen,
   LogIn,
-  AlertCircle,
-} from "lucide-react";
+  CircleAlert,
+  Headphones,
+} from '../../components/ui/icons.js';
 import { api } from "../../lib/api.js";
 import { useChildStore } from "../../store/childStore.js";
 import { useAuthStore } from "../../store/authStore.js";
@@ -204,8 +203,8 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
               </>
             ) : (
               <>
-                <Volume2 className="w-4 h-4" />
-                <span>Sao Lí Lắc kể chuyện 🎧</span>
+                <Headphones className="w-4 h-4" />
+                <span>Sao Lí Lắc kể chuyện</span>
               </>
             )}
           </button>
@@ -248,7 +247,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
             </span>
             {pointsResult !== null && (
               <span className="bg-emerald-500 text-white px-3 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <CircleCheck className="w-3.5 h-3.5" />
                 <span>Đã khám phá</span>
               </span>
             )}
@@ -338,7 +337,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                       >
                         <span>{opt}</span>
                         {isSelected && (
-                          <CheckCircle2 className="w-4 h-4 text-culture" />
+                          <CircleCheck className="w-4 h-4 text-culture" />
                         )}
                       </button>
                     );
@@ -350,7 +349,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
 
           {submitError && (
             <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+              <CircleAlert className="w-5 h-5 shrink-0 text-red-500" />
               <span>{submitError}</span>
             </div>
           )}

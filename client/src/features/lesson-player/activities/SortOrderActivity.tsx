@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { cn } from '../../../lib/utils.js';
-import { RotateCcw } from 'lucide-react';
+import {
+  RotateCcw,
+} from '../../../components/ui/icons.js';
 
 export interface SortOrderActivityProps {
   activity: {

@@ -1,6 +1,14 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Star, Award, ArrowRight, RotateCcw, MapPin, Sparkles } from 'lucide-react';
+import {
+  Star,
+  Award,
+  ArrowRight,
+  RotateCcw,
+  MapPin,
+  Sparkles,
+  CloudOff,
+} from './icons.js';
 import { Modal } from './Modal.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
@@ -99,8 +107,9 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 
       {/* Points & Badges Won or Offline Pending Status */}
       {isOfflinePending ? (
-        <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 my-4 text-amber-900 text-xs sm:text-sm font-bold text-center leading-relaxed">
-          📶 Đang lưu bài học trên thiết bị! Khi có mạng Internet, điểm ViVi Points sẽ tự động được đồng bộ vào kho báu của bé.
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 my-4 text-amber-900 text-xs sm:text-sm font-bold text-center leading-relaxed flex items-start justify-center gap-2">
+          <CloudOff className="w-5 h-5 shrink-0" />
+          <span>Đang lưu bài học trên thiết bị! Khi có mạng Internet, điểm ViVi Points sẽ tự động được đồng bộ vào kho báu của bé.</span>
         </div>
       ) : (
         <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">

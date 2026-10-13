@@ -3,17 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Gift,
   Truck,
-  CheckCircle2,
+  CircleCheck,
   Clock,
   Search,
-  ExternalLink,
-  XCircle,
+  CircleX,
   Package,
-  Layers,
-  Edit2,
-  AlertTriangle,
-  RotateCcw,
-} from 'lucide-react';
+  TriangleAlert,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
@@ -276,7 +272,7 @@ export const AdminRedemptionsPage: React.FC = () => {
 
       {/* TAB 1: REDEMPTION ORDERS */}
       {activeTab === 'orders' && (
-        <div className="space-y-6 animate-in fade-in duration-150">
+        <div className="space-y-6 animate-fade-in">
           {/* Status Metrics Bar */}
           <div className="flex items-center space-x-2 text-xs font-bold overflow-x-auto pb-1 scrollbar-none">
             <span className="px-3 py-1.5 bg-amber-100 text-amber-800 rounded-xl flex items-center space-x-1 whitespace-nowrap min-h-[36px]">
@@ -288,11 +284,11 @@ export const AdminRedemptionsPage: React.FC = () => {
               <span>Đang vận chuyển: {countShipped}</span>
             </span>
             <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl flex items-center space-x-1 whitespace-nowrap min-h-[36px]">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+              <CircleCheck className="w-3.5 h-3.5" />
               <span>Đã nhận quà: {countDelivered}</span>
             </span>
             <span className="px-3 py-1.5 bg-stone-100 text-stone-700 rounded-xl flex items-center space-x-1 whitespace-nowrap min-h-[36px]">
-              <XCircle className="w-3.5 h-3.5" />
+              <CircleX className="w-3.5 h-3.5" />
               <span>Đã hủy: {countCancelled}</span>
             </span>
           </div>
@@ -326,6 +322,7 @@ export const AdminRedemptionsPage: React.FC = () => {
               <input
                 type="text"
                 placeholder="Tìm tên bé, quà, SĐT..."
+                aria-label="Tìm tên bé, quà hoặc số điện thoại"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 text-xs border border-cream-border rounded-xl focus:outline-none focus:border-primary min-h-[44px]"
@@ -442,7 +439,7 @@ export const AdminRedemptionsPage: React.FC = () => {
 
       {/* TAB 2: INVENTORY MANAGEMENT */}
       {activeTab === 'inventory' && (
-        <div className="space-y-6 animate-in fade-in duration-150">
+        <div className="space-y-6 animate-fade-in">
           {errorInventory ? (
             <QueryErrorState error={errorInventory} onRetry={() => refetchInventory()} />
           ) : loadingInventory ? (
@@ -702,8 +699,8 @@ export const AdminRedemptionsPage: React.FC = () => {
       {/* Modal: Process / Cancel Order */}
       {editingId && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl animate-in fade-in duration-150">
-            <h3 className="text-lg font-bold font-display text-stone-800 mb-4 pb-2 border-b border-cream-border">
+          <div role="dialog" aria-modal="true" aria-labelledby="redemption-edit-title" className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl animate-fade-in">
+            <h3 id="redemption-edit-title" className="text-lg font-bold font-display text-stone-800 mb-4 pb-2 border-b border-cream-border">
               Xử Lý Đơn Đổi Quà
             </h3>
 
@@ -727,7 +724,7 @@ export const AdminRedemptionsPage: React.FC = () => {
 
               {editStatus === 'cancelled' && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <TriangleAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Lưu ý nghiệp vụ:</span> Khi chọn hủy đơn, hệ thống
                     sẽ tự động hoàn trả điểm ViVi Points vào tài khoản của bé và khôi phục lại tồn

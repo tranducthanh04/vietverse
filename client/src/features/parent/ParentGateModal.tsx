@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/ui/Modal.js';
 import { Button } from '../../components/ui/Button.js';
-import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  ShieldCheck,
+  CircleAlert,
+  LoaderCircle,
+} from '../../components/ui/icons.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { api } from '../../lib/api.js';
 
@@ -88,7 +92,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
 
         {errorMsg && (
           <div role="alert" className="w-full flex items-center space-x-2 bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 mb-4 text-sm font-bold">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <CircleAlert className="w-5 h-5 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -119,7 +123,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
             <Button type="submit" variant="primary" disabled={!challengeToken || loadingChallenge || isSubmitting} className="flex-1 flex items-center justify-center">
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <LoaderCircle className="w-5 h-5 animate-spin mr-2" />
                   <span>Đang kiểm tra...</span>
                 </>
               ) : (

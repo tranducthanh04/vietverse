@@ -1,5 +1,9 @@
 import React from 'react';
-import { AlertCircle, RefreshCw, WifiOff } from 'lucide-react';
+import {
+  CircleAlert,
+  RefreshCw,
+  WifiOff,
+} from './icons.js';
 import { Button } from './Button.js';
 
 export interface QueryErrorStateProps {
@@ -34,7 +38,7 @@ export const QueryErrorState: React.FC<QueryErrorStateProps> = ({
       role="alert"
     >
       <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
-        {isNetworkError ? <WifiOff className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
+        {isNetworkError ? <WifiOff className="w-8 h-8" /> : <CircleAlert className="w-8 h-8" />}
       </div>
 
       <div className="space-y-1">

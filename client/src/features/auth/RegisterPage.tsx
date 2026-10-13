@@ -154,7 +154,7 @@ export const RegisterPage: React.FC = () => {
 
           <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.hasAccount} </span>
-            <Link to={selectedPlan ? `/dang-nhap?plan=${selectedPlan}` : '/dang-nhap'} className="font-bold text-primary hover:underline">
+            <Link to={selectedPlan ? `/dang-nhap?plan=${selectedPlan}` : '/dang-nhap'} className="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:underline">
               {VI_LOCALES.auth.loginBtn}
             </Link>
           </div>

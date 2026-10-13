@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ShieldCheck, UserRound } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Button } from '../../components/ui/Button.js';
@@ -83,10 +84,12 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-stone-700 font-bold text-sm mb-2">
+              <label htmlFor="login-email" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.emailLabel}
               </label>
               <input
+                id="login-email"
+                autoComplete="email"
                 type="email"
                 required
                 value={email}
@@ -97,10 +100,12 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-stone-700 font-bold text-sm mb-2">
+              <label htmlFor="login-password" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.passwordLabel}
               </label>
               <input
+                id="login-password"
+                autoComplete="current-password"
                 type="password"
                 required
                 value={password}
@@ -129,7 +134,7 @@ export const LoginPage: React.FC = () => {
           {import.meta.env.DEV && (
             <div className="mt-6 pt-5 border-t-2 border-cream-border">
               <p className="text-xs text-stone-500 font-bold text-center mb-3">
-                🎯 Tài khoản mẫu (Chỉ hiển thị ở chế độ Phát triển):
+                Tài khoản mẫu (Chỉ hiển thị ở chế độ Phát triển):
               </p>
               <div className="grid grid-cols-2 gap-2.5">
                 <button
@@ -140,7 +145,7 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="p-2.5 min-h-[44px] text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
                 >
-                  <span>⭐ Phụ huynh Bé An</span>
+                  <span className="inline-flex items-center gap-1"><UserRound className="w-3.5 h-3.5" />Phụ huynh Bé An</span>
                   <span className="text-[10px] text-amber-700 font-normal">Chặng 1 • 45 ViVi Pts</span>
                 </button>
                 <button
@@ -151,7 +156,7 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="p-2.5 min-h-[44px] text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
                 >
-                  <span>🛡️ Quản trị Admin</span>
+                  <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" />Quản trị Admin</span>
                   <span className="text-[10px] text-red-700 font-normal">Quản lý bài học & đơn quà</span>
                 </button>
               </div>
@@ -160,7 +165,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="mt-6 pt-4 border-t border-cream-border text-center text-sm text-stone-600">
             <span>{VI_LOCALES.auth.noAccount} </span>
-            <Link to={searchParams.get('plan') ? `/dang-ky?plan=${searchParams.get('plan')}` : '/dang-ky'} className="font-bold text-primary hover:underline">
+            <Link to={searchParams.get('plan') ? `/dang-ky?plan=${searchParams.get('plan')}` : '/dang-ky'} className="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:underline">
               {VI_LOCALES.auth.registerBtn}
             </Link>
           </div>

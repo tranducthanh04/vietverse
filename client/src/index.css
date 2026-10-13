@@ -63,3 +63,25 @@
   box-shadow: 0 0 0 0 #005236;
   transform: translateY(4px);
 }
+
+/* Lucide icons never shrink inside flex rows (labels wrap instead). */
+svg.lucide {
+  flex-shrink: 0;
+}
+
+/* Keyboard focus is always visible, also on elements that drop the browser outline. */
+:where(a, button, [role='button'], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #b02518;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

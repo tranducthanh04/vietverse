@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Clock, Flower2, Heart, Mail, Menu, Phone, Sparkles, Star, X } from 'lucide-react';
+import {
+  Clock,
+  Flower2,
+  Heart,
+  Mail,
+  Menu,
+  Phone,
+  Sparkles,
+  Star,
+  X,
+} from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 
@@ -27,7 +37,7 @@ export const PublicLayout: React.FC = () => {
     <div className="min-h-screen bg-surface flex flex-col justify-between font-sans text-on-surface">
       {/* Stitch Folk Play Header */}
       <header className="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(180,83,9,0.08)] border-b border-outline-variant/30">
-        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
+        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 xl:px-8 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
             <div className="flex flex-col">
@@ -37,21 +47,21 @@ export const PublicLayout: React.FC = () => {
                 </span>
                 <Star className="w-[22px] h-[22px] text-secondary-container select-none" aria-hidden="true" />
               </div>
-              <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden sm:inline">
+              <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden sm:inline xl:hidden 2xl:inline">
                 CÙNG CON MỞ KHO BÁU, TIẾNG VIỆT THÊM NHIỆM MÀU
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation with Active States */}
-          <nav className="hidden lg:flex items-center gap-2 xl:gap-4">
+          <nav aria-label="Điều hướng chính" className="hidden xl:flex items-center gap-1 2xl:gap-3">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `relative min-h-[44px] px-3.5 py-2 inline-flex items-center text-sm font-bold transition-all duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+                  `relative min-h-[44px] px-3 py-2 inline-flex items-center whitespace-nowrap text-sm font-bold transition-all duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
                     isActive
                       ? 'text-primary border-primary bg-primary/5 font-black'
                       : 'text-on-surface-variant hover:text-primary border-transparent hover:bg-surface-container/60'
@@ -68,7 +78,7 @@ export const PublicLayout: React.FC = () => {
             {user ? (
               <button
                 onClick={() => navigate('/kham-pha')}
-                className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                className="btn-3d-primary inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
               >
                 Vào học ngay
               </button>
@@ -76,13 +86,13 @@ export const PublicLayout: React.FC = () => {
               <div className="hidden sm:flex items-center gap-2">
                 <button
                   onClick={() => navigate('/dang-nhap')}
-                  className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                  className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
                   {VI_LOCALES.nav.login}
                 </button>
                 <button
                   onClick={() => navigate('/dang-ky')}
-                  className="btn-3d-primary inline-flex items-center justify-center min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                  className="btn-3d-primary inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
                   {VI_LOCALES.nav.register}
                 </button>
@@ -93,7 +103,7 @@ export const PublicLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-2xl border-2 border-cream-border bg-white text-stone-700 hover:text-primary hover:border-primary flex items-center justify-center transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="xl:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-2xl border-2 border-cream-border bg-white text-stone-700 hover:text-primary hover:border-primary flex items-center justify-center transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
               aria-label={mobileMenuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
               aria-expanded={mobileMenuOpen}
             >
@@ -104,7 +114,7 @@ export const PublicLayout: React.FC = () => {
 
         {/* Mobile Navigation Dropdown Panel */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white/95 backdrop-blur-md border-b-2 border-cream-border shadow-xl px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="xl:hidden bg-white/95 backdrop-blur-md border-b-2 border-cream-border shadow-xl px-4 py-4 space-y-2 animate-fade-in">
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => (
                 <NavLink
@@ -187,18 +197,18 @@ export const PublicLayout: React.FC = () => {
 
             <div className="space-y-4">
               <h4 className="text-base font-bold text-on-surface">Khám Phá Học Tập</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <Link to="/">VietVerse là gì</Link>
+              <ul className="space-y-1 text-sm">
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/" className="inline-flex items-center min-h-[32px]">VietVerse là gì</Link>
                 </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <Link to="/kham-pha">Lộ trình 5 chặng thám hiểm</Link>
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/kham-pha" className="inline-flex items-center min-h-[32px]">Lộ trình 5 chặng thám hiểm</Link>
                 </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <Link to="/kho-truyen">Kho truyện dân gian tương tác</Link>
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/kho-truyen" className="inline-flex items-center min-h-[32px]">Kho truyện dân gian tương tác</Link>
                 </li>
-                <li className="hover:text-primary transition-colors cursor-pointer">
-                  <Link to="/van-hoa">Khám phá văn hóa truyền thống</Link>
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/van-hoa" className="inline-flex items-center min-h-[32px]">Khám phá văn hóa truyền thống</Link>
                 </li>
               </ul>
             </div>

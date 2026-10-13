@@ -2,15 +2,16 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users,
-  BookOpen,
   Gift,
   Mic,
-  Award,
-  TrendingUp,
+  Smile,
+  CircleCheck,
+  Clock,
+  DomainIcon,
   Package,
   History,
   ShieldCheck,
-} from 'lucide-react';
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
@@ -70,13 +71,13 @@ export const AdminDashboardPage: React.FC = () => {
     {
       label: VI_LOCALES.admin.kpiChildren,
       value: kpis.totalChildren,
-      icon: <Award className="w-6 h-6 text-amber-600" />,
+      icon: <Smile className="w-6 h-6 text-amber-600" />,
       bg: 'bg-amber-50',
     },
     {
       label: VI_LOCALES.admin.kpiLessonsDone,
       value: kpis.totalLessonsCompleted,
-      icon: <BookOpen className="w-6 h-6 text-emerald-600" />,
+      icon: <CircleCheck className="w-6 h-6 text-emerald-600" />,
       bg: 'bg-emerald-50',
     },
     {
@@ -94,13 +95,13 @@ export const AdminDashboardPage: React.FC = () => {
     {
       label: 'Đơn chờ đóng gói',
       value: kpis.pendingRedemptions,
-      icon: <TrendingUp className="w-6 h-6 text-orange-600" />,
+      icon: <Clock className="w-6 h-6 text-orange-600" />,
       bg: 'bg-orange-50',
     },
     {
       label: 'Tổng bài học nền tảng',
       value: kpis.totalLessons || 20,
-      icon: <BookOpen className="w-6 h-6 text-indigo-600" />,
+      icon: <DomainIcon.lessons className="w-6 h-6 text-indigo-600" />,
       bg: 'bg-indigo-50',
     },
     {

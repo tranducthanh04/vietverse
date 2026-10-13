@@ -6,11 +6,12 @@ import {
   Pause,
   RotateCcw,
   ArrowLeft,
-  CheckCircle2,
-  HelpCircle,
+  CircleCheck,
+  CircleHelp,
   Volume2,
   LogIn,
-} from "lucide-react";
+  Lightbulb,
+} from '../../components/ui/icons.js';
 import { api } from "../../lib/api.js";
 import { useChildStore } from "../../store/childStore.js";
 import { Card } from "../../components/ui/Card.js";
@@ -141,9 +142,9 @@ export const StoryDetailPage: React.FC = () => {
             />
           )}
 
-          <h2 className="text-kid-lg font-bold font-display text-center text-stone-800 mb-1">
+          <h1 className="text-kid-lg font-bold font-display text-center text-stone-800 mb-1">
             {story.title}
-          </h2>
+          </h1>
           <span className="text-xs text-stone-500 font-semibold mb-4">
             Tác giả: {story.author || "Dân gian Việt Nam"}
           </span>
@@ -303,7 +304,7 @@ export const StoryDetailPage: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2 text-primary font-bold text-base">
-                  <HelpCircle className="w-5 h-5" />
+                  <CircleHelp className="w-5 h-5" />
                   <span>{VI_LOCALES.stories.quizTitle}</span>
                 </div>
 
@@ -351,7 +352,7 @@ export const StoryDetailPage: React.FC = () => {
                     >
                       <span>{opt}</span>
                       {isCorrect && (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                        <CircleCheck className="w-5 h-5 text-emerald-600" />
                       )}
                     </button>
                   );
@@ -359,8 +360,9 @@ export const StoryDetailPage: React.FC = () => {
               </div>
 
               {isQuizChecked && currentQuiz.explanation && (
-                <p className="text-xs text-stone-500 italic mt-2">
-                  💡 {currentQuiz.explanation}
+                <p className="text-xs text-stone-600 italic mt-2 flex items-start gap-1.5">
+                  <Lightbulb className="w-4 h-4 shrink-0 text-amber-600 not-italic" />
+                  <span>{currentQuiz.explanation}</span>
                 </p>
               )}
             </Card>

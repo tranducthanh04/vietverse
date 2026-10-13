@@ -1,5 +1,6 @@
 import React from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
+import { Lightbulb } from '../../../components/ui/icons.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
 
 export interface WordCardActivityProps {
@@ -60,8 +61,9 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
       </div>
 
       {activity.hints && activity.hints.length > 0 && (
-        <div className="bg-amber-50 text-amber-900 border border-amber-200 rounded-xl px-4 py-2 mt-4 text-sm max-w-md">
-          💡 {activity.hints[0]}
+        <div className="bg-amber-50 text-amber-900 border border-amber-200 rounded-xl px-4 py-2 mt-4 text-sm max-w-md flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 mt-0.5 shrink-0 text-amber-700" />
+          <span>{activity.hints[0]}</span>
         </div>
       )}
     </div>

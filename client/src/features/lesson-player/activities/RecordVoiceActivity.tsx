@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../../store/authStore.js';
 import { useChildStore } from '../../../store/childStore.js';
-import { Mic, Square, Play, RotateCcw, Check, AlertCircle } from 'lucide-react';
+import {
+  Mic,
+  Square,
+  Play,
+  RotateCcw,
+  Check,
+  CircleAlert,
+} from '../../../components/ui/icons.js';
 import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
@@ -116,7 +123,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
 
       {errorMessage && (
         <div className="flex items-center space-x-2 bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 my-4 text-sm max-w-md">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <CircleAlert className="w-5 h-5 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -191,7 +198,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
             {uploadError && (
               <div className="flex flex-col items-center space-y-2 bg-red-50 text-red-700 border border-red-200 rounded-2xl p-4 text-sm w-full">
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                  <CircleAlert className="w-5 h-5 shrink-0 text-red-500" />
                   <span className="font-medium">{uploadError}</span>
                 </div>
               </div>

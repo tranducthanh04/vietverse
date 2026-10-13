@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Mic, Play, Pause, Calendar, Clock } from 'lucide-react';
+import {
+  Mic,
+  Play,
+  Pause,
+  Calendar,
+  Clock,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';

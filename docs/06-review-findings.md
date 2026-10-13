@@ -354,6 +354,21 @@ Phần này ghi nhận các việc phát hiện khi review lại `client/src` tr
 - `Modal` cần `role="dialog"`, `aria-modal`, focus management và hỗ trợ bàn phím; card tương tác cần dùng `Link`/`button` thay cho `div` clickable.
 - Thêm hỗ trợ `prefers-reduced-motion` cho các animation liên tục.
 
+**Cập nhật 2026-10-13 — rà UI và làm lại hệ thống icon:**
+
+- **Icon [ĐÃ SỬA]:** mọi icon đi qua `client/src/components/ui/icons.tsx` (bọc `lucide-react`). Icon mặc định `aria-hidden`; icon có `aria-label` tự có `role="img"`. ESLint `no-restricted-imports` chặn import `lucide-react` ngoài file này. `DomainIcon` gán một icon cho mỗi khái niệm nghiệp vụ (truyện `BookOpenText`, văn hóa `Landmark`, bài học `GraduationCap`, điểm ViVi `Sparkles`, cài đặt `Settings`, thanh toán thử `CreditCard`, quy tắc điểm `SlidersHorizontal`…). Trước đây admin dùng `BookOpen` cho ba mục khác nhau, phụ huynh dùng `Clock` cho Cài đặt, ô điểm của bé dùng `Award`. Tên lucide deprecated (`AlertCircle`, `CheckCircle2`, `Loader2`, `BarChart2`…) đã đổi sang tên mới.
+- **Emoji làm icon [ĐÃ SỬA]:** thay 33 emoji ở 14 file bằng SVG. Cờ quốc gia ở bước chọn ngôn ngữ (hiển thị thành chữ "GB"/"JP" trên Windows) thay bằng huy hiệu mã EN/JA/KO/ZH/FR. Huy hiệu Phòng báu vật dùng component icon; trạng thái khóa có thêm icon khóa, không chỉ dựa vào độ mờ.
+- **Utility Tailwind thiếu [ĐÃ SỬA]:** thêm `border-3`, `w-18`/`h-18`, `scale-102`, `animate-fade-in` vào config; `animate-fadeIn` và `animate-in fade-in …` (plugin chưa cài) đổi sang `animate-fade-in`. `ring-6` không còn trong code.
+- **Modal/dialog [ĐÃ SỬA]:** `Modal` có `role="dialog"`, `aria-modal`, `aria-labelledby`, đưa focus vào dialog khi mở, giữ Tab trong dialog, trả focus khi đóng. Hồ sơ học viên, xử lý đơn đổi quà và màn giới hạn thời gian (`alertdialog`) có role tương ứng; nút đóng hồ sơ học viên có nhãn và vùng chạm 44px.
+- **Bàn phím [ĐÃ SỬA]:** thẻ chọn độ tuổi ở onboarding và ba thẻ tính năng ở Landing là `div onClick`, nay là `button`/`Link`. Thêm viền `:focus-visible` mặc định và `prefers-reduced-motion` toàn cục trong `index.css`.
+- **Tương phản [ĐÃ SỬA MỘT PHẦN]:** chữ tồn kho `text-[11px]` amber-600/red-500 đổi sang `text-xs` amber-700/red-700. Chưa chạy axe trên toàn bộ trang.
+- **Đánh đổi:** gom icon về một module làm entry tăng ~2,1 KB gzip và vendor ~1,9 KB gzip (đo bằng build Vite trước/sau).
+- **Header [ĐÃ SỬA]:** menu desktop của `PublicLayout` xuống dòng ở 1280px. Menu đầy đủ nay hiện từ `xl` (1280px), dưới mức đó dùng nút menu; nhãn `whitespace-nowrap`; dòng slogan ẩn ở `xl`, hiện lại ở `2xl`. Đã chụp ở 1024/1280/1600px.
+- **Lượt QA trình duyệt [ĐÃ SỬA]:** chạy Chromium headless qua DevTools Protocol trên DB QA cục bộ (seed `--demo-users`, không đụng dữ liệu thật), kiểm tra 27 route công khai/bé/phụ huynh/admin ở 390px và 1280px: control không tên, vùng chạm < 24px, ảnh thiếu alt, input thiếu nhãn, SVG lộ cho trình đọc màn hình, emoji, tràn ngang, số `h1`. Đã sửa mọi lỗi tìm thấy: label đăng nhập không gắn `htmlFor`/`id` (thêm cả `autoComplete`), ô tìm truyện và hai ô tìm kiếm admin thiếu nhãn, link "Đăng nhập ngay"/"Tạo tài khoản" và link footer/liên hệ quá nhỏ, onboarding/bài học thiếu `h1` (thêm `sr-only`), trang truyện dùng `h2` cho tiêu đề chính, trang thanh toán thử có hai `h1`. Bản đồ chặng đổi icon điểm sang `Sparkles` như mọi nơi khác; dãy sao bài học có `aria-label` "x/3 sao". Lần chạy cuối không còn lỗi nào theo các tiêu chí trên.
+- **Tiêu đề tab [ĐÃ SỬA]:** `client/src/app/pageTitles.ts` đặt `document.title` theo route qua `router.subscribe`, để trình đọc màn hình báo khi chuyển trang (trước đây mọi trang cùng một tiêu đề).
+- **Test [ĐÃ SỬA]:** 2 test `cmsContentEditors.test.tsx` lỗi sẵn do React Router data router tạo `Request` với `AbortSignal` của jsdom mà `Request` gốc của Node 26 từ chối. `src/test/setup.ts` bỏ signal lạ khi tạo `Request`. Kết quả: 232/232 test FE đạt.
+- **Chưa kiểm chứng:** chưa chạy axe-core (không có trong dependencies), nên chưa đo tương phản màu tự động trên toàn bộ trang; chưa thử với trình đọc màn hình thật.
+
 ### P2-FE.2 — Test, lint và performance [ĐÃ XỬ LÝ PHẦN LINT - 2026-10-01]
 
 - **ESLint đã thiết lập** với flat config (`eslint.config.js`), hỗ trợ React + TypeScript + react-hooks + react-refresh.

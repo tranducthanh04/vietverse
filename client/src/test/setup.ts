@@ -10,3 +10,23 @@ if (!HTMLDialogElement.prototype.showModal) {
     this.open = false;
   };
 }
+
+// React Router data routers build a `Request` with JSDOM's AbortSignal, which
+// Node's native (undici) Request rejects ("Expected signal to be an instance of
+// AbortSignal"). Drop a foreign signal so navigations work under JSDOM.
+const NativeRequest = globalThis.Request;
+globalThis.Request = class extends NativeRequest {
+  constructor(input: RequestInfo | URL, init?: RequestInit) {
+    if (init?.signal) {
+      try {
+        super(input, init);
+        return;
+      } catch {
+        const { signal: _signal, ...rest } = init;
+        super(input, rest);
+        return;
+      }
+    }
+    super(input, init);
+  }
+} as typeof Request;

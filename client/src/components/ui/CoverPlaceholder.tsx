@@ -1,10 +1,22 @@
 import React from 'react';
 import {
-  BookOpen, Compass, Drum, Feather, Gift, Moon, Music, Puzzle, Shirt, Sparkles, Trees, Users, UtensilsCrossed,
-  type LucideIcon,
-} from 'lucide-react';
+  BookOpen,
+  Compass,
+  Drum,
+  Feather,
+  Gift,
+  Moon,
+  Music,
+  Puzzle,
+  Shirt,
+  Sparkles,
+  Trees,
+  Users,
+  UtensilsCrossed,
+  type AppIcon,
+} from './icons.js';
 
-type Variant = { icon: LucideIcon; gradient: string; iconColor: string };
+type Variant = { icon: AppIcon; gradient: string; iconColor: string };
 
 const storyVariants: Record<string, Variant> = {
   dong_dao: { icon: Music, gradient: 'from-primary-light to-accent-light', iconColor: 'text-primary' },

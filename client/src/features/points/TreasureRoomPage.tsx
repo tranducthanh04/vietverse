@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import {
+  ArrowLeft,
+  CircleCheck,
+  Crown,
+  DomainIcon,
+  Gift,
+  Lock,
+  Mic,
+  Sprout,
+  Star,
+} from '../../components/ui/icons.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
@@ -45,7 +55,7 @@ export const TreasureRoomPage: React.FC = () => {
           {item.assetUrl ? (
             <img src={item.assetUrl} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-3xl" aria-hidden="true">🎁</span>
+            <Gift className="w-9 h-9 text-accent-dark" />
           )}
         </div>
         <h3 className="text-sm font-bold font-display text-stone-800">{item.name}</h3>
@@ -85,35 +95,35 @@ export const TreasureRoomPage: React.FC = () => {
       id: 'tan-binh-vietverse',
       name: 'Tân Binh Vietverse',
       desc: 'Bắt đầu bước chân vào thế giới ngôn ngữ diệu kỳ',
-      icon: '🌱',
+      Icon: Sprout,
       isUnlocked: true,
     },
     {
       id: 'ngoi-sao-cham-chi',
       name: 'Ngôi Sao Chăm Chỉ',
       desc: 'Hoàn thành bài học liên tiếp mỗi ngày',
-      icon: '⭐',
+      Icon: Star,
       isUnlocked: (activeChild?.viviPoints || 0) >= 30,
     },
     {
       id: 'dung-si-phat-am',
       name: 'Dũng Sĩ Phát Âm',
       desc: 'Tự tin thu âm 5 bản đọc tiếng Việt chuẩn xác',
-      icon: '🎙️',
+      Icon: Mic,
       isUnlocked: (activeChild?.viviPoints || 0) >= 50,
     },
     {
       id: 'nha-thong-thai-van-hoa',
       name: 'Nhà Thông Thái Văn Hóa',
       desc: 'Trả lời đúng toàn bộ câu hỏi trắc nghiệm văn hóa',
-      icon: '🏮',
+      Icon: DomainIcon.culture,
       isUnlocked: (activeChild?.viviPoints || 0) >= 70,
     },
     {
       id: 'bau-vat-nuoc-nam',
       name: 'Báu Vật Nước Nam',
       desc: 'Chinh phục toàn bộ 5 chặng học và bài học Bài 20',
-      icon: '👑',
+      Icon: Crown,
       isUnlocked: (activeChild?.viviPoints || 0) >= 150,
     },
   ];
@@ -186,12 +196,12 @@ export const TreasureRoomPage: React.FC = () => {
             className={`p-6 text-center flex flex-col items-center justify-between border-3 ${
               b.isUnlocked
                 ? 'bg-white border-accent shadow-kid'
-                : 'bg-stone-50 border-stone-200 opacity-50 grayscale'
+                : 'bg-stone-50 border-stone-200 opacity-70 grayscale'
             }`}
           >
             <div>
-              <div className="w-24 h-24 rounded-full bg-accent-light/50 border-4 border-accent flex items-center justify-center text-4xl shadow-inner mx-auto mb-4">
-                {b.icon}
+              <div className="w-24 h-24 rounded-full bg-accent-light/50 border-4 border-accent flex items-center justify-center text-accent-dark shadow-inner mx-auto mb-4">
+                <b.Icon className="w-11 h-11" strokeWidth={1.75} />
               </div>
               <h3 className="text-kid-base font-bold font-display text-stone-800 mb-1">
                 {b.name}
@@ -202,7 +212,8 @@ export const TreasureRoomPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-3 border-t border-cream-border w-full">
-              <span className={`text-xs font-bold uppercase ${b.isUnlocked ? 'text-emerald-600' : 'text-stone-400'}`}>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase ${b.isUnlocked ? 'text-emerald-700' : 'text-stone-500'}`}>
+                {b.isUnlocked ? <CircleCheck className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                 {b.isUnlocked ? 'Đã mở khóa' : 'Chưa đạt'}
               </span>
             </div>

@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Gift, History, PiggyBank, ShoppingBag, Sparkles } from 'lucide-react';
+import {
+  Check,
+  Gift,
+  History,
+  Package,
+  TriangleAlert,
+  PiggyBank,
+  ShoppingBag,
+  Sparkles,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
@@ -160,8 +169,9 @@ export const PointsShopPage: React.FC = () => {
         <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-secondary-fixed/50 blur-3xl pointer-events-none" />
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           <div className="md:col-span-8 flex flex-col gap-3">
-            <h1 id="points-balance-title" className="font-display text-lg md:text-xl font-extrabold text-on-secondary-container">
-              ✨ ViVi Points của bé{activeChild?.name ? ` ${activeChild.name}` : ''}
+            <h1 id="points-balance-title" className="font-display text-lg md:text-xl font-extrabold text-on-secondary-container flex items-center gap-2">
+              <Sparkles className="w-5 h-5 shrink-0" />
+              ViVi Points của bé{activeChild?.name ? ` ${activeChild.name}` : ''}
             </h1>
             <p className="font-display text-4xl md:text-5xl text-secondary font-extrabold tracking-tight" data-testid="points-balance">
               {currentPoints} ViVi Points
@@ -334,10 +344,11 @@ export const PointsShopPage: React.FC = () => {
                           }}
                         />
                       ) : (
-                        <span className="text-5xl" aria-hidden="true">🎁</span>
+                        <Gift className="w-14 h-14 text-secondary" strokeWidth={1.75} />
                       )}
-                      <span className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-surface/90 backdrop-blur-md text-[11px] font-extrabold text-on-surface shadow-sm">
-                        {group === 'physical' ? '📦 Quà gửi tận nhà' : SHOP_CATEGORY_LABELS[group]}
+                      <span className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-surface/90 backdrop-blur-md text-xs font-extrabold text-on-surface shadow-sm inline-flex items-center gap-1">
+                        {group === 'physical' && <Package className="w-3.5 h-3.5" />}
+                        {group === 'physical' ? 'Quà gửi tận nhà' : SHOP_CATEGORY_LABELS[group]}
                       </span>
                     </div>
 
@@ -347,21 +358,26 @@ export const PointsShopPage: React.FC = () => {
                     </p>
 
                     {item.type === 'physical' && (
-                      <div className="mb-3 text-[11px] font-bold">
+                      <div className="mb-3 text-xs font-bold">
                         {item.stock !== undefined && item.stock > 0 ? (
-                          <span className={item.stock <= 5 ? 'text-amber-600' : 'text-stone-500'}>
-                            📦 Còn lại: {item.stock} món
+                          <span className={`inline-flex items-center gap-1 ${item.stock <= 5 ? 'text-amber-700' : 'text-stone-600'}`}>
+                            <Package className="w-3.5 h-3.5" />
+                            Còn lại: {item.stock} món
                           </span>
                         ) : (
-                          <span className="text-red-500">⚠️ Tạm thời hết hàng</span>
+                          <span className="inline-flex items-center gap-1 text-red-700">
+                            <TriangleAlert className="w-3.5 h-3.5" />
+                            Tạm thời hết hàng
+                          </span>
                         )}
                       </div>
                     )}
                   </div>
 
                   <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
-                    <span className="font-display font-black text-secondary text-sm">
-                      ✨ {item.costPoints} ViVi Points
+                    <span className="font-display font-black text-secondary text-sm inline-flex items-center gap-1">
+                      <Sparkles className="w-4 h-4 shrink-0" />
+                      {item.costPoints} ViVi Points
                     </span>
 
                     {owned ? (

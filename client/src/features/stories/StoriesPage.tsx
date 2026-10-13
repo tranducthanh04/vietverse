@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, Search, Music, Clock } from 'lucide-react';
+import {
+  BookOpen,
+  Search,
+  Music,
+  Clock,
+  DomainIcon,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
@@ -79,6 +85,7 @@ export const StoriesPage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm truyện hoặc đồng dao..."
+            aria-label="Tìm truyện hoặc đồng dao"
             className="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-cream-border bg-white focus:outline-none focus:border-primary text-sm min-h-[44px]"
           />
         </div>
@@ -94,7 +101,7 @@ export const StoriesPage: React.FC = () => {
         </div>
       ) : stories.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-cream-border p-8">
-          <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+          <DomainIcon.stories className="w-12 h-12 text-stone-400 mx-auto mb-3" />
           <p className="text-stone-500 font-bold">Chưa có câu chuyện nào phù hợp.</p>
         </div>
       ) : (

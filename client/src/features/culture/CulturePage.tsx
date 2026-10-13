@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles, Compass } from 'lucide-react';
+import {
+  Sparkles,
+  DomainIcon,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Card } from '../../components/ui/Card.js';
 import { Button } from '../../components/ui/Button.js';
@@ -46,7 +49,7 @@ export const CulturePage: React.FC = () => {
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center space-x-2 bg-culture-light/40 px-3 py-1 rounded-full text-culture-dark text-sm font-bold mb-3">
-          <Compass className="w-4 h-4 text-culture" />
+          <DomainIcon.culture className="w-4 h-4 text-culture" />
           <span>Bản sắc & Tinh hoa Việt Nam</span>
         </div>
         <h1 className="text-kid-xl md:text-kid-2xl font-black font-display text-culture">

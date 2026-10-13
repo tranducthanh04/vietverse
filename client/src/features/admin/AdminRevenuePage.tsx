@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Wallet } from 'lucide-react';
+import {
+  DomainIcon,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { Card } from '../../components/ui/Card.js';
@@ -34,7 +36,7 @@ export function AdminRevenuePage() {
   const report = query.data;
   return <div className="space-y-6">
     <header>
-      <h1 className="text-2xl font-bold font-display flex items-center gap-2"><Wallet className="w-7 h-7 text-primary" />Doanh thu</h1>
+      <h1 className="text-2xl font-bold font-display flex items-center gap-2"><DomainIcon.revenue className="w-7 h-7 text-primary" />Doanh thu</h1>
       <p className="text-sm text-stone-600 mt-2">Tiền bán gói học đã thanh toán. Không gồm đơn chờ, thất bại, đã huỷ hoặc giao dịch test.</p>
       <p className="text-sm text-stone-500">Số tiền trước phí, thuế và hoàn tiền; không phải lợi nhuận hay báo cáo quyết toán.</p>
     </header>

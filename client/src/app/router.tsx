@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { pageTitleFor } from './pageTitles.js';
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout.js';
@@ -179,3 +180,8 @@ export const router = createBrowserRouter([
     element: <NotFoundPage />,
   },
 ]);
+
+document.title = pageTitleFor(router.state.location.pathname);
+router.subscribe((state) => {
+  document.title = pageTitleFor(state.location.pathname);
+});

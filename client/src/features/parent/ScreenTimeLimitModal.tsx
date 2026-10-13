@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Moon, Sparkles, HeartHandshake, ShieldCheck } from 'lucide-react';
+import {
+  Moon,
+  Sparkles,
+  HeartHandshake,
+  ShieldCheck,
+} from '../../components/ui/icons.js';
 import { Button } from '../../components/ui/Button.js';
 import { ParentGateModal } from './ParentGateModal.js';
 
@@ -24,8 +29,8 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-md animate-fadeIn">
-        <div className="bg-white rounded-3xl max-w-lg w-full p-8 text-center shadow-2xl border-4 border-indigo-200 relative overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-md animate-fade-in">
+        <div role="alertdialog" aria-modal="true" aria-labelledby="screen-time-title" className="bg-white rounded-3xl max-w-lg w-full p-8 text-center shadow-2xl border-4 border-indigo-200 relative overflow-hidden">
           {/* Decorative Background */}
           <div className="absolute -top-16 -right-16 w-40 h-40 bg-indigo-100 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-amber-100 rounded-full blur-2xl pointer-events-none" />
@@ -36,8 +41,8 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
             <Sparkles className="w-6 h-6 absolute top-2 right-2 text-yellow-300 animate-pulse" />
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-black font-display text-indigo-950 mb-3">
-            Đến giờ cho mắt nghỉ ngơi! 👀✨
+          <h2 id="screen-time-title" className="text-2xl md:text-3xl font-black font-display text-indigo-950 mb-3">
+            Đến giờ cho mắt nghỉ ngơi!
           </h2>
 
           <p className="text-stone-600 text-base md:text-lg mb-6 leading-relaxed">

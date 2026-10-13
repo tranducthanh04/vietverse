@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
+import { Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
 
@@ -83,7 +84,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
                 />
               ) : (
                 <div className="w-24 h-24 rounded-2xl bg-amber-100 flex items-center justify-center mb-3">
-                  <span className="text-3xl font-display font-bold text-primary">★</span>
+                  <Star className="w-9 h-9 text-primary" />
                 </div>
               )}
 

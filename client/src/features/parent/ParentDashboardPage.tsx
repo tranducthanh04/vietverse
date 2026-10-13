@@ -1,6 +1,11 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Mic, BookOpen, HeartHandshake, Compass } from 'lucide-react';
+import {
+  Mic,
+  BookOpen,
+  HeartHandshake,
+  Headphones,
+} from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
@@ -64,7 +69,7 @@ export const ParentDashboardPage: React.FC = () => {
   const getCompetencyIcon = (key: string) => {
     switch (key) {
       case 'listening':
-        return <Compass className="w-6 h-6 text-sky-600" />;
+        return <Headphones className="w-6 h-6 text-sky-600" />;
       case 'speaking':
         return <Mic className="w-6 h-6 text-primary" />;
       case 'reading':

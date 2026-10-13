@@ -1,5 +1,7 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import {
+  Star,
+} from './icons.js';
 import { cn } from '../../lib/utils.js';
 
 export interface ProgressBarProps {

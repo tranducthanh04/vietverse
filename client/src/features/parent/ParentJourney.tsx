@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Clock, LockKeyhole } from 'lucide-react';
+import {
+  CircleCheck,
+  Clock,
+  LockKeyhole,
+} from '../../components/ui/icons.js';
 import { Card } from '../../components/ui/Card.js';
 import type { ParentProgress, ParentRecentActivity, ParentStageProgress } from './parentProgress.types.js';
 
@@ -22,7 +26,7 @@ export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey'
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="min-w-0">
             {journey?.isCompleted ? (
-              <p className="font-bold text-emerald-800 flex items-center gap-2"><CheckCircle2 className="w-5 h-5 shrink-0" />Đã hoàn thành tất cả chặng học</p>
+              <p className="font-bold text-emerald-800 flex items-center gap-2"><CircleCheck className="w-5 h-5 shrink-0" />Đã hoàn thành tất cả chặng học</p>
             ) : current ? (
               <>
                 <p className="font-bold text-stone-800 break-words">Chặng hiện tại: {current.title}</p>
@@ -50,7 +54,7 @@ export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey'
                   <div className="h-full bg-primary rounded-full" style={{ width: `${stage.percentage}%` }} />
                 </div>
                 <p className="flex items-start gap-1.5 text-xs text-stone-600">
-                  {stage.isCompleted ? <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" /> : stage.lockReason ? <LockKeyhole className="w-4 h-4 shrink-0" /> : <Clock className="w-4 h-4 shrink-0" />}
+                  {stage.isCompleted ? <CircleCheck className="w-4 h-4 shrink-0 text-emerald-600" /> : stage.lockReason ? <LockKeyhole className="w-4 h-4 shrink-0" /> : <Clock className="w-4 h-4 shrink-0" />}
                   {stageDescription(stage)}
                 </p>
               </Card>

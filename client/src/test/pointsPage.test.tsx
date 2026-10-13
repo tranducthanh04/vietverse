@@ -152,7 +152,7 @@ describe('points page', () => {
     show(<PointsShopPage />);
     expect(await screen.findByRole('heading', { name: 'VẬT PHẨM ĐỔI THƯỞNG' })).toBeInTheDocument();
     expect(await screen.findByText('Avatar Mèo')).toBeInTheDocument();
-    expect(screen.getByText('✨ 30 ViVi Points')).toBeInTheDocument();
+    expect(screen.getByText('30 ViVi Points')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Avatar Mèo' })).toHaveAttribute('loading', 'lazy');
 
     fireEvent.click(screen.getByRole('button', { name: 'Avatar' }));
