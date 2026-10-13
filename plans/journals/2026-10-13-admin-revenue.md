@@ -22,4 +22,4 @@ Add a read-only admin report for completed subscription payments. Exclude test o
 
 ## Release
 
-Deployment and read-only production smoke pending. No authenticated production revenue claim until an authorized admin session is available.
+Deployment and read-only production smoke completed. Backend `dpl_5WFkutVr5gZi4xUZQkCfFrMEgWZ2` and frontend `dpl_CxnENHtyXEtzpZD4EFkcSoTp5cSE` are Ready on their production aliases. Health/readiness/catalog passed and unauthenticated revenue correctly returned 401. No authenticated production revenue claim was made because no admin session was used and no payment data was changed.

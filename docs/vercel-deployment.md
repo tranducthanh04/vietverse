@@ -1,5 +1,12 @@
 # Rollout backend Vercel — Vietverse
 
+## Admin revenue release — 2026-10-13
+
+- Commit `b4be673d9f86038d31f1b5d23c5af36abfa9498f` is deployed to both production projects from tracked-only snapshots.
+- Backend deployment `dpl_5WFkutVr5gZi4xUZQkCfFrMEgWZ2` is Ready at `https://vietverse-backend.vercel.app`; frontend deployment `dpl_CxnENHtyXEtzpZD4EFkcSoTp5cSE` is Ready at `https://vietverse-nine.vercel.app`.
+- Read-only smoke checks: backend `/health` 200, `/ready` 200, frontend `/api/v1/stories` 200, and unauthenticated `/api/v1/admin/revenue` 401. The public admin shell route returned 200 and the built asset contains the Doanh thu route and API path.
+- No authenticated revenue data was claimed, no payment/test order was created, and no checkout, webhook, subscription, refund or PayOS configuration was changed.
+
 ## CMS cover image release — 2026-10-12
 
 - Commit `4d58dde3eacb4a90ccad04ebf0660cb836c33c8f` is deployed to both production projects.
