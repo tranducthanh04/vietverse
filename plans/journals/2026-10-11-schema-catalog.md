@@ -2,7 +2,7 @@
 
 ## Authorization and target
 
-Owner approved design, database `test`, schema migration and catalog bootstrap. Target allowlist remains `thanh.841ysjn.mongodb.net/test`. Cloudinary/payment remain out of scope. No secrets read into chat or source, no account/admin creation, no network/role/env changes.
+Owner approved design, database `test`, schema migration and catalog bootstrap. Target allowlist remains `<cluster-host>.mongodb.net/<db-name>` (redacted 2026-10-13). Cloudinary/payment remain out of scope. No secrets read into chat or source, no account/admin creation, no network/role/env changes.
 
 ## Local implementation
 

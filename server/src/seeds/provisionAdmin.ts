@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { z } from 'zod';
 import { User } from '../models/User.js';
 import { ROLES } from '../constants/roles.js';
+import { assertOperatorTarget, targetLabel, type OperatorTarget } from './operatorTarget.js';
 
 const seedLockId = 'vietverse-catalog-seed';
 const maxPasswordBytes = 72;
@@ -88,13 +89,9 @@ export async function provisionAdmin(input: ProvisionAdminInput): Promise<Provis
   }
 }
 
-export function validateAdminTarget(uri: string): void {
-  try {
-    const url = new URL(uri);
-    if (url.protocol !== 'mongodb+srv:' || url.hostname !== 'thanh.841ysjn.mongodb.net' ||
-      url.pathname !== '/test' || url.port || url.hash || url.username !== 'binhlqhe181123_db_user' || !url.password ||
-      [...url.searchParams.keys()].some(key => !['retryWrites', 'w', 'appName'].includes(key))) throw new Error();
-  } catch { throw new Error('ADMIN_TARGET_INVALID'); }
+// Host, DB user and DB name come from the operator (launcher env), not from this public repo.
+export function validateAdminTarget(uri: string, target: unknown): OperatorTarget {
+  return assertOperatorTarget(uri, target, 'ADMIN_TARGET_INVALID');
 }
 
 async function main() {
@@ -105,8 +102,8 @@ async function main() {
     input += chunk.toString();
     if (input.length > 8192) throw new Error('ADMIN_INPUT_INVALID');
   }
-  const payload = JSON.parse(input) as ProvisionAdminInput & { uri: string };
-  validateAdminTarget(payload.uri);
+  const payload = JSON.parse(input) as ProvisionAdminInput & { uri: string; target: unknown };
+  const target = validateAdminTarget(payload.uri, payload.target);
   await mongoose.connect(payload.uri, { autoIndex: false, autoCreate: false, serverSelectionTimeoutMS: 15000, connectTimeoutMS: 15000, maxPoolSize: 2 });
   input = '';
   try {
@@ -115,7 +112,7 @@ async function main() {
     const passwordVerified = user?.role === ROLES.ADMIN && await bcrypt.compare(payload.password, user.passwordHash);
     payload.password = '';
     payload.uri = '';
-    console.log(JSON.stringify({ target: 'thanh/test', ...result, passwordVerified }));
+    console.log(JSON.stringify({ target: targetLabel(target), ...result, passwordVerified }));
   } finally {
     await mongoose.disconnect();
   }

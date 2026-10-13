@@ -8,6 +8,7 @@ import { GoogleAuthFlow } from '../../models/GoogleAuthFlow.js';
 import { User, type IUser } from '../../models/User.js';
 import { Subscription } from '../../models/Subscription.js';
 import { AuthService } from './auth.service.js';
+import { mapTransactionError } from '../../utils/dbErrors.js';
 
 const google = new OAuth2Client();
 const hash = (value: string) => crypto.createHash('sha256').update(value).digest('hex');
@@ -52,9 +53,8 @@ export class GoogleAuthService {
     try {
       return await mongoose.connection.transaction(work);
     } catch (error) {
-      if (typeof error === 'object' && error && 'statusCode' in error) throw error;
       if (typeof error === 'object' && error && 'code' in error && error.code === 11000) throw conflict();
-      throw { statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Chưa thể hoàn tất đăng nhập. Vui lòng thử lại.' };
+      throw mapTransactionError(error, () => ({ statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Chưa thể hoàn tất đăng nhập. Vui lòng thử lại.' }));
     }
   }
 

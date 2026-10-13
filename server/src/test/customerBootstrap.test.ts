@@ -105,17 +105,20 @@ describe('initial customer catalog', () => {
   });
 
   it('rejects old, implicit or conflicting DB targets without including credentials in errors', () => {
-    expect(validateBootstrapUri('mongodb+srv://u:dummy@thanh.841ysjn.mongodb.net/test')).toBe('test');
+    // Placeholder target: the real host/user/DB are supplied by the operator, never committed.
+    const target = { host: 'cluster0.example.mongodb.net', user: 'u', dbName: 'appdb' };
+    expect(validateBootstrapUri('mongodb+srv://u:dummy@cluster0.example.mongodb.net/appdb', target).dbName).toBe('appdb');
     for (const uri of [
-      'mongodb+srv://u:dummy@vietversedatabase.1v0mrgy.mongodb.net/test',
-      'mongodb+srv://u:dummy@thanh.841ysjn.mongodb.net',
-      'mongodb+srv://u:dummy@thanh.841ysjn.mongodb.net/admin',
-      'mongodb+srv://u:dummy@thanh.841ysjn.mongodb.net/test?dbName=admin',
-      'mongodb://localhost/test',
+      'mongodb+srv://u:dummy@other.example.mongodb.net/appdb',
+      'mongodb+srv://u:dummy@cluster0.example.mongodb.net',
+      'mongodb+srv://u:dummy@cluster0.example.mongodb.net/admin',
+      'mongodb+srv://u:dummy@cluster0.example.mongodb.net/appdb?dbName=admin',
+      'mongodb://localhost/appdb',
     ]) {
-      expect(() => validateBootstrapUri(uri)).toThrow('BOOTSTRAP_TARGET_INVALID');
-      try { validateBootstrapUri(uri); } catch (e) { expect(String(e)).not.toContain('dummy'); }
+      expect(() => validateBootstrapUri(uri, target)).toThrow('BOOTSTRAP_TARGET_INVALID');
+      try { validateBootstrapUri(uri, target); } catch (e) { expect(String(e)).not.toContain('dummy'); }
     }
+    expect(() => validateBootstrapUri('mongodb+srv://u:dummy@cluster0.example.mongodb.net/appdb', undefined)).toThrow('BOOTSTRAP_TARGET_INVALID');
   });
 
   it('dry-run changes no records or locks, and apply requires the inspected hash', async () => {

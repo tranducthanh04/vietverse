@@ -59,7 +59,7 @@ export function AdminRevenuePage() {
           <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Đơn đã thanh toán trong kỳ</p><p className="mt-2 text-2xl font-bold">{report.paidOrders.toLocaleString('vi-VN')}</p></Card>
           <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Tháng hiện tại ({report.currentMonth}), không theo bộ lọc</p><p className="mt-2 text-2xl font-bold break-words">{money(report.currentMonthRevenue)}</p></Card>
         </div>
-        {report.undatedOrders > 0 && <p role="status" className="rounded-xl bg-amber-50 p-4 text-amber-900">Có {report.undatedOrders} đơn đã thanh toán thiếu ngày thanh toán: chỉ tính trong tổng toàn thời gian và theo gói khi không lọc ngày; không đưa vào bảng tháng. Cần đối soát, không tự lấy ngày tạo đơn thay thế.</p>}
+        {report.undatedOrders > 0 && <p role="status" className="rounded-xl bg-amber-50 p-4 text-amber-900">Có {report.undatedOrders} đơn đã thanh toán thiếu ngày thanh toán: không được tính vào tổng doanh thu, theo gói hay bảng tháng. Cần đối soát, không tự lấy ngày tạo đơn thay thế.</p>}
         {report.paidOrders === 0 && <p className="rounded-xl bg-stone-100 p-4">Chưa có đơn đã thanh toán trong kỳ này. Doanh thu là 0; không dùng giao dịch test làm dữ liệu bán hàng.</p>}
         <section className="bg-white border border-cream-border rounded-2xl overflow-hidden">
           <h2 className="p-4 font-bold font-display">Theo gói học trong kỳ</h2>

@@ -20,7 +20,7 @@ Kế hoạch thực thi chi tiết cho người deploy: [nhập dữ liệu stag
 
 ### Schema hồ sơ bé — owner duyệt 2026-10-11
 
-- Đích được owner xác nhận là cluster `thanh.841ysjn.mongodb.net`, database `test`. Không dùng URI ngầm hoặc `.env` cũ. Giữ Cloudinary, thanh toán ngoài phạm vi và `CMS_PUBLISH_ENABLED=false`.
+- Đích được owner xác nhận là cluster `<cluster-host>.mongodb.net`, database `<db-name>`; từ 2026-10-13 launcher đọc đích từ `VIETVERSE_DB_HOST`/`VIETVERSE_DB_USER`/`VIETVERSE_DB_NAME` trong phiên shell của operator thay vì hằng số trong repo. Không dùng URI ngầm hoặc `.env` cũ. Giữ Cloudinary, thanh toán ngoài phạm vi và `CMS_PUBLISH_ENABLED=false`.
 - Launcher dry-run báo riêng `schemaMigration` (pending/invalid/migrated/preimage/fingerprint). Hash kế hoạch gắn cả catalog và preimage của các hồ sơ legacy cần backfill theo ID; thay đổi tập cần migrate giữa dry-run/apply hoặc trước transaction làm apply dừng. Hồ sơ đã có danh sách hợp lệ không bị migrate và không ảnh hưởng fingerprint. Fingerprint không phải secret và không in dữ liệu bé.
 - Cùng transaction: thêm `companionLanguages: [companionLanguage]` cho bản cũ hợp lệ, giữ mọi field và timestamp khác; ghi preimage tối thiểu và receipt `schema_migration_receipts/child-companion-languages-v1`. Bản đã có mảng hợp lệ giữ nguyên; mảng rỗng/trùng/mã lạ/mâu thuẫn hoặc thiếu cả hai trường dừng, không tự suy đoán.
 - Chạy lại chỉ xác minh catalog và schema receipt, không nhân dữ liệu. Nếu sau receipt xuất hiện document legacy mới (backend cũ còn chạy) thì dừng để đối soát, không bỏ qua. Cần phát hành backend tương thích trước khi mở ghi hồ sơ; FE chọn nhiều ngôn ngữ chỉ bật sau BE mới.

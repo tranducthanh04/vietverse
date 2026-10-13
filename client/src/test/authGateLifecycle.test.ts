@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { api, setApiAccessToken } from '../lib/api.js';
+import { api, getApiAccessToken, setApiAccessToken } from '../lib/api.js';
 import { useAuthStore, type User } from '../store/authStore.js';
 import '../store/childStore.js';
 
@@ -38,6 +38,44 @@ describe('parent gate authentication lifecycle', () => {
     expect(useAuthStore.getState().user?.id).toBe('parent-a');
     expect(sessionStorage.getItem('vietverse_parent_gate_token')).toBe('signed-parent-gate');
     expect(Number(sessionStorage.getItem('vietverse_parent_gate_unlocked'))).toBeGreaterThan(Date.now());
+  });
+
+  it('restores a reload with one refresh request and no /auth/me round trip', async () => {
+    const urls: string[] = [];
+    api.defaults.adapter = async (config) => {
+      urls.push(config.url ?? '');
+      return {
+        data: { data: { user: parent, accessToken: 'fresh-access', subscription: { plan: 'monthly', maxChildren: 1 } } },
+        status: 200, statusText: 'OK', headers: {}, config,
+      };
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual(['/auth/refresh']);
+    expect(useAuthStore.getState()).toMatchObject({ user: parent, accessToken: 'fresh-access', subscription: { plan: 'monthly' }, isLoading: false });
+    expect(getApiAccessToken()).toBe('fresh-access');
+  });
+
+  it('uses /auth/me without rotating the refresh cookie when a token is already in memory', async () => {
+    const urls: string[] = [];
+    setApiAccessToken('existing-access');
+    api.defaults.adapter = async (config) => {
+      urls.push(config.url ?? '');
+      return { data: { data: { user: parent, subscription: { plan: 'free', maxChildren: 1 } } }, status: 200, statusText: 'OK', headers: {}, config };
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual(['/auth/me']);
+    expect(getApiAccessToken()).toBe('existing-access');
+  });
+
+  it('signs out locally when the bootstrap refresh is rejected', async () => {
+    const urls: string[] = [];
+    api.defaults.adapter = async (config) => {
+      urls.push(config.url ?? '');
+      throw Object.assign(new Error('Unauthorized'), { config, response: { status: 401, data: {}, headers: {}, config } });
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual(['/auth/refresh']);
+    expect(useAuthStore.getState()).toMatchObject({ user: null, accessToken: null, isLoading: false });
   });
 
   it.each(['login', 'register'] as const)('clears the previous gate after an explicit %s even for the same user', async (method) => {

@@ -3,11 +3,22 @@ import { z } from 'zod';
 
 dotenv.config();
 
+function isHttpsOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.origin === value.replace(/\/$/, '');
+  } catch {
+    return false;
+  }
+}
+
 const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CMS_PUBLISH_ENABLED: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
+  // Optional extra trusted browser origins, comma-separated (for example a custom FE domain).
+  CLIENT_ORIGINS: z.string().trim().default(''),
   GOOGLE_CLIENT_ID: z.string().trim().default(''),
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/vietverse'),
   JWT_SECRET: z.string().min(16).default('vietverse_jwt_access_secret_super_key_2026'),
@@ -47,6 +58,14 @@ const envSchema = z.object({
         code: z.ZodIssueCode.custom,
         message: 'CLIENT_ORIGIN phải dùng HTTPS khi chạy production.',
         path: ['CLIENT_ORIGIN'],
+      });
+    }
+    const extraOrigins = data.CLIENT_ORIGINS.split(',').map((value) => value.trim()).filter(Boolean);
+    if (extraOrigins.some((value) => !isHttpsOrigin(value))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'CLIENT_ORIGINS chỉ gồm origin HTTPS (không path), phân tách bằng dấu phẩy.',
+        path: ['CLIENT_ORIGINS'],
       });
     }
   }

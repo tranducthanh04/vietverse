@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, authPost, setApiAccessToken } from '../lib/api.js';
+import { api, authPost, getApiAccessToken, refreshSession, setApiAccessToken } from '../lib/api.js';
 
 export interface User {
   id: string;
@@ -79,13 +79,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchMe: async () => {
     try {
       set({ isLoading: true });
-      const res = await api.get('/auth/me');
+      // Reload has no in-memory token: one refresh call restores token, user and subscription.
+      // With a token in memory (in-app re-check), /auth/me is enough.
+      const session: { user: User; subscription: Subscription; accessToken?: string } = getApiAccessToken()
+        ? (await api.get('/auth/me')).data.data
+        : await refreshSession<User, Subscription>();
+      if (!session?.user?.id) throw new Error('Phiên đăng nhập không hợp lệ');
       // A bootstrap restore is not a new login; keep the tab's signed gate on reload.
       const previousUser = get().user;
-      if (previousUser && previousUser.id !== res.data.data.user.id) clearParentGate();
+      if (previousUser && previousUser.id !== session.user.id) clearParentGate();
       set({
-        user: res.data.data.user,
-        subscription: res.data.data.subscription,
+        user: session.user,
+        subscription: session.subscription,
+        ...(session.accessToken ? { accessToken: session.accessToken } : {}),
       });
     } catch (err) {
       clearParentGate();

@@ -13,6 +13,7 @@ import { parseDraft } from '../../modules/content/content.validation.js';
 import { toContentPayload } from '../../modules/content/content.dto.js';
 import { contentModel } from '../../modules/content/content.store.js';
 import { buildBootstrapCatalog } from './bootstrapCatalog.js';
+import { assertOperatorTarget, targetLabel, type OperatorTarget } from '../operatorTarget.js';
 
 const operation = 'initial-customer-catalog';
 const receiptId = 'customer-docs-bootstrap-v1';
@@ -24,14 +25,9 @@ type LanguageReceipt = { _id: string; operation: string; migrated: number; finge
 const languageMigrationReceiptId = 'child-companion-languages-v1';
 
 // Credentials only enter through a private pipe. No dotenv import or implicit DB.
-export function validateBootstrapUri(uri: string): 'test' {
-  try {
-    const url = new URL(uri);
-    if (url.protocol !== 'mongodb+srv:' || url.hostname !== 'thanh.841ysjn.mongodb.net' ||
-      url.port || url.pathname !== '/test' || !url.username || !url.password || url.hash ||
-      [...url.searchParams.keys()].some(k => !['retryWrites', 'w', 'appName'].includes(k))) throw new Error();
-    return 'test';
-  } catch { throw new Error('BOOTSTRAP_TARGET_INVALID'); }
+// Host, DB user and DB name come from the operator (launcher env), not from this public repo.
+export function validateBootstrapUri(uri: string, target: unknown): OperatorTarget {
+  return assertOperatorTarget(uri, target, 'BOOTSTRAP_TARGET_INVALID');
 }
 
 async function countPreimage(session?: ClientSession): Promise<Counts> {
@@ -194,13 +190,13 @@ async function main() {
     input += chunk.toString();
     if (input.length > 8192) throw new Error('BOOTSTRAP_INPUT_INVALID');
   }
-  const { uri, exclusiveWindowConfirmed } = JSON.parse(input) as { uri: string; exclusiveWindowConfirmed?: boolean };
-  validateBootstrapUri(uri);
+  const { uri, target: declared, exclusiveWindowConfirmed } = JSON.parse(input) as { uri: string; target: unknown; exclusiveWindowConfirmed?: boolean };
+  const target = validateBootstrapUri(uri, declared);
   await mongoose.connect(uri, { autoIndex: false, autoCreate: false, serverSelectionTimeoutMS: 15000, connectTimeoutMS: 15000, maxPoolSize: 2 });
   input = '';
   try {
     const result = await bootstrapCatalog({ apply: args.includes('--apply'), expectedHash: args.find(a => a.startsWith('--expect-hash='))?.split('=')[1], exclusiveWindowConfirmed });
-    console.log(JSON.stringify({ target: 'thanh/test', ...result }));
+    console.log(JSON.stringify({ target: targetLabel(target), ...result }));
   } finally { await mongoose.disconnect(); }
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {

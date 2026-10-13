@@ -1,14 +1,18 @@
 import { z } from 'zod';
 import { contentVersionSchema, contentVersionParam } from '../content/content.reader.js';
 
+// Malformed IDs are client errors (400), never database outages.
+const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, 'Mã định danh không hợp lệ');
+export const lessonIdParamSchema = objectIdSchema;
+
 export const lessonQuerySchema = z.object({
-  childId: z.string().regex(/^[a-f\d]{24}$/i),
+  childId: objectIdSchema,
   contentVersion: contentVersionParam,
   activityContract: z.literal('2').transform(() => 2 as const).optional(),
 });
 
 export const completeLessonSchema = z.object({
-  childId: z.string().min(1, 'Thiếu childId'),
+  childId: objectIdSchema,
   contentVersion: contentVersionSchema.optional(),
   scorePercent: z.number().min(0).max(100).optional(),
   durationSec: z.number().min(0).optional().default(0),

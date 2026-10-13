@@ -47,14 +47,21 @@ describe('production admin provisioning', () => {
     expect(await User.countDocuments()).toBe(0);
   });
 
-  it('allows only the approved Atlas user, host and test database', () => {
-    expect(() => validateAdminTarget('mongodb+srv://binhlqhe181123_db_user:fake@thanh.841ysjn.mongodb.net/test?retryWrites=true&w=majority')).not.toThrow();
+  it('allows only the operator-declared Atlas user, host and database', () => {
+    // Placeholder target: the real host/user/DB are supplied by the operator, never committed.
+    const target = { host: 'cluster0.example.mongodb.net', user: 'app_operator', dbName: 'appdb' };
+    expect(validateAdminTarget('mongodb+srv://app_operator:fake@cluster0.example.mongodb.net/appdb?retryWrites=true&w=majority', target)).toEqual(target);
     for (const uri of [
-      'mongodb+srv://binhlqhe181123_db_user:fake@thanh.841ysjn.mongodb.net/production',
-      'mongodb+srv://binhlqhe181123_db_user:fake@other.example.com/test',
-      'mongodb+srv://other_user:fake@thanh.841ysjn.mongodb.net/test',
-      'mongodb+srv://binhlqhe181123_db_user:fake@thanh.841ysjn.mongodb.net/test?tls=false',
-    ]) expect(() => validateAdminTarget(uri)).toThrow('ADMIN_TARGET_INVALID');
+      'mongodb+srv://app_operator:fake@cluster0.example.mongodb.net/production',
+      'mongodb+srv://app_operator:fake@other.example.com/appdb',
+      'mongodb+srv://other_user:fake@cluster0.example.mongodb.net/appdb',
+      'mongodb+srv://app_operator@cluster0.example.mongodb.net/appdb',
+      'mongodb+srv://app_operator:fake@cluster0.example.mongodb.net/appdb?tls=false',
+    ]) expect(() => validateAdminTarget(uri, target)).toThrow('ADMIN_TARGET_INVALID');
+    const uri = 'mongodb+srv://app_operator:fake@cluster0.example.mongodb.net/admin';
+    for (const declared of [undefined, { ...target, host: 'evil.example.com' }, { ...target, dbName: 'admin' }]) {
+      expect(() => validateAdminTarget(uri, declared)).toThrow('ADMIN_TARGET_INVALID');
+    }
   });
 
   it.each([
