@@ -1,6 +1,6 @@
 ---
 title: Sửa lag production và hoàn thiện trang ViVi Points theo tài liệu khách hàng
-status: in progress — Pha 3, 4, 5 đang làm; Pha 1, 2 (deploy/hiệu năng) TẠM HOÃN theo yêu cầu 2026-10-09 (ưu tiên tính năng trước); D3 áp dụng đề xuất mặc định; D4 còn chờ
+status: in progress — Pha 1, 2 (hiệu năng) gần xong 2026-10-13 sau chuyển BE sang Vercel (còn F5 auth); Pha 3, 4, 5 đang làm; bảng trạng thái Pha 1–2 ở cuối file; D3 áp dụng đề xuất mặc định; D4 còn chờ
 created: 2026-10-09
 branch: main (tạo nhánh feature trước khi code)
 sources:
@@ -115,3 +115,21 @@ Tiêu chí chấp nhận: các test trong `client/src/test` cho các trường h
 | D3 | "Hoạt động thưởng khác do hệ thống cấu hình" cần mức nào? | **Đã áp dụng:** admin sửa được số điểm của các quy tắc có sẵn, không tạo quy tắc mới tùy ý. |
 | D4 | "Sử dụng phần thưởng" trừ điểm khi nào? | **Đã chốt 2026-10-09: dùng/bỏ dùng vật phẩm không trừ điểm; `use_reward` giữ sẵn cho phần thưởng tiêu hao tương lai.** |
 | D5 | Avatar và trang trí hồ sơ sau khi đổi được dùng ở đâu? | **Đã chốt: bé tự chọn để dùng; hiện ở header khu bé và Phòng báu vật.** |
+
+# Trạng thái Pha 1–2 — cập nhật 2026-10-13 (sau chuyển BE sang Vercel)
+
+Đối chiếu với `plans/reports/review-261013-0835-post-vercel-audit.md` mục 3. Sửa local, chưa deploy.
+
+| Mục | Trạng thái |
+|---|---|
+| P1.1 Cold start Render / keep-warm | Không còn áp dụng (BE đã chuyển sang Vercel) |
+| P1.2 Region DB | Xong (local): Atlas ap-east-1, function `regions: ["hkg1"]` |
+| P1.3 Nén response | Xong (Vercel tự `br`) |
+| P1.4 Rate limit sau proxy | Xong trước đó; còn gate đo 2 IP thật |
+| P1.5 Mongo pool/socketTimeout | Xong: `socketTimeoutMS: 45000`, Production `autoIndex/autoCreate: false` + script index phủ mọi model |
+| P1.6 `submitLesson` tải cả chặng | Xong trước đó; thêm: `assertLessonUnlocked` song song + `readPublished` không đọc lại lesson, `GET /stages` số query cố định |
+| P2.1 Khởi động auth (F5 3 request) | Chưa làm (module auth do luồng khác sở hữu) |
+| P2.2 Code splitting | Xong: entry 722 KB → 98,85 KB |
+| P2.3 Font | Xong: bỏ Material Symbols (4 MB), bỏ Baloo 2/Nunito |
+| P2.4 Ảnh hotlink | Xong: mascot tự host WebP |
+| P2.5 Cache `/assets` | Xong: immutable 1 năm, `/images` 1 ngày |

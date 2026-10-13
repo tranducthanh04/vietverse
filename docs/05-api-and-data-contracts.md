@@ -58,8 +58,8 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | --- | --- | --- | --- |
 | POST | `/auth/register` | Public | Tạo parent + free subscription |
 | POST | `/auth/login` | Public | Nhận access token + refresh cookie |
-| POST | `/auth/refresh` | Refresh cookie/body | Cấp access token mới + xoay vòng (rotate) refresh token, phát hiện và ngăn chặn token reuse |
-| POST | `/auth/logout` | Public | Thu hồi phiên refresh token / token family trên server và xóa refresh cookie |
+| POST | `/auth/refresh` | Refresh cookie/body + trusted Origin | Cấp access token mới + xoay vòng (rotate) refresh token, phát hiện và ngăn chặn token reuse; trả thêm `user`, `subscription` cùng shape `/auth/me` |
+| POST | `/auth/logout` | Public + trusted Origin | Thu hồi phiên refresh token / token family trên server và xóa refresh cookie |
 | GET | `/auth/me` | Auth | Lấy user/subscription |
 | GET | `/auth/google` | Public | Trả `clientId` public hoặc 503 `GOOGLE_NOT_CONFIGURED` |
 | POST | `/auth/google/start` | Public + trusted Origin | Tạo challenge nonce dùng một lần trong cookie HttpOnly 5 phút; trả `clientId`, `nonce` |
@@ -67,9 +67,18 @@ Quyết định bảo vệ phiên học khi xuất bản:
 | POST | `/auth/google/link` | Public + trusted Origin | Nhận mật khẩu Vietverse để liên kết flow Google đang chờ; tối đa 5 lần thử, giữ nguyên role/subscription/dữ liệu |
 | POST | `/auth/google/cancel` | Public + trusted Origin | Body `{nonce}` hủy đúng flow, không clear cookie của flow mới khác tab; cookie/bản ghi hết hạn sau 5 phút |
 
-Google payload: `/start` nhận `{}`; `/google` nhận strict `{credential, nonce}` (credential <= 12000 ký tự); `/link` nhận strict `{password, nonce}` (password 1..256). Nonce 64 ký tự hex. Các POST kiểm tra `Origin` đúng origin của `CLIENT_ORIGIN`, chịu auth rate limit và trả `Cache-Control: no-store`. ID token/mật khẩu không vào URL/localStorage.
+### Phiên, cookie và origin — 2026-10-13
 
-`GoogleAuthFlow` lưu SHA256 của cookie token ngẫu nhiên, nonce, trạng thái `fresh|link`, userId/googleId khi chờ liên kết, số lần thử và expiresAt. Unique `tokenHash_1`, TTL `expiresAt_1`; server vẫn kiểm tra hạn trực tiếp. Cookie Google HttpOnly 5 phút, production Secure/SameSite=None/host-only prefix `__Host-`, path `/`. Collection mới không lưu ID token hoặc mật khẩu.
+- *Quyết định bảo mật (review S1)*: CORS production chỉ tin origin trong `CLIENT_ORIGIN` và danh sách tùy chọn `CLIENT_ORIGINS` (phân tách dấu phẩy, mỗi mục là origin HTTPS không path). Không còn origin cứng hay `localhost` ở production. Request có header `Origin` không thuộc allowlist nhận 403 `ORIGIN_NOT_ALLOWED`, không có `Access-Control-Allow-Origin`; request không có `Origin` (curl, webhook, server-to-server) đi tiếp. Môi trường `development` vẫn cho mọi origin để QA local; `test`/staging không phải production tin thêm `localhost:5173`/`127.0.0.1:5173`.
+- `POST /auth/refresh` và `/auth/logout` từ chối 403 khi có `Origin` nhưng không thuộc allowlist; không có `Origin` thì xử lý bình thường (trình duyệt luôn gửi `Origin` cho POST, nên chỉ client không phải trình duyệt mới thiếu).
+- Refresh cookie và cookie flow Google: `HttpOnly`, `SameSite=Lax`, `Path=/`, production thêm `Secure`. Giả định triển khai: trình duyệt gọi API cùng origin qua rewrite `/api/*` của FE (`VITE_API_URL` để trống hoặc `/api/v1`). Nếu FE gọi thẳng domain BE khác site thì cookie Lax không được gửi trong fetch POST, cần quyết định lại trước khi đổi.
+- Google Sign-In dùng GIS callback trong trang (popup/One Tap), credential được FE gửi bằng `fetch` cùng origin nên cookie Lax vẫn đi kèm. Không dùng `ux_mode: redirect`/`login_uri` (Google POST cross-site sẽ không mang cookie Lax).
+- Bootstrap khi tải lại trang: client không có access token trong bộ nhớ gọi một request `POST /auth/refresh` và dùng luôn `user`/`subscription` trả về; chỉ gọi `GET /auth/me` khi đã có token trong bộ nhớ. Response refresh: `{ accessToken, user: { id, email, displayName, role }, subscription: { plan, maxChildren, startedAt?, expiresAt? } }`, `Cache-Control: no-store`. Client cũ chỉ đọc `accessToken` vẫn tương thích.
+- Access token chỉ được chấp nhận khi không có claim `aud`/`purpose` và có `id` cùng `role` hợp lệ. Token mục đích riêng ký cùng `JWT_SECRET` (Parent Gate `purpose: parent_gate`, thử thách gate, ticket ảnh CMS `aud: cms-cover-image`) không dùng được làm Bearer; access token đã phát hành trước đó vẫn hợp lệ.
+
+Google payload: `/start` nhận `{}`; `/google` nhận strict `{credential, nonce}` (credential <= 12000 ký tự); `/link` nhận strict `{password, nonce}` (password 1..256). Nonce 64 ký tự hex. Các POST bắt buộc `Origin` thuộc `CLIENT_ORIGIN`/`CLIENT_ORIGINS` (không gồm origin local bổ sung), chịu auth rate limit và trả `Cache-Control: no-store`. ID token/mật khẩu không vào URL/localStorage.
+
+`GoogleAuthFlow` lưu SHA256 của cookie token ngẫu nhiên, nonce, trạng thái `fresh|link`, userId/googleId khi chờ liên kết, số lần thử và expiresAt. Unique `tokenHash_1`, TTL `expiresAt_1`; server vẫn kiểm tra hạn trực tiếp. Cookie Google HttpOnly 5 phút, production Secure/SameSite=Lax/host-only prefix `__Host-`, path `/`. Collection mới không lưu ID token hoặc mật khẩu.
 
 `User.googleId` dùng unique partial index `google_identity_unique`; thiếu index khiến `/start` trả 503 `GOOGLE_STORAGE_NOT_READY`. `deploy:indexes` bổ sung index không xóa legacy. Tạo user/free subscription và tiêu thụ challenge cùng transaction; liên kết password dùng compare-and-set cùng transaction. Replay/hết hạn trả 401 `GOOGLE_FLOW_INVALID`; token lỗi 401 `GOOGLE_TOKEN_INVALID`; mật khẩu sai 401 `GOOGLE_LINK_PASSWORD_INVALID`; liên kết xung đột 409 `GOOGLE_LINK_CONFLICT`.
 
@@ -104,6 +113,15 @@ Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudin
 - Lỗi: schema/context400; auth401; không sở hữu/context không tồn tại404; asset chưa có404 `UPLOAD_ASSET_NOT_FOUND` (chỉ mã này cho phép reupload sau upload response không rõ); intent conflict/expired409; asset quá size413 `UPLOAD_TOO_LARGE`; metadata/video/duration422 `UPLOAD_AUDIO_INVALID`; storage503 `UPLOAD_STORAGE_UNAVAILABLE`; DB503 `DATABASE_UNAVAILABLE`. Không lỗi nào cấp điểm hoặc hoàn thành activity.
 - `RecordingUploadIntent`: parent/request/fingerprint, context, publicId/timestamp, pending/completed, recordingId, expiresAt10 phút, deleteAt7 ngày; TTL deleteAt và unique parent/request. `RateLimitBucket`: string `_id=scope:digestIP`, hits, resetAt; TTL resetAt, reset atomic không chờ TTL. `Recording.uploadIntentId` unique sparse/select:false cho bản direct, legacy không có field.
 - DELETE bé: Child và các collections phụ thuộc, thêm RecordingUploadIntent, được cascade tuần tự trong Mongo transaction; finalize/legacy ghi Child.__v để tranh chấp với delete. Failure503 rollback DB. Không xóa Cloudinary trong transaction; xem debt retention/runbook. Không mở quyền đọc audio.
+
+**Cập nhật 2026-10-13 (review sau khi chuyển backend sang Vercel):**
+- Finalize đồng thời: request đầu giành intent (`pending → finalizing`, lease 45 s); request khác chờ có jitter (tối đa 15 s) rồi trả **cùng receipt**. Quá thời gian chờ trả `409 UPLOAD_FINALIZE_IN_PROGRESS` (không còn 503). Mọi nhánh lỗi tra receipt theo intent trước khi ném lỗi; lỗi inspect/nghiệp vụ trả intent về `pending`.
+- Inspect khoan dung với file thiếu duration (WebM của Chrome): nhận nếu có codec audio, format hợp lệ, ≤ 5 MiB; lưu `durationSec = 0`. Luồng video placeholder chỉ coi là audio khi provider đánh dấu `is_audio`. Vẫn từ chối video thật, quá cỡ, duration > 180.
+- Cloudinary giới hạn tần suất (HTTP 420/429) trả `503 UPLOAD_STORAGE_RATE_LIMITED` kèm `Retry-After`.
+- `POST /recordings/upload-intent` có limiter riêng theo tài khoản: 10/phút, 200/ngày (`429`). Chữ ký upload hết hiệu lực sau khoảng 15 phút.
+- `RecordingUploadIntent`: thêm trạng thái `finalizing` (+ `claimToken`, lease); intent chưa hoàn tất giữ 30 ngày, đã hoàn tất giữ 7 ngày kể từ lúc hoàn tất (để đối soát asset mồ côi).
+- DELETE bé: sau commit, xóa asset audio trên Cloudinary (`invalidate: true`, đúng `resource_type`); lỗi provider ghi vào collection mới `AudioCleanupTask` (status `pending`) để xử lý lại, không làm hỏng thao tác xóa. `Recording.resourceType` mới lưu loại asset cho bản legacy.
+- `GET /recordings/children/:childId`: tối đa 200 bản mới nhất, shape không đổi.
 - `/health`200 liveness; `/ready`200 ping DB hoặc503 `DATABASE_UNAVAILABLE`. API production rate limit shared Mongo auth30/15m/API120/m, store lỗi503 `RATE_LIMIT_UNAVAILABLE`.
 
 Giả định môi trường chưa xác minh: preset/metadata provider thực, IP qua rewrite, replica set/network/transaction, native build, cookie auth và webhook. Multipart legacy chỉ dùng local/Render/client cũ; không hứa file5MiB qua endpoint này trên Vercel.
@@ -126,8 +144,8 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 | POST | `/stories/:id/explored` | Auth | Ghi exploration cho child (idempotent qua unique index `{childId, kind, refId}`) |
 | GET | `/culture`, `/culture/:id` | Public | Đọc bài văn hóa (query `category`, `search` được escape regex; limit 100) |
 | POST | `/culture/:id/quiz` | Auth | Chấm quiz và thưởng (+5 points idempotent, rollback tự động nếu lỗi) |
-| POST | `/recordings` | Auth + multipart | Upload file âm thanh bé đọc (`audio/*`, `application/ogg`; max 5MB; duration capped 180s; Dev/Test fallback Base64 <= 2MB; Production bắt buộc Cloudinary) |
-| GET | `/recordings/children/:childId` | Auth | Parent ownership |
+| POST | `/recordings` | Auth + multipart | **Legacy.** Production mặc định tắt (`410 LEGACY_RECORDING_UPLOAD_DISABLED`, bật lại bằng `LEGACY_RECORDING_UPLOAD_ENABLED=true`); dev/test bật. Upload file âm thanh bé đọc (`audio/*`, `application/ogg`; max 5MB; duration capped 180s; Dev/Test fallback Base64 <= 2MB) |
+| GET | `/recordings/children/:childId` | Auth | Parent ownership; tối đa 200 bản mới nhất |
 
 ## Subscription và thanh toán
 
@@ -147,7 +165,7 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 | Method | Path | Auth | Mục đích |
 | --- | --- | --- | --- |
 | GET | `/points/shop/items` | Auth | Item active (trả về cả `stock` tồn kho thực tế) |
-| GET | `/points/children/:childId` | Auth | Số dư `viviPoints`, `totalEarned` (tổng delta > 0, không tính `refund`), `history` và `nextCursor`. Phân trang `?before=<ISO createdAt>&limit=1..50` (mặc định 20; trước 2026-10-09 là 100). Giao dịch trùng timestamp ở biên trang được trả chung trang. Sai tham số trả 400 `VALIDATION_ERROR` |
+| GET | `/points/children/:childId` | Auth | Số dư `viviPoints`, `totalEarned` (tổng delta > 0, không tính `refund`; **chỉ có ở trang đầu**, trang có `before` không trả trường này — từ 2026-10-13), `history` và `nextCursor`. Phân trang `?before=<ISO createdAt>&limit=1..50` (mặc định 20; trước 2026-10-09 là 100). Giao dịch trùng timestamp ở biên trang được trả chung trang. Sai tham số trả 400 `VALIDATION_ERROR` |
 | GET | `/points/children/:childId/collection` | Auth + ownership | `ownedItems[]` (kể cả món đã ẩn khỏi shop), `equippedAvatarItemId`, `profileDecorationId` |
 | PATCH | `/points/children/:childId/equip` | Auth + ownership | Body `{ slot, itemId }`: `slot` là `avatar` hoặc `profile_decoration`, `itemId` là ObjectId hoặc `null` (bỏ dùng). 404 bé/item không tồn tại, 403 `ITEM_NOT_OWNED`, 400 `ITEM_CATEGORY_MISMATCH`. Response giống `/collection` |
 | POST | `/points/shop/redeem` | Auth | Trừ điểm nguyên tử, trừ stock quà vật lý, chặn mua lặp quà ảo, tạo redemption kèm rollback bù nếu thất bại |
@@ -168,6 +186,8 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 | GET | `/admin/lessons` | Admin | Danh sách tất cả bài học kèm populate stage |
 | POST | `/admin/lessons` | Admin | Ngừng ghi live; payload hợp lệ trả 409 `CONTENT_CMS_REQUIRED` |
 | PUT | `/admin/lessons/:id` | Admin | Ngừng ghi live; dùng luồng draft/publish CMS |
+
+Từ 2026-10-13 (review): `totalRevenue`, `paidOrders`, `byPlan` và `series` dùng cùng bộ lọc, chỉ tính đơn completed có `paidAt` kiểu ngày, nên `totalRevenue = Σ series.revenue`; đơn thiếu `paidAt` chỉ hiện ở `undatedOrders` để đối soát. Câu "Tổng toàn thời gian gồm đơn completed thiếu `paidAt`" phía dưới là hành vi cũ.
 
 Revenue response: `{ currency: 'VND', timezone: 'Asia/Ho_Chi_Minh', from: string|null, to: string|null, totalRevenue, paidOrders, currentMonth: 'YYYY-MM', currentMonthRevenue, undatedOrders, byPlan: { monthly: { orders, revenue }, yearly: { orders, revenue } }, series: [{ month: 'YYYY-MM', orders, revenue }] }`. `totalRevenue`, `paidOrders`, `byPlan`, `series` dùng khoảng được chọn, mặc định toàn thời gian; tháng hiện tại và số đơn thiếu ngày thanh toán là toàn hệ thống, không theo bộ lọc. `series` tăng dần, chỉ có tháng phát sinh đơn. Tổng toàn thời gian gồm đơn completed thiếu `paidAt`; lọc ngày/bảng tháng loại các đơn đó và UI cảnh báo đối soát. Ngày sai, khoảng đảo, query lặp/khóa lạ trả 400. JWT/admin và role DB được kiểm tra; thu hồi quyền trả 403, response `Cache-Control: no-store`. Không trả dữ liệu khách hàng, link checkout hay thông tin giao dịch riêng lẻ; không sửa payment/subscription hoặc gọi PayOS. Giới hạn truy vấn DB 10 giây; lỗi tải phải hiện retry, không giả doanh thu 0.
 ### Data ViVi Points và vật phẩm — 2026-10-09

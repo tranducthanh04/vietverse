@@ -1,5 +1,13 @@
 # Rollout backend Vercel — Vietverse
 
+## CORS, cookie và đích DB — sửa local 2026-10-13, chưa deploy
+
+- BE Production: `CLIENT_ORIGIN` phải là origin HTTPS chính xác của FE đang phục vụ người dùng (hiện tại là alias FE production). Muốn thêm domain FE khác (custom domain, alias phụ) thì khai báo `CLIENT_ORIGINS` gồm các origin HTTPS phân tách dấu phẩy; env sai định dạng làm BE từ chối khởi động. Không còn origin cứng hoặc `localhost` trong code. Preview FE có domain riêng sẽ bị 403 `ORIGIN_NOT_ALLOWED` cho tới khi được thêm vào `CLIENT_ORIGINS` của đúng môi trường BE.
+- Google Cloud Console: mọi origin trong `CLIENT_ORIGIN`/`CLIENT_ORIGINS` dùng đăng nhập Google phải có trong Authorized JavaScript origins.
+- Cookie refresh và flow Google là `SameSite=Lax` + `Secure`. Điều này dựa trên việc trình duyệt gọi `/api/*` cùng origin qua rewrite trong `client/vercel.json`; không đặt `VITE_API_URL` của FE Production sang domain BE khác site (cookie sẽ không được gửi).
+- Sau khi deploy bản sửa: smoke preflight tới `/api/v1/auth/refresh` với `Origin: https://vietverse.vercel.app` phải trả 403 và không có `Access-Control-Allow-Origin`; đăng nhập, F5, logout, đăng nhập Google qua FE phải hoạt động. Owner quyết định có thu hồi toàn bộ refresh token/xoay `JWT_REFRESH_SECRET` do lỗ hổng S1 đã tồn tại trên production hay không (xem `06`).
+- Script vận hành offline (`provision-admin.cjs`, `bootstrap-production.cjs`) không còn chứa host/user/DB: operator đặt `VIETVERSE_DB_HOST` (`<cluster-host>.mongodb.net`), `VIETVERSE_DB_USER`, `VIETVERSE_DB_NAME` trong phiên PowerShell trước khi chạy. Mật khẩu DB vẫn nhập qua hộp thoại riêng, không qua env.
+
 ## Admin revenue release — 2026-10-13
 
 - Commit `b4be673d9f86038d31f1b5d23c5af36abfa9498f` is deployed to both production projects from tracked-only snapshots.
@@ -149,3 +157,58 @@ Source snapshot tracked-only `b2c8613` (không `.env`, node_modules hay prebuilt
 GET smoke protected URL Preview: `/health`200/status ok; `/ready`503/DATABASE_UNAVAILABLE; `/api/v1/not-found`503 cùng code vì DB guard chạy trước router; `/not-found`404/NOT_FOUND. `/health`, `/ready`, `/not-found` có nosniff; DB guard `/api` trả trước Helmet nên 503 thiếu nosniff, ghi nhận debt chưa sửa trong lượt deploy. Không có Atlas URI được cấu hình; connection attempt chỉ tới default localhost và không thành công, không gọi DB thật/Cloudinary hay endpoint ghi. Protection không bị tắt và JWT/bypass values không được in/ghi file.
 
 DB readiness và GET qua FE đã xác minh với quyền mạng tạm như mục MongoDB Production. Chưa có Cloudinary/preset/metadata audio thật, bcrypt hash/auth đăng nhập/transaction với DB trên Linux Vercel, index apply, IP/cookies qua rewrite, webhook/cutover hoặc mạng production lâu dài. Audio chưa nghiệm thu. Sau khi bổ sung env cần redeploy và kiểm staging đầy đủ; không gọi chuyển đổi production hoàn tất chỉ vì shell Preview READY hoặc readiness200.
+
+## Audio ops — sửa local 2026-10-13, chưa deploy
+
+Phạm vi và lý do ở [06 — Audio sau chuyển BE sang Vercel](./06-review-findings.md). Mục này chỉ là bước vận hành.
+
+### Env BE
+
+- `LEGACY_RECORDING_UPLOAD_ENABLED`: không đặt (hoặc `false`) ở Production → `POST /recordings` trả 410. Chỉ đặt `true` nếu chủ động cần client multipart cũ. Dev/test mặc định bật.
+- Không thêm env mới cho Cloudinary; vẫn là bộ `CLOUDINARY_*` hiện có.
+
+### Cloudinary console (operator làm tay)
+
+1. Preset audio signed (`CLOUDINARY_RECORDING_UPLOAD_PRESET`): bật **Max file size = 5242880** (nếu giao diện gói hiện tại không hiển thị, ghi nhận là chưa có giới hạn phía provider) và **Allowed formats = webm, mp4, m4a, ogg, mp3, wav**; giữ `overwrite=false`, signed.
+2. Kiểm hạn mức Admin API mỗi giờ của gói (Settings → Usage/API). Finalize gọi Admin API 1 lần mỗi bản thu; vượt hạn mức nay trả `503 UPLOAD_STORAGE_RATE_LIMITED` kèm `Retry-After`.
+3. Không cần đổi preset để rút thời hạn chữ ký: server ký timestamp lùi 45 phút nên quyền upload hết sau ~15 phút. Staging cần xác nhận: upload sau 16 phút kể từ khi cấp intent phải bị Cloudinary từ chối ("Stale request"), upload trong 10 phút phải qua.
+
+### Index
+
+`npm run deploy:indexes` chưa có index cho `AudioCleanupTask` (collection nhỏ, truy vấn thủ công). Trường mới trên `RecordingUploadIntent` (`status: finalizing`, `claimToken`, `claimedAt`) và `Recording.resourceType` là additive, không cần migration.
+
+### Đối soát audio
+
+- Backlog xóa vật lý (xóa hồ sơ bé hoặc bù xóa legacy thất bại): `db.audiocleanuptasks.find({ status: 'pending' })`. Với mỗi bản: gọi destroy đúng `resourceType` (rỗng thì thử `video`, `raw`, `image`) với `invalidate: true`, rồi đặt `status: 'done'`. Không xóa theo wildcard.
+- Orphan upload chưa finalize: `db.recordinguploadintents.find({ status: { $ne: 'completed' }, expiresAt: { $lt: new Date() } }, { publicId: 1, childId: 1, createdAt: 1 })`. Với mỗi publicId: kiểm `db.recordings.countDocuments({ publicId })` bằng 0 và asset tồn tại trên Cloudinary trước khi xóa, ghi audit. Intent chưa hoàn tất giữ 30 ngày, nên chạy đối soát ít nhất mỗi tháng; intent tạo trước bản sửa chỉ giữ 7 ngày.
+- Intent kẹt `finalizing` quá 45 giây sẽ được finalize sau chiếm lại; không cần sửa tay.
+
+### Cần test trên thiết bị/provider thật trước khi phát hành
+
+- Upload + finalize thật: Chrome desktop (WebM/Opus), Chrome Android, iOS Safari (`audio/mp4`). Ghi lại metadata Cloudinary trả về (`duration`, `is_audio`, `video`, `width/height`) để xác nhận nhánh chấp nhận thiếu duration và nhánh video placeholder là đúng thực tế.
+- File video thật (mp4 có hình) và file > 5 MiB phải bị từ chối.
+- Hai tab bấm gửi cùng lúc: cả hai nhận cùng receipt.
+- Xóa hồ sơ bé có bản thu: URL audio cũ trả 404 sau khi CDN hết cache; `audiocleanuptasks` rỗng.
+- TTS: iOS Safari (nút đọc lần đầu sau tải trang, đọc sau khi asset lỗi), Android có giọng `vi_VN`; watchdog không được dừng nhầm khi máy đang đọc.
+- Mạng yếu (throttle): nút gửi nhả sau tối đa 60 giây, "Thử gửi lại" không upload lại khi file đã lên provider.
+
+## Region và hiệu năng — sửa local 2026-10-13, chưa deploy
+
+### Region function (P1)
+
+- **Sự thật đã xác minh:** cluster MongoDB Atlas Production nằm ở **AWS ap-east-1 (Hong Kong)**, gói M0 (SRV/CNAME `mtm-aws-ape1-...`). Trước bản sửa, `server/vercel.json` không có `regions` nên function chạy ở `iad1` (Washington): mỗi lượt Mongo qua Thái Bình Dương thêm ~200 ms.
+- **Quyết định kỹ thuật:** `server/vercel.json` đặt `"regions": ["hkg1"]` (Vercel Hong Kong, cùng metro với Atlas ap-east-1, cũng là edge gần người dùng Việt Nam). Không đặt `maxDuration`: các handler hiện kết thúc dưới giới hạn mặc định và upload 5 MiB đi thẳng browser→Cloudinary.
+- **Project setting không được ghi đè:** Vercel → project `vietverse-backend` → Settings → Functions → Function Region phải để `hkg1` (hoặc để trống cho `vercel.json` quyết định). Nếu dashboard đặt region khác, deployment mới vẫn có thể chạy sai chỗ. Sau deploy, kiểm tra trong Deployment → Functions rằng region là `hkg1`.
+- **Giả định cần owner xác nhận:** gói Vercel hiện tại cho phép chọn region function (Hobby chỉ cho một region, `hkg1` nằm trong danh sách; Pro cho nhiều). Nếu deploy báo lỗi region thì dừng và báo owner, không tự đổi gói.
+- Smoke sau deploy: `/health` và `/api/v1/culture` từ Việt Nam; kỳ vọng `/culture` giảm từ ~0,8 s xuống ~0,1–0,2 s khi warm.
+
+### Index thủ công vì `autoIndex: false`
+
+- `server/src/config/db.ts`: khi `NODE_ENV=production` kết nối với `autoIndex: false`, `autoCreate: false`, `socketTimeoutMS: 45000` (pool giữ max 5/min 0). Dev/test vẫn auto-index.
+- Nguồn index duy nhất cho Production là `npm run deploy:indexes -w server` (dry-run, không kết nối DB) và `npm run deploy:indexes -w server -- --apply`. Script nay tự nạp **mọi model** trong `server/src/models` và gọi `Model.createIndexes()` (cùng tên index Mongoose auto-index từng tạo, không drop/sync), cộng index vận hành `paymentorders.status_1_paidAt_1` cho báo cáo doanh thu.
+- **Trình tự bắt buộc:** chạy dry-run để xem plan → backup/xác nhận đích → `--apply` trên Production **trước** khi deploy bản BE có `autoIndex:false`. Index đã tồn tại là no-op; conflict tên/option làm script dừng để đối soát tay. Mỗi khi thêm index vào schema về sau, phải chạy lại `--apply` trước/cùng lúc deploy.
+
+### Cache tĩnh FE
+
+- `client/vercel.json` thêm header: `/assets/(.*)` → `public, max-age=31536000, immutable` (file có hash), `/images/(.*)` → `public, max-age=86400`. Rewrites giữ nguyên. Lưu ý: chunk cũ đã bị xóa sau deploy rơi vào SPA rewrite và nhận HTML với header immutable; URL có hash nên không ảnh hưởng chunk mới.
+- Smoke sau deploy FE: `curl -I https://vietverse-nine.vercel.app/assets/<file>.js` có `cache-control: public, max-age=31536000, immutable`.
