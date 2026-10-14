@@ -1,5 +1,11 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## PayOS — chuẩn bị cấu hình 2026-10-13, local
+
+- Owner yêu cầu tiếp tục tích hợp sau lần hoãn 2026-10-12; giữ giá và quyền lợi hiện có. File mẫu có ba biến PayOS trống, key thật chỉ ở backend environment.
+- Checkout mua gói chủ động gắn mã đơn trong cả return/cancel URL; chỉ webhook hợp lệ mới nâng cấp gói, không tin query trả về.
+- Chưa deploy thay đổi hoặc nghiệm thu chuyển khoản thật. Production cần nạp key riêng, đăng ký đúng webhook `/api/v1/payments/webhook` và kiểm tra MongoDB transaction; xem `05-api-and-data-contracts.md`.
+
 ## Feedback 2026-10-12 — triển khai local, chưa deploy
 
 - Giá tháng mới 250.000đ, năm giữ 990.000đ; QR/PayOS hoãn theo owner.

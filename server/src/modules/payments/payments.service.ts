@@ -154,8 +154,8 @@ export class PaymentsService {
         amount,
         description: `Vietverse ${data.planType === 'yearly' ? 'goi nam' : 'goi thang'}`,
         items: [{ name: `Vietverse ${data.planType === 'yearly' ? 'Gói năm' : 'Gói tháng'}`, quantity: 1, price: amount }],
-        cancelUrl: `${env.CLIENT_ORIGIN}/thanh-toan?payment=returned`,
-        returnUrl: `${env.CLIENT_ORIGIN}/thanh-toan?payment=returned`,
+        cancelUrl: `${env.CLIENT_ORIGIN}/thanh-toan?orderCode=${orderCode}&payment=returned`,
+        returnUrl: `${env.CLIENT_ORIGIN}/thanh-toan?orderCode=${orderCode}&payment=returned`,
       });
       order.checkoutUrl = paymentLink.checkoutUrl;
       order.paymentLinkId = paymentLink.paymentLinkId;

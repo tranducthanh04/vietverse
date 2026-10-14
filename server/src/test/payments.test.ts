@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 
+const gatewayCreate = vi.hoisted(() => vi.fn());
+
 vi.mock('@payos/node', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@payos/node')>();
   return {
@@ -8,7 +10,7 @@ vi.mock('@payos/node', async (importOriginal) => {
     PayOS: class TestPayOS extends actual.PayOS {
       constructor(options?: ConstructorParameters<typeof actual.PayOS>[0]) {
         super(options);
-        this.paymentRequests.create = vi.fn(async ({ orderCode }) => ({
+        this.paymentRequests.create = gatewayCreate.mockImplementation(async ({ orderCode }) => ({
           orderCode,
           paymentLinkId: `link-${orderCode}`,
           checkoutUrl: `https://payos.test/checkout/${orderCode}`,
@@ -28,6 +30,7 @@ describe('Payments & Subscription Webhook API', () => {
   let parentId: string;
 
   beforeEach(async () => {
+    gatewayCreate.mockClear();
     // 1. Register a test parent
     const parentRes = await request(app).post('/api/v1/auth/register').send({
       email: 'parent_payment_test@vietverse.edu.vn',
@@ -59,6 +62,30 @@ describe('Payments & Subscription Webhook API', () => {
     expect(dbOrder).not.toBeNull();
     expect(dbOrder?.status).toBe('pending');
     expect(dbOrder?.amount).toBe(250000);
+  });
+
+  it.each(['monthly', 'yearly'])('keeps the %s order queryable through both gateway return URLs without activating it', async (planType) => {
+    const checkout = await request(app)
+      .post('/api/v1/payments/create-checkout')
+      .set('Authorization', `Bearer ${parentToken}`)
+      .send({ planType });
+
+    expect(checkout.status).toBe(201);
+    const gatewayRequest = gatewayCreate.mock.calls.at(-1)![0];
+    for (const target of [gatewayRequest.returnUrl, gatewayRequest.cancelUrl]) {
+      const url = new URL(target);
+      expect(url.pathname).toBe('/thanh-toan');
+      expect(url.searchParams.get('payment')).toBe('returned');
+      expect(url.searchParams.get('orderCode')).toBe(checkout.body.data.orderCode);
+
+      const details = await request(app)
+        .get(`/api/v1/payments/orders/${url.searchParams.get('orderCode')}`)
+        .set('Authorization', `Bearer ${parentToken}`);
+      expect(details.status).toBe(200);
+      expect(details.body.data.status).toBe('pending');
+      expect(details.body.data.planType).toBe(planType);
+    }
+    expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
   });
 
   it('2. POST /api/v1/payments/create-checkout - Từ chối khi planType không hợp lệ', async () => {

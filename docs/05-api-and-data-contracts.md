@@ -149,6 +149,14 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 
 ## Subscription và thanh toán
 
+### Cấu hình PayOS và URL quay về — 2026-10-13
+
+- **Quyết định triển khai:** giữ giá và quyền gói hiện tại; `returnUrl`/`cancelUrl` của checkout mua gói chủ động chứa `orderCode=VV...` và `payment=returned`. Mã đơn chỉ để tra cứu với ownership; query trả về không chứng minh thanh toán, không đổi trạng thái đơn hay subscription.
+- Key local điền trong `server/.env` (git-ignore): `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`. File mẫu chỉ để trống; không đặt secret ở client hoặc biến `VITE_*`.
+- Local `.env` không tự đồng bộ lên production. Cần đặt đủ ba biến trong môi trường backend đang phục vụ domain rồi restart/redeploy. Với Docker self-host theo runbook, dùng file `.env` vận hành cạnh `compose.yml`, không phải `app/server/.env`; recreate container API để nạp biến mới (chỉ restart container không cập nhật environment).
+- Webhook của domain `vietverse.io.vn` là `https://vietverse.io.vn/api/v1/payments/webhook`, nhận **POST**. Không nhập trang chủ `/` (có thể trả 405), không dùng URL kết quả `/thanh-toan`, không dùng localhost cho callback từ PayOS.
+- **Giới hạn nghiệm thu:** 400 có thể là schema hoặc chữ ký không hợp lệ, cần response/log của request thực tế để phân biệt; không bỏ xác minh chữ ký để lưu webhook. 503 với thông báo PayOS chưa cấu hình nghĩa là process backend chưa nạp bộ key. MongoDB phải hỗ trợ transaction. Chỉ kiểm thử giao dịch tiền thật sau khi owner chủ động đồng ý; kiểm thử tự động dùng SDK mock và MongoDB replica set tạm.
+
 | Method | Path | Auth | Mục đích / ràng buộc |
 | --- | --- | --- | --- |
 | POST | `/payments/create-checkout` | Auth | Body `{ planType: 'monthly' | 'yearly' }`; server chọn giá 250.000đ/990.000đ cho đơn mới (feedback 2026-10-12) và trả `orderCode`, `checkoutUrl`; không cấu hình PayOS thì trả 503; webhook vẫn đối chiếu amount đã lưu của đơn, không tính lại giá đơn cũ |

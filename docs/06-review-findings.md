@@ -1,5 +1,13 @@
 # 06 — Kết quả review senior BA/code
 
+## PayOS — cấu hình và callback, 2026-10-13
+
+- Checkout mua gói nay chủ động gắn mã `VV...` trong cả return/cancel URL, không phụ thuộc riêng vào query do gateway bổ sung. Test hồi quy bao phủ gói tháng/năm: URL tra được đúng đơn còn pending, subscription vẫn free trước webhook. Giá, ownership và xác minh chữ ký không đổi.
+- Ảnh owner cho thấy Webhook URL trỏ trang chủ và PayOS báo 405; endpoint đúng là `/api/v1/payments/webhook`. Sau đổi URL owner báo 400; chưa có payload/log của request đó nên chưa xác định schema hay chữ ký bị từ chối.
+- Probe chẩn đoán cố ý sai chữ ký, đúng schema, tới endpoint public trả 503 `PayOS chưa được cấu hình; từ chối webhook`: process production chưa nạp key. Không gửi key local, không tạo đơn, không chuyển tiền, không thay đổi cấu hình production. Key trong `server/.env` local không tự cập nhật server.
+- Giới hạn: thay đổi callback chưa deploy; cần operator cấu hình key trên đúng backend, nạp lại environment, kiểm tra lại request xác nhận webhook rồi owner nghiệm thu giao dịch. Không nới kiểm chữ ký cho request không xác thực.
+- Kiểm chứng local: hai ca hồi quy URL thất bại trước sửa, 7/7 test thanh toán qua sau sửa. Toàn bộ backend 483/483 và frontend 232/232 qua; typecheck/build và `git diff --check` qua. Frontend còn warning React `act(...)` tại test `audioPlayback.test.tsx`; không thay code audio trong lượt này. Không gọi PayOS tạo link thật hoặc chuyển tiền.
+
 ## Tự host — Pha 1 code, 2026-10-13, local
 
 - IP cho rate limit khi tự host: chỉ tin đúng `TRUST_PROXY_HOPS` proxy (mặc định 2) khi `SELF_HOSTED=1`; XFF giả mạo phía trái bị bỏ qua (test đơn vị 1/2 hop). Rủi ro còn lại **[GĐ]**: thêm CDN/proxy trước nginx host mà không tăng hop sẽ gộp mọi người dùng vào một bucket; nginx host phải ghi đè XFF như file mẫu.
