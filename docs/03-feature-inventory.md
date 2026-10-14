@@ -1,5 +1,12 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## PayOS — xác nhận webhook 2026-10-14, local
+
+- Đã tái hiện request theo mẫu PayOS, ký bằng key test: mã đơn chưa có trong DB bị trả 404, chặn xác nhận webhook cần 2xx.
+- Webhook đúng schema và chữ ký nhưng không tìm thấy ở cả `PaymentTestOrder`/`PaymentOrder` nay được ACK 200 với `ignored: true`, không ghi DB hoặc mở gói. Có warning để đối soát đơn lạ; không coi ACK là thanh toán thành công.
+- Sai chữ ký/số tiền vẫn trả 400, thêm mã `PAYOS_INVALID_SIGNATURE`/`PAYOS_AMOUNT_MISMATCH` để phân biệt nguyên nhân. Không nới schema hoặc bỏ xác minh SDK.
+- Chưa deploy hoặc xác nhận portal hết lỗi 400; cần bản sửa chạy trên backend và key cùng kênh PayOS. Lần Actions đã kiểm tra trước đó thất bại `missing server host`, không phải bằng chứng deploy thành công.
+
 ## PayOS — chuẩn bị cấu hình 2026-10-13, local
 
 - Owner yêu cầu tiếp tục tích hợp sau lần hoãn 2026-10-12; giữ giá và quyền lợi hiện có. File mẫu có ba biến PayOS trống, key thật chỉ ở backend environment.

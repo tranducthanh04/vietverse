@@ -149,6 +149,13 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 
 ## Subscription và thanh toán
 
+### Xác nhận webhook — 2026-10-14
+
+- **Quyết định kỹ thuật:** PayOS gửi giao dịch mẫu khi kiểm tra/đăng ký webhook ([API chính thức](https://payos.vn/docs/api/)); mẫu không cần có đơn nội bộ. Sau schema và SDK verify, nếu cả `PaymentTestOrder` và `PaymentOrder` không có mã tương ứng, trả `200 { success: true, data: { ignored: true, reason: 'ORDER_NOT_FOUND' } }`. Không tạo/cập nhật đơn hoặc subscription; request lặp cũng không ghi dữ liệu.
+- ACK này áp dụng cả webhook đã xác thực của đơn lạ, không chỉ hardcode `orderCode=123`. Log warning `event=payos_webhook_ignored`, `reason=ORDER_NOT_FOUND`, mã `VV...`; không log body, signature, key hoặc tài khoản ngân hàng. Operator phải đối soát cảnh báo không phải request mẫu vì 200 kết thúc lần giao, không trông chờ PayOS retry. Nếu DB đọc lỗi vẫn trả lỗi, không ACK giả.
+- Sai schema giữ `400 VALIDATION_ERROR`; sai chữ ký trả `400 PAYOS_INVALID_SIGNATURE`; số tiền không khớp đơn thật/test trả `400 PAYOS_AMOUNT_MISMATCH`. Status/message cũ giữ nguyên, mã lỗi thay cho `INTERNAL_ERROR`. Nhánh xử lý đơn thật/test, transaction và idempotency không đổi.
+- **Giả định cần nghiệm thu:** dữ liệu xác nhận thực tế của kênh tuân theo contract công khai và được ký bằng `PAYOS_CHECKSUM_KEY` của kênh đó. Chưa có payload/log request thật; generic 400 trên portal không đủ để kết luận chỉ do đơn mẫu. Không bypass chữ ký nếu key sai.
+
 ### Cấu hình PayOS và URL quay về — 2026-10-13
 
 - **Quyết định triển khai:** giữ giá và quyền gói hiện tại; `returnUrl`/`cancelUrl` của checkout mua gói chủ động chứa `orderCode=VV...` và `payment=returned`. Mã đơn chỉ để tra cứu với ownership; query trả về không chứng minh thanh toán, không đổi trạng thái đơn hay subscription.

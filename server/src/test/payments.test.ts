@@ -24,6 +24,7 @@ import { app } from '../app.js';
 import { PayOS } from '@payos/node';
 import { Subscription } from '../models/Subscription.js';
 import { PaymentOrder } from '../models/PaymentOrder.js';
+import { PaymentTestOrder } from '../models/PaymentTestOrder.js';
 
 describe('Payments & Subscription Webhook API', () => {
   let parentToken: string;
@@ -172,6 +173,7 @@ describe('Payments & Subscription Webhook API', () => {
 
     const forgedRes = await request(app).post('/api/v1/payments/webhook').send(payload);
     expect(forgedRes.status).toBe(400);
+    expect(forgedRes.body.error.code).toBe('PAYOS_INVALID_SIGNATURE');
     expect(await PaymentOrder.findOne({ orderCode: checkoutRes.body.data.orderCode }).then((order) => order?.status)).toBe('pending');
     expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
 
@@ -179,7 +181,90 @@ describe('Payments & Subscription Webhook API', () => {
     payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
     const mismatchRes = await request(app).post('/api/v1/payments/webhook').send(payload);
     expect(mismatchRes.status).toBe(400);
+    expect(mismatchRes.body.error.code).toBe('PAYOS_AMOUNT_MISMATCH');
     expect(await PaymentOrder.findOne({ orderCode: checkoutRes.body.data.orderCode }).then((order) => order?.status)).toBe('pending');
+  });
+
+  it.each([123, 987654321])('acknowledges signed unknown order %s without changing payment data', async (orderCode) => {
+    // PayOS documents this sample shape for webhook delivery/registration.
+    const payload = {
+      code: '00', desc: 'success', success: true,
+      data: {
+        orderCode, amount: 3000, description: 'VQRIO123', accountNumber: '12345678',
+        reference: 'TF230204212323', transactionDateTime: '2023-02-04 18:25:00',
+        currency: 'VND', paymentLinkId: '124c33293c43417ab7879e14c8d9eb18',
+        code: '00', desc: 'Thành công', counterAccountBankId: '', counterAccountBankName: '',
+        counterAccountName: '', counterAccountNumber: '', virtualAccountName: '', virtualAccountNumber: '',
+      },
+      signature: '',
+    };
+    await PaymentOrder.create({ userId: parentId, orderCode: 'VV456789123', amount: 250000, planType: 'monthly', status: 'pending' });
+    await PaymentTestOrder.create({ userId: parentId, orderCode: 'VT456789124', amount: 10000, status: 'pending' });
+    const before = {
+      orders: await PaymentOrder.find().lean(),
+      testOrders: await PaymentTestOrder.find().lean(),
+      subscriptions: await Subscription.find().lean(),
+    };
+    const signer = new PayOS({ clientId: 'test', apiKey: 'test', checksumKey: 'test-checksum-key' });
+    payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await request(app).post('/api/v1/payments/webhook').send(payload);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ success: true, data: { ignored: true, reason: 'ORDER_NOT_FOUND' } });
+    }
+    expect(await PaymentOrder.find().lean()).toEqual(before.orders);
+    expect(await PaymentTestOrder.find().lean()).toEqual(before.testOrders);
+    expect(await Subscription.find().lean()).toEqual(before.subscriptions);
+
+    // Even an unknown/sample order must authenticate before being acknowledged.
+    payload.data.amount = 3001;
+    const tampered = await request(app).post('/api/v1/payments/webhook').send(payload);
+    expect(tampered.status).toBe(400);
+    expect(tampered.body.error.code).toBe('PAYOS_INVALID_SIGNATURE');
+  });
+
+  it.each([{}, { code: '00', desc: 'success', success: true, data: {}, signature: 'invalid' }])('rejects malformed webhook data instead of acknowledging it', async (payload) => {
+    const res = await request(app).post('/api/v1/payments/webhook').send(payload);
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    expect(await PaymentOrder.countDocuments()).toBe(0);
+    expect(await PaymentTestOrder.countDocuments()).toBe(0);
+    expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
+  });
+
+  it('still completes a matching test order once without granting a subscription', async () => {
+    const checkout = await request(app).post('/api/v1/payments/test-checkout')
+      .set('Authorization', `Bearer ${parentToken}`).send({});
+    expect(checkout.status).toBe(201);
+    const subscriptions = await Subscription.find().lean();
+    const payload = {
+      code: '00', desc: 'success', success: true,
+      data: {
+        orderCode: Number(checkout.body.data.orderCode.slice(2)), amount: 9999,
+        code: '00', desc: 'success', reference: 'TEST-REF',
+      },
+      signature: '',
+    };
+    const signer = new PayOS({ clientId: 'test', apiKey: 'test', checksumKey: 'test-checksum-key' });
+    payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
+    const mismatch = await request(app).post('/api/v1/payments/webhook').send(payload);
+    expect(mismatch.status).toBe(400);
+    expect(mismatch.body.error.code).toBe('PAYOS_AMOUNT_MISMATCH');
+    expect(await PaymentTestOrder.findOne({ orderCode: checkout.body.data.orderCode }).then((order) => order?.status)).toBe('pending');
+
+    payload.data.amount = 10000;
+    payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
+    for (const retry of [false, true]) {
+      const res = await request(app).post('/api/v1/payments/webhook').send(payload);
+      expect(res.status).toBe(200);
+      expect(res.body.data.order.status).toBe('completed');
+      expect(res.body.data.order.transactionRef).toBe('TEST-REF');
+      expect(res.body.data.subscription).toBeNull();
+      expect(res.body.data.idempotencyHandled).toBe(retry);
+    }
+    expect(await PaymentOrder.countDocuments()).toBe(0);
+    expect(await PaymentTestOrder.countDocuments()).toBe(1);
+    expect(await Subscription.find().lean()).toEqual(subscriptions);
   });
 
   it('4. GET /api/v1/payments/history - Lấy lịch sử giao dịch thanh toán', async () => {

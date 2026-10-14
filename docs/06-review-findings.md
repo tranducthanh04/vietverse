@@ -1,5 +1,14 @@
 # 06 — Kết quả review senior BA/code
 
+## PayOS — đăng ký webhook, 2026-10-14, sửa local
+
+- **Đã tái hiện:** mẫu payload công khai PayOS (`orderCode=123`, amount 3000, ký lại bằng key test) qua schema/SDK nhưng service ném 404 vì không có đơn. Tài liệu `/confirm-webhook` nói gửi giao dịch ngân hàng mẫu, webhook phải ACK 2xx; schema hiện tại chấp nhận mẫu, không cần nới.
+- **Quyết định kỹ thuật:** chỉ sau xác minh chữ ký, ACK 200/ignored cho đơn không tồn tại ở cả hai collection; không ghi tiền, subscription hoặc tạo đơn. Warning chỉ gồm event/reason/orderCode, không xuất payload/key/thông tin ngân hàng. Không catch lỗi DB thành ACK.
+- **Rủi ro/đối soát:** webhook thật của đơn không tồn tại cũng được ACK, cần operator xem `payos_webhook_ignored` để phát hiện sai DB/kênh/đơn bị mất; chưa có job đối soát tự động. Không hardcode request mẫu hoặc cho phép request sai chữ ký.
+- **Chẩn đoán:** 400 sai chữ ký/số tiền nay có mã riêng `PAYOS_INVALID_SIGNATURE`/`PAYOS_AMOUNT_MISMATCH`. Dữ liệu sai schema vẫn `VALIDATION_ERROR`. Chưa có log xác nhận thật nên chưa chứng minh nguyên nhân duy nhất của 400 trên portal.
+- **Deployment:** kiểm tra trước đó cho thấy public POST vào được bước verify; Actions run `38518361058` cho commit `0e59153` thất bại `Error: missing server host`. Không có quyền VPS, chưa deploy bản sửa này hoặc xác nhận bộ key đúng kênh. Không gửi webhook ký bằng key production, tạo link thật hoặc chuyển tiền trong lượt sửa.
+- **Kiểm chứng:** test hồi quy đơn mẫu thất bại 404 trước sửa, qua sau sửa; bộ thanh toán cuối 12/12, frontend 232/232, typecheck/build và diff-check qua. Full backend có 486/487 qua, ca `recordingFinalize` gọi finalize chồng nhau trả một 404 thay vì 201; chạy lại riêng 23/23 qua, chưa sửa phần ghi âm. Chi tiết tại `plans/261014-payos-webhook/plan.md`.
+
 ## PayOS — cấu hình và callback, 2026-10-13
 
 - Checkout mua gói nay chủ động gắn mã `VV...` trong cả return/cancel URL, không phụ thuộc riêng vào query do gateway bổ sung. Test hồi quy bao phủ gói tháng/năm: URL tra được đúng đơn còn pending, subscription vẫn free trước webhook. Giá, ownership và xác minh chữ ký không đổi.

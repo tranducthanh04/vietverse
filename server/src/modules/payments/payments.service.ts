@@ -5,6 +5,7 @@ import { PaymentTestOrder } from '../../models/PaymentTestOrder.js';
 import { Subscription } from '../../models/Subscription.js';
 import { User } from '../../models/User.js';
 import { env } from '../../config/env.js';
+import { logger } from '../../utils/logger.js';
 import mongoose, { Types } from 'mongoose';
 
 const PLAN_PRICES: Record<PaidPlanType, number> = {
@@ -191,7 +192,7 @@ export class PaymentsService {
     try {
       verifiedData = await payos.webhooks.verify(payload);
     } catch {
-      throw { statusCode: 400, message: 'Chữ ký webhook PayOS không hợp lệ' };
+      throw { statusCode: 400, code: 'PAYOS_INVALID_SIGNATURE', message: 'Chữ ký webhook PayOS không hợp lệ' };
     }
 
     const orderCode = `VV${verifiedData.orderCode}`;
@@ -199,7 +200,7 @@ export class PaymentsService {
     const testOrder = await PaymentTestOrder.findOne({ orderCode: testOrderCode });
     if (testOrder) {
       if (verifiedData.amount !== testOrder.amount) {
-        throw { statusCode: 400, message: 'Số tiền webhook không khớp với giao dịch test' };
+        throw { statusCode: 400, code: 'PAYOS_AMOUNT_MISMATCH', message: 'Số tiền webhook không khớp với giao dịch test' };
       }
 
       const session = await mongoose.startSession();
@@ -232,11 +233,14 @@ export class PaymentsService {
 
     const order = await PaymentOrder.findOne({ orderCode });
     if (!order) {
-      throw { statusCode: 404, message: `Không tìm thấy đơn hàng mã ${orderCode}` };
+      // Registration sends a signed sample transaction with no local order.
+      // Acknowledge delivery only; never create an order or grant a subscription.
+      logger.warn({ event: 'payos_webhook_ignored', reason: 'ORDER_NOT_FOUND', orderCode }, 'Authenticated PayOS webhook has no local order');
+      return { ignored: true, reason: 'ORDER_NOT_FOUND' };
     }
 
     if (verifiedData.amount !== order.amount) {
-      throw { statusCode: 400, message: 'Số tiền webhook không khớp với đơn hàng' };
+      throw { statusCode: 400, code: 'PAYOS_AMOUNT_MISMATCH', message: 'Số tiền webhook không khớp với đơn hàng' };
     }
 
     const isPaid = verifiedData.code === '00';
