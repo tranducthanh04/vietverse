@@ -367,6 +367,22 @@ describe("narration in learning journeys", () => {
     expect(play).not.toHaveBeenCalled();
   });
 
+  it("reads a legacy target-word passage without completing the activity", () => {
+    const passage = "A full reading passage stored in targetWord.";
+    const complete = vi.fn();
+    render(
+      <WordCardActivity
+        activity={{ id: "legacy-passage", prompt: "Read", targetWord: passage }}
+        onComplete={complete}
+      />,
+    );
+    expect(screen.getByText(passage)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Nghe đọc" }));
+    expect(spoken.map((item) => item.text)).toEqual([passage]);
+    act(() => spoken[0].onend?.call(spoken[0], new Event("end") as SpeechSynthesisEvent));
+    expect(complete).not.toHaveBeenCalled();
+  });
+
   it("reads game instructions without completing or grading the activity", () => {
     const submit = vi.fn();
     render(
