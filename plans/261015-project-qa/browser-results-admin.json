@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "name": "admin: UI login redirects to populated KPI dashboard",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: revenue loads actual report and rejects inverted date range",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/bai-hoc and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/truyen and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/van-hoa and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: learners filter, detail dialog, and close",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: learner dialog keyboard focus stays inside and Escape restores trigger focus",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: Learner modal keyboard contract\n+ actual - expected\n\n  {\n+   escapeClosed: false,\n+   focusInsideAtOpen: false,\n+   focusRestored: false,\n-   escapeClosed: true,\n-   focusInsideAtOpen: true,\n-   focusRestored: true,\n    tabFocus: [\n      true,\n      true,\n+     false\n-     true\n    ]\n  }\n"
+    },
+    {
+      "name": "admin: zero-score in-progress learner is not presented as 100 percent and three stars",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: API fixture scorePercent=0 must not render as perfect score\n\n'100%' !== '0%'\n"
+    },
+    {
+      "name": "admin: redemption search and populated inventory",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: point-rule invalid amount is rejected without API mutation",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: create, save, reload, and preview unpublished story draft",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: mobile dashboard fits 390px and navigation is usable",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: no uncaught browser runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "observations": {}
+}

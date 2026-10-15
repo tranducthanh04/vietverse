@@ -1,5 +1,18 @@
 # 06 — Kết quả review senior BA/code
 
+## QA trình duyệt toàn dự án — 2026-10-15, local
+
+- **P2 — admin hiển thị sai kết quả bằng 0, chưa sửa:** API `in_progress`, `scorePercent: 0`, `stars: 0` hiện thành 100%/3 sao ở chi tiết học viên. `AdminLearnersPage.tsx` dùng `p.scorePercent || 100` và `p.stars || 3`; nhãn "Hoàn thành" không phân biệt trạng thái. Đã tái hiện trên Chrome với DB tạm, có screenshot.
+- **P2 — hộp chi tiết học viên thiếu điều khiển bàn phím, chưa sửa:** focus không chuyển vào hộp khi mở, Tab lần ba đi ra nền, Escape không đóng hộp; không dùng Modal chung đã có focus trap. Đã tái hiện bằng thao tác bàn phím qua Playwright.
+- **Kết quả:** 489 backend + 233 frontend tests qua; E2E/UI 41/43 kiểm tra qua, 2 lỗi nêu trên. Build/typecheck qua; cảnh báo `act()` ở test audioPlayback còn tồn tại. Kiểm thử local bằng DB tạm, không dùng key/dữ liệu production. Báo cáo: `plans/261015-project-qa/qa-report.md`.
+
+## Word card tràn chữ — 2026-10-15, sửa local
+
+- **Nguyên nhân đã tái hiện:** catalog có đoạn văn trong `targetWord`, nhưng renderer dùng thẻ cao cố định 256/288px và cỡ chữ tới 96px. Test trình duyệt trước sửa xác nhận chữ tràn thẻ và chồng hướng dẫn ở 1366px.
+- **Đã sửa renderer:** chiều cao theo nội dung, độ rộng co theo viewport, tự xuống dòng và cỡ chữ theo độ dài; giữ chữ/từ ngắn lớn. Không sửa seed/DB để dữ liệu đã lưu cũng nhận bản sửa. CMS preview dùng cùng component.
+- **Kiểm chứng:** 7 dạng nội dung × 3 viewport (320/390/1366px) qua kiểm tra hình học trên Chrome: trong thẻ, không chồng prompt/audio, không tràn ngang; xem ảnh desktop/mobile. Có test bảo toàn việc đọc toàn bộ đoạn `targetWord` mà không tự hoàn thành bài.
+- **Giới hạn:** fixture hình học dùng khung lesson mô phỏng; QA sau đó đã kiểm tra thêm route đăng nhập local thật và hoàn thành bài. Chưa nghiệm thu production hoặc iOS/Android thật. Ngưỡng chia cỡ chữ là giả định trình bày, không đổi nghiệp vụ chấm điểm. Chưa push/deploy.
+
 ## PayOS — đăng ký webhook, 2026-10-14, sửa local
 
 - **Đã tái hiện:** mẫu payload công khai PayOS (`orderCode=123`, amount 3000, ký lại bằng key test) qua schema/SDK nhưng service ném 404 vì không có đơn. Tài liệu `/confirm-webhook` nói gửi giao dịch ngân hàng mẫu, webhook phải ACK 2xx; schema hiện tại chấp nhận mẫu, không cần nới.

@@ -1,5 +1,12 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Lesson word card — bố cục đoạn đọc 2026-10-15, local
+
+- Thẻ tự tăng chiều cao theo nội dung; đoạn văn dài trong `targetWord` hiển thị chữ nhỏ hơn, căn trái và xuống dòng, không tràn lên hướng dẫn/mascot. Chữ và từ ngắn vẫn nổi bật. Áp dụng chung cho lesson player và CMS preview.
+- **Quyết định kỹ thuật/giả định trình bày:** hơn 12 ký tự (chuẩn hóa NFC), hơn 2 từ hoặc có xuống dòng được trình bày như đoạn đọc; không phải phân loại nghiệp vụ hay giới hạn nội dung.
+- Giữ nguyên `subPrompt`, nút đọc đoạn riêng, audio/TTS của `targetWord` và quy tắc hoàn thành/điểm. Tương thích dữ liệu cũ, không cần seed/migrate DB; không đổi API/quyền.
+- Chưa push/deploy; kiểm tra component/CSS thật ở 320/390/1366px, thêm E2E route bài học thật ở 390/1366px với API/DB local. Không phải nghiệm thu production. Chi tiết tại `plans/261015-word-card-layout/plan.md`; QA toàn dự án tại `plans/261015-project-qa/qa-report.md`.
+
 ## PayOS — xác nhận webhook 2026-10-14, local
 
 - Đã tái hiện request theo mẫu PayOS, ký bằng key test: mã đơn chưa có trong DB bị trả 404, chặn xác nhận webhook cần 2xx.

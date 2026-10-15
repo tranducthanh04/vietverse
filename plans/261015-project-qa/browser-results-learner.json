@@ -1,0 +1,97 @@
+{
+  "results": [
+    {
+      "name": "public: home, pricing, 404 and mobile menu",
+      "status": "PASS"
+    },
+    {
+      "name": "public: stories search, empty result, detail and culture",
+      "status": "PASS"
+    },
+    {
+      "name": "public: unauthenticated protected route redirects to login",
+      "status": "PASS"
+    },
+    {
+      "name": "public: no uncaught JavaScript errors",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: password confirmation rejects mismatch, then UI registration succeeds",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: four-step child onboarding persists a profile and opens map",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: actual seeded passage fits mobile and desktop lesson route",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: choice correction, fill blank, ordering and reload preserve lesson progress",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: denied microphone shows an error and cannot complete the activity",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: synthetic browser microphone records and uploads through real local API",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: recording plus review completes lesson and unlocks lesson two after reload",
+      "status": "PASS"
+    },
+    {
+      "name": "culture: wrong answer stays retryable and awards no points",
+      "status": "PASS"
+    },
+    {
+      "name": "culture: correct answer awards once; browser reload and replay award zero",
+      "status": "PASS"
+    },
+    {
+      "name": "points: ledger balance, virtual redemption and equip preserve the expected balance",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: wrong arithmetic stays locked; correct challenge unlocks portal",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: screen-time settings persist after reload without losing Parent Gate",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: direct admin navigation is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "payment test: blank local gateway credentials show a recoverable configuration error",
+      "status": "PASS"
+    },
+    {
+      "name": "learner browser journey: no uncaught application exceptions",
+      "status": "PASS"
+    }
+  ],
+  "observations": {
+    "learner": {
+      "observations": [
+        "Positive audio capture uses Chromium synthetic media, real MediaRecorder and real local legacy upload/storage; it does not validate a physical microphone or Cloudinary."
+      ],
+      "screenshots": [
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-passage-390.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-passage-1366.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-microphone-denied.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\parent-settings-persisted.png"
+      ],
+      "pageErrors": [],
+      "blockedExternal": [
+        "https://fonts.googleapis.com"
+      ]
+    }
+  }
+}
