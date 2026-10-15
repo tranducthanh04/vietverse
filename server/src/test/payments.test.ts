@@ -223,6 +223,31 @@ describe('Payments & Subscription Webhook API', () => {
     expect(tampered.body.error.code).toBe('PAYOS_INVALID_SIGNATURE');
   });
 
+  it('acknowledges the registration sample even without the `success` field', async () => {
+    // Mau that PayOS gui khi xac minh webhook url KHONG kem `success`; chi payload thanh
+    // toan that moi co. Ca test ngay tren tu them `success: true` nen Zod cho qua va nhanh
+    // ignored chay binh thuong — vi vay no van xanh trong khi PayOS that nhan 400 va bao
+    // "Webhook url cua ban hien dang khong hoat dong". Ca nay giu dung hinh dang that.
+    const payload: Record<string, unknown> = {
+      code: '00', desc: 'success',
+      data: {
+        orderCode: 987654322, amount: 3000, description: 'VQRIO123', accountNumber: '12345678',
+        reference: 'TF230204212323', transactionDateTime: '2023-02-04 18:25:00',
+        currency: 'VND', paymentLinkId: '124c33293c43417ab7879e14c8d9eb18',
+        code: '00', desc: 'Thành công',
+      },
+      signature: '',
+    };
+    const signer = new PayOS({ clientId: 'test', apiKey: 'test', checksumKey: 'test-checksum-key' });
+    payload.signature = (await signer.crypto.createSignatureFromObj(payload.data as Record<string, unknown>, 'test-checksum-key')) || '';
+
+    const res = await request(app).post('/api/v1/payments/webhook').send(payload);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: { ignored: true, reason: 'ORDER_NOT_FOUND' } });
+    expect(await PaymentOrder.findOne({ orderCode: 'VV987654322' })).toBeNull();
+  });
+
   it.each([{}, { code: '00', desc: 'success', success: true, data: {}, signature: 'invalid' }])('rejects malformed webhook data instead of acknowledging it', async (payload) => {
     const res = await request(app).post('/api/v1/payments/webhook').send(payload);
     expect(res.status).toBe(400);
