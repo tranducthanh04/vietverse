@@ -51,11 +51,11 @@ export const KidsLayout: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowChildPicker(!showChildPicker)}
-              className="flex items-center space-x-2 bg-cream px-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px]"
+              className="flex items-center gap-2 bg-cream pl-2 pr-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px] min-w-0"
               aria-label="Chọn hồ sơ bé"
             >
               <EquippedAvatar child={activeChild} />
-              <span className="font-bold font-display text-stone-800 text-sm md:text-base">
+              <span className="font-bold font-display text-stone-800 text-sm md:text-base whitespace-nowrap truncate max-w-[5.5rem] sm:max-w-[10rem]">
                 {activeChild?.name || 'Bé yêu'}
               </span>
               <span className="text-[10px] text-stone-400">▼</span>
@@ -96,8 +96,8 @@ export const KidsLayout: React.FC = () => {
           </div>
 
           {/* Points Pill & Parent Gate Link */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex items-center space-x-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
               <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
@@ -108,14 +108,14 @@ export const KidsLayout: React.FC = () => {
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
               onClick={handleOpenParent}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
               title="Vào Góc Phụ Huynh (yêu cầu mở khóa)"
               aria-label="Vào Góc Phụ Huynh (yêu cầu mở khóa)"
             >
               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Lock className="w-3.5 h-3.5 text-primary" />
               </div>
-              <span className="font-bold text-xs sm:text-sm text-stone-800">Góc Phụ Huynh</span>
+              <span className="font-bold text-xs sm:text-sm text-stone-800 whitespace-nowrap"><span className="sm:hidden">Phụ huynh</span><span className="hidden sm:inline">Góc Phụ Huynh</span></span>
             </button>
 
             {user?.role === 'admin' && (

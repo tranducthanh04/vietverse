@@ -91,7 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {title && (
-          <h3 id={titleId} className="text-kid-xl font-bold font-display text-primary mb-4 pr-10">
+          <h3 id={titleId} className="text-kid-lg sm:text-kid-xl font-bold font-display text-primary mb-4 pr-10 text-balance">
             {title}
           </h3>
         )}

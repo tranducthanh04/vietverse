@@ -278,7 +278,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   return (
     <div className="min-h-screen bg-cream flex flex-col justify-between">
       {/* Top Header Bar */}
-      <header className="px-6 py-4 bg-white/80 backdrop-blur-md border-b-2 border-cream-border sticky top-0 z-30 flex items-center justify-between">
+      <header className="px-3 sm:px-6 py-3 sm:py-4 bg-white/80 backdrop-blur-md border-b-2 border-cream-border sticky top-0 z-30 flex items-center justify-between">
         <h1 className="sr-only">{lesson.title}</h1>
         <button
           onClick={() => navigate('/kham-pha')}
@@ -289,13 +289,13 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         </button>
 
         {/* 5-Step Progress Bar */}
-        <div className="w-1/2 max-w-md mx-4">
+        <div className="flex-1 max-w-md mx-3 sm:mx-6">
           <ProgressBar currentStep={currentStep} totalSteps={activities.length || 1} />
         </div>
 
         {/* Hearts and Hint */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full">
             <Heart className="w-6 h-6 text-red-500 fill-red-500 animate-pulse" />
             <span className="font-display font-bold text-red-700 text-lg">{hearts}</span>
           </div>
@@ -342,14 +342,14 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         )}
       </main>
       <PendingSubmissions childId={childId} />
-      {inputError && <div role="alert" className="p-4 bg-amber-50 space-y-3">
-        <p>{inputError}</p><Button onClick={() => void persistInput(activityInput)}>Thử lưu lại</Button>
+      {inputError && <div role="alert" className="px-4 sm:px-6 py-3 bg-amber-50 border-t-2 border-amber-200 text-amber-900 font-bold flex flex-wrap items-center justify-between gap-3">
+        <p className="flex items-center gap-2"><TriangleAlert className="w-4 h-4 shrink-0" />{inputError}</p><Button onClick={() => void persistInput(activityInput)}>Thử lưu lại</Button>
       </div>}
-      {offlinePending && <div role="status" className="p-4 bg-amber-50">Bài đã lưu trên máy, đang chờ đồng bộ. Chưa xác nhận điểm thưởng. <Button onClick={() => navigate('/kham-pha')}>Về bản đồ</Button></div>}
+      {offlinePending && <div role="status" className="px-4 sm:px-6 py-3 bg-amber-50 border-t-2 border-amber-200 text-amber-900 font-bold flex flex-wrap items-center justify-between gap-3"><span>Bài đã lưu trên máy, đang chờ đồng bộ. Chưa xác nhận điểm thưởng.</span><Button size="sm" onClick={() => navigate('/kham-pha')}>Về bản đồ</Button></div>}
 
       {/* Error alert banner if submission failed */}
       {submitError && (
-        <div role="alert" className="bg-red-50 border-t-2 border-red-200 px-6 py-3 flex items-center justify-between text-red-700 text-sm font-bold animate-fade-in">
+        <div role="alert" className="bg-red-50 border-t-2 border-red-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-red-700 text-sm font-bold animate-fade-in">
           <span className="flex items-center gap-2">
             <TriangleAlert className="w-4 h-4 shrink-0" />
             {submitError}
@@ -360,7 +360,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             variant="primary"
             onClick={handleNextStep}
             disabled={isSubmitting}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded-xl ml-4"
+            className="bg-red-600 hover:bg-red-700 shadow-none"
           >
             {isSubmitting ? 'Đang gửi...' : 'Thử lại'}
           </Button>
@@ -369,7 +369,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
 
       {/* Bottom Sticky Action Footer */}
       <footer className="p-4 bg-white border-t-2 border-cream-border sticky bottom-0 z-30">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
           <div className="flex-1">
             {stepAnswered && (
               <div className="flex items-center space-x-2">
@@ -390,11 +390,11 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
           </div>
 
           <Button
-            variant={stepAnswered ? 'primary' : 'outline'}
+            variant={stepAnswered || currentActivity?.type === 'word_card' ? 'primary' : 'outline'}
             size="kid"
             onClick={handleNextStep}
             disabled={isSubmitting || offlinePending || isSavingAnswer || Boolean(inputError) || (!stepAnswered && currentActivity?.type !== 'word_card')}
-            className="flex items-center space-x-2 px-8"
+            className="gap-2 px-6 sm:px-8 shrink-0"
           >
             <span>{isSubmitting ? 'Đang lưu...' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
             <ArrowRight className="w-6 h-6" />

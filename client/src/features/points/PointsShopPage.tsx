@@ -171,7 +171,7 @@ export const PointsShopPage: React.FC = () => {
           <div className="md:col-span-8 flex flex-col gap-3">
             <h1 id="points-balance-title" className="font-display text-lg md:text-xl font-extrabold text-on-secondary-container flex items-center gap-2">
               <Sparkles className="w-5 h-5 shrink-0" />
-              ViVi Points của bé{activeChild?.name ? ` ${activeChild.name}` : ''}
+              ViVi Points của {!activeChild?.name ? 'bé' : /^bé\s/i.test(activeChild.name) ? activeChild.name : `bé ${activeChild.name}`}
             </h1>
             <p className="font-display text-4xl md:text-5xl text-secondary font-extrabold tracking-tight" data-testid="points-balance">
               {currentPoints} ViVi Points

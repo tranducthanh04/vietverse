@@ -73,7 +73,8 @@ export const PricingPage: React.FC = () => {
       id: 'yearly',
       name: 'Gói Gia Đình (Năm)',
       price: '990.000đ',
-      period: '/ năm (tiết kiệm 67% so với 12 tháng)',
+      period: '/ năm',
+      note: 'Tiết kiệm 67% so với 12 tháng',
       description: 'Đồng hành dài hạn cho tối đa 3 bé trong gia đình, tặng kèm quà hiện vật.',
       features: [
         'Tất cả tính năng của gói Tháng',
@@ -95,7 +96,7 @@ export const PricingPage: React.FC = () => {
         </div>
       )}
       <div className="text-center">
-        <h1 className="text-3xl md:text-5xl font-black font-display text-primary mb-3">
+        <h1 className="text-3xl md:text-5xl font-black font-display text-primary mb-3 text-balance">
           Bảng Giá Đầu Tư Tương Lai Tiếng Việt Của Bé
         </h1>
         <p className="text-stone-600 text-lg max-w-xl mx-auto">
@@ -106,33 +107,40 @@ export const PricingPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8 items-stretch pt-2">
         {plans.map((p) => (
           <Card
             key={p.id}
-            variant="kid"
-            className={`p-8 relative flex flex-col justify-between border-3 ${
-              p.popular ? 'border-primary bg-white shadow-2xl scale-105 z-10' : 'border-cream-border bg-white'
+            variant="elevated"
+            className={`p-6 lg:p-8 relative flex flex-col border-3 bg-white ${
+              p.popular ? 'border-primary shadow-2xl md:-translate-y-2 z-10' : 'border-cream-border'
             }`}
           >
             {p.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white font-bold text-xs uppercase px-4 py-1 rounded-full shadow-md">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-white font-bold text-xs uppercase tracking-wide px-4 py-1.5 rounded-full shadow-md">
                 Được phụ huynh yêu thích nhất
               </div>
             )}
 
-            <div>
-              <h3 className="text-xl font-bold font-display text-stone-800 mb-2">{p.name}</h3>
-              <p className="text-xs text-stone-500 mb-6">{p.description}</p>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold font-display text-stone-800 mb-2 md:min-h-[3.5rem]">{p.name}</h3>
+              <p className="text-sm text-stone-500 mb-6 md:min-h-[3.75rem]">{p.description}</p>
 
-              <div className="mb-6 pb-6 border-b border-cream-border">
-                <span className="text-3xl font-black font-display text-primary">{p.price}</span>
-                <span className="text-xs text-stone-500 font-semibold ml-1">{p.period}</span>
+              <div className="mb-6 pb-6 border-b border-cream-border md:min-h-[6.5rem]">
+                <div className="flex items-baseline flex-wrap gap-x-1">
+                  <span className="text-3xl font-black font-display text-primary whitespace-nowrap">{p.price}</span>
+                  <span className="text-sm text-stone-500 font-semibold">{p.period}</span>
+                </div>
+                {'note' in p && p.note && (
+                  <span className="inline-block mt-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                    {p.note}
+                  </span>
+                )}
               </div>
 
               <div className="space-y-3 mb-8">
                 {p.features.map((f, i) => (
-                  <div key={i} className="flex items-start space-x-2 text-sm text-stone-700">
+                  <div key={i} className="flex items-start gap-2 text-sm text-stone-700">
                     <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </div>

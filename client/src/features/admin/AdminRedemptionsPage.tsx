@@ -449,8 +449,8 @@ export const AdminRedemptionsPage: React.FC = () => {
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-cream-border overflow-hidden shadow-sm">
-              <div className="p-4 bg-stone-50 border-b border-cream-border flex items-center justify-between">
-                <div>
+              <div className="p-4 bg-stone-50 border-b border-cream-border flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 flex-1 basis-56">
                   <h3 className="font-bold font-display text-stone-800">
                     Kho Quà Tặng & Vật Phẩm Đổi Điểm
                   </h3>
@@ -462,6 +462,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                   type="button"
                   variant={showCreateForm ? 'outline' : 'primary'}
                   size="sm"
+                  className="shrink-0 whitespace-nowrap"
                   aria-expanded={showCreateForm}
                   onClick={() => {
                     setCreateError(null);
@@ -585,11 +586,11 @@ export const AdminRedemptionsPage: React.FC = () => {
               )}
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-stone-600 min-w-[700px]">
+                <table className="w-full text-left text-sm text-stone-600 min-w-[860px]">
                   <thead className="bg-stone-50 text-stone-700 font-bold uppercase text-xs border-b border-cream-border">
                     <tr>
-                      <th className="px-5 py-3">Hình ảnh</th>
-                      <th className="px-5 py-3">Tên vật phẩm</th>
+                      <th className="px-5 py-3 whitespace-nowrap">Hình ảnh</th>
+                      <th className="px-5 py-3 min-w-[12rem]">Tên vật phẩm</th>
                       <th className="px-5 py-3">Phân loại</th>
                       <th className="px-5 py-3">Giá điểm</th>
                       <th className="px-5 py-3">Số lượng tồn</th>

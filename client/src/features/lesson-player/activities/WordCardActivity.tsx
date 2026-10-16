@@ -2,6 +2,7 @@ import React from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { Lightbulb } from '../../../components/ui/icons.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
+import { targetTextSize } from './targetTextSize.js';
 
 export interface WordCardActivityProps {
   activity: {
@@ -20,6 +21,8 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
   activity,
   onComplete,
 }) => {
+  const word = activity.targetWord || 'A';
+
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
       <div className="mb-4">
@@ -38,9 +41,9 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
       )}
 
       {/* Big 3D Flashcard */}
-      <div className="w-64 h-64 md:w-72 md:h-72 bg-white border-4 border-accent rounded-3xl shadow-kid-card flex flex-col items-center justify-center p-6 my-4 transform transition hover:scale-105">
-        <span className="text-7xl md:text-8xl font-black font-display text-primary tracking-wider">
-          {activity.targetWord || 'A'}
+      <div className="w-full max-w-sm min-h-[16rem] md:min-h-[18rem] bg-white border-4 border-accent rounded-3xl shadow-kid-card flex flex-col items-center justify-center p-6 my-4">
+        <span className={`${targetTextSize(word)} font-black font-display text-primary break-words text-balance max-w-full`}>
+          {word}
         </span>
 
         {activity.targetPhonetic && (

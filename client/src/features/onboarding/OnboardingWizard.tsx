@@ -74,11 +74,11 @@ export const OnboardingWizard: React.FC = () => {
 
       <div className="relative w-full max-w-3xl flex flex-col gap-6">
         {/* Top Utility Bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           {step > 1 ? (
             <button
               onClick={() => setStep(step - 1)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-all active:scale-95 shadow-sm"
+              className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-all active:scale-95 shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Quay lại</span>
@@ -87,7 +87,7 @@ export const OnboardingWizard: React.FC = () => {
             <div />
           )}
 
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed shadow-sm">
+          <div className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed shadow-sm">
             <Sparkles className="w-4 h-4 text-secondary-container fill-secondary-container" />
             <span className="text-xs uppercase tracking-wider font-bold">
               Hành trình cá nhân hóa cho bé
@@ -188,8 +188,8 @@ export const OnboardingWizard: React.FC = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ví dụ: Minh, An, Linh, Bắp..."
-                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-2xl font-bold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
+                    placeholder="Ví dụ: Minh, Bắp…"
+                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-400 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
                     autoFocus
                   />
                 </div>

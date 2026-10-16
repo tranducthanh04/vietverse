@@ -46,15 +46,15 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center max-w-2xl w-full mx-auto">
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-6">
         {activity.prompt}
       </h2>
 
-      <div className="grid grid-cols-2 gap-8 w-full max-w-lg">
+      <div className="grid grid-cols-2 gap-3 sm:gap-8 w-full max-w-lg">
         {/* Left Column */}
-        <div className="flex flex-col space-y-4">
-          <span className="font-bold text-stone-500 text-sm uppercase tracking-wider">Cột từ</span>
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">Từ</span>
           {pairs.map((p) => {
             const isMatched = !!matchedPairs[p.left];
             const isSelected = selectedLeft === p.left;
@@ -65,15 +65,15 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 onClick={() => handleSelectLeft(p.left)}
                 disabled={isMatched}
                 className={cn(
-                  'h-16 px-4 rounded-2xl font-display font-bold text-kid-base flex items-center justify-between transition-all border-3 shadow-sm select-none',
+                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-all border-3 shadow-sm select-none',
                   isMatched
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-80'
                     : isSelected
-                    ? 'bg-accent border-accent-dark text-stone-900 scale-105 shadow-md ring-4 ring-accent/30'
+                    ? 'bg-accent border-accent-dark text-stone-900 shadow-md ring-4 ring-accent/30'
                     : 'bg-white border-cream-border hover:border-accent text-stone-800'
                 )}
               >
-                <span>{p.left}</span>
+                <span className="text-kid-base">{p.left}</span>
                 {isMatched && <CircleCheck className="w-5 h-5 text-emerald-600" />}
               </button>
             );
@@ -81,8 +81,8 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
         </div>
 
         {/* Right Column (shuffled order or fixed for kid ergonomics) */}
-        <div className="flex flex-col space-y-4">
-          <span className="font-bold text-stone-500 text-sm uppercase tracking-wider">Ý nghĩa / Hình ảnh</span>
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">Ý nghĩa</span>
           {pairs.map((p) => {
             const isMatched = Object.values(matchedPairs).includes(p.right);
 
@@ -92,15 +92,15 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 onClick={() => handleSelectRight(p.right)}
                 disabled={isMatched}
                 className={cn(
-                  'h-16 px-4 rounded-2xl font-display font-bold text-kid-base flex items-center justify-between transition-all border-3 shadow-sm select-none',
+                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-all border-3 shadow-sm select-none',
                   isMatched
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-80'
                     : selectedLeft
-                    ? 'bg-white border-accent hover:bg-accent-light/40 text-stone-800 scale-102 cursor-pointer'
+                    ? 'bg-white border-accent hover:bg-accent-light/40 text-stone-800 cursor-pointer'
                     : 'bg-white border-cream-border text-stone-800'
                 )}
               >
-                <span>{p.right}</span>
+                <span className="text-base sm:text-kid-sm">{p.right}</span>
                 {isMatched && <CircleCheck className="w-5 h-5 text-emerald-600" />}
               </button>
             );

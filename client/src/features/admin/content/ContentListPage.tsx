@@ -43,16 +43,20 @@ function ContentList({ kind }: { kind: ContentKind }) {
   });
   return (
     <div className="cms">
-      <h1>{titles[kind]}</h1>
-      <p>
-        Nội dung nháp chỉ dành cho admin. Lưu nháp không thay đổi nội dung của
-        bé.
-      </p>
-      {kind !== "lesson" && (
-        <Link className="cms-link" to={`${paths[kind]}/moi`}>
-          Tạo nháp mới
-        </Link>
-      )}
+      <div className="cms-header">
+        <div>
+          <h1>{titles[kind]}</h1>
+          <p className="cms-meta">
+            Nội dung nháp chỉ dành cho admin. Lưu nháp không thay đổi nội dung
+            của bé.
+          </p>
+        </div>
+        {kind !== "lesson" && (
+          <Link className="cms-link cms-primary" to={`${paths[kind]}/moi`}>
+            + Tạo nháp mới
+          </Link>
+        )}
+      </div>
       <div className="cms-row">
         <TextField
           label="Tìm nội dung"
@@ -118,7 +122,7 @@ function ContentList({ kind }: { kind: ContentKind }) {
           {query.data.items.length === 0 ? (
             <p>Chưa có nội dung phù hợp.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="cms-table">
               <table>
                 <thead>
                   <tr>
@@ -133,10 +137,12 @@ function ContentList({ kind }: { kind: ContentKind }) {
                     <tr key={item.contentId}>
                       <td>{item.title || "(Chưa đặt tên)"}</td>
                       <td>
-                        {states[item.state]}
-                        {item.state === "withdrawn" &&
-                          item.hasDraft &&
-                          " · Có nháp"}
+                        <span className={`cms-pill cms-pill-${item.state}`}>
+                          {states[item.state]}
+                          {item.state === "withdrawn" &&
+                            item.hasDraft &&
+                            " · Có nháp"}
+                        </span>
                       </td>
                       <td>
                         Live {item.contentVersion ?? "—"} / Nháp{" "}
@@ -156,7 +162,7 @@ function ContentList({ kind }: { kind: ContentKind }) {
               </table>
             </div>
           )}
-          <div className="cms-actions">
+          <div className="cms-actions cms-pager">
             <button disabled={page === 1} onClick={() => setPage(page - 1)}>
               Trang trước
             </button>

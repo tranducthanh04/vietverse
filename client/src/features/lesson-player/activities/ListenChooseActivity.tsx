@@ -32,6 +32,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
     const isCorrect = id === activity.correctAnswer;
     onComplete(isCorrect, id);
   };
+  const hasImages = activity.options?.some((option) => option.imageUrl) ?? false;
 
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto">
@@ -52,19 +53,26 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
         {!activity.audioUrl && <MissingSourceAudioNotice hint="đọc câu hỏi phía trên" />}
       </div>
 
-      {/* Options grid with large touchable cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-lg">
-        {activity.options?.map((option) => {
+      {/* Options: picture cards when the lesson has images, compact lettered rows otherwise */}
+      <div
+        className={cn(
+          'grid gap-4 w-full',
+          hasImages ? 'grid-cols-2 md:grid-cols-3 max-w-lg' : 'grid-cols-1 sm:grid-cols-2 max-w-xl'
+        )}
+      >
+        {activity.options?.map((option, index) => {
           const isSelected = selectedId === option.id;
           const isCorrect = isSelected && option.id === activity.correctAnswer;
-          const isWrong = isSelected && option.id !== activity.correctAnswer;
 
           return (
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
               className={cn(
-                'group relative bg-white border-4 rounded-3xl p-4 flex flex-col items-center justify-center transition-all min-h-[160px] shadow-kid active:scale-95',
+                'group relative bg-white border-4 rounded-3xl transition-all shadow-kid active:scale-95',
+                hasImages
+                  ? 'p-4 flex flex-col items-center justify-center min-h-[160px]'
+                  : 'px-4 py-3 flex items-center gap-4 text-left min-h-[72px]',
                 isSelected
                   ? isCorrect
                     ? 'border-kidSuccess bg-emerald-50'
@@ -72,20 +80,29 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
                   : 'border-cream-border hover:border-accent hover:-translate-y-1'
               )}
             >
-              {option.imageUrl ? (
-                <img
-                  src={option.imageUrl}
-                  alt={option.text || ''}
-                  className="w-28 h-28 object-cover rounded-2xl mb-3 shadow-inner pointer-events-none"
-                  onError={(e) => {
-                    // Fallback to text box if external image is unavailable
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
+              {hasImages ? (
+                option.imageUrl ? (
+                  <img
+                    src={option.imageUrl}
+                    alt={option.text || ''}
+                    className="w-28 h-28 object-cover rounded-2xl mb-3 shadow-inner pointer-events-none"
+                    onError={(e) => {
+                      // Fallback to text box if external image is unavailable
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-2xl bg-amber-100 flex items-center justify-center mb-3">
+                    <Star className="w-9 h-9 text-primary" />
+                  </div>
+                )
               ) : (
-                <div className="w-24 h-24 rounded-2xl bg-amber-100 flex items-center justify-center mb-3">
-                  <Star className="w-9 h-9 text-primary" />
-                </div>
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 font-display font-black text-kid-base flex items-center justify-center"
+                >
+                  {String.fromCharCode(65 + index)}
+                </span>
               )}
 
               <span className="text-kid-lg font-bold font-display text-stone-800 group-hover:text-primary">

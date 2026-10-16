@@ -43,9 +43,9 @@ export const AdminLayout: React.FC = () => {
             aria-label="Quay lại ứng dụng khám phá của bé"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" />
-            <span>Về ứng dụng</span>
+            <span className="hidden sm:inline">Về ứng dụng</span>
           </button>
-          <span className="font-display font-black text-lg sm:text-xl text-accent tracking-wide select-none">
+          <span className="font-display font-black text-base sm:text-xl whitespace-nowrap text-accent tracking-wide select-none">
             VIETVERSE ADMIN
           </span>
         </div>

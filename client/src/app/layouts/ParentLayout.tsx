@@ -43,11 +43,11 @@ export const ParentLayout: React.FC = () => {
               aria-label="Quay lại màn hình học của bé"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Về màn hình bé</span>
+              <span className="hidden sm:inline">Về màn hình bé</span>
             </button>
 
             <div>
-              <h1 className="text-lg sm:text-xl font-bold font-display text-primary">
+              <h1 className="text-lg sm:text-xl whitespace-nowrap font-bold font-display text-primary">
                 {VI_LOCALES.parentPortal.title}
               </h1>
               <span className="text-xs text-stone-500 font-semibold hidden sm:inline">

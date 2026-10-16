@@ -112,7 +112,7 @@ export const culture = [
 const emojiAsset = (emoji: string, background: string) =>
   `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" rx="40" fill="${background}"/><text x="40" y="54" font-size="40" text-anchor="middle">${emoji}</text></svg>`)}`;
 const SAMPLE_NOTE = 'Vật phẩm mẫu; quà hiện vật chỉ mở khi vận hành xác nhận tồn kho và giao hàng.';
-const STAR_ASSET = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ctext x="20" y="55" font-size="48"%3E★%3C/text%3E%3C/svg%3E';
+const STAR_ASSET = emojiAsset('🌟', '#FFF3C4');
 
 // Seed is insert-only by name: existing items (and their categories) are never rewritten here;
 // legacy rows get a category through `npm run migrate:shop-category -w server`.

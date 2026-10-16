@@ -34,11 +34,11 @@ export function ContentCreatePage({
   }
   return (
     <div className="cms">
-      <Link className="cms-link" to={paths[kind]}>
-        Về danh sách
+      <Link className="cms-back" to={paths[kind]}>
+        <span aria-hidden="true">←</span> Về danh sách
       </Link>
       <h1>Tạo nháp {titles[kind].toLocaleLowerCase("vi")}</h1>
-      <p>Chưa hiển thị với bé. Biên tập chi tiết sau khi tạo.</p>
+      <p className="cms-meta">Chưa hiển thị với bé. Biên tập chi tiết sau khi tạo.</p>
       <fieldset disabled={busy}>
         <TextField
           label="Tiêu đề mới"
@@ -48,9 +48,11 @@ export function ContentCreatePage({
         />
       </fieldset>
       {error && <p role="alert">{error}</p>}
-      <button disabled={busy} onClick={() => void create()}>
-        Tạo bản nháp
-      </button>
+      <div className="cms-actions">
+        <button className="cms-primary" disabled={busy} onClick={() => void create()}>
+          Tạo bản nháp
+        </button>
+      </div>
     </div>
   );
 }

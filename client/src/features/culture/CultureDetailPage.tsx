@@ -332,7 +332,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                         className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
                           isSelected
                             ? "bg-culture/10 border-culture text-culture-dark font-bold"
-                            : "bg-stone-50 border-transparent hover:border-stone-200 text-stone-700"
+                            : "bg-white border-cream-border hover:border-culture/60 hover:bg-emerald-50/40 text-stone-700"
                         }`}
                       >
                         <span>{opt}</span>

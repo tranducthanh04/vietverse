@@ -30,34 +30,34 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
   const sentenceParts = blank.sentence.split(/_{2,}/);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center max-w-xl w-full mx-auto">
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
 
       {/* Word / Sentence display with dashed blank box */}
-      <div className="bg-white border-4 border-accent rounded-3xl p-8 shadow-kid flex items-center justify-center space-x-3 mb-10">
-        <span className="text-4xl md:text-5xl font-display font-black text-stone-800">
+      <div className="w-full bg-white border-4 border-accent rounded-3xl px-5 py-6 sm:p-8 shadow-kid flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-8 sm:mb-10">
+        <span className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-stone-800 break-words">
           {sentenceParts[0]}
         </span>
 
-        <div className="w-16 h-20 border-4 border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
+        <div className="shrink-0 min-w-[3.5rem] sm:min-w-[4rem] h-16 sm:h-20 px-2 border-4 border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-3xl sm:text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
           {filledLetter || '?'}
         </div>
 
-        <span className="text-4xl md:text-5xl font-display font-black text-stone-800">
+        <span className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-stone-800 break-words">
           {sentenceParts[1]}
         </span>
       </div>
 
       {/* Letter choices */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         {activity.options?.map((opt) => (
           <button
             key={opt.id}
             onClick={() => handleSelect(opt.text, opt.id)}
             className={cn(
-              'w-20 h-20 bg-white border-3 border-cream-border rounded-2xl text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center min-h-[58px] min-w-[58px]',
+              'min-w-[4.5rem] h-16 sm:h-20 px-4 bg-white border-3 border-cream-border rounded-2xl text-2xl sm:text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center',
               filledLetter === opt.text && 'border-primary bg-primary-light/30'
             )}
           >
