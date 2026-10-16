@@ -75,9 +75,9 @@ export const ParentRecordingsPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang tải danh sách giọng đọc của bé...</p>
+        <div className="py-12 text-center" role="status" aria-live="polite">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" aria-hidden="true" />
+          <p className="font-bold text-stone-600">Đang tải danh sách giọng đọc của bé…</p>
         </div>
       ) : recordings.length === 0 ? (
         <Card className="p-8 bg-white border-cream-border text-center">

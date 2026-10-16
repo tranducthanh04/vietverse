@@ -6,6 +6,7 @@ import {
   ShieldCheck,
 } from '../../components/ui/icons.js';
 import { Button } from '../../components/ui/Button.js';
+import { Modal } from '../../components/ui/Modal.js';
 import { ParentGateModal } from './ParentGateModal.js';
 
 export interface ScreenTimeLimitModalProps {
@@ -29,8 +30,17 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-md animate-fade-in">
-        <div role="alertdialog" aria-modal="true" aria-labelledby="screen-time-title" className="bg-white rounded-3xl max-w-lg w-full p-8 text-center shadow-2xl border-4 border-indigo-200 relative overflow-hidden">
+      {/* Forced rest screen: no close button and Escape is a no-op so the break can't be skipped. */}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {}}
+        hideCloseBtn
+        role="alertdialog"
+        ariaLabel="Đến giờ cho mắt nghỉ ngơi!"
+        className="bg-white border-indigo-200 rounded-3xl p-0 text-center"
+      >
+        {/* Inner wrapper fills the dialog and clips the decorative glows to its rounded corners. */}
+        <div className="relative overflow-hidden rounded-[inherit] p-8">
           {/* Decorative Background */}
           <div className="absolute -top-16 -right-16 w-40 h-40 bg-indigo-100 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-amber-100 rounded-full blur-2xl pointer-events-none" />
@@ -41,7 +51,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
             <Sparkles className="w-6 h-6 absolute top-2 right-2 text-yellow-300 animate-pulse" />
           </div>
 
-          <h2 id="screen-time-title" className="text-2xl md:text-3xl font-black font-display text-indigo-950 mb-3">
+          <h2 className="text-2xl md:text-3xl font-black font-display text-indigo-950 mb-3">
             Đến giờ cho mắt nghỉ ngơi!
           </h2>
 
@@ -77,7 +87,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
             </Button>
           </div>
         </div>
-      </div>
+      </Modal>
 
       {showGate && (
         <ParentGateModal

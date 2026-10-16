@@ -11,7 +11,7 @@ export const PaymentResultPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const fetchMe = useAuthStore((state) => state.fetchMe);
   const fetchChildren = useChildStore((state) => state.fetchChildren);
-  const [message, setMessage] = useState('Đang kiểm tra trạng thái giao dịch với hệ thống...');
+  const [message, setMessage] = useState('Đang kiểm tra trạng thái giao dịch với hệ thống…');
   const [isComplete, setIsComplete] = useState(false);
   const [nextPath, setNextPath] = useState('/kham-pha');
 
