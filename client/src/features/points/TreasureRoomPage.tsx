@@ -69,7 +69,7 @@ export const TreasureRoomPage: React.FC = () => {
                 type="button"
                 onClick={() => handleEquip(slot, null)}
                 disabled={equip.isPending}
-                className="text-[11px] font-bold text-stone-500 hover:underline min-h-[32px]"
+                className="text-[11px] font-bold text-stone-500 hover:underline min-h-[44px]"
               >
                 Bỏ dùng
               </button>
@@ -80,7 +80,7 @@ export const TreasureRoomPage: React.FC = () => {
               onClick={() => handleEquip(slot, item._id)}
               disabled={equip.isPending}
               aria-label={`Dùng ${item.name}`}
-              className="btn-3d-primary px-4 py-2 rounded-full text-xs font-bold min-h-[40px] disabled:opacity-60"
+              className="btn-3d-primary px-4 py-2 rounded-full text-xs font-bold min-h-[44px] disabled:opacity-60"
             >
               Dùng
             </button>
@@ -132,7 +132,7 @@ export const TreasureRoomPage: React.FC = () => {
     <div className="py-6 px-4 max-w-4xl mx-auto">
       <button
         onClick={() => navigate('/kham-pha')}
-        className="inline-flex items-center space-x-2 text-stone-600 hover:text-primary font-bold mb-6"
+        className="inline-flex items-center space-x-2 text-stone-600 hover:text-primary font-bold mb-6 min-h-[44px]"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Về bản đồ chặng</span>
@@ -162,7 +162,7 @@ export const TreasureRoomPage: React.FC = () => {
         {collection.error ? (
           <QueryErrorState error={collection.error} onRetry={() => collection.refetch()} />
         ) : collection.isLoading ? (
-          <p className="text-sm text-stone-500 font-bold">Đang mở rương báu vật...</p>
+          <p className="text-sm text-stone-500 font-bold">Đang mở rương báu vật…</p>
         ) : ownedItems.length === 0 ? (
           <p className="text-sm text-stone-500 bg-white rounded-2xl p-5 border-2 border-cream-border">
             Bé chưa có vật phẩm nào. Hãy đổi ViVi Points lấy avatar, trang trí hồ sơ hoặc huy hiệu ở trang Đổi quà nhé!

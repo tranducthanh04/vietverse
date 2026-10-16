@@ -19,13 +19,19 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div className={cn('w-full flex items-center space-x-3', className)}>
-      <div className="flex-1 h-5 bg-stone-200 rounded-full overflow-hidden p-1 shadow-inner relative">
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={totalSteps}
+        aria-valuenow={currentStep + 1}
+        aria-label={`Tiến độ bài học: bước ${currentStep + 1} trên ${totalSteps}`}
+        className="flex-1 h-5 bg-stone-200 rounded-full overflow-hidden p-1 shadow-inner relative"
+      >
+        {/* Animate the fill with transform: scaleX (GPU-friendly) instead of width to avoid layout reflow. */}
         <div
-          className="h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-1"
-          style={{ width: `${percentage}%` }}
-        >
-          <div className="w-2.5 h-2.5 bg-white/70 rounded-full animate-ping" />
-        </div>
+          className="h-full w-full origin-left bg-gradient-to-r from-accent to-primary rounded-full transition-transform duration-300 ease-out"
+          style={{ transform: `scaleX(${percentage / 100})` }}
+        />
       </div>
 
       <div className="flex items-center space-x-1 font-display font-bold text-primary text-base">

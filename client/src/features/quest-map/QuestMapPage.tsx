@@ -11,6 +11,7 @@ import {
   Compass,
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
+import { formatPoints } from '../../lib/utils.js';
 import { useChildStore } from '../../store/childStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
@@ -65,7 +66,7 @@ export const QuestMapPage: React.FC = () => {
                   ViVi Points của bé
                 </span>
                 <span className="text-2xl font-black font-display text-secondary">
-                  {activeChild?.viviPoints || 0} Điểm
+                  {formatPoints(activeChild?.viviPoints || 0)} Điểm
                 </span>
               </div>
             </div>
@@ -93,13 +94,14 @@ export const QuestMapPage: React.FC = () => {
           return (
             <button
               key={stage._id}
-              onClick={() => setSelectedStageOrder(stage.order)}
-              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-all flex items-center space-x-2.5 cursor-pointer ${
+              onClick={() => { if (!isLocked) setSelectedStageOrder(stage.order); }}
+              aria-disabled={isLocked || undefined}
+              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-all flex items-center space-x-2.5 ${
                 isSelected
-                  ? 'btn-3d-primary ring-2 ring-primary/40 scale-105'
+                  ? 'btn-3d-primary ring-2 ring-primary/40 scale-105 cursor-pointer'
                   : isLocked
                   ? 'bg-surface-container-high text-on-surface-variant/60 border border-outline-variant/30 cursor-not-allowed'
-                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border border-outline-variant/40 shadow-sm'
+                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border border-outline-variant/40 shadow-sm cursor-pointer'
               }`}
             >
               {isLocked ? (
@@ -138,7 +140,7 @@ export const QuestMapPage: React.FC = () => {
                   Tiến độ bài học
                 </span>
                 <span className="text-2xl font-black font-display text-primary">
-                  {activeStage.completedCount || 0} / {activeStage.totalLessons || 4}
+                  {formatPoints(activeStage.completedCount || 0)} / {formatPoints(activeStage.totalLessons || 4)}
                 </span>
               </div>
             </div>
@@ -150,7 +152,7 @@ export const QuestMapPage: React.FC = () => {
       {isLoading ? (
         <div className="text-center py-16">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-bold text-on-surface-variant">Đang tải bản đồ phiêu lưu...</p>
+          <p className="font-bold text-on-surface-variant">Đang tải bản đồ phiêu lưu…</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

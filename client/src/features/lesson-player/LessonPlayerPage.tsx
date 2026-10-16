@@ -138,7 +138,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-kid-base font-bold text-stone-700">Đang chuẩn bị bài học vui nhộn cho bé...</p>
+        <p className="text-kid-base font-bold text-stone-700">Đang chuẩn bị bài học vui nhộn cho bé…</p>
       </div>
     );
   }
@@ -362,7 +362,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             disabled={isSubmitting}
             className="bg-red-600 hover:bg-red-700 shadow-none"
           >
-            {isSubmitting ? 'Đang gửi...' : 'Thử lại'}
+            {isSubmitting ? 'Đang gửi…' : 'Thử lại'}
           </Button>
         </div>
       )}
@@ -396,7 +396,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             disabled={isSubmitting || offlinePending || isSavingAnswer || Boolean(inputError) || (!stepAnswered && currentActivity?.type !== 'word_card')}
             className="gap-2 px-6 sm:px-8 shrink-0"
           >
-            <span>{isSubmitting ? 'Đang lưu...' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
+            <span>{isSubmitting ? 'Đang lưu…' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
             <ArrowRight className="w-6 h-6" />
           </Button>
         </div>

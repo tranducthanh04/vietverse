@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '../../../lib/utils.js';
 import {
   CircleCheck,
+  CircleX,
 } from '../../../components/ui/icons.js';
 
 export interface DragMatchActivityProps {
@@ -20,6 +21,13 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
   const pairs = activity.pairs || [];
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
+  // The right cell that was just mismatched, flashed briefly so the child knows to try again.
+  const [wrongRight, setWrongRight] = useState<string | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
+  }, []);
 
   const handleSelectLeft = (left: string) => {
     if (matchedPairs[left]) return;
@@ -40,8 +48,11 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
         onComplete(true, newMatches);
       }
     } else {
-      // Wrong match: brief shake or reset
+      // Wrong match: flash a short, accessible "try again" hint on the chosen cell.
       setSelectedLeft(null);
+      setWrongRight(right);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => setWrongRight(null), 600);
     }
   };
 
@@ -85,6 +96,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
           <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">Ý nghĩa</span>
           {pairs.map((p) => {
             const isMatched = Object.values(matchedPairs).includes(p.right);
+            const isWrong = wrongRight === p.right;
 
             return (
               <button
@@ -95,6 +107,8 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                   'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-all border-3 shadow-sm select-none',
                   isMatched
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-80'
+                    : isWrong
+                    ? 'bg-red-50 border-red-500 text-red-800 animate-wiggle'
                     : selectedLeft
                     ? 'bg-white border-accent hover:bg-accent-light/40 text-stone-800 cursor-pointer'
                     : 'bg-white border-cream-border text-stone-800'
@@ -102,11 +116,17 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
               >
                 <span className="text-base sm:text-kid-sm">{p.right}</span>
                 {isMatched && <CircleCheck className="w-5 h-5 text-emerald-600" />}
+                {isWrong && <CircleX className="w-5 h-5 text-red-600" aria-hidden="true" />}
               </button>
             );
           })}
         </div>
       </div>
+
+      {/* Polite announcement so screen-reader users hear the retry hint for a wrong match. */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {wrongRight ? 'Chưa đúng, thử lại nhé' : ''}
+      </span>
     </div>
   );
 };
