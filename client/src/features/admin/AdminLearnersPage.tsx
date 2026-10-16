@@ -292,7 +292,7 @@ export const AdminLearnersPage: React.FC = () => {
                   {learnerDetail.progress.map((p: any) => (
                     <div
                       key={p._id}
-                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex items-center justify-between shadow-2xs"
+                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex items-center justify-between shadow-sm"
                     >
                       <div>
                         <span className="font-bold text-stone-800">
@@ -330,7 +330,7 @@ export const AdminLearnersPage: React.FC = () => {
                   {learnerDetail.recordings.map((rec: any) => (
                     <div
                       key={rec._id}
-                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs"
+                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm"
                     >
                       <div>
                         <span className="font-bold text-stone-800 block">

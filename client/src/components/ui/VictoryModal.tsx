@@ -77,7 +77,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
         <span>{passed ? 'HOÀN THÀNH BÀI HỌC!' : 'CÙNG LUYỆN TẬP THÊM'}</span>
       </div>
 
-      <h2 id="victory-dialog-title" className="text-3xl font-display font-black text-primary mb-2">
+      <h2 className="text-3xl font-display font-black text-primary mb-2">
         {passed ? VI_LOCALES.victory.congrats : 'Bé hãy luyện tập thêm nhé!'}
       </h2>
       <p className="text-sm text-on-surface-variant max-w-sm mx-auto mb-4 font-medium">
