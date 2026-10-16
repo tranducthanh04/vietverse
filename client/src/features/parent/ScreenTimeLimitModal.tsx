@@ -40,10 +40,10 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
         className="bg-white border-accent rounded-3xl p-0 text-center"
       >
         {/* Inner wrapper fills the dialog and clips the decorative glows to its rounded corners. */}
-        <div className="relative overflow-hidden rounded-[inherit] p-8">
+        <div className="relative isolate overflow-hidden rounded-[inherit] p-8">
           {/* Decorative Background */}
-          <div className="absolute -top-16 -right-16 w-40 h-40 bg-primary-light rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-accent-light rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -z-10 -top-16 -right-16 w-40 h-40 bg-primary-light rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -z-10 -bottom-16 -left-16 w-40 h-40 bg-accent-light rounded-full blur-2xl pointer-events-none" />
 
           {/* Mascot / Icon Badge */}
           <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-tr from-culture to-culture-hover text-white flex items-center justify-center shadow-lg relative">
