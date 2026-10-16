@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
-import { Star } from '../../../components/ui/icons.js';
+import { CircleCheck, CircleX, Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
 
@@ -80,6 +80,17 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
                   : 'border-cream-border hover:border-accent hover:-translate-y-1'
               )}
             >
+              {/* Pair the colour feedback with an icon + text so it is not conveyed by colour alone. */}
+              {isSelected && (
+                <span className="absolute top-2 right-2">
+                  {isCorrect ? (
+                    <CircleCheck className="w-6 h-6 text-emerald-600" />
+                  ) : (
+                    <CircleX className="w-6 h-6 text-red-600" />
+                  )}
+                  <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
+                </span>
+              )}
               {hasImages ? (
                 option.imageUrl ? (
                   <img

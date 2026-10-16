@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   DomainIcon,
@@ -7,6 +7,7 @@ import {
 } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
+import { formatPoints } from '../../lib/utils.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
 import { EquippedAvatar } from '../../features/points/EquippedAvatar.js';
 
@@ -17,6 +18,30 @@ export const KidsLayout: React.FC = () => {
 
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [showChildPicker, setShowChildPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Close the child switcher on outside click or Escape, returning focus to the trigger.
+  useEffect(() => {
+    if (!showChildPicker) return;
+    const handlePointer = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowChildPicker(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowChildPicker(false);
+        pickerBtnRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [showChildPicker]);
 
   const handleOpenParent = () => {
     // Check if parent gate was already unlocked recently in this session (15 mins)
@@ -48,23 +73,31 @@ export const KidsLayout: React.FC = () => {
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
           {/* Active Child Profile & Switcher */}
-          <div className="relative">
+          <div className="relative" ref={pickerRef}>
             <button
+              ref={pickerBtnRef}
               onClick={() => setShowChildPicker(!showChildPicker)}
               className="flex items-center gap-2 bg-cream pl-2 pr-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px] min-w-0"
               aria-label="Chọn hồ sơ bé"
+              aria-haspopup="menu"
+              aria-expanded={showChildPicker}
+              aria-controls="child-picker-menu"
             >
               <EquippedAvatar child={activeChild} />
               <span className="font-bold font-display text-stone-800 text-sm md:text-base whitespace-nowrap truncate max-w-[5.5rem] sm:max-w-[10rem]">
                 {activeChild?.name || 'Bé yêu'}
               </span>
-              <span className="text-[10px] text-stone-400">▼</span>
+              <span className="text-[10px] text-stone-500" aria-hidden="true">▼</span>
             </button>
 
             {/* Child Switcher Dropdown */}
             {showChildPicker && (
-              <div className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in">
-                <span className="text-xs font-bold text-stone-400 px-3 py-1 block">Chọn hồ sơ bé:</span>
+              <div
+                id="child-picker-menu"
+                aria-label="Chọn hồ sơ bé"
+                className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in"
+              >
+                <span className="text-xs font-bold text-stone-600 px-3 py-1 block">Chọn hồ sơ bé:</span>
                 {children.map((c) => (
                   <button
                     key={c._id}
@@ -101,7 +134,7 @@ export const KidsLayout: React.FC = () => {
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
               <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
-                {activeChild?.viviPoints || 0}
+                {formatPoints(activeChild?.viviPoints || 0)}
               </span>
             </div>
 

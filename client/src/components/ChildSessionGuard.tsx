@@ -39,7 +39,7 @@ export const ChildSessionGuard: React.FC<React.PropsWithChildren<{ screenTime?: 
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-6 text-center">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-bold text-stone-700">Đang tải hồ sơ của bé...</p>
+        <p className="font-bold text-stone-700">Đang tải hồ sơ của bé…</p>
       </div>
     );
   }
