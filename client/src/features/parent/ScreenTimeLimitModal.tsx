@@ -41,7 +41,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
       >
         {/* Inner wrapper fills the dialog and clips the decorative glows to its rounded corners. */}
         <div className="relative isolate overflow-hidden rounded-[inherit] p-8">
-          {/* Decorative Background */}
+          {/* Decorative glows sit behind the content: the wrapper is `isolate` so `-z-10` stays inside it. Keep the wrapper transparent or the glows disappear. */}
           <div className="absolute -z-10 -top-16 -right-16 w-40 h-40 bg-primary-light rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -z-10 -bottom-16 -left-16 w-40 h-40 bg-accent-light rounded-full blur-2xl pointer-events-none" />
 
