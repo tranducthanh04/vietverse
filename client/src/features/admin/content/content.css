@@ -376,6 +376,15 @@
   object-fit: contain;
   border-radius: 0.75rem;
 }
+/* Reserve a fixed preview box so the layout does not jump while the image loads (CLS). */
+.cms .cms-media-img {
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: contain;
+  background: #f5f5f4;
+}
 .cms-row > .cms-field,
 .cms-row > .cms-field-label {
   margin: 0;

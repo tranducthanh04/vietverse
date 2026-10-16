@@ -2,7 +2,7 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
 import type { AxiosRequestConfig } from 'axios';
 import { api } from '../lib/api.js';
 import { useAuthStore } from '../store/authStore.js';
@@ -243,7 +243,7 @@ describe('admin inventory categories', () => {
       }
       return [];
     };
-    render(<QueryClientProvider client={queryClient}><AdminRedemptionsPage /></QueryClientProvider>);
+    render(<QueryClientProvider client={queryClient}><MemoryRouter><AdminRedemptionsPage /></MemoryRouter></QueryClientProvider>);
     fireEvent.click(screen.getByRole('button', { name: /Kho vật phẩm/ }));
 
     const categorySelect = await screen.findByRole('combobox', { name: 'Loại của Nón lá' });

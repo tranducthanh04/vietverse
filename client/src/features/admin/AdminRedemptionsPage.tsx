@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Gift,
@@ -12,7 +13,7 @@ import {
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Button } from '../../components/ui/Button.js';
-import { Card } from '../../components/ui/Card.js';
+import { Modal } from '../../components/ui/Modal.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 
 const CARRIERS = [
@@ -53,9 +54,51 @@ const EMPTY_CREATE_FORM: CreateItemForm = {
   active: true,
 };
 
+// Fixed-size thumbnail. Falls back to a local icon when the item has no image or it fails to load,
+// so the row never jumps and we avoid an external placeholder service.
+const InventoryThumb: React.FC<{
+  item: { assetUrl?: string; name: string; type: string };
+}> = ({ item }) => {
+  const [failed, setFailed] = useState(false);
+  const FallbackIcon = item.type === 'physical' ? Package : Gift;
+  if (!item.assetUrl || failed) {
+    return (
+      <div
+        className="w-12 h-12 rounded-xl border border-cream-border bg-stone-100 flex items-center justify-center text-stone-500"
+        aria-hidden="true"
+      >
+        <FallbackIcon className="w-6 h-6" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={item.assetUrl}
+      alt={item.name}
+      width={48}
+      height={48}
+      className="w-12 h-12 rounded-xl object-cover border border-cream-border"
+      onError={() => setFailed(true)}
+    />
+  );
+};
+
 export const AdminRedemptionsPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'orders' | 'inventory'>('orders');
+
+  // Tab, status filter and search live in the URL so the view is shareable and the back button restores it.
+  const [params, setParams] = useSearchParams();
+  const activeTab: 'orders' | 'inventory' = params.get('tab') === 'inventory' ? 'inventory' : 'orders';
+  const filterStatus = params.get('status') ?? 'all';
+  const searchTerm = params.get('q') ?? '';
+  const updateParams = (next: Record<string, string>, opts?: { replace?: boolean }) => {
+    const nextParams = new URLSearchParams(params);
+    for (const [key, val] of Object.entries(next)) {
+      if (val === '') nextParams.delete(key);
+      else nextParams.set(key, val);
+    }
+    setParams(nextParams, opts);
+  };
 
   // Order management state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -63,13 +106,14 @@ export const AdminRedemptionsPage: React.FC = () => {
   const [trackingCode, setTrackingCode] = useState('');
   const [carrier, setCarrier] = useState('Viettel Post');
   const [notes, setNotes] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   // Inventory creation state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createForm, setCreateForm] = useState<CreateItemForm>(EMPTY_CREATE_FORM);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
 
   // Query Redemptions
   const {
@@ -110,10 +154,13 @@ export const AdminRedemptionsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['adminRedemptions'] });
       queryClient.invalidateQueries({ queryKey: ['adminInventory'] });
       queryClient.invalidateQueries({ queryKey: ['adminKPIs'] });
+      setOrderError(null);
+      setConfirmingCancel(false);
       setEditingId(null);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.error?.message || 'Không thể cập nhật đơn đổi quà.');
+      setConfirmingCancel(false);
+      setOrderError(err.response?.data?.error?.message || 'Không thể cập nhật đơn đổi quà.');
     },
   });
 
@@ -126,9 +173,10 @@ export const AdminRedemptionsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminInventory'] });
       queryClient.invalidateQueries({ queryKey: ['shopItems'] });
+      setInventoryError(null);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.error?.message || 'Không thể cập nhật kho quà.');
+      setInventoryError(err.response?.data?.error?.message || 'Không thể cập nhật kho quà.');
     },
   });
 
@@ -193,9 +241,18 @@ export const AdminRedemptionsPage: React.FC = () => {
     setTrackingCode(red.trackingCode || '');
     setCarrier(red.carrier || 'Viettel Post');
     setNotes(red.notes || '');
+    setOrderError(null);
+    setConfirmingCancel(false);
   };
 
-  const handleSaveOrder = (id: string) => {
+  const handleCloseEditOrder = () => {
+    setEditingId(null);
+    setOrderError(null);
+    setConfirmingCancel(false);
+  };
+
+  const submitOrder = (id: string) => {
+    setOrderError(null);
     updateRedemptionMutation.mutate({
       id,
       data: {
@@ -205,6 +262,21 @@ export const AdminRedemptionsPage: React.FC = () => {
         notes: notes.trim() || undefined,
       },
     });
+  };
+
+  const editingOrder:
+    | { _id: string; status?: string; pointsSpent?: number; childId?: { name?: string } }
+    | undefined = redemptions.find((order: { _id: string }) => order._id === editingId);
+  const alreadyCancelled = editingOrder?.status === 'cancelled';
+
+  const handleSaveOrder = (id: string) => {
+    // Cancelling refunds points and restocks the item, so confirm it first — unless it is already cancelled.
+    if (editStatus === 'cancelled' && !alreadyCancelled) {
+      setOrderError(null);
+      setConfirmingCancel(true);
+      return;
+    }
+    submitOrder(id);
   };
 
   const handleQuickAdjustStock = (item: any, delta: number) => {
@@ -246,7 +318,7 @@ export const AdminRedemptionsPage: React.FC = () => {
         {/* Tab switch buttons */}
         <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-cream-border">
           <button
-            onClick={() => setActiveTab('orders')}
+            onClick={() => updateParams({ tab: '' })}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center space-x-1.5 ${
               activeTab === 'orders'
                 ? 'bg-white text-stone-800 shadow-sm'
@@ -257,7 +329,7 @@ export const AdminRedemptionsPage: React.FC = () => {
             <span>Đơn đổi quà ({redemptions.length})</span>
           </button>
           <button
-            onClick={() => setActiveTab('inventory')}
+            onClick={() => updateParams({ tab: 'inventory' })}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center space-x-1.5 ${
               activeTab === 'inventory'
                 ? 'bg-white text-stone-800 shadow-sm'
@@ -305,7 +377,7 @@ export const AdminRedemptionsPage: React.FC = () => {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setFilterStatus(tab.id)}
+                  onClick={() => updateParams({ status: tab.id === 'all' ? '' : tab.id })}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-h-[44px] ${
                     filterStatus === tab.id
                       ? 'bg-primary text-white shadow-xs'
@@ -321,10 +393,10 @@ export const AdminRedemptionsPage: React.FC = () => {
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
               <input
                 type="text"
-                placeholder="Tìm tên bé, quà, SĐT..."
+                placeholder="Tìm tên bé, quà, SĐT…"
                 aria-label="Tìm tên bé, quà hoặc số điện thoại"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => updateParams({ q: e.target.value }, { replace: true })}
                 className="w-full pl-9 pr-3 py-1.5 text-xs border border-cream-border rounded-xl focus:outline-none focus:border-primary min-h-[44px]"
               />
             </div>
@@ -335,7 +407,7 @@ export const AdminRedemptionsPage: React.FC = () => {
           ) : loadingOrders ? (
             <div className="py-12 text-center">
               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <span className="text-stone-500 text-sm font-bold">Đang tải danh sách đơn quà...</span>
+              <span className="text-stone-500 text-sm font-bold">Đang tải danh sách đơn quà…</span>
             </div>
           ) : filteredRedemptions.length === 0 ? (
             <div className="bg-white rounded-2xl border border-cream-border p-12 text-center">
@@ -363,13 +435,13 @@ export const AdminRedemptionsPage: React.FC = () => {
                           <span className="font-bold text-stone-800 block">
                             {red.childId?.name || 'Học viên'}
                           </span>
-                          <span className="text-[11px] text-stone-400">
+                          <span className="text-[11px] text-stone-500 tabular-nums">
                             {new Date(red.createdAt).toLocaleDateString('vi-VN')}
                           </span>
                         </td>
                         <td className="px-5 py-4">
                           <span className="font-bold text-stone-800 block">{red.itemId?.name}</span>
-                          <span className="text-xs text-secondary font-bold">
+                          <span className="text-xs text-secondary font-bold tabular-nums">
                             {red.pointsSpent} ViVi points
                           </span>
                         </td>
@@ -384,7 +456,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                               </p>
                             </div>
                           ) : (
-                            <span className="text-stone-400 italic">Quà kỹ thuật số</span>
+                            <span className="text-stone-500 italic">Quà kỹ thuật số</span>
                           )}
                         </td>
                         <td className="px-5 py-4">
@@ -411,7 +483,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                             </span>
                           )}
                           {red.status === 'cancelled' && (
-                            <span className="px-2.5 py-1 bg-stone-100 text-red-600 rounded-full text-xs font-bold">
+                            <span className="px-2.5 py-1 bg-stone-100 text-red-700 rounded-full text-xs font-bold">
                               Đã hủy (Đã hoàn điểm)
                             </span>
                           )}
@@ -422,7 +494,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                         <td className="px-5 py-4 text-right">
                           <button
                             onClick={() => handleStartEditOrder(red)}
-                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-colors min-h-[36px]"
+                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-colors min-h-[44px]"
                           >
                             Xử lý đơn
                           </button>
@@ -445,15 +517,15 @@ export const AdminRedemptionsPage: React.FC = () => {
           ) : loadingInventory ? (
             <div className="py-12 text-center">
               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <span className="text-stone-500 text-sm font-bold">Đang tải kho vật phẩm...</span>
+              <span className="text-stone-500 text-sm font-bold">Đang tải kho vật phẩm…</span>
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-cream-border overflow-hidden shadow-sm">
               <div className="p-4 bg-stone-50 border-b border-cream-border flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0 flex-1 basis-56">
-                  <h3 className="font-bold font-display text-stone-800">
+                  <h2 className="font-bold font-display text-stone-800">
                     Kho Quà Tặng & Vật Phẩm Đổi Điểm
-                  </h3>
+                  </h2>
                   <p className="text-xs text-stone-500">
                     Quản lý số lượng hàng tồn kho quà hiện vật và giá điểm đổi quà của bé
                   </p>
@@ -486,7 +558,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                       maxLength={120}
                       value={createForm.name}
                       onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     />
                   </label>
                   <label className="flex flex-col gap-1 font-bold text-xs text-stone-700">
@@ -501,7 +573,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                           category: type === 'virtual' ? createForm.category || 'badge' : '',
                         });
                       }}
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     >
                       <option value="virtual">Vật phẩm ảo</option>
                       <option value="physical">Quà gửi tận nhà</option>
@@ -512,7 +584,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                     <select
                       value={createForm.category}
                       onChange={(e) => setCreateForm({ ...createForm, category: e.target.value as CreateItemForm['category'] })}
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     >
                       {createForm.type === 'physical' && <option value="">Không phân loại</option>}
                       {ITEM_CATEGORIES.map((c) => (
@@ -529,7 +601,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                       step={1}
                       value={createForm.costPoints}
                       onChange={(e) => setCreateForm({ ...createForm, costPoints: e.target.value })}
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     />
                   </label>
                   <label className="flex flex-col gap-1 font-bold text-xs text-stone-700 md:col-span-2">
@@ -538,8 +610,8 @@ export const AdminRedemptionsPage: React.FC = () => {
                       required
                       value={createForm.assetUrl}
                       onChange={(e) => setCreateForm({ ...createForm, assetUrl: e.target.value })}
-                      placeholder="https://... hoặc /assets/..."
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      placeholder="https://… hoặc /assets/…"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     />
                   </label>
                   <label className="flex flex-col gap-1 font-bold text-xs text-stone-700 md:col-span-2">
@@ -548,7 +620,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                       maxLength={500}
                       value={createForm.description}
                       onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                      className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                     />
                   </label>
                   {createForm.type === 'physical' && (
@@ -560,7 +632,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                         step={1}
                         value={createForm.stock}
                         onChange={(e) => setCreateForm({ ...createForm, stock: e.target.value })}
-                        className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm"
+                        className="px-3 py-2 border border-cream-border rounded-xl font-normal text-sm min-h-[44px]"
                       />
                     </label>
                   )}
@@ -585,6 +657,15 @@ export const AdminRedemptionsPage: React.FC = () => {
                 </form>
               )}
 
+              {inventoryError && (
+                <p
+                  role="alert"
+                  className="mx-4 mb-4 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl p-3"
+                >
+                  {inventoryError}
+                </p>
+              )}
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-stone-600 min-w-[860px]">
                   <thead className="bg-stone-50 text-stone-700 font-bold uppercase text-xs border-b border-cream-border">
@@ -602,11 +683,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                     {inventory.map((item: any) => (
                       <tr key={item._id} className="hover:bg-stone-50/80 transition-colors">
                         <td className="px-5 py-3">
-                          <img
-                            src={item.assetUrl || 'https://via.placeholder.com/60'}
-                            alt={item.name}
-                            className="w-12 h-12 rounded-xl object-cover border border-cream-border"
-                          />
+                          <InventoryThumb item={item} />
                         </td>
                         <td className="px-5 py-3 font-bold text-stone-800">{item.name}</td>
                         <td className="px-5 py-3">
@@ -625,7 +702,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                                   data: { category: e.target.value },
                                 })
                               }
-                              className="px-2 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200"
+                              className="px-2 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 min-h-[44px]"
                             >
                               {!item.category && <option value="" disabled>Chưa phân loại</option>}
                               {ITEM_CATEGORIES.map((c) => (
@@ -634,11 +711,11 @@ export const AdminRedemptionsPage: React.FC = () => {
                             </select>
                           )}
                         </td>
-                        <td className="px-5 py-3 font-bold text-secondary">{item.costPoints} pts</td>
+                        <td className="px-5 py-3 font-bold text-secondary tabular-nums">{item.costPoints} pts</td>
                         <td className="px-5 py-3">
                           {item.type === 'physical' ? (
                             <span
-                              className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                              className={`px-2.5 py-1 rounded-full text-xs font-bold tabular-nums ${
                                 (item.stock || 0) > 0
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : 'bg-red-100 text-red-700'
@@ -647,44 +724,44 @@ export const AdminRedemptionsPage: React.FC = () => {
                               {item.stock ?? 0} món
                             </span>
                           ) : (
-                            <span className="text-stone-400 text-xs">Vô hạn</span>
+                            <span className="text-stone-500 text-xs">Vô hạn</span>
                           )}
                         </td>
                         <td className="px-5 py-3">
                           {item.active ? (
-                            <span className="text-emerald-600 font-bold text-xs">Đang mở bán</span>
+                            <span className="text-emerald-700 font-bold text-xs">Đang mở bán</span>
                           ) : (
-                            <span className="text-stone-400 font-bold text-xs">Đã ẩn</span>
+                            <span className="text-stone-500 font-bold text-xs">Đã ẩn</span>
                           )}
                         </td>
                         <td className="px-5 py-3 text-right">
                           {item.type === 'physical' ? (
-                            <div className="inline-flex items-center space-x-1.5">
+                            <div className="inline-flex items-center space-x-2">
                               <button
                                 onClick={() => handleQuickAdjustStock(item, -1)}
                                 disabled={(item.stock || 0) <= 0}
-                                className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm disabled:opacity-40"
+                                className="h-11 min-w-[44px] rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm disabled:opacity-40"
                                 title="Giảm 1 món"
                               >
                                 -1
                               </button>
                               <button
                                 onClick={() => handleQuickAdjustStock(item, 1)}
-                                className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm"
+                                className="h-11 min-w-[44px] rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm"
                                 title="Thêm 1 món"
                               >
                                 +1
                               </button>
                               <button
                                 onClick={() => handleQuickAdjustStock(item, 5)}
-                                className="px-2 h-8 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs"
+                                className="h-11 min-w-[44px] px-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs"
                                 title="Nhập thêm 5 món"
                               >
                                 +5
                               </button>
                             </div>
                           ) : (
-                            <span className="text-xs text-stone-400">Tự động cấp</span>
+                            <span className="text-xs text-stone-500">Tự động cấp</span>
                           )}
                         </td>
                       </tr>
@@ -698,113 +775,147 @@ export const AdminRedemptionsPage: React.FC = () => {
       )}
 
       {/* Modal: Process / Cancel Order */}
-      {editingId && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="redemption-edit-title" className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl animate-fade-in">
-            <h3 id="redemption-edit-title" className="text-lg font-bold font-display text-stone-800 mb-4 pb-2 border-b border-cream-border">
-              Xử Lý Đơn Đổi Quà
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Trạng thái đơn hàng
-                </label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value as any)}
-                  disabled={redemptions.find((order: { _id: string; status: string }) => order._id === editingId)?.status === 'cancelled'}
-                  className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
-                >
-                  <option value="pending">Chờ đóng gói (Pending)</option>
-                  <option value="shipped">Đang vận chuyển (Shipped)</option>
-                  <option value="delivered">Đã giao thành công (Delivered)</option>
-                  <option value="cancelled">Hủy đơn & hoàn điểm (Cancelled)</option>
-                </select>
-              </div>
-
-              {editStatus === 'cancelled' && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start space-x-2">
-                  <TriangleAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold">Lưu ý nghiệp vụ:</span> Khi chọn hủy đơn, hệ thống
-                    sẽ tự động hoàn trả điểm ViVi Points vào tài khoản của bé và khôi phục lại tồn
-                    kho cho vật phẩm hiện vật.
-                  </div>
-                </div>
-              )}
-
-              {editStatus === 'shipped' && (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
-                      Đơn vị vận chuyển
-                    </label>
-                    <select
-                      value={carrier}
-                      onChange={(e) => setCarrier(e.target.value)}
-                      className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
-                    >
-                      {CARRIERS.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
-                      Mã vận đơn (Tracking Code)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ví dụ: VTP12345678"
-                      value={trackingCode}
-                      onChange={(e) => setTrackingCode(e.target.value)}
-                      className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label htmlFor="redemption-notes" className="block text-xs font-bold text-stone-700 mb-1">
-                  Ghi chú nội bộ / Lý do hủy
-                </label>
-                <textarea
-                  id="redemption-notes"
-                  rows={2}
-                  placeholder="Ghi chú vận hành (ví dụ: đã bàn giao bưu tá, hoặc lý do hủy đơn)..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4 border-t border-cream-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  onClick={() => setEditingId(null)}
-                >
-                  Đóng
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  isLoading={updateRedemptionMutation.isPending}
-                  onClick={() => handleSaveOrder(editingId)}
-                >
-                  Lưu thay đổi
-                </Button>
+      <Modal isOpen={!!editingId} onClose={handleCloseEditOrder} title="Xử Lý Đơn Đổi Quà">
+        {confirmingCancel ? (
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-900 flex items-start space-x-2">
+              <TriangleAlert className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold">Xác nhận huỷ đơn &amp; hoàn điểm</p>
+                <p>
+                  Hệ thống sẽ hoàn{' '}
+                  <strong className="tabular-nums">{editingOrder?.pointsSpent ?? 0} điểm ViVi</strong>{' '}
+                  cho bé <strong>{editingOrder?.childId?.name || 'học viên'}</strong> và trả lại tồn
+                  kho cho vật phẩm hiện vật. Thao tác này không thể hoàn tác.
+                </p>
               </div>
             </div>
+
+            {orderError && (
+              <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl p-2">
+                {orderError}
+              </p>
+            )}
+
+            <div className="flex justify-end space-x-2 pt-4 border-t border-cream-border">
+              <Button type="button" variant="outline" size="md" onClick={() => setConfirmingCancel(false)}>
+                Quay lại
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="md"
+                isLoading={updateRedemptionMutation.isPending}
+                onClick={() => editingId && submitOrder(editingId)}
+              >
+                Xác nhận huỷ &amp; hoàn điểm
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="redemption-status" className="block text-xs font-bold text-stone-700 mb-1">
+                Trạng thái đơn hàng
+              </label>
+              <select
+                id="redemption-status"
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value as any)}
+                disabled={alreadyCancelled}
+                className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary min-h-[44px]"
+              >
+                <option value="pending">Chờ đóng gói (Pending)</option>
+                <option value="shipped">Đang vận chuyển (Shipped)</option>
+                <option value="delivered">Đã giao thành công (Delivered)</option>
+                <option value="cancelled">Hủy đơn &amp; hoàn điểm (Cancelled)</option>
+              </select>
+            </div>
+
+            {editStatus === 'cancelled' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start space-x-2">
+                <TriangleAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold">Lưu ý nghiệp vụ:</span> Khi chọn hủy đơn, hệ thống
+                  sẽ tự động hoàn trả điểm ViVi Points vào tài khoản của bé và khôi phục lại tồn
+                  kho cho vật phẩm hiện vật.
+                </div>
+              </div>
+            )}
+
+            {editStatus === 'shipped' && (
+              <>
+                <div>
+                  <label htmlFor="redemption-carrier" className="block text-xs font-bold text-stone-700 mb-1">
+                    Đơn vị vận chuyển
+                  </label>
+                  <select
+                    id="redemption-carrier"
+                    value={carrier}
+                    onChange={(e) => setCarrier(e.target.value)}
+                    className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary min-h-[44px]"
+                  >
+                    {CARRIERS.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="redemption-tracking" className="block text-xs font-bold text-stone-700 mb-1">
+                    Mã vận đơn (Tracking Code)
+                  </label>
+                  <input
+                    id="redemption-tracking"
+                    type="text"
+                    placeholder="Ví dụ: VTP12345678"
+                    value={trackingCode}
+                    onChange={(e) => setTrackingCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary min-h-[44px]"
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label htmlFor="redemption-notes" className="block text-xs font-bold text-stone-700 mb-1">
+                Ghi chú nội bộ / Lý do hủy
+              </label>
+              <textarea
+                id="redemption-notes"
+                rows={2}
+                placeholder="Ghi chú vận hành (ví dụ: đã bàn giao bưu tá, hoặc lý do hủy đơn)…"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-3 py-2 border border-cream-border rounded-xl text-sm focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            {orderError && (
+              <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl p-2">
+                {orderError}
+              </p>
+            )}
+
+            <div className="flex justify-end space-x-2 pt-4 border-t border-cream-border">
+              <Button type="button" variant="outline" size="md" onClick={handleCloseEditOrder}>
+                Đóng
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                isLoading={updateRedemptionMutation.isPending}
+                onClick={() => editingId && handleSaveOrder(editingId)}
+              >
+                Lưu thay đổi
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
