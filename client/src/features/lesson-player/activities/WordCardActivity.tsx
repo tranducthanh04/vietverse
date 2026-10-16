@@ -2,7 +2,6 @@ import React from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { Lightbulb } from '../../../components/ui/icons.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
-import { targetTextSize } from './targetTextSize.js';
 
 export interface WordCardActivityProps {
   activity: {
@@ -19,40 +18,46 @@ export interface WordCardActivityProps {
 
 export const WordCardActivity: React.FC<WordCardActivityProps> = ({
   activity,
-  onComplete,
 }) => {
-  const word = activity.targetWord || 'A';
+  const targetText = activity.targetWord || 'A';
+  const displayLength = Array.from(targetText.trim().normalize('NFC')).length;
+  // Legacy lessons also store entire reading passages in targetWord.
+  const isPassage = displayLength > 12 || targetText.trim().split(/\s+/).length > 2 || /[\r\n]/.test(targetText);
+  const textClass = isPassage
+    ? 'text-2xl md:text-3xl leading-relaxed font-bold text-left'
+    : displayLength > 4
+      ? 'text-4xl md:text-5xl leading-snug font-black'
+      : 'text-6xl md:text-8xl leading-tight font-black';
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
+    <div className="flex w-full min-w-0 flex-col items-center p-4 sm:p-6 text-center max-w-2xl mx-auto">
       <div className="mb-4">
         <Mascot mood="talking" size="md" />
       </div>
 
-      <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-2">
+      <h2 className="max-w-full break-words text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-2">
         {activity.prompt}
       </h2>
 
       {activity.subPrompt && (
-        <div className="mb-6 space-y-3">
-          <p className="text-stone-600 text-kid-base">{activity.subPrompt}</p>
+        <div className="w-full min-w-0 mb-6 space-y-3">
+          <p className="whitespace-pre-line break-words text-stone-600 text-kid-base">{activity.subPrompt}</p>
           <AudioButton contentKey={activity.id} textToSpeak={activity.subPrompt} label="Đọc đoạn văn" size="sm" />
         </div>
       )}
 
-      {/* Big 3D Flashcard */}
-      <div className="w-full max-w-sm min-h-[16rem] md:min-h-[18rem] bg-white border-4 border-accent rounded-3xl shadow-kid-card flex flex-col items-center justify-center p-6 my-4">
-        <span className={`${targetTextSize(word)} font-black font-display text-primary break-words text-balance max-w-full`}>
-          {word}
-        </span>
+      <div className={`w-full min-w-0 ${isPassage ? '' : 'max-w-72 min-h-64 md:min-h-72'} bg-white border-4 border-accent rounded-3xl shadow-kid-card flex flex-col items-center justify-center gap-4 p-6 my-4`}>
+        <p className={`w-full min-w-0 whitespace-pre-line break-words font-display text-primary ${textClass}`}>
+          {targetText}
+        </p>
 
         {activity.targetPhonetic && (
-          <span className="text-kid-base text-stone-500 font-semibold mt-2">
+          <span className="max-w-full break-words text-kid-base text-stone-500 font-semibold">
             /{activity.targetPhonetic}/
           </span>
         )}
 
-        <div className="mt-4">
+        <div className="max-w-full">
           <AudioButton
             contentKey={activity.id}
             audioUrl={activity.audioUrl}

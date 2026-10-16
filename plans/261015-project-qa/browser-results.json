@@ -1,0 +1,133 @@
+{
+  "results": [
+    {
+      "name": "public: home, pricing, 404 and mobile menu",
+      "status": "FAIL",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('404', { exact: true }) to be visible\u001b[22m\n"
+    },
+    {
+      "name": "public: stories search, empty result, detail and culture",
+      "status": "PASS"
+    },
+    {
+      "name": "public: unauthenticated protected route redirects to login",
+      "status": "PASS"
+    },
+    {
+      "name": "public: no uncaught JavaScript errors",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: password confirmation rejects mismatch, then UI registration succeeds",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: four-step child onboarding persists a profile and opens map",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: actual seeded passage fits mobile and desktop lesson route",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: choice correction, fill blank, ordering and reload preserve lesson progress",
+      "status": "PASS"
+    },
+    {
+      "name": "learner: denied microphone shows an error and cannot complete the activity",
+      "status": "PASS"
+    },
+    {
+      "name": "culture: wrong answer stays retryable and awards no points",
+      "status": "PASS"
+    },
+    {
+      "name": "culture: correct answer awards once; browser reload and replay award zero",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: wrong arithmetic stays locked; correct challenge unlocks portal",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: screen-time settings persist after reload without losing Parent Gate",
+      "status": "PASS"
+    },
+    {
+      "name": "parent: direct admin navigation is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "learner browser journey: no uncaught application exceptions",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: UI login redirects to populated KPI dashboard",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: revenue loads actual report and rejects inverted date range",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/bai-hoc and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/truyen and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: populated CMS catalog /admin/van-hoa and empty search recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: learners filter, detail dialog, and close",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: zero-score in-progress learner is not presented as 100 percent and three stars",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: API fixture scorePercent=0 must not render as perfect score\n\n'100%' !== '0%'\n"
+    },
+    {
+      "name": "admin: redemption search and populated inventory",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: point-rule invalid amount is rejected without API mutation",
+      "status": "PASS"
+    },
+    {
+      "name": "admin: create, save, reload, and preview unpublished story draft",
+      "status": "FAIL",
+      "error": "TimeoutError: locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Mô tả truyện', { exact: true }) to be visible\u001b[22m\n"
+    },
+    {
+      "name": "admin: mobile dashboard fits 390px and navigation is usable",
+      "status": "FAIL",
+      "error": "TimeoutError: locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('Tổng bài học nền tảng', { exact: true }) to be visible\u001b[22m\n"
+    },
+    {
+      "name": "admin: no uncaught browser runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "observations": {
+    "learner": {
+      "observations": [
+        "Recording intentionally stops at denied permission; no fake audio upload or lesson completion was injected."
+      ],
+      "screenshots": [
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-passage-390.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-passage-1366.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\learner-microphone-denied.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\parent-settings-persisted.png"
+      ],
+      "pageErrors": [],
+      "blockedExternal": [
+        "https://fonts.googleapis.com"
+      ]
+    }
+  }
+}

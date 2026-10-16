@@ -1,0 +1,65 @@
+{
+  "results": [
+    {
+      "name": "new activities: parent login and published four-activity lesson load through real API",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: multi-select keeps both same-letter choices after reload before submission",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: multi-select fits 390px viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: neutral multi-select submission and group-sort submission",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: group-sort fits 390px viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: group submission stays neutral and both blank inputs can be filled",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: fill-blanks fits 390px viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: blank submission stays neutral; follow-steps records explicit self-report",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: follow-steps fits 390px viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: real server grades published answers at 100 percent and awards 14 points",
+      "status": "PASS"
+    },
+    {
+      "name": "new activities: no uncaught application exceptions",
+      "status": "PASS"
+    }
+  ],
+  "observations": {
+    "activities": {
+      "observations": [
+        "Four activities published by real CMS service into isolated test DB; follow-steps is self-report only, not physical action verification."
+      ],
+      "screenshots": [
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\new-activity-multi-select-390.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\new-activity-group-sort-390.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\new-activity-fill-blanks-390.png",
+        "D:\\ki9\\codeDuAN\\plans\\261015-project-qa\\screenshots\\new-activity-follow-steps-390.png"
+      ],
+      "pageErrors": [],
+      "blockedExternal": [
+        "https://fonts.googleapis.com"
+      ]
+    }
+  }
+}
