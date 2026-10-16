@@ -123,8 +123,8 @@ export const PricingPage: React.FC = () => {
             )}
 
             <div className="flex-1">
-              <h3 className="text-xl font-bold font-display text-stone-800 mb-2 md:min-h-[3.5rem]">{p.name}</h3>
-              <p className="text-sm text-stone-500 mb-6 md:min-h-[3.75rem]">{p.description}</p>
+              <h2 className="text-xl font-bold font-display text-stone-800 mb-2 md:min-h-[3.5rem]">{p.name}</h2>
+              <p className="text-base sm:text-sm text-stone-500 mb-6 md:min-h-[3.75rem]">{p.description}</p>
 
               <div className="mb-6 pb-6 border-b border-cream-border md:min-h-[6.5rem]">
                 <div className="flex items-baseline flex-wrap gap-x-1">

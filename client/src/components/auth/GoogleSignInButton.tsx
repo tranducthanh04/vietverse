@@ -101,7 +101,7 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
 
   return <section aria-label="Đăng nhập Google" className="space-y-3">
     {phase === 'idle' && <Button type="button" variant="outline" className="w-full" disabled={disabled} onClick={begin}>Tiếp tục với Google</Button>}
-    {phase === 'starting' && <p role="status" className="text-sm text-center">Đang kết nối Google...</p>}
+    {phase === 'starting' && <p role="status" className="text-sm text-center">Đang kết nối Google…</p>}
     <div ref={host} hidden={phase !== 'ready'} className="flex justify-center" />
     {(phase === 'link' || (submitting && email)) && <form onSubmit={link} className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 space-y-3">
       <p className="text-sm text-amber-900">Email <strong>{email}</strong> đã có tài khoản. Nhập mật khẩu Vietverse để liên kết. Đây không phải mật khẩu Google.</p>
@@ -110,7 +110,7 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
         value={password} onChange={event => setPassword(event.target.value)} className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border bg-white" />
       <Button type="submit" isLoading={submitting} className="w-full">Xác nhận liên kết</Button>
     </form>}
-    {submitting && !email && <p role="status" className="text-sm text-center">Đang xác minh tài khoản...</p>}
+    {submitting && !email && <p role="status" className="text-sm text-center">Đang xác minh tài khoản…</p>}
     {(phase === 'ready' || phase === 'link') && <Button type="button" variant="ghost" className="w-full" onClick={cancel}>Hủy đăng nhập Google</Button>}
     {phase === 'done' && <Button type="button" className="w-full" onClick={async () => {
       setError(''); try { await onSuccess(); } catch { setError('Chưa tải được trang tiếp theo. Vui lòng thử lại.'); }

@@ -63,7 +63,7 @@ export const CulturePage: React.FC = () => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-5 py-2.5 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-all border-2 ${
+            className={`inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-all border-2 ${
               selectedCategory === cat.id
                 ? 'bg-culture text-white border-culture shadow-kid-culture'
                 : 'bg-white text-stone-700 border-cream-border hover:border-culture'
@@ -80,7 +80,12 @@ export const CulturePage: React.FC = () => {
       ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-culture border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang mở trang văn hóa...</p>
+          <p className="font-bold text-stone-600">Đang mở trang văn hóa…</p>
+        </div>
+      ) : articles.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-3xl border border-cream-border p-8">
+          <DomainIcon.culture className="w-12 h-12 text-stone-400 mx-auto mb-3" />
+          <p className="text-stone-500 font-bold">Chưa có bài viết nào cho chủ đề này.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -109,9 +114,9 @@ export const CulturePage: React.FC = () => {
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-culture transition-colors mb-1 sm:mb-2 line-clamp-2">
+                  <h2 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-culture transition-colors mb-1 sm:mb-2 line-clamp-2">
                     {article.title}
-                  </h3>
+                  </h2>
                   <p className="text-stone-500 text-sm line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4">
                     {article.intro}
                   </p>

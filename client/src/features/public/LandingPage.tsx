@@ -176,7 +176,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="font-display text-xl text-on-surface font-bold mb-3">
                 Học qua truyện kể
               </h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              <p className="text-base sm:text-sm text-on-surface-variant leading-relaxed mb-6">
                 Trẻ hòa mình vào kho tàng cổ tích dân gian Việt Nam với giọng đọc truyền cảm, minh họa rực rỡ mở ra vầng trăng sáng và khúc đồng dao ngọt ngào.
               </p>
               <div className="mt-auto pt-4 flex items-center gap-2 text-primary font-bold text-sm">
@@ -199,7 +199,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="font-display text-xl text-on-surface font-bold mb-3">
                 Trò chơi tương tác
               </h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              <p className="text-base sm:text-sm text-on-surface-variant leading-relaxed mb-6">
                 Vừa chơi vừa ghi nhớ từ vựng qua các trò chơi dân gian hấp dẫn: ô ăn quan, đố vui thông thái, chiếc nón lá ma thuật và vòng quay chữ cái diệu kỳ.
               </p>
               <div className="mt-auto pt-4 flex items-center gap-2 text-secondary font-bold text-sm">
@@ -222,7 +222,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="font-display text-xl text-on-surface font-bold mb-3">
                 Báu vật văn hóa
               </h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              <p className="text-base sm:text-sm text-on-surface-variant leading-relaxed mb-6">
                 Tìm hiểu nhịp sống lễ hội truyền thống, danh lam ba miền, hoa sen ngọc bích và nhịp trống đồng, đánh thức niềm tự hào cội nguồn quê hương trong con.
               </p>
               <div className="mt-auto pt-4 flex items-center gap-2 text-tertiary font-bold text-sm">

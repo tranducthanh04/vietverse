@@ -8,6 +8,7 @@ import { VI_LOCALES } from '../../locales/vi.js';
 import { api } from '../../lib/api.js';
 import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton.js';
 import { useGoogleDestination } from './useGoogleDestination.js';
+import { PasswordField } from './PasswordField.js';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export const RegisterPage: React.FC = () => {
 
         <Card variant="kid" className="p-8 bg-white border-3 border-cream-border">
           {errorMsg && (
-            <div role="alert" className="bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
+            <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
               {errorMsg}
             </div>
           )}
@@ -82,6 +83,7 @@ export const RegisterPage: React.FC = () => {
               <input
                 id="register-name"
                 type="text"
+                autoComplete="name"
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -97,6 +99,8 @@ export const RegisterPage: React.FC = () => {
               <input
                 id="register-email"
                 type="email"
+                autoComplete="email"
+                spellCheck={false}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -109,15 +113,13 @@ export const RegisterPage: React.FC = () => {
               <label htmlFor="register-password" className="block text-stone-700 font-bold text-sm mb-2">
                 {VI_LOCALES.auth.passwordLabel}
               </label>
-              <input
+              <PasswordField
                 id="register-password"
-                type="password"
                 autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={VI_LOCALES.auth.passwordPlaceholder}
-                className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
 
@@ -125,15 +127,13 @@ export const RegisterPage: React.FC = () => {
               <label htmlFor="register-confirm-password" className="block text-stone-700 font-bold text-sm mb-2">
                 Xác nhận mật khẩu
               </label>
-              <input
+              <PasswordField
                 id="register-confirm-password"
-                type="password"
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Nhập lại mật khẩu"
-                className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
 
@@ -149,7 +149,7 @@ export const RegisterPage: React.FC = () => {
             </Button>
           </form>
 
-          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-400"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
+          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-500"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
           <GoogleSignInButton disabled={isLoading} onActiveChange={setGoogleActive} onSuccess={googleDestination} />
 
           <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
