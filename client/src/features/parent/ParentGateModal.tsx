@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../../components/ui/Modal.js';
 import { Button } from '../../components/ui/Button.js';
 import {
@@ -51,6 +51,13 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
       fetchChallenge();
     }
   }, [isOpen]);
+
+  // The input is disabled while a challenge loads, so autoFocus cannot land on it and Modal focuses the
+  // close button instead. Move focus to the answer box once the new challenge is ready (also after a retry).
+  const answerRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (isOpen && challengeToken && !loadingChallenge) answerRef.current?.focus();
+  }, [isOpen, challengeToken, loadingChallenge]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,8 +114,8 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
           </div>
 
           <input
+            ref={answerRef}
             type="number"
-            autoFocus
             aria-label="Nhập kết quả phép tính"
             disabled={!challengeToken || loadingChallenge || isSubmitting}
             value={userAnswer}
