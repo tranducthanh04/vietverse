@@ -15,6 +15,10 @@ export interface ModalProps {
   ariaLabel?: string;
 }
 
+// Open modals share one body scroll lock. Counting them keeps the page locked until the last one
+// closes, whatever order React unmounts nested modals in (e.g. Parent Gate over the screen-time break).
+let openModalCount = 0;
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -61,11 +65,10 @@ export const Modal: React.FC<ModalProps> = ({
         first.focus();
       }
     };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (openModalCount++ === 0) document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKey);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      if (--openModalCount === 0) document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKey);
       previouslyFocused?.focus?.();
     };

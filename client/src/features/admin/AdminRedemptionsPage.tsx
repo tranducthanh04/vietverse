@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -108,6 +108,15 @@ export const AdminRedemptionsPage: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [orderError, setOrderError] = useState<string | null>(null);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  // Switching between the edit form and the cancel confirmation swaps the modal body, so move focus to
+  // the new step: "Quay lại" (the safe choice) on confirm, the status select when returning.
+  const orderStepRef = useRef<HTMLDivElement>(null);
+  const confirmStepShown = useRef(false);
+  useEffect(() => {
+    if (confirmingCancel === confirmStepShown.current) return;
+    confirmStepShown.current = confirmingCancel;
+    orderStepRef.current?.querySelector<HTMLElement>('button, select')?.focus();
+  }, [confirmingCancel]);
 
   // Inventory creation state
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -777,7 +786,7 @@ export const AdminRedemptionsPage: React.FC = () => {
       {/* Modal: Process / Cancel Order */}
       <Modal isOpen={!!editingId} onClose={handleCloseEditOrder} title="Xử Lý Đơn Đổi Quà">
         {confirmingCancel ? (
-          <div className="space-y-4">
+          <div ref={orderStepRef} className="space-y-4">
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-900 flex items-start space-x-2">
               <TriangleAlert className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
               <div className="space-y-1">
@@ -813,7 +822,7 @@ export const AdminRedemptionsPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div ref={orderStepRef} className="space-y-4">
             <div>
               <label htmlFor="redemption-status" className="block text-xs font-bold text-stone-700 mb-1">
                 Trạng thái đơn hàng

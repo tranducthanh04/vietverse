@@ -83,7 +83,7 @@ export const KidsLayout: React.FC = () => {
               aria-label="Chọn hồ sơ bé"
               aria-haspopup="true"
               aria-expanded={showChildPicker}
-              aria-controls="child-picker-menu"
+              aria-controls={showChildPicker ? "child-picker-menu" : undefined}
             >
               <EquippedAvatar child={activeChild} />
               <span className="font-bold font-display text-stone-800 text-sm md:text-base whitespace-nowrap truncate max-w-[5.5rem] sm:max-w-[10rem]">
