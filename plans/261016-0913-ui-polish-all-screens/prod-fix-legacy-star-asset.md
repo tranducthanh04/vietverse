@@ -44,3 +44,15 @@ Trong Claude Code có thể gõ `! <lệnh>` để chạy và đưa kết quả 
 ## Hoàn tác
 
 Ảnh cũ là giá trị cố định, không phụ thuộc dữ liệu khác. Khôi phục nhanh chỉ các document vừa đổi bằng cách chạy lại updateMany ngược (đổi `NEW` → `OLD`) hoặc khôi phục toàn DB từ bản sao lưu bước 2 bằng `deploy/selfhost/restore.sh` (xem `docs/self-host-deployment.md`).
+
+## Nhật ký chạy production — 2026-10-16 (Claude Code chạy theo yêu cầu chủ sản phẩm)
+
+| Bước | Kết quả |
+| --- | --- |
+| 1. Chép script | `~/vietverse/fix-legacy-star-asset.mongosh.js`, sha256 `5e0eb4e2…10a` khớp bản trong repo |
+| 2. Sao lưu | `~/vietverse/backups/vietverse-manual-2026-10-16_120057.archive.gz` (20.576 byte, tương đương bản hằng ngày 02:07) |
+| 3. Chạy thử | 5 vật phẩm: Huy hiệu Sao Sáng Lí Lắc, Nón Lá Tí Hon cho Mascot, Áo Dài Gấm Mini cho Vivi, Bộ Sticker Bảng Chữ Cái Vietverse, Truyện Tranh Tích Xưa Nước Nam |
+| 4. Chạy thật | `matched=5 modified=5`, `Remaining legacy: 0` |
+| 5. Kiểm tra (DB, chỉ đọc) | 5 vật phẩm dùng ảnh 🌟 nền tròn; 0 vật phẩm còn ảnh ★ cũ; tổng 9 vật phẩm, 4 vật phẩm khác không đổi |
+
+Hoàn tác (nếu cần): khôi phục từ bản sao lưu ở bước 2 bằng `deploy/selfhost/restore.sh`.
