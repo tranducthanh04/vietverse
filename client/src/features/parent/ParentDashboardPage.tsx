@@ -110,7 +110,7 @@ export const ParentDashboardPage: React.FC = () => {
           </Card>
           <Card className="p-4 bg-white border-cream-border text-center">
             <span className="text-xs text-stone-500 font-bold block mb-1">Chủ đề văn hóa</span>
-            <span className="text-3xl font-black font-display text-purple-600">
+            <span className="text-3xl font-black font-display text-secondary">
               {overview.cultureExplored}
             </span>
           </Card>
