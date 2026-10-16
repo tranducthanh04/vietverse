@@ -57,9 +57,9 @@ export function AdminRevenuePage() {
       : report && <>
         <p className="text-sm text-stone-600">Kỳ đang xem: {report.from ?? 'Từ đầu'} → {report.to ?? 'Hiện tại'}{query.isFetching ? ' · Đang cập nhật…' : ''}</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">{range.from || range.to ? 'Doanh thu trong kỳ' : 'Tổng doanh thu'}</p><p className="mt-2 text-2xl font-bold break-words">{money(report.totalRevenue)}</p></Card>
-          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Đơn đã thanh toán trong kỳ</p><p className="mt-2 text-2xl font-bold">{report.paidOrders.toLocaleString('vi-VN')}</p></Card>
-          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Tháng hiện tại ({report.currentMonth}), không theo bộ lọc</p><p className="mt-2 text-2xl font-bold break-words">{money(report.currentMonthRevenue)}</p></Card>
+          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">{range.from || range.to ? 'Doanh thu trong kỳ' : 'Tổng doanh thu'}</p><p className="mt-2 text-2xl font-bold break-words tabular-nums">{money(report.totalRevenue)}</p></Card>
+          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Đơn đã thanh toán trong kỳ</p><p className="mt-2 text-2xl font-bold tabular-nums">{report.paidOrders.toLocaleString('vi-VN')}</p></Card>
+          <Card className="p-5 border border-cream-border"><p className="text-sm text-stone-500">Tháng hiện tại ({report.currentMonth}), không theo bộ lọc</p><p className="mt-2 text-2xl font-bold break-words tabular-nums">{money(report.currentMonthRevenue)}</p></Card>
         </div>
         {report.undatedOrders > 0 && <p role="status" className="rounded-xl bg-amber-50 p-4 text-amber-900">Có {report.undatedOrders} đơn đã thanh toán thiếu ngày thanh toán: không được tính vào tổng doanh thu, theo gói hay bảng tháng. Cần đối soát, không tự lấy ngày tạo đơn thay thế.</p>}
         {report.paidOrders === 0 && <p className="rounded-xl bg-stone-100 p-4">Chưa có đơn đã thanh toán trong kỳ này. Doanh thu là 0; không dùng giao dịch test làm dữ liệu bán hàng.</p>}
@@ -68,7 +68,7 @@ export function AdminRevenuePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 pb-4">
             {(['monthly', 'yearly'] as const).map(plan => <div key={plan} className="bg-stone-50 rounded-xl p-4">
               <h3 className="font-bold">{plan === 'monthly' ? 'Gói tháng' : 'Gói năm'}</h3>
-              <p>{report.byPlan[plan].orders.toLocaleString('vi-VN')} đơn · {money(report.byPlan[plan].revenue)}</p>
+              <p className="tabular-nums">{report.byPlan[plan].orders.toLocaleString('vi-VN')} đơn · {money(report.byPlan[plan].revenue)}</p>
             </div>)}
           </div>
         </section>
@@ -77,7 +77,7 @@ export function AdminRevenuePage() {
           <div className="overflow-x-auto">
             <table aria-label="Doanh thu theo tháng" className="w-full text-sm text-left">
               <thead className="bg-stone-50"><tr><th scope="col" className="px-4 py-3">Tháng</th><th scope="col" className="px-4 py-3 text-right">Đơn đã thanh toán</th><th scope="col" className="px-4 py-3 text-right">Doanh thu</th></tr></thead>
-              <tbody>{report.series.map(row => <tr key={row.month} className="border-t border-cream-border"><th scope="row" className="px-4 py-3">{row.month}</th><td className="px-4 py-3 text-right">{row.orders.toLocaleString('vi-VN')}</td><td className="px-4 py-3 text-right whitespace-nowrap">{money(row.revenue)}</td></tr>)}</tbody>
+              <tbody>{report.series.map(row => <tr key={row.month} className="border-t border-cream-border"><th scope="row" className="px-4 py-3 tabular-nums">{row.month}</th><td className="px-4 py-3 text-right tabular-nums">{row.orders.toLocaleString('vi-VN')}</td><td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">{money(row.revenue)}</td></tr>)}</tbody>
             </table>
           </div>
           <p className="text-xs text-stone-500 p-4">Chỉ hiển thị tháng có đơn đã thanh toán trong khoảng đã chọn. Không sửa hoặc tạo đơn từ báo cáo này.</p>

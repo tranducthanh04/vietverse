@@ -76,7 +76,7 @@ const RuleRow: React.FC<{ rule: PointRule }> = ({ rule }) => {
       <td className="py-3 pr-4">
         <label htmlFor={inputId} className="font-bold text-stone-800 block">{meta?.label ?? rule.key}</label>
         <span className="text-xs text-stone-500 block">{meta?.hint}</span>
-        <span className="text-xs text-stone-400 block">Mặc định: {rule.defaultAmount} điểm</span>
+        <span className="text-xs text-stone-500 block tabular-nums">Mặc định: {rule.defaultAmount} điểm</span>
       </td>
       <td className="py-3 pr-4">
         <input
@@ -142,11 +142,11 @@ export const AdminPointRulesPage: React.FC = () => {
         {error ? (
           <QueryErrorState error={error} onRetry={() => refetch()} />
         ) : isLoading ? (
-          <div className="py-12 text-center text-sm text-stone-500">Đang tải quy tắc điểm...</div>
+          <div className="py-12 text-center text-sm text-stone-500">Đang tải quy tắc điểm…</div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="text-xs uppercase tracking-wider text-stone-400">
+              <tr className="text-xs uppercase tracking-wider text-stone-500">
                 <th className="pb-2 pr-4 font-bold">Quy tắc</th>
                 <th className="pb-2 pr-4 font-bold">ViVi Points</th>
                 <th className="pb-2 pr-4 font-bold">Trạng thái</th>

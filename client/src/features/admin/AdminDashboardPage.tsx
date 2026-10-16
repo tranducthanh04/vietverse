@@ -56,7 +56,7 @@ export const AdminDashboardPage: React.FC = () => {
     return (
       <div className="py-12 text-center">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="font-bold text-stone-600">Đang tải số liệu hệ thống...</p>
+        <p className="font-bold text-stone-600">Đang tải số liệu hệ thống…</p>
       </div>
     );
   }
@@ -132,7 +132,7 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-xs font-bold text-stone-500">{stat.label}</span>
               <div className={`p-2 rounded-xl ${stat.bg}`}>{stat.icon}</div>
             </div>
-            <span className="text-2xl font-black font-display text-stone-800 block">
+            <span className="text-2xl font-black font-display text-stone-800 block tabular-nums">
               {stat.value}
             </span>
           </Card>
@@ -144,17 +144,17 @@ export const AdminDashboardPage: React.FC = () => {
         <div className="p-4 bg-stone-50 border-b border-cream-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <History className="w-5 h-5 text-primary" />
-            <h3 className="font-bold font-display text-stone-800 text-base">
+            <h2 className="font-bold font-display text-stone-800 text-base">
               Nhật Ký Thao Tác Quản Trị (Audit Trail)
-            </h3>
+            </h2>
           </div>
-          <span className="text-xs font-bold text-stone-400">
+          <span className="text-xs font-bold text-stone-500 tabular-nums">
             {auditLogs.length} sự kiện gần nhất
           </span>
         </div>
 
         {auditLogs.length === 0 ? (
-          <div className="p-8 text-center text-stone-400 text-sm">
+          <div className="p-8 text-center text-stone-500 text-sm">
             Chưa có thao tác quản trị nào được ghi nhận.
           </div>
         ) : (
@@ -172,7 +172,7 @@ export const AdminDashboardPage: React.FC = () => {
               <tbody className="divide-y divide-cream-border">
                 {auditLogs.slice(0, 15).map((log: any) => (
                   <tr key={log._id} className="hover:bg-stone-50/80">
-                    <td className="px-5 py-3 text-stone-400 whitespace-nowrap">
+                    <td className="px-5 py-3 text-stone-500 whitespace-nowrap tabular-nums">
                       {new Date(log.createdAt).toLocaleString('vi-VN')}
                     </td>
                     <td className="px-5 py-3 font-bold text-stone-800">

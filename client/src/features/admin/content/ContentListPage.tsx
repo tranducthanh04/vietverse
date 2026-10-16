@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../lib/api.js";
 import { contentApi } from "./content.api.js";
@@ -21,10 +21,24 @@ export function ContentListPage({ kind }: { kind: ContentKind }) {
   return <ContentList key={kind} kind={kind} />;
 }
 function ContentList({ kind }: { kind: ContentKind }) {
-  const [search, setSearch] = useState("");
-  const [state, setState] = useState("");
-  const [group, setGroup] = useState("");
-  const [page, setPage] = useState(1);
+  // Keep search, filters and page in the URL so the list is shareable and survives the back button.
+  const [params, setParams] = useSearchParams();
+  const search = params.get("q") ?? "";
+  const state = params.get("state") ?? "";
+  const group = params.get("group") ?? "";
+  const pageParam = Number(params.get("page"));
+  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const updateParams = (
+    next: Record<string, string>,
+    opts?: { replace?: boolean },
+  ) => {
+    const nextParams = new URLSearchParams(params);
+    for (const [key, val] of Object.entries(next)) {
+      if (val === "") nextParams.delete(key);
+      else nextParams.set(key, val);
+    }
+    setParams(nextParams, opts);
+  };
   const query = useQuery({
     queryKey: ["cms-list", kind, search, state, group, page],
     queryFn: () =>
@@ -62,19 +76,15 @@ function ContentList({ kind }: { kind: ContentKind }) {
           label="Tìm nội dung"
           name="search"
           value={search}
-          onChange={(text) => {
-            setSearch(text.slice(0, 50));
-            setPage(1);
-          }}
+          onChange={(text) =>
+            updateParams({ q: text.slice(0, 50), page: "" }, { replace: true })
+          }
         />
         <label className="cms-field">
           <span>Trạng thái</span>
           <select
             value={state}
-            onChange={(e) => {
-              setState(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => updateParams({ state: e.target.value, page: "" })}
           >
             <option value="">Tất cả</option>
             {Object.entries(states).map(([key, label]) => (
@@ -89,10 +99,7 @@ function ContentList({ kind }: { kind: ContentKind }) {
             <span>{kind === "lesson" ? "Chặng" : "Chủ đề"}</span>
             <select
               value={group}
-              onChange={(e) => {
-                setGroup(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => updateParams({ group: e.target.value, page: "" })}
             >
               <option value="">Tất cả</option>
               {kind === "lesson"
@@ -163,7 +170,12 @@ function ContentList({ kind }: { kind: ContentKind }) {
             </div>
           )}
           <div className="cms-actions cms-pager">
-            <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <button
+              disabled={page === 1}
+              onClick={() =>
+                updateParams({ page: page - 1 <= 1 ? "" : String(page - 1) })
+              }
+            >
               Trang trước
             </button>
             <span>
@@ -171,7 +183,7 @@ function ContentList({ kind }: { kind: ContentKind }) {
             </span>
             <button
               disabled={page * query.data.pageSize >= query.data.total}
-              onClick={() => setPage(page + 1)}
+              onClick={() => updateParams({ page: String(page + 1) })}
             >
               Trang sau
             </button>
