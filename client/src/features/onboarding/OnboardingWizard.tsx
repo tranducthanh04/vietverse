@@ -192,7 +192,7 @@ export const OnboardingWizard: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ví dụ: Minh, Bắp…"
-                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-400 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
+                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
                     autoFocus
                   />
                 </div>

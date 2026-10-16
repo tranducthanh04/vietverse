@@ -205,12 +205,12 @@ export const StoryDetailPage: React.FC = () => {
                     aria-label="Tua thời gian bài đồng dao"
                   />
                   {narration.mode === "asset" && narration.duration > 0 ? (
-                    <div className="flex justify-between text-xs font-mono font-bold text-stone-500">
+                    <div className="flex justify-between text-xs font-mono font-bold text-stone-600">
                       <span>{Math.floor(narration.currentTime)}s</span>
                       <span>{Math.floor(narration.duration)}s</span>
                     </div>
                   ) : (
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-stone-600">
                       {narration.mode === "tts"
                         ? "Đọc từng dòng; dừng rồi bấm nghe để đọc lại từ đầu."
                         : "Đang chờ thời lượng bản audio."}

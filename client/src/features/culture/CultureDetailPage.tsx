@@ -348,7 +348,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           </div>
 
           {submitError && (
-            <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
+            <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
               <CircleAlert className="w-5 h-5 shrink-0 text-red-500" />
               <span>{submitError}</span>
             </div>

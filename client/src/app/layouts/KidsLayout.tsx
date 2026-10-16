@@ -10,6 +10,7 @@ import { useChildStore } from '../../store/childStore.js';
 import { formatPoints } from '../../lib/utils.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
 import { EquippedAvatar } from '../../features/points/EquippedAvatar.js';
+import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const KidsLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -69,6 +70,7 @@ export const KidsLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col justify-between pb-24 md:pb-8 font-sans">
+      <SkipLink />
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
@@ -167,7 +169,7 @@ export const KidsLayout: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none flex-1">
         <Outlet />
       </main>
 
