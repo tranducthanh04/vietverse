@@ -79,7 +79,7 @@ export const KidsLayout: React.FC = () => {
               onClick={() => setShowChildPicker(!showChildPicker)}
               className="flex items-center gap-2 bg-cream pl-2 pr-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px] min-w-0"
               aria-label="Chọn hồ sơ bé"
-              aria-haspopup="menu"
+              aria-haspopup="true"
               aria-expanded={showChildPicker}
               aria-controls="child-picker-menu"
             >
@@ -94,10 +94,10 @@ export const KidsLayout: React.FC = () => {
             {showChildPicker && (
               <div
                 id="child-picker-menu"
-                aria-label="Chọn hồ sơ bé"
+                aria-labelledby="child-picker-label"
                 className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in"
               >
-                <span className="text-xs font-bold text-stone-600 px-3 py-1 block">Chọn hồ sơ bé:</span>
+                <span id="child-picker-label" className="text-xs font-bold text-stone-600 px-3 py-1 block">Chọn hồ sơ bé:</span>
                 {children.map((c) => (
                   <button
                     key={c._id}

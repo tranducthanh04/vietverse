@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye } from '../../components/ui/icons.js';
+import { Eye, EyeOff } from '../../components/ui/icons.js';
 import { cn } from '../../lib/utils.js';
 
 type PasswordFieldProps = React.InputHTMLAttributes<HTMLInputElement>;
@@ -29,7 +29,7 @@ export const PasswordField: React.FC<PasswordFieldProps> = ({ className, ...prop
         aria-pressed={visible}
         className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-stone-500 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       >
-        <Eye className="w-5 h-5" />
+        {visible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
       </button>
     </div>
   );

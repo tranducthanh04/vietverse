@@ -34,7 +34,7 @@ export const PublicLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between font-sans text-on-surface">
+    <div className="min-h-dvh bg-surface flex flex-col justify-between font-sans text-on-surface">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:inline-flex focus:items-center focus:min-h-[44px] focus:px-5 focus:py-2.5 focus:rounded-full focus:bg-primary focus:text-white focus:font-bold focus:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"

@@ -61,10 +61,11 @@ export const Modal: React.FC<ModalProps> = ({
         first.focus();
       }
     };
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKey);
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKey);
       previouslyFocused?.focus?.();
     };
