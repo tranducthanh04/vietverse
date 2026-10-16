@@ -8,6 +8,7 @@ import {
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const ParentLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export const ParentLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col justify-between font-sans text-stone-800">
+      <SkipLink />
       {/* Top Header */}
       <header className="bg-white border-b-2 border-cream-border px-4 sm:px-6 py-3 sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
@@ -43,11 +45,11 @@ export const ParentLayout: React.FC = () => {
               aria-label="Quay lại màn hình học của bé"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Về màn hình bé</span>
+              <span className="hidden sm:inline">Về màn hình bé</span>
             </button>
 
             <div>
-              <h1 className="text-lg sm:text-xl font-bold font-display text-primary">
+              <h1 className="text-lg sm:text-xl whitespace-nowrap font-bold font-display text-primary">
                 {VI_LOCALES.parentPortal.title}
               </h1>
               <span className="text-xs text-stone-500 font-semibold hidden sm:inline">
@@ -99,7 +101,7 @@ export const ParentLayout: React.FC = () => {
       </div>
 
       {/* Main Outlet */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none flex-1 max-w-5xl w-full mx-auto p-6">
         <Outlet />
       </main>
     </div>

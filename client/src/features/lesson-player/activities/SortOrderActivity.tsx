@@ -44,17 +44,17 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center max-w-xl w-full mx-auto">
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
 
       {/* Assembly line / Result boxes */}
-      <div className="flex items-center space-x-3 bg-white border-4 border-accent-light rounded-3xl p-6 shadow-sm min-h-[100px] mb-8">
+      <div className="w-full flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white border-4 border-accent-light rounded-3xl p-4 sm:p-6 shadow-sm min-h-[100px] mb-8">
         {targetOrder.map((_, idx) => (
           <div
             key={idx}
-            className="w-16 h-16 border-3 border-dashed border-stone-300 rounded-2xl flex items-center justify-center bg-cream text-3xl font-display font-black text-primary shadow-inner"
+            className="min-w-[4.5rem] h-14 sm:h-16 px-3 border-3 border-dashed border-stone-300 rounded-2xl flex items-center justify-center bg-cream text-xl sm:text-2xl font-display font-black text-primary shadow-inner"
           >
             {selectedItems[idx] || ''}
           </div>
@@ -62,12 +62,12 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
       </div>
 
       {/* Available choices */}
-      <div className="flex items-center space-x-4 mb-6">
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
         {availableItems.map((item, idx) => (
           <button
             key={idx}
             onClick={() => handleSelectItem(item, idx)}
-            className="w-18 h-18 bg-white border-3 border-cream-border rounded-2xl text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:scale-105 active:scale-95 transition-all p-4 min-h-[58px] min-w-[58px]"
+            className="min-w-[4.5rem] h-14 sm:h-16 px-4 bg-white border-3 border-cream-border rounded-2xl text-xl sm:text-2xl font-display font-black text-stone-800 shadow-kid hover:border-accent active:translate-y-1 active:shadow-none transition-all"
           >
             {item}
           </button>
@@ -77,7 +77,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
       {selectedItems.length > 0 && selectedItems.length < targetOrder.length && (
         <button
           onClick={handleReset}
-          className="flex items-center space-x-1 text-sm font-bold text-stone-500 hover:text-stone-800"
+          className="flex items-center gap-1 text-sm font-bold text-stone-500 hover:text-stone-800 min-h-[44px] px-3"
         >
           <RotateCcw className="w-4 h-4" />
           <span>Xếp lại</span>

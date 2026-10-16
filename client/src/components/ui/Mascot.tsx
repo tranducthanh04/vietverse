@@ -5,12 +5,15 @@ export interface MascotProps {
   mood?: 'happy' | 'cheering' | 'talking' | 'listening' | 'thinking';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  /** Accessible name when the mascot carries meaning; omit to keep it decorative (aria-hidden). */
+  label?: string;
 }
 
 export const Mascot: React.FC<MascotProps> = ({
   mood = 'happy',
   size = 'md',
   className,
+  label,
 }) => {
   const sizeMap = {
     sm: 'w-14 h-14',
@@ -30,7 +33,13 @@ export const Mascot: React.FC<MascotProps> = ({
         className
       )}
     >
-      <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-md">
+      <svg
+        viewBox="0 0 120 120"
+        className="w-full h-full drop-shadow-md"
+        role={label ? 'img' : undefined}
+        aria-label={label}
+        aria-hidden={label ? undefined : true}
+      >
         {/* Five-pointed chubby cheerful Star Body */}
         <defs>
           <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">

@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
+import { formatPoints } from '../../lib/utils.js';
 import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { Mascot } from '../../components/ui/Mascot.js';
@@ -171,10 +172,10 @@ export const PointsShopPage: React.FC = () => {
           <div className="md:col-span-8 flex flex-col gap-3">
             <h1 id="points-balance-title" className="font-display text-lg md:text-xl font-extrabold text-on-secondary-container flex items-center gap-2">
               <Sparkles className="w-5 h-5 shrink-0" />
-              ViVi Points của bé{activeChild?.name ? ` ${activeChild.name}` : ''}
+              ViVi Points của {!activeChild?.name ? 'bé' : /^bé\s/i.test(activeChild.name) ? activeChild.name : `bé ${activeChild.name}`}
             </h1>
             <p className="font-display text-4xl md:text-5xl text-secondary font-extrabold tracking-tight" data-testid="points-balance">
-              {currentPoints} ViVi Points
+              {formatPoints(currentPoints)} ViVi Points
             </p>
             <p className="text-sm md:text-base text-on-secondary-container font-medium leading-relaxed">
               Đây là số ViVi Points hiện có và được cập nhật sau mỗi hoạt động.
@@ -220,7 +221,7 @@ export const PointsShopPage: React.FC = () => {
         {historyQuery.error ? (
           <QueryErrorState error={historyQuery.error} onRetry={() => historyQuery.refetch()} />
         ) : historyQuery.isLoading ? (
-          <div className="py-8 text-center text-sm font-bold text-on-surface-variant">Đang tải lịch sử điểm...</div>
+          <div className="py-8 text-center text-sm font-bold text-on-surface-variant">Đang tải lịch sử điểm…</div>
         ) : history.length === 0 ? (
           <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-sm text-on-surface-variant font-medium">
             Chưa có hoạt động ViVi Points. Bé hãy bắt đầu học Bài 1 để nhận ViVi Points đầu tiên nhé!
@@ -273,7 +274,7 @@ export const PointsShopPage: React.FC = () => {
                 disabled={historyQuery.isFetchingNextPage}
                 className="self-center px-5 py-2 rounded-full font-bold text-sm bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 disabled:opacity-60"
               >
-                {historyQuery.isFetchingNextPage ? 'Đang tải...' : 'Xem thêm'}
+                {historyQuery.isFetchingNextPage ? 'Đang tải…' : 'Xem thêm'}
               </button>
             )}
           </>
@@ -311,7 +312,7 @@ export const PointsShopPage: React.FC = () => {
         ) : isLoading ? (
           <div className="text-center py-16">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="font-bold text-on-surface-variant">Đang mở tủ quà tặng...</p>
+            <p className="font-bold text-on-surface-variant">Đang mở tủ quà tặng…</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <p className="bg-surface-container-lowest p-6 rounded-2xl text-center text-sm text-on-surface-variant font-medium">
@@ -436,9 +437,11 @@ export const PointsShopPage: React.FC = () => {
                 <span className="text-xs font-bold text-on-surface uppercase tracking-wider block">
                   Địa Chỉ Nhận Quà (Miễn Phí Vận Chuyển):
                 </span>
+                <label className="block text-sm font-bold" htmlFor="shipping-recipient">Tên người nhận</label>
                 <input
+                  id="shipping-recipient"
                   type="text"
-                  aria-label="Tên người nhận (Phụ huynh)"
+                  autoComplete="name"
                   placeholder="Tên người nhận (Phụ huynh)"
                   value={shippingAddress.recipientName}
                   onChange={(e) =>
@@ -446,9 +449,12 @@ export const PointsShopPage: React.FC = () => {
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
+                <label className="block text-sm font-bold" htmlFor="shipping-phone">Số điện thoại</label>
                 <input
+                  id="shipping-phone"
                   type="tel"
-                  aria-label="Số điện thoại nhận hàng"
+                  inputMode="tel"
+                  autoComplete="tel"
                   placeholder="Số điện thoại nhận hàng"
                   value={shippingAddress.phone}
                   onChange={(e) =>
@@ -456,9 +462,11 @@ export const PointsShopPage: React.FC = () => {
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
+                <label className="block text-sm font-bold" htmlFor="shipping-street">Địa chỉ</label>
                 <input
+                  id="shipping-street"
                   type="text"
-                  aria-label="Địa chỉ số nhà, tên đường, phường/xã"
+                  autoComplete="street-address"
                   placeholder="Địa chỉ số nhà, tên đường, phường/xã"
                   value={shippingAddress.street}
                   onChange={(e) =>
@@ -500,7 +508,7 @@ export const PointsShopPage: React.FC = () => {
                 disabled={isSubmitting}
                 className="btn-3d-primary flex-1 py-3 rounded-full font-bold text-sm select-none"
               >
-                {isSubmitting ? 'Đang đổi quà...' : 'Xác Nhận Đổi Quà'}
+                {isSubmitting ? 'Đang đổi quà…' : 'Xác Nhận Đổi Quà'}
               </button>
             </div>
           </div>

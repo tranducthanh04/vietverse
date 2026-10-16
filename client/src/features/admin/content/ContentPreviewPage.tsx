@@ -27,11 +27,11 @@ export function ContentPreviewPage({ kind }: { kind: ContentKind }) {
   const view = query.data;
   return (
     <div className="cms">
-      <Link className="cms-link" to={`${paths[kind]}/${id}`}>
-        Về biên tập
+      <Link className="cms-back" to={`${paths[kind]}/${id}`}>
+        <span aria-hidden="true">←</span> Về biên tập
       </Link>
       <h1>Xem trước bản nháp {valid ? version : ""} — chỉ admin</h1>
-      <p>Không lưu tiến độ, không cộng điểm, không ghi âm.</p>
+      <p className="cms-meta">Không lưu tiến độ, không cộng điểm, không ghi âm.</p>
       {!valid ? (
         <p role="alert">
           Thiếu phiên bản nháp hợp lệ. Mở từ editor sau khi lưu.
@@ -47,7 +47,7 @@ export function ContentPreviewPage({ kind }: { kind: ContentKind }) {
       ) : (
         view && (
           <>
-            <aside>
+            {(view.source || view.editorialNotes.length > 0) && <aside>
               {view.source && (
                 <p>
                   Nguồn: {view.source.heading} · {view.source.capturedAt}
@@ -58,7 +58,7 @@ export function ContentPreviewPage({ kind }: { kind: ContentKind }) {
                   {note.field}: {note.message}
                 </p>
               ))}
-            </aside>
+            </aside>}
             {view.issues.length > 0 && (
               <div role="alert">
                 Nháp chưa đủ điều kiện xuất bản.

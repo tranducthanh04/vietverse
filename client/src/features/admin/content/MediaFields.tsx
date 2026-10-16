@@ -52,6 +52,7 @@ export function MediaAsset({
   ) : (
     <img
       key={url}
+      className="cms-media-img"
       src={url}
       alt="Ảnh nội dung"
       onError={() => setFailedUrl(url)}

@@ -8,6 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { AdminRedemptionsPage } from '../features/admin/AdminRedemptionsPage.js';
 
@@ -48,7 +49,9 @@ it('sends a relative stock adjustment instead of overwriting a stale displayed c
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <AdminRedemptionsPage />
+      <MemoryRouter>
+        <AdminRedemptionsPage />
+      </MemoryRouter>
     </QueryClientProvider>
   );
   fireEvent.click(screen.getByRole('button', { name: /Kho vật phẩm/ }));
@@ -82,7 +85,9 @@ it('allows notes but does not offer reopening a cancelled order', async () => {
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <AdminRedemptionsPage />
+      <MemoryRouter>
+        <AdminRedemptionsPage />
+      </MemoryRouter>
     </QueryClientProvider>
   );
   fireEvent.click(await screen.findByRole('button', { name: 'Xử lý đơn' }));

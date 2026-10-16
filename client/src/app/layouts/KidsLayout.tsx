@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   DomainIcon,
@@ -7,8 +7,10 @@ import {
 } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { useChildStore } from '../../store/childStore.js';
+import { formatPoints } from '../../lib/utils.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
 import { EquippedAvatar } from '../../features/points/EquippedAvatar.js';
+import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const KidsLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +19,30 @@ export const KidsLayout: React.FC = () => {
 
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [showChildPicker, setShowChildPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Close the child switcher on outside click or Escape, returning focus to the trigger.
+  useEffect(() => {
+    if (!showChildPicker) return;
+    const handlePointer = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowChildPicker(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowChildPicker(false);
+        pickerBtnRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [showChildPicker]);
 
   const handleOpenParent = () => {
     // Check if parent gate was already unlocked recently in this session (15 mins)
@@ -44,27 +70,36 @@ export const KidsLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col justify-between pb-24 md:pb-8 font-sans">
+      <SkipLink />
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
           {/* Active Child Profile & Switcher */}
-          <div className="relative">
+          <div className="relative" ref={pickerRef}>
             <button
+              ref={pickerBtnRef}
               onClick={() => setShowChildPicker(!showChildPicker)}
-              className="flex items-center space-x-2 bg-cream px-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px]"
+              className="flex items-center gap-2 bg-cream pl-2 pr-3 py-1.5 rounded-2xl border-2 border-cream-border hover:border-accent transition-colors min-h-[44px] min-w-0"
               aria-label="Chọn hồ sơ bé"
+              aria-haspopup="true"
+              aria-expanded={showChildPicker}
+              aria-controls={showChildPicker ? "child-picker-menu" : undefined}
             >
               <EquippedAvatar child={activeChild} />
-              <span className="font-bold font-display text-stone-800 text-sm md:text-base">
+              <span className="font-bold font-display text-stone-800 text-sm md:text-base whitespace-nowrap truncate max-w-[5.5rem] sm:max-w-[10rem]">
                 {activeChild?.name || 'Bé yêu'}
               </span>
-              <span className="text-[10px] text-stone-400">▼</span>
+              <span className="text-[10px] text-stone-500" aria-hidden="true">▼</span>
             </button>
 
             {/* Child Switcher Dropdown */}
             {showChildPicker && (
-              <div className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in">
-                <span className="text-xs font-bold text-stone-400 px-3 py-1 block">Chọn hồ sơ bé:</span>
+              <div
+                id="child-picker-menu"
+                aria-labelledby="child-picker-label"
+                className="absolute top-14 left-0 bg-white border-2 border-cream-border rounded-2xl shadow-xl p-2 w-52 z-50 animate-fade-in"
+              >
+                <span id="child-picker-label" className="text-xs font-bold text-stone-600 px-3 py-1 block">Chọn hồ sơ bé:</span>
                 {children.map((c) => (
                   <button
                     key={c._id}
@@ -96,26 +131,26 @@ export const KidsLayout: React.FC = () => {
           </div>
 
           {/* Points Pill & Parent Gate Link */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex items-center space-x-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
               <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
-                {activeChild?.viviPoints || 0}
+                {formatPoints(activeChild?.viviPoints || 0)}
               </span>
             </div>
 
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
               onClick={handleOpenParent}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
               title="Vào Góc Phụ Huynh (yêu cầu mở khóa)"
               aria-label="Vào Góc Phụ Huynh (yêu cầu mở khóa)"
             >
               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Lock className="w-3.5 h-3.5 text-primary" />
               </div>
-              <span className="font-bold text-xs sm:text-sm text-stone-800">Góc Phụ Huynh</span>
+              <span className="font-bold text-xs sm:text-sm text-stone-800 whitespace-nowrap"><span className="sm:hidden">Phụ huynh</span><span className="hidden sm:inline">Góc Phụ Huynh</span></span>
             </button>
 
             {user?.role === 'admin' && (
@@ -134,7 +169,7 @@ export const KidsLayout: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none flex-1">
         <Outlet />
       </main>
 

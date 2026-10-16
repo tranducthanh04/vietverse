@@ -46,9 +46,9 @@ export const ParentDashboardPage: React.FC = () => {
 
   if (isLoading || !progressData) {
     return (
-      <div className="py-12 text-center">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="font-bold text-stone-600">Đang tổng hợp tiến độ của bé...</p>
+      <div className="py-12 text-center" role="status" aria-live="polite">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" aria-hidden="true" />
+        <p className="font-bold text-stone-600">Đang tổng hợp tiến độ của bé…</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export const ParentDashboardPage: React.FC = () => {
           </Card>
           <Card className="p-4 bg-white border-cream-border text-center">
             <span className="text-xs text-stone-500 font-bold block mb-1">Chủ đề văn hóa</span>
-            <span className="text-3xl font-black font-display text-purple-600">
+            <span className="text-3xl font-black font-display text-secondary">
               {overview.cultureExplored}
             </span>
           </Card>
@@ -161,10 +161,17 @@ export const ParentDashboardPage: React.FC = () => {
                   <span>Mức độ làm quen</span>
                   <span>{comp.percentage}%</span>
                 </div>
-                <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden">
+                <div
+                  className="w-full h-3 bg-stone-100 rounded-full overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={comp.percentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Mức độ làm quen ${comp.name}`}
+                >
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-700 ease-out"
-                    style={{ width: `${comp.percentage}%` }}
+                    className="h-full w-full bg-primary rounded-full origin-left transition-transform duration-300 ease-out"
+                    style={{ transform: `scaleX(${comp.percentage / 100})` }}
                   />
                 </div>
               </div>

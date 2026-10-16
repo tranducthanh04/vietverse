@@ -7,6 +7,7 @@ import {
 } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ export const AdminLayout: React.FC = () => {
   if (user?.role !== 'admin') return null;
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col font-sans text-stone-800">
+      <SkipLink />
       {/* Top Header */}
       <header className="bg-stone-900 text-white px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center space-x-3 sm:space-x-4">
@@ -43,9 +45,9 @@ export const AdminLayout: React.FC = () => {
             aria-label="Quay lại ứng dụng khám phá của bé"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" />
-            <span>Về ứng dụng</span>
+            <span className="hidden sm:inline">Về ứng dụng</span>
           </button>
-          <span className="font-display font-black text-lg sm:text-xl text-accent tracking-wide select-none">
+          <span className="font-display font-black text-base sm:text-xl whitespace-nowrap text-accent tracking-wide select-none">
             VIETVERSE ADMIN
           </span>
         </div>
@@ -119,7 +121,7 @@ export const AdminLayout: React.FC = () => {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-6xl w-full">
+        <main id="main-content" tabIndex={-1} className="focus:outline-none flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-6xl w-full">
           <Outlet />
         </main>
       </div>

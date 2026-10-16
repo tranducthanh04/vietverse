@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import {
   Users,
   Search,
   Sparkles,
   Eye,
-  X,
   Volume2,
   BookOpen,
   Coins,
@@ -14,12 +14,24 @@ import {
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { Button } from '../../components/ui/Button.js';
+import { Modal } from '../../components/ui/Modal.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 
 export const AdminLearnersPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedAge, setSelectedAge] = useState<string>('all');
+  const [params, setParams] = useSearchParams();
+  const searchTerm = params.get('q') ?? '';
+  const selectedAge = params.get('age') ?? 'all';
   const [selectedLearnerId, setSelectedLearnerId] = useState<string | null>(null);
+
+  // Keep filters and search in the URL so views are shareable and the back button restores them.
+  const updateParams = (next: Record<string, string>, opts?: { replace?: boolean }) => {
+    const nextParams = new URLSearchParams(params);
+    for (const [key, val] of Object.entries(next)) {
+      if (val === '') nextParams.delete(key);
+      else nextParams.set(key, val);
+    }
+    setParams(nextParams, opts);
+  };
 
   const {
     data: learners = [],
@@ -78,8 +90,8 @@ export const AdminLearnersPage: React.FC = () => {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-stone-400 uppercase">Tổng số bé</span>
-            <span className="text-2xl font-black font-display text-stone-800 block">
+            <span className="text-xs font-bold text-stone-500 uppercase">Tổng số bé</span>
+            <span className="text-2xl font-black font-display text-stone-800 block tabular-nums">
               {learners.length} học viên
             </span>
           </div>
@@ -90,8 +102,8 @@ export const AdminLearnersPage: React.FC = () => {
             <Cake className="w-6 h-6 text-amber-600" />
           </div>
           <div>
-            <span className="text-xs font-bold text-stone-400 uppercase">Phân bố độ tuổi</span>
-            <span className="text-sm font-bold text-stone-700 block">
+            <span className="text-xs font-bold text-stone-500 uppercase">Phân bố độ tuổi</span>
+            <span className="text-sm font-bold text-stone-700 block tabular-nums">
               5-6T: <strong>{countAge56}</strong> bé | 6-8T: <strong>{countAge68}</strong> bé
             </span>
           </div>
@@ -102,8 +114,8 @@ export const AdminLearnersPage: React.FC = () => {
             <Sparkles className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
-            <span className="text-xs font-bold text-stone-400 uppercase">ViVi Points lưu hành</span>
-            <span className="text-2xl font-black font-display text-emerald-700 block">
+            <span className="text-xs font-bold text-stone-500 uppercase">ViVi Points lưu hành</span>
+            <span className="text-2xl font-black font-display text-emerald-700 block tabular-nums">
               {totalPoints} Points
             </span>
           </div>
@@ -121,7 +133,7 @@ export const AdminLearnersPage: React.FC = () => {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setSelectedAge(tab.id)}
+              onClick={() => updateParams({ age: tab.id === 'all' ? '' : tab.id })}
               className={`px-3 py-1.5 rounded-xl font-bold text-xs whitespace-nowrap transition-colors min-h-[44px] ${
                 selectedAge === tab.id
                   ? 'bg-primary text-white shadow-sm'
@@ -138,10 +150,10 @@ export const AdminLearnersPage: React.FC = () => {
           <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
           <input
             type="text"
-            placeholder="Tìm tên bé hoặc phụ huynh..."
-                aria-label="Tìm tên bé hoặc phụ huynh"
+            placeholder="Tìm tên bé hoặc phụ huynh…"
+            aria-label="Tìm tên bé hoặc phụ huynh"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => updateParams({ q: e.target.value }, { replace: true })}
             className="w-full pl-9 pr-3 py-1.5 text-xs border border-cream-border rounded-xl focus:outline-none focus:border-primary min-h-[44px]"
           />
         </div>
@@ -152,7 +164,7 @@ export const AdminLearnersPage: React.FC = () => {
       ) : isLoading ? (
         <div className="py-12 text-center">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <span className="text-stone-500 text-sm font-bold">Đang tải danh sách học viên...</span>
+          <span className="text-stone-500 text-sm font-bold">Đang tải danh sách học viên…</span>
         </div>
       ) : filteredLearners.length === 0 ? (
         <div className="bg-white rounded-2xl border border-cream-border p-12 text-center">
@@ -183,7 +195,7 @@ export const AdminLearnersPage: React.FC = () => {
                         </div>
                         <div>
                           <span className="font-bold text-stone-800 block">{child.name}</span>
-                          <span className="text-xs text-stone-400">
+                          <span className="text-xs text-stone-500">
                             Ngày tạo: {new Date(child.createdAt).toLocaleDateString('vi-VN')}
                           </span>
                         </div>
@@ -198,20 +210,20 @@ export const AdminLearnersPage: React.FC = () => {
                       <span className="font-bold text-stone-800 block text-xs">
                         {child.parentId?.displayName || 'Phụ huynh'}
                       </span>
-                      <span className="text-xs text-stone-400">{child.parentId?.email}</span>
+                      <span className="text-xs text-stone-500">{child.parentId?.email}</span>
                     </td>
                     <td className="px-5 py-4 text-xs font-bold text-primary">
                       {child.currentStageId?.title || `Chặng ${child.currentStageId?.order || 1}`}
                     </td>
                     <td className="px-5 py-4">
-                      <span className="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full">
+                      <span className="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full tabular-nums">
                         {child.viviPoints || 0} pts
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <button
                         onClick={() => setSelectedLearnerId(child._id)}
-                        className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-colors inline-flex items-center space-x-1 min-h-[36px]"
+                        className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-colors inline-flex items-center space-x-1 min-h-[44px]"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Xem chi tiết</span>
@@ -226,175 +238,161 @@ export const AdminLearnersPage: React.FC = () => {
       )}
 
       {/* Modal: Comprehensive Learner Detail View */}
-      {selectedLearnerId && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="learner-profile-title" className="bg-white rounded-3xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-cream-border">
-              <h3 id="learner-profile-title" className="text-lg font-bold font-display text-stone-800 flex items-center space-x-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span>Hồ Sơ Toàn Diện Của Bé</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setSelectedLearnerId(null)}
-                aria-label="Đóng hồ sơ"
-                className="w-11 h-11 rounded-full hover:bg-stone-100 flex items-center justify-center text-stone-400 hover:text-stone-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <Modal
+        isOpen={!!selectedLearnerId}
+        onClose={() => setSelectedLearnerId(null)}
+        title="Hồ Sơ Toàn Diện Của Bé"
+        className="max-w-3xl"
+      >
+        {loadingDetail || !learnerDetail ? (
+          <div className="py-12 text-center">
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <span className="text-stone-500 text-sm font-bold">Đang tải hồ sơ bé…</span>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Child Summary Header Card */}
+            <div className="bg-stone-50 border border-cream-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center font-display font-black text-2xl text-stone-800 shadow-sm shrink-0">
+                  {learnerDetail.child?.name?.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold font-display text-stone-800">
+                    {learnerDetail.child?.name}
+                  </h4>
+                  <p className="text-xs text-stone-500">
+                    Phụ huynh: <strong>{learnerDetail.child?.parentId?.displayName}</strong> (
+                    {learnerDetail.child?.parentId?.email})
+                  </p>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Giới hạn phiên học: <strong>{learnerDetail.child?.screenTimeLimit || 20} phút</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-cream-border">
+                <span className="text-xs font-bold text-stone-500 uppercase">Số dư điểm</span>
+                <span className="text-2xl font-black font-display text-secondary tabular-nums">
+                  {learnerDetail.child?.viviPoints || 0} pts
+                </span>
+              </div>
             </div>
 
-            {loadingDetail || !learnerDetail ? (
-              <div className="py-12 text-center">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <span className="text-stone-500 text-sm font-bold">Đang tải hồ sơ bé...</span>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Child Summary Header Card */}
-                <div className="bg-stone-50 border border-cream-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center font-display font-black text-2xl text-stone-800 shadow-sm shrink-0">
-                      {learnerDetail.child?.name?.charAt(0)}
+            {/* Progress & Lessons */}
+            <div>
+              <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
+                <BookOpen className="w-4 h-4 text-primary" />
+                <span>Bài học đã học ({learnerDetail.progress?.length || 0})</span>
+              </h4>
+              {learnerDetail.progress?.length === 0 ? (
+                <p className="text-xs text-stone-500 italic">Bé chưa bắt đầu bài học nào.</p>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {learnerDetail.progress.map((p: any) => (
+                    <div
+                      key={p._id}
+                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex items-center justify-between shadow-sm"
+                    >
+                      <div>
+                        <span className="font-bold text-stone-800">
+                          {p.lessonId?.title || 'Bài học'}
+                        </span>
+                        <span className="text-stone-500 block text-[11px]">
+                          Hoàn thành: {new Date(p.updatedAt).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold inline-flex items-center gap-1 tabular-nums">
+                          {p.stars || 3}
+                          <Star className="w-3.5 h-3.5 fill-current" aria-label="sao" />
+                        </span>
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold tabular-nums">
+                          {p.scorePercent || 100}%
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xl font-bold font-display text-stone-800">
-                        {learnerDetail.child?.name}
-                      </h4>
-                      <p className="text-xs text-stone-500">
-                        Phụ huynh: <strong>{learnerDetail.child?.parentId?.displayName}</strong> (
-                        {learnerDetail.child?.parentId?.email})
-                      </p>
-                      <p className="text-xs text-stone-500 mt-0.5">
-                        Giới hạn phiên học: <strong>{learnerDetail.child?.screenTimeLimit || 20} phút</strong>
-                      </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recordings with Player */}
+            <div>
+              <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
+                <Volume2 className="w-4 h-4 text-emerald-600" />
+                <span>Bản thu âm của bé ({learnerDetail.recordings?.length || 0})</span>
+              </h4>
+              {learnerDetail.recordings?.length === 0 ? (
+                <p className="text-xs text-stone-500 italic">Bé chưa có bản thu âm nào.</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {learnerDetail.recordings.map((rec: any) => (
+                    <div
+                      key={rec._id}
+                      className="p-3 bg-white border border-cream-border rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm"
+                    >
+                      <div>
+                        <span className="font-bold text-stone-800 block">
+                          Từ/Câu: &ldquo;{rec.wordOrPrompt}&rdquo;
+                        </span>
+                        <span className="text-stone-500 text-[11px]">
+                          {new Date(rec.createdAt).toLocaleString('vi-VN')} (Bài: {rec.lessonId?.title || 'Bài học'})
+                        </span>
+                      </div>
+                      {rec.url && (
+                        <audio controls src={rec.url} className="h-8 w-full sm:w-56" />
+                      )}
                     </div>
-                  </div>
-
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-cream-border">
-                    <span className="text-xs font-bold text-stone-400 uppercase">Số dư điểm</span>
-                    <span className="text-2xl font-black font-display text-secondary">
-                      {learnerDetail.child?.viviPoints || 0} pts
-                    </span>
-                  </div>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Progress & Lessons */}
-                <div>
-                  <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    <span>Bài học đã học ({learnerDetail.progress?.length || 0})</span>
-                  </h4>
-                  {learnerDetail.progress?.length === 0 ? (
-                    <p className="text-xs text-stone-400 italic">Bé chưa bắt đầu bài học nào.</p>
-                  ) : (
-                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                      {learnerDetail.progress.map((p: any) => (
-                        <div
-                          key={p._id}
-                          className="p-3 bg-white border border-cream-border rounded-xl text-xs flex items-center justify-between shadow-2xs"
-                        >
-                          <div>
-                            <span className="font-bold text-stone-800">
-                              {p.lessonId?.title || 'Bài học'}
-                            </span>
-                            <span className="text-stone-400 block text-[11px]">
-                              Hoàn thành: {new Date(p.updatedAt).toLocaleDateString('vi-VN')}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold inline-flex items-center gap-1">
-                              {p.stars || 3}
-                              <Star className="w-3.5 h-3.5 fill-current" aria-label="sao" />
-                            </span>
-                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold">
-                              {p.scorePercent || 100}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+            {/* Point Ledger Transactions */}
+            <div>
+              <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
+                <Coins className="w-4 h-4 text-amber-600" />
+                <span>Sổ cái biến động điểm ({learnerDetail.transactions?.length || 0})</span>
+              </h4>
+              {learnerDetail.transactions?.length === 0 ? (
+                <p className="text-xs text-stone-500 italic">Chưa có giao dịch điểm nào.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {learnerDetail.transactions.map((tx: any) => (
+                    <div
+                      key={tx._id}
+                      className="p-2.5 bg-stone-50 rounded-xl text-xs flex items-center justify-between border border-cream-border"
+                    >
+                      <div>
+                        <span className="font-semibold text-stone-800 block">
+                          {tx.description || tx.reason}
+                        </span>
+                        <span className="text-stone-500 text-[10px]">
+                          {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                        </span>
+                      </div>
+                      <span
+                        className={`font-black font-display text-sm tabular-nums ${
+                          tx.delta >= 0 ? 'text-emerald-700' : 'text-red-700'
+                        }`}
+                      >
+                        {tx.delta >= 0 ? `+${tx.delta}` : tx.delta} pts
+                      </span>
                     </div>
-                  )}
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Recordings with Player */}
-                <div>
-                  <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
-                    <Volume2 className="w-4 h-4 text-emerald-600" />
-                    <span>Bản thu âm của bé ({learnerDetail.recordings?.length || 0})</span>
-                  </h4>
-                  {learnerDetail.recordings?.length === 0 ? (
-                    <p className="text-xs text-stone-400 italic">Bé chưa có bản thu âm nào.</p>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {learnerDetail.recordings.map((rec: any) => (
-                        <div
-                          key={rec._id}
-                          className="p-3 bg-white border border-cream-border rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs"
-                        >
-                          <div>
-                            <span className="font-bold text-stone-800 block">
-                              Từ/Câu: &ldquo;{rec.wordOrPrompt}&rdquo;
-                            </span>
-                            <span className="text-stone-400 text-[11px]">
-                              {new Date(rec.createdAt).toLocaleString('vi-VN')} (Bài: {rec.lessonId?.title || 'Bài học'})
-                            </span>
-                          </div>
-                          {rec.url && (
-                            <audio controls src={rec.url} className="h-8 w-full sm:w-56" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Point Ledger Transactions */}
-                <div>
-                  <h4 className="text-sm font-bold font-display text-stone-800 mb-2 flex items-center space-x-2">
-                    <Coins className="w-4 h-4 text-amber-600" />
-                    <span>Sổ cái biến động điểm ({learnerDetail.transactions?.length || 0})</span>
-                  </h4>
-                  {learnerDetail.transactions?.length === 0 ? (
-                    <p className="text-xs text-stone-400 italic">Chưa có giao dịch điểm nào.</p>
-                  ) : (
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                      {learnerDetail.transactions.map((tx: any) => (
-                        <div
-                          key={tx._id}
-                          className="p-2.5 bg-stone-50 rounded-xl text-xs flex items-center justify-between border border-cream-border"
-                        >
-                          <div>
-                            <span className="font-semibold text-stone-800 block">
-                              {tx.description || tx.reason}
-                            </span>
-                            <span className="text-stone-400 text-[10px]">
-                              {new Date(tx.createdAt).toLocaleString('vi-VN')}
-                            </span>
-                          </div>
-                          <span
-                            className={`font-black font-display text-sm ${
-                              tx.delta >= 0 ? 'text-emerald-600' : 'text-red-500'
-                            }`}
-                          >
-                            {tx.delta >= 0 ? `+${tx.delta}` : tx.delta} pts
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-end pt-4 border-t border-cream-border">
-                  <Button variant="outline" size="sm" onClick={() => setSelectedLearnerId(null)}>
-                    Đóng
-                  </Button>
-                </div>
-              </div>
-            )}
+            <div className="flex justify-end pt-4 border-t border-cream-border">
+              <Button variant="outline" size="sm" onClick={() => setSelectedLearnerId(null)}>
+                Đóng
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

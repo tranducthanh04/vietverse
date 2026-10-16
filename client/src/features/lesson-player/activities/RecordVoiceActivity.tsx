@@ -12,6 +12,7 @@ import {
 import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
+import { targetTextSize } from './targetTextSize.js';
 import { VI_LOCALES } from '../../../locales/vi.js';
 
 export interface RecordVoiceActivityProps {
@@ -104,7 +105,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center max-w-xl w-full mx-auto">
       <div className="mb-4">
         <Mascot mood={isRecording ? 'listening' : 'happy'} size="md" />
       </div>
@@ -114,8 +115,8 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       </h2>
 
       {activity.targetWord && (
-        <div className="bg-white border-4 border-primary/30 rounded-2xl px-8 py-3 my-4 inline-block shadow-sm">
-          <span className="text-4xl md:text-5xl font-black font-display text-primary">
+        <div className="max-w-full bg-white border-4 border-primary/30 rounded-2xl px-5 sm:px-8 py-3 my-4 inline-block shadow-sm">
+          <span className={`${targetTextSize(activity.targetWord)} block font-black font-display text-primary break-words text-balance`}>
             {activity.targetWord}
           </span>
         </div>

@@ -8,7 +8,7 @@ export const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-6 text-center">
       <Mascot mood="thinking" size="xl" className="mb-6" />
 
       <h1 className="text-kid-2xl md:text-5xl font-black font-display text-primary mb-2">

@@ -9,7 +9,15 @@ export interface ModalProps {
   children: React.ReactNode;
   className?: string;
   hideCloseBtn?: boolean;
+  /** Dialog semantics; use `alertdialog` for interruptions that demand a response. */
+  role?: 'dialog' | 'alertdialog';
+  /** Accessible name when no visible `title` is rendered (e.g. custom headings). */
+  ariaLabel?: string;
 }
+
+// Open modals share one body scroll lock. Counting them keeps the page locked until the last one
+// closes, whatever order React unmounts nested modals in (e.g. Parent Gate over the screen-time break).
+let openModalCount = 0;
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -21,6 +29,8 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   className,
   hideCloseBtn = false,
+  role = 'dialog',
+  ariaLabel,
 }) => {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -55,10 +65,10 @@ export const Modal: React.FC<ModalProps> = ({
         first.focus();
       }
     };
-    document.body.style.overflow = 'hidden';
+    if (openModalCount++ === 0) document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKey);
     return () => {
-      document.body.style.overflow = 'unset';
+      if (--openModalCount === 0) document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKey);
       previouslyFocused?.focus?.();
     };
@@ -70,9 +80,10 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
       <div
         ref={dialogRef}
-        role="dialog"
+        role={role}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
+        aria-label={!title ? ariaLabel : undefined}
         tabIndex={-1}
         className={cn(
           'relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-cream rounded-kid-lg border-4 border-accent p-6 shadow-2xl animate-pop focus:outline-none',
@@ -91,7 +102,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {title && (
-          <h3 id={titleId} className="text-kid-xl font-bold font-display text-primary mb-4 pr-10">
+          <h3 id={titleId} className="text-kid-lg sm:text-kid-xl font-bold font-display text-primary mb-4 pr-10 text-balance">
             {title}
           </h3>
         )}

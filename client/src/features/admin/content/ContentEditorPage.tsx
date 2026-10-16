@@ -197,16 +197,16 @@ function Editor({
   const source = loaded?.source;
   return (
     <div className="cms">
-      <Link className="cms-link" to={paths[kind]}>
-        Về danh sách
+      <Link className="cms-back" to={paths[kind]}>
+        <span aria-hidden="true">←</span> Về danh sách
       </Link>
       <h1>Biên tập {titles[kind].toLocaleLowerCase("vi")}</h1>
-      <p>
+      <p className="cms-meta">
         Live: {detail.live?.contentVersion ?? "chưa có"} · Nháp:{" "}
         {loaded?.draftVersion ?? "chưa có"} {dirty && "· Chưa lưu"}
       </p>
       {loaded && (
-        <p>
+        <p className="cms-meta">
           Sửa bởi {loaded.updatedBy} ·{" "}
           {new Date(loaded.updatedAt).toLocaleString("vi-VN")}
         </p>
@@ -319,7 +319,7 @@ function Editor({
               )}
             </fieldset>
           </EditorialNotesContext.Provider>
-          <div className="cms-actions">
+          <div className="cms-actions cms-toolbar">
             <button
               className="cms-primary"
               disabled={busy || conflict || !dirty}
@@ -344,41 +344,60 @@ function Editor({
               Kiểm tra
             </button>
             <button
+              className="cms-success"
               disabled={busy || conflict || dirty}
               onClick={() => void run(() => validate(true))}
             >
               Xuất bản
             </button>
-            <button disabled={busy} onClick={() => setConfirmation("discard")}>
+            <span className="cms-spacer" />
+            {kind !== "lesson" && detail.live && (
+              <button
+                disabled={busy || dirty}
+                onClick={() => setConfirmation("visibility")}
+              >
+                {detail.live.visibility === "withdrawn"
+                  ? "Hiện nội dung"
+                  : "Ẩn nội dung"}
+              </button>
+            )}
+            <button className="cms-danger" disabled={busy} onClick={() => setConfirmation("discard")}>
               Bỏ nháp
             </button>
           </div>
         </>
       ) : (
-        <>
-          <p>{detail.live?.payload.title ?? loaded?.payload.title}</p>
-          <button
-            disabled={busy}
-            onClick={() =>
-              void run(async () => {
-                adopt(await contentApi.start(kind, id, loaded?.draftVersion));
-                await invalidate();
-              })
-            }
-          >
-            Bắt đầu biên tập
-          </button>
-        </>
-      )}
-      {kind !== "lesson" && detail.live && (
-        <button
-          disabled={busy || dirty}
-          onClick={() => setConfirmation("visibility")}
-        >
-          {detail.live.visibility === "withdrawn"
-            ? "Hiện nội dung"
-            : "Ẩn nội dung"}
-        </button>
+        <section>
+          <h2>{detail.live?.payload.title ?? loaded?.payload.title}</h2>
+          <p className="cms-meta">
+            Bắt đầu biên tập để tạo bản nháp. Bản đang phát hành không đổi cho
+            tới khi xuất bản.
+          </p>
+          <div className="cms-actions" style={{ marginTop: "1rem" }}>
+            <button
+              className="cms-primary"
+              disabled={busy}
+              onClick={() =>
+                void run(async () => {
+                  adopt(await contentApi.start(kind, id, loaded?.draftVersion));
+                  await invalidate();
+                })
+              }
+            >
+              Bắt đầu biên tập
+            </button>
+            {kind !== "lesson" && detail.live && (
+              <button
+                disabled={busy || dirty}
+                onClick={() => setConfirmation("visibility")}
+              >
+                {detail.live.visibility === "withdrawn"
+                  ? "Hiện nội dung"
+                  : "Ẩn nội dung"}
+              </button>
+            )}
+          </div>
+        </section>
       )}
       {confirmation && (
         <ConfirmationDialog
@@ -396,7 +415,7 @@ function Editor({
           </p>
           <div className="cms-actions">
             <button onClick={() => setConfirmation(null)}>Hủy</button>
-            <button onClick={() => void run(confirm)}>Xác nhận</button>
+            <button className="cms-primary" onClick={() => void run(confirm)}>Xác nhận</button>
           </div>
         </ConfirmationDialog>
       )}

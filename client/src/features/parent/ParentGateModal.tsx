@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../../components/ui/Modal.js';
 import { Button } from '../../components/ui/Button.js';
 import {
@@ -52,6 +52,13 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
     }
   }, [isOpen]);
 
+  // The input is disabled while a challenge loads, so autoFocus cannot land on it and Modal focuses the
+  // close button instead. Move focus to the answer box once the new challenge is ready (also after a retry).
+  const answerRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (isOpen && challengeToken && !loadingChallenge) answerRef.current?.focus();
+  }, [isOpen, challengeToken, loadingChallenge]);
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!challengeToken || loadingChallenge || isSubmitting || !userAnswer.trim()) return;
@@ -102,18 +109,19 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
           {/* Math challenge */}
           <div className="bg-cream-muted border-2 border-cream-border rounded-2xl p-4 mb-6 text-center">
             <span className="text-2xl font-black font-display text-stone-800">
-              {challengeToken ? `${num1} × ${num2} = ?` : loadingChallenge ? 'Đang tải phép tính...' : 'Phép tính chưa sẵn sàng'}
+              {challengeToken ? `${num1} × ${num2} = ?` : loadingChallenge ? 'Đang tải phép tính…' : 'Phép tính chưa sẵn sàng'}
             </span>
           </div>
 
           <input
+            ref={answerRef}
             type="number"
-            autoFocus
+            aria-label="Nhập kết quả phép tính"
             disabled={!challengeToken || loadingChallenge || isSubmitting}
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder={loadingChallenge ? 'Đang tạo phép tính...' : VI_LOCALES.parentGate.inputPlaceholder}
-            className="w-full text-center text-xl font-bold p-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none mb-6 min-h-[48px] disabled:opacity-50"
+            placeholder={loadingChallenge ? 'Đang tạo phép tính…' : VI_LOCALES.parentGate.inputPlaceholder}
+            className="w-full text-center text-xl font-bold p-3 rounded-2xl border-2 border-cream-border placeholder:text-stone-500 focus:border-primary focus:outline-none mb-6 min-h-[48px] disabled:opacity-50"
           />
 
           <div className="flex space-x-3">
@@ -124,7 +132,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
               {isSubmitting ? (
                 <>
                   <LoaderCircle className="w-5 h-5 animate-spin mr-2" />
-                  <span>Đang kiểm tra...</span>
+                  <span>Đang kiểm tra…</span>
                 </>
               ) : (
                 VI_LOCALES.parentGate.btnConfirm

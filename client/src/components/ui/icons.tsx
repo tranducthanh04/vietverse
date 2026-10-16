@@ -35,6 +35,7 @@ import {
   Earth as LEarth,
   ExternalLink as LExternalLink,
   Eye as LEye,
+  EyeOff as LEyeOff,
   Feather as LFeather,
   Flower2 as LFlower2,
   Gamepad2 as LGamepad2,
@@ -147,6 +148,7 @@ export const Drum = withDefaults(LDrum, 'Drum');
 export const Earth = withDefaults(LEarth, 'Earth');
 export const ExternalLink = withDefaults(LExternalLink, 'ExternalLink');
 export const Eye = withDefaults(LEye, 'Eye');
+export const EyeOff = withDefaults(LEyeOff, 'EyeOff');
 export const Feather = withDefaults(LFeather, 'Feather');
 export const Flower2 = withDefaults(LFlower2, 'Flower2');
 export const Gamepad2 = withDefaults(LGamepad2, 'Gamepad2');

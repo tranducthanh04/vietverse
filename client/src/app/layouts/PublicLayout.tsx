@@ -13,6 +13,7 @@ import {
 } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
+import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +35,8 @@ export const PublicLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between font-sans text-on-surface">
+    <div className="min-h-dvh bg-surface flex flex-col justify-between font-sans text-on-surface">
+      <SkipLink />
       {/* Stitch Folk Play Header */}
       <header className="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(180,83,9,0.08)] border-b border-outline-variant/30">
         <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 xl:px-8 flex items-center justify-between gap-4">
@@ -166,7 +168,7 @@ export const PublicLayout: React.FC = () => {
       </header>
 
       {/* Main Content Spacer for fixed header */}
-      <main className="flex-1 pt-20">
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-20 focus:outline-none">
         <Outlet />
       </main>
 

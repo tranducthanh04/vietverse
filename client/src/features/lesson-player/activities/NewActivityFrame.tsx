@@ -19,21 +19,23 @@ export function NewActivityFrame({
     .filter(Boolean)
     .join(". ");
   return (
-    <section className="w-full max-w-2xl space-y-5 p-4 text-stone-800">
-      <h2 className="text-kid-lg font-display font-bold break-words">
-        {activity.prompt}
-      </h2>
-      {activity.subPrompt && <p>{activity.subPrompt}</p>}
-      <AudioButton
-        contentKey={activity.id}
-        audioUrl={activity.audioUrl}
-        textToSpeak={instructions}
-        label="Nghe hướng dẫn"
-        size="sm"
-      />
-      {!activity.audioUrl && activity.type === "follow_steps" && (
-        <MissingSourceAudioNotice hint="đọc hướng dẫn bên dưới" />
-      )}
+    <section className="w-full max-w-2xl flex flex-col gap-5 p-4 sm:p-6 text-stone-800">
+      <header className="flex flex-col items-center gap-3 text-center">
+        <h2 className="text-kid-lg md:text-kid-xl font-display font-bold break-words text-balance">
+          {activity.prompt}
+        </h2>
+        {activity.subPrompt && <p className="text-kid-sm text-stone-600">{activity.subPrompt}</p>}
+        <AudioButton
+          contentKey={activity.id}
+          audioUrl={activity.audioUrl}
+          textToSpeak={instructions}
+          label="Nghe hướng dẫn"
+          size="sm"
+        />
+        {!activity.audioUrl && activity.type === "follow_steps" && (
+          <MissingSourceAudioNotice hint="đọc hướng dẫn bên dưới" />
+        )}
+      </header>
       {children}
     </section>
   );

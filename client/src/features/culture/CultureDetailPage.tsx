@@ -99,10 +99,10 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
 
   if (isLoading || !article) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
+      <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-culture border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-stone-600 font-bold text-sm">
-          Đang mở trang văn hóa...
+          Đang mở trang văn hóa…
         </span>
       </div>
     );
@@ -272,10 +272,10 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
       {/* Fun Facts Section */}
       {article.funFacts && article.funFacts.length > 0 && (
         <div className="mb-10">
-          <h3 className="text-xl font-bold font-display text-stone-800 mb-4 flex items-center space-x-2">
+          <h2 className="text-xl font-bold font-display text-stone-800 mb-4 flex items-center space-x-2">
             <Lightbulb className="w-6 h-6 text-amber-500" />
             <span>Có thể bé chưa biết?</span>
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {article.funFacts.map((fact: string, idx: number) => (
               <div
@@ -298,9 +298,9 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-6 h-6 text-culture" />
-              <h3 className="text-xl font-black font-display text-stone-800">
+              <h2 className="text-xl font-black font-display text-stone-800">
                 Thử Tài Khám Phá Văn Hóa
-              </h3>
+              </h2>
             </div>
             <span className="text-xs font-bold bg-culture-light/50 text-culture-dark px-3 py-1 rounded-full">
               Thưởng +5 ViVi Points
@@ -318,9 +318,9 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                 key={qIdx}
                 className="bg-white rounded-2xl p-5 border border-cream-border"
               >
-                <h4 className="font-bold text-stone-800 mb-3 text-base">
+                <h3 className="font-bold text-stone-800 mb-3 text-base">
                   Câu {qIdx + 1}: {q.question}
-                </h4>
+                </h3>
                 <div className="space-y-2">
                   {q.options.map((opt: string, optIdx: number) => {
                     const isSelected = selectedAnswers[qIdx] === optIdx;
@@ -332,7 +332,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                         className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
                           isSelected
                             ? "bg-culture/10 border-culture text-culture-dark font-bold"
-                            : "bg-stone-50 border-transparent hover:border-stone-200 text-stone-700"
+                            : "bg-white border-cream-border hover:border-culture/60 hover:bg-emerald-50/40 text-stone-700"
                         }`}
                       >
                         <span>{opt}</span>
@@ -348,7 +348,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           </div>
 
           {submitError && (
-            <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
+            <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mt-4 text-sm flex items-center space-x-2">
               <CircleAlert className="w-5 h-5 shrink-0 text-red-500" />
               <span>{submitError}</span>
             </div>
@@ -364,7 +364,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             {!quizSubmitted ? (
               <>
-                <span className="text-xs text-stone-400">
+                <span className="text-xs text-stone-500">
                   {activeChild
                     ? `Bé đang trả lời: ${Object.keys(selectedAnswers).length}/${article.quiz.length} câu`
                     : "Đăng nhập tài khoản để nhận điểm thưởng vào kho báu"}
@@ -402,9 +402,9 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                 <div className="flex items-center space-x-3">
                   <PartyPopper className="w-8 h-8 text-emerald-600" />
                   <div>
-                    <h4 className="font-bold text-emerald-800 text-base">
+                    <h3 className="font-bold text-emerald-800 text-base">
                       Tuyệt vời! Bé đã hoàn thành phần khám phá
-                    </h4>
+                    </h3>
                     <p className="text-xs text-emerald-600">
                       {pointsResult && pointsResult > 0
                         ? `Bé nhận được +${pointsResult} ViVi Points!`

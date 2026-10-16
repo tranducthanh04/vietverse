@@ -45,6 +45,8 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           spread: 80,
           origin: { y: 0.55 },
           colors: ['#b02518', '#fea619', '#00855b', '#0284c7', '#ffdad4'],
+          // Honour prefers-reduced-motion: canvas-confetti skips the burst when the OS asks for less motion.
+          disableForReducedMotion: true,
         });
       } catch (err) {
         // Safe fallback in headless or non-canvas env
@@ -55,10 +57,10 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn className="max-w-lg text-center p-8 bg-surface-container-lowest border-4 border-secondary-container/40 rounded-3xl shadow-2xl">
+    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn ariaLabel="Kết quả bài học" className="max-w-lg text-center p-8 bg-surface-container-lowest border-4 border-secondary-container/40 rounded-3xl shadow-2xl">
       {/* Celebration Mascot Badge */}
-      <div className="flex justify-center -mt-20 mb-3">
-        <div className="relative w-32 h-32 rounded-full overflow-hidden bg-secondary-fixed ring-8 ring-secondary-container/30 shadow-xl flex items-center justify-center">
+      <div className="flex justify-center mb-3">
+        <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-secondary-fixed ring-8 ring-secondary-container/30 shadow-xl flex items-center justify-center">
           <img
             alt="Sao Lí Lắc"
             className="w-full h-full object-cover animate-bounce-subtle"

@@ -7,6 +7,7 @@ import {
   RotateCcw,
   ArrowLeft,
   CircleCheck,
+  CircleX,
   CircleHelp,
   Volume2,
   LogIn,
@@ -84,10 +85,10 @@ export const StoryDetailPage: React.FC = () => {
 
   if (isLoading || !story) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
+      <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-stone-600 font-bold text-sm">
-          Đang mở trang truyện cho bé...
+          Đang mở trang truyện cho bé…
         </span>
       </div>
     );
@@ -118,127 +119,162 @@ export const StoryDetailPage: React.FC = () => {
       {/* Back button */}
       <button
         onClick={() => navigate("/kho-truyen")}
-        className="inline-flex items-center space-x-2 text-stone-600 hover:text-primary font-bold mb-6 min-h-[44px]"
+        className="inline-flex items-center gap-2 text-stone-600 hover:text-primary font-bold mb-4 min-h-[44px] transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Quay lại kho truyện</span>
       </button>
 
-      {/* Main Story Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Side: Cover & Controls */}
-        <div className="md:col-span-1 flex flex-col items-center">
-          {story.coverImage ? (
-            <img
-              src={story.coverImage}
-              alt={story.title}
-              className="w-full max-w-xs rounded-3xl shadow-kid border-4 border-white mb-6 object-cover h-64"
-            />
-          ) : (
-            <CoverPlaceholder
-              kind="story"
-              variant={story.type}
-              className="w-full max-w-xs rounded-3xl shadow-kid border-4 border-white mb-6 h-64"
-            />
-          )}
-
-          <h1 className="text-kid-lg font-bold font-display text-center text-stone-800 mb-1">
-            {story.title}
-          </h1>
-          <span className="text-xs text-stone-500 font-semibold mb-4">
-            Tác giả: {story.author || "Dân gian Việt Nam"}
-          </span>
-
-          {/* Audio Mode Badge */}
-          <div className="mb-4">
-            {audioUnavailable ? (
-              <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full inline-flex items-center space-x-1">
-                <span>Chế độ đọc: chưa có âm thanh khả dụng</span>
-              </span>
-            ) : narration.mode === "tts" ? (
-              <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full inline-flex items-center space-x-1">
-                <span>Giọng đọc thiết bị</span>
-              </span>
-            ) : (
-              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full inline-flex items-center space-x-1">
-                <Volume2 className="w-3.5 h-3.5" />
-                <span>Audio Studio Vietverse</span>
-              </span>
-            )}
-          </div>
-
-          {narration.error && (
-            <p role="status" className="text-sm text-amber-800 mb-3">
-              {narration.error}
-            </p>
-          )}
-
-          {/* Karaoke Play / Pause Controls */}
-          <div className="flex flex-col items-center space-y-3 w-full max-w-xs bg-white p-4 rounded-3xl border-2 border-cream-border shadow-sm">
-            <div className="flex items-center justify-center space-x-4 w-full">
-              <button
-                onClick={narration.toggle}
-                disabled={audioUnavailable}
-                className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:scale-105 active:scale-95 transition-transform min-h-[56px] min-w-[56px]"
-                aria-label={
-                  narration.isPlaying
-                    ? narration.mode === "tts"
-                      ? "Dừng đọc"
-                      : "Tạm dừng"
-                    : "Bắt đầu nghe"
-                }
-              >
-                {narration.isPlaying ? (
-                  <Pause className="w-7 h-7" />
-                ) : (
-                  <Play className="w-7 h-7 fill-white ml-0.5" />
-                )}
-              </button>
-
-              <button
-                onClick={narration.reset}
-                disabled={audioUnavailable}
-                className="p-3 text-stone-500 hover:text-stone-800 rounded-full hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px]"
-                aria-label="Nghe lại từ đầu"
-              >
-                <RotateCcw className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Audio Seek Timeline */}
-            <div className="w-full space-y-1">
-              <input
-                type="range"
-                disabled={
-                  audioUnavailable ||
-                  narration.mode === "tts" ||
-                  !narration.duration
-                }
-                min={0}
-                max={narration.duration || 0}
-                value={narration.currentTime}
-                onChange={(event) => narration.seek(Number(event.target.value))}
-                className="w-full accent-primary h-2 bg-stone-200 rounded-lg cursor-pointer"
-                aria-label="Tua thời gian bài đồng dao"
+      <div className="flex flex-col gap-6">
+        {/* Player header: cover, title and narration controls */}
+        <Card variant="elevated" className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] md:grid-cols-[240px_1fr] gap-5 sm:gap-8 items-center">
+            {story.coverImage ? (
+              <img
+                src={story.coverImage}
+                alt={story.title}
+                className="w-full aspect-video sm:aspect-square rounded-kid object-cover shadow-sm"
               />
-              {narration.mode === "asset" && narration.duration > 0 ? (
-                <div className="flex justify-between text-[11px] font-mono font-bold text-stone-500">
-                  <span>{Math.floor(narration.currentTime)}s</span>
-                  <span>{Math.floor(narration.duration)}s</span>
-                </div>
+            ) : (
+              <CoverPlaceholder
+                kind="story"
+                variant={story.type}
+                className="w-full aspect-video sm:aspect-square rounded-kid"
+              />
+            )}
+
+            <div className="flex flex-col items-start min-w-0">
+              {/* Audio Mode Badge */}
+              {audioUnavailable ? (
+                <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                  Chế độ đọc: chưa có âm thanh khả dụng
+                </span>
+              ) : narration.mode === "tts" ? (
+                <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                  Giọng đọc thiết bị
+                </span>
               ) : (
-                <p className="text-xs text-stone-500">
-                  {narration.mode === "tts"
-                    ? "Đọc từng dòng; dừng rồi bấm nghe để đọc lại từ đầu."
-                    : "Đang chờ thời lượng bản audio."}
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full inline-flex items-center gap-1">
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>Audio Studio Vietverse</span>
+                </span>
+              )}
+
+              <h1 className="mt-3 text-kid-xl sm:text-kid-2xl font-black font-display text-stone-800 text-balance">
+                {story.title}
+              </h1>
+              <span className="mt-1 text-sm text-stone-500 font-semibold">
+                Tác giả: {story.author || "Dân gian Việt Nam"}
+              </span>
+
+              {/* Karaoke Play / Pause Controls */}
+              <div className="mt-5 w-full flex items-center gap-3 sm:gap-4 bg-cream-muted/70 border border-cream-border rounded-kid p-3 sm:p-4">
+                <button
+                  onClick={narration.toggle}
+                  disabled={audioUnavailable}
+                  className="shrink-0 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:bg-primary-hover active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  aria-label={
+                    narration.isPlaying
+                      ? narration.mode === "tts"
+                        ? "Dừng đọc"
+                        : "Tạm dừng"
+                      : "Bắt đầu nghe"
+                  }
+                >
+                  {narration.isPlaying ? (
+                    <Pause className="w-7 h-7" />
+                  ) : (
+                    <Play className="w-7 h-7 fill-white ml-0.5" />
+                  )}
+                </button>
+
+                {/* Audio Seek Timeline */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <input
+                    type="range"
+                    disabled={
+                      audioUnavailable ||
+                      narration.mode === "tts" ||
+                      !narration.duration
+                    }
+                    min={0}
+                    max={narration.duration || 0}
+                    value={narration.currentTime}
+                    onChange={(event) => narration.seek(Number(event.target.value))}
+                    className="w-full accent-primary h-2 bg-stone-200 rounded-lg cursor-pointer disabled:cursor-default"
+                    aria-label="Tua thời gian bài đồng dao"
+                  />
+                  {narration.mode === "asset" && narration.duration > 0 ? (
+                    <div className="flex justify-between text-xs font-mono font-bold text-stone-600">
+                      <span>{Math.floor(narration.currentTime)}s</span>
+                      <span>{Math.floor(narration.duration)}s</span>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-stone-600">
+                      {narration.mode === "tts"
+                        ? "Đọc từng dòng; dừng rồi bấm nghe để đọc lại từ đầu."
+                        : "Đang chờ thời lượng bản audio."}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={narration.reset}
+                  disabled={audioUnavailable}
+                  className="shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-full hover:bg-white transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
+                  aria-label="Nghe lại từ đầu"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              </div>
+
+              {narration.error && (
+                <p role="status" className="mt-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  {narration.error}
                 </p>
               )}
             </div>
           </div>
+        </Card>
+
+        {/* Reading / karaoke lines */}
+        <Card variant="elevated" className="p-5 sm:p-8 border-2 border-accent/70">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-accent-dark">
+              {audioUnavailable || narration.mode === "tts"
+                ? "Cùng đọc truyện"
+                : VI_LOCALES.stories.karaokeMode}
+            </span>
+            {narration.isPlaying && narration.mode === "asset" && (
+              <span className="flex items-center gap-1 text-xs font-bold text-primary animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-primary" />
+                <span>Đang phát lời theo nhạc</span>
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {story.lyrics.map((line: any, idx: number) => {
+              const isActive = idx === currentLineIndex;
+
+              return (
+                <p
+                  key={idx}
+                  className={`px-4 py-3 rounded-2xl border-l-4 transition-colors duration-300 text-kid-base sm:text-kid-lg ${
+                    isActive
+                      ? "bg-amber-100/90 text-primary border-primary font-black"
+                      : "border-transparent text-stone-700 font-bold"
+                  }`}
+                >
+                  {line.text}
+                </p>
+              );
+            })}
+          </div>
 
           {/* Vocabulary chips */}
           {story.vocab && story.vocab.length > 0 && (
-            <div className="mt-6 w-full bg-white p-4 rounded-2xl border border-cream-border shadow-2xs">
+            <div className="mt-6 pt-5 border-t border-cream-border">
               <span className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-2">
                 Từ vựng nổi bật
               </span>
@@ -246,7 +282,7 @@ export const StoryDetailPage: React.FC = () => {
                 {story.vocab.map((v: string, i: number) => (
                   <span
                     key={i}
-                    className="px-3 py-1 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-xs font-bold"
+                    className="px-3 py-1.5 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-sm font-bold"
                   >
                     {v}
                   </span>
@@ -254,120 +290,85 @@ export const StoryDetailPage: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
-        {/* Right Side: Karaoke Lyrics Scroll */}
-        <div className="md:col-span-2 flex flex-col space-y-6">
+        {/* Interactive Story Quiz */}
+        {currentQuiz && (
           <Card
-            variant="kid"
-            className="p-8 bg-white border-3 border-accent min-h-[360px] flex flex-col justify-center"
+            variant="default"
+            className="p-6 bg-gradient-to-br from-cream to-white border-2 border-cream-border"
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-accent-dark">
-                {audioUnavailable || narration.mode === "tts"
-                  ? "Cùng đọc truyện"
-                  : VI_LOCALES.stories.karaokeMode}
-              </span>
-              {narration.isPlaying && narration.mode === "asset" && (
-                <span className="flex items-center space-x-1 text-xs font-bold text-primary animate-pulse">
-                  <span className="w-2 h-2 rounded-full bg-primary" />
-                  <span>Đang phát lời theo nhạc</span>
-                </span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2 text-primary font-bold text-base">
+                <CircleHelp className="w-5 h-5" />
+                <span>{VI_LOCALES.stories.quizTitle}</span>
+              </div>
+
+              {!activeChild && (
+                <Link
+                  to={`/dang-nhap?redirect=/kho-truyen/${id}`}
+                  className="text-xs font-bold text-primary hover:underline flex items-center space-x-1"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Đăng nhập để nhận điểm</span>
+                </Link>
               )}
             </div>
 
-            <div className="space-y-4">
-              {story.lyrics.map((line: any, idx: number) => {
-                const isActive = idx === currentLineIndex;
+            <h2 className="text-kid-base font-bold font-display text-stone-800 mb-4">
+              {currentQuiz.question}
+            </h2>
+
+            <div className="space-y-3 mb-4">
+              {currentQuiz.options.map((opt: string, idx: number) => {
+                const isSelected = selectedQuizAnswer === idx;
+                const isCorrect =
+                  isQuizChecked && idx === currentQuiz.correctAnswer;
+                const isWrong =
+                  isQuizChecked &&
+                  isSelected &&
+                  idx !== currentQuiz.correctAnswer;
 
                 return (
-                  <div
+                  <button
                     key={idx}
-                    className={`p-3 rounded-2xl transition-all duration-300 ${
-                      isActive
-                        ? "bg-amber-100/90 text-primary scale-102 border-l-4 border-primary pl-4 font-black text-kid-lg shadow-sm"
-                        : "text-stone-600 font-bold text-kid-base"
+                    onClick={() => {
+                      setSelectedQuizAnswer(idx);
+                      setIsQuizChecked(true);
+                    }}
+                    className={`w-full p-4 rounded-2xl font-bold font-display text-left border-2 transition-all flex items-center justify-between min-h-[50px] ${
+                      isCorrect
+                        ? "bg-emerald-50 border-emerald-500 text-emerald-800"
+                        : isWrong
+                          ? "bg-red-50 border-red-400 text-red-800"
+                          : isSelected
+                            ? "bg-accent/30 border-accent text-stone-900"
+                            : "bg-white border-cream-border hover:border-accent text-stone-700"
                     }`}
                   >
-                    {line.text}
-                  </div>
+                    <span>{opt}</span>
+                    {isCorrect && (
+                      <CircleCheck className="w-5 h-5 shrink-0 text-emerald-600" />
+                    )}
+                    {isWrong && (
+                      <CircleX className="w-5 h-5 shrink-0 text-red-600" />
+                    )}
+                    {(isCorrect || isWrong) && (
+                      <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
+                    )}
+                  </button>
                 );
               })}
             </div>
+
+            {isQuizChecked && currentQuiz.explanation && (
+              <p className="text-xs text-stone-600 italic mt-2 flex items-start gap-1.5">
+                <Lightbulb className="w-4 h-4 shrink-0 text-amber-600 not-italic" />
+                <span>{currentQuiz.explanation}</span>
+              </p>
+            )}
           </Card>
-
-          {/* Interactive Story Quiz */}
-          {currentQuiz && (
-            <Card
-              variant="default"
-              className="p-6 bg-gradient-to-br from-cream to-white border-2 border-cream-border"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2 text-primary font-bold text-base">
-                  <CircleHelp className="w-5 h-5" />
-                  <span>{VI_LOCALES.stories.quizTitle}</span>
-                </div>
-
-                {!activeChild && (
-                  <Link
-                    to={`/dang-nhap?redirect=/kho-truyen/${id}`}
-                    className="text-xs font-bold text-primary hover:underline flex items-center space-x-1"
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>Đăng nhập để nhận điểm</span>
-                  </Link>
-                )}
-              </div>
-
-              <h4 className="text-kid-base font-bold font-display text-stone-800 mb-4">
-                {currentQuiz.question}
-              </h4>
-
-              <div className="space-y-3 mb-4">
-                {currentQuiz.options.map((opt: string, idx: number) => {
-                  const isSelected = selectedQuizAnswer === idx;
-                  const isCorrect =
-                    isQuizChecked && idx === currentQuiz.correctAnswer;
-                  const isWrong =
-                    isQuizChecked &&
-                    isSelected &&
-                    idx !== currentQuiz.correctAnswer;
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setSelectedQuizAnswer(idx);
-                        setIsQuizChecked(true);
-                      }}
-                      className={`w-full p-4 rounded-2xl font-bold font-display text-left border-2 transition-all flex items-center justify-between min-h-[50px] ${
-                        isCorrect
-                          ? "bg-emerald-50 border-emerald-500 text-emerald-800"
-                          : isWrong
-                            ? "bg-red-50 border-red-400 text-red-800"
-                            : isSelected
-                              ? "bg-accent/30 border-accent text-stone-900"
-                              : "bg-white border-cream-border hover:border-accent text-stone-700"
-                      }`}
-                    >
-                      <span>{opt}</span>
-                      {isCorrect && (
-                        <CircleCheck className="w-5 h-5 text-emerald-600" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {isQuizChecked && currentQuiz.explanation && (
-                <p className="text-xs text-stone-600 italic mt-2 flex items-start gap-1.5">
-                  <Lightbulb className="w-4 h-4 shrink-0 text-amber-600 not-italic" />
-                  <span>{currentQuiz.explanation}</span>
-                </p>
-              )}
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
