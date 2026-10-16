@@ -23,7 +23,7 @@
   background-color: #b02518;
   color: #ffffff;
   box-shadow: 0 4px 0 0 #910a04;
-  transition: all 0.15s ease;
+  transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
 }
 .btn-3d-primary:hover {
   box-shadow: 0 2px 0 0 #910a04;
@@ -38,7 +38,7 @@
   background-color: #fea619;
   color: #684000;
   box-shadow: 0 4px 0 0 #855300;
-  transition: all 0.15s ease;
+  transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
 }
 .btn-3d-accent:hover {
   box-shadow: 0 2px 0 0 #855300;
@@ -53,7 +53,7 @@
   background-color: #00855b;
   color: #ffffff;
   box-shadow: 0 4px 0 0 #005236;
-  transition: all 0.15s ease;
+  transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
 }
 .btn-3d-tertiary:hover {
   box-shadow: 0 2px 0 0 #005236;

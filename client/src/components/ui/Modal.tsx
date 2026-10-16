@@ -9,6 +9,10 @@ export interface ModalProps {
   children: React.ReactNode;
   className?: string;
   hideCloseBtn?: boolean;
+  /** Dialog semantics; use `alertdialog` for interruptions that demand a response. */
+  role?: 'dialog' | 'alertdialog';
+  /** Accessible name when no visible `title` is rendered (e.g. custom headings). */
+  ariaLabel?: string;
 }
 
 const FOCUSABLE =
@@ -21,6 +25,8 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   className,
   hideCloseBtn = false,
+  role = 'dialog',
+  ariaLabel,
 }) => {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -70,9 +76,10 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
       <div
         ref={dialogRef}
-        role="dialog"
+        role={role}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
+        aria-label={!title ? ariaLabel : undefined}
         tabIndex={-1}
         className={cn(
           'relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-cream rounded-kid-lg border-4 border-accent p-6 shadow-2xl animate-pop focus:outline-none',

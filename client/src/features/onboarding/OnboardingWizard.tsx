@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -28,6 +28,7 @@ export const OnboardingWizard: React.FC = () => {
   const [avatarId, setAvatarId] = useState('mascot-star-1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const handleNext = async () => {
     setErrorMsg('');
@@ -35,6 +36,7 @@ export const OnboardingWizard: React.FC = () => {
     if (step === 1) {
       if (!name.trim()) {
         setErrorMsg('Ba mẹ vui lòng nhập tên của bé nhé!');
+        nameInputRef.current?.focus();
         return;
       }
       setStep(2);
@@ -144,7 +146,7 @@ export const OnboardingWizard: React.FC = () => {
         {/* Main Stage Container (Wizard Showcase) */}
         <div className="relative w-full bg-surface-container-lowest rounded-3xl p-6 sm:p-10 shadow-[0_12px_36px_-6px_rgba(180,83,9,0.1)] border border-outline-variant/30">
           {errorMsg && (
-            <div className="bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
+            <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
               {errorMsg}
             </div>
           )}
@@ -184,6 +186,7 @@ export const OnboardingWizard: React.FC = () => {
                     Hôm nay chúng ta sẽ cùng ai khám phá?
                   </label>
                   <input
+                    ref={nameInputRef}
                     id="child-name-input"
                     type="text"
                     value={name}
@@ -401,7 +404,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="btn-3d-accent w-full h-16 rounded-full font-display text-xl font-black flex items-center justify-center gap-3 cursor-pointer shadow-xl"
                 >
                   <Sparkles className="w-6 h-6" />
-                  <span>{isSubmitting ? 'Đang khởi tạo...' : 'BẮT ĐẦU CHUYẾN PHIÊU LƯU!'}</span>
+                  <span>{isSubmitting ? 'Đang khởi tạo…' : 'BẮT ĐẦU CHUYẾN PHIÊU LƯU!'}</span>
                   <ArrowRight className="w-6 h-6" />
                 </button>
               </div>

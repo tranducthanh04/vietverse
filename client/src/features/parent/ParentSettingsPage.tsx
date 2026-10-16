@@ -90,7 +90,7 @@ export const ParentSettingsPage: React.FC = () => {
       </Card>
 
       <div>
-        <h2 className="text-xl font-bold font-display text-stone-800">
+        <h2 id="screen-time-limit-title" className="text-xl font-bold font-display text-stone-800">
           {VI_LOCALES.parentPortal.screenTimeTitle}
         </h2>
         <p className="text-sm text-stone-500">
@@ -99,11 +99,13 @@ export const ParentSettingsPage: React.FC = () => {
       </div>
 
       <Card className="p-6 bg-white border border-cream-border">
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-6" role="radiogroup" aria-labelledby="screen-time-limit-title">
           {options.map((opt) => (
             <button
               key={opt.value}
               type="button"
+              role="radio"
+              aria-checked={selectedLimit === opt.value}
               onClick={() => setSelectedLimit(opt.value)}
               className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between ${
                 selectedLimit === opt.value
