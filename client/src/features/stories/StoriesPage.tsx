@@ -66,7 +66,7 @@ export const StoriesPage: React.FC = () => {
             <button
               key={type.id}
               onClick={() => setSelectedType(type.id)}
-              className={`px-4 py-2 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-all border-2 ${
+              className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-all border-2 ${
                 selectedType === type.id
                   ? 'bg-primary text-white border-primary shadow-sm'
                   : 'bg-white text-stone-700 border-cream-border hover:border-accent'
@@ -84,7 +84,7 @@ export const StoriesPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm truyện hoặc đồng dao..."
+            placeholder="Tìm truyện hoặc đồng dao…"
             aria-label="Tìm truyện hoặc đồng dao"
             className="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-cream-border bg-white focus:outline-none focus:border-primary text-sm min-h-[44px]"
           />
@@ -97,7 +97,7 @@ export const StoriesPage: React.FC = () => {
       ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang mở trang sách...</p>
+          <p className="font-bold text-stone-600">Đang mở trang sách…</p>
         </div>
       ) : stories.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-cream-border p-8">
@@ -132,9 +132,9 @@ export const StoriesPage: React.FC = () => {
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
                   <span className="sm:hidden text-xs font-bold text-primary">{storyTypeLabel(story.type)}</span>
-                  <h3 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-primary transition-colors mb-1 line-clamp-2 sm:line-clamp-1">
+                  <h2 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-primary transition-colors mb-1 line-clamp-2 sm:line-clamp-1">
                     {story.title}
-                  </h3>
+                  </h2>
                   <p className="text-stone-500 text-sm line-clamp-2 mb-3">
                     {story.description}
                   </p>

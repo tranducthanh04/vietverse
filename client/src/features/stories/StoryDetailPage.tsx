@@ -7,6 +7,7 @@ import {
   RotateCcw,
   ArrowLeft,
   CircleCheck,
+  CircleX,
   CircleHelp,
   Volume2,
   LogIn,
@@ -84,10 +85,10 @@ export const StoryDetailPage: React.FC = () => {
 
   if (isLoading || !story) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
+      <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-stone-600 font-bold text-sm">
-          Đang mở trang truyện cho bé...
+          Đang mở trang truyện cho bé…
         </span>
       </div>
     );
@@ -314,9 +315,9 @@ export const StoryDetailPage: React.FC = () => {
               )}
             </div>
 
-            <h4 className="text-kid-base font-bold font-display text-stone-800 mb-4">
+            <h2 className="text-kid-base font-bold font-display text-stone-800 mb-4">
               {currentQuiz.question}
-            </h4>
+            </h2>
 
             <div className="space-y-3 mb-4">
               {currentQuiz.options.map((opt: string, idx: number) => {
@@ -347,7 +348,13 @@ export const StoryDetailPage: React.FC = () => {
                   >
                     <span>{opt}</span>
                     {isCorrect && (
-                      <CircleCheck className="w-5 h-5 text-emerald-600" />
+                      <CircleCheck className="w-5 h-5 shrink-0 text-emerald-600" />
+                    )}
+                    {isWrong && (
+                      <CircleX className="w-5 h-5 shrink-0 text-red-600" />
+                    )}
+                    {(isCorrect || isWrong) && (
+                      <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
                     )}
                   </button>
                 );
