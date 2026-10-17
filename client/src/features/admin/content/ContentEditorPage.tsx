@@ -21,6 +21,13 @@ import { CultureEditor } from "./CultureEditor.js";
 import { useUnsavedChanges } from "./useUnsavedChanges.js";
 import { ConfirmationDialog } from "./ConfirmationDialog.js";
 import { EditorialNotesContext } from "./editorialNotesContext.js";
+import {
+  FieldIssuesContext,
+  fieldAnchorId,
+  fieldErrorId,
+  issueFieldName,
+  resolveIssueField,
+} from "./fieldIssuesContext.js";
 
 export function ContentEditorPage({ kind }: { kind: ContentKind }) {
   const { id = "" } = useParams();
@@ -86,16 +93,22 @@ function Editor({
   const blocker = useUnsavedChanges(dirty || busy);
   useEffect(() => {
     if (!busy && issues.length) {
-      const name = issues[0].field.replace(/^payload\./, "");
-      const fields = Array.from(
-        form.current?.querySelectorAll<HTMLElement>("[name]") ?? [],
-      );
-      (
-        fields.find((field) => field.getAttribute("name") === name) ??
-        fields.find((field) => field.getAttribute("name")?.startsWith(name))
-      )?.focus();
+      resolveIssueField(form.current, issues[0].field)?.focus();
     }
   }, [busy, issues]);
+  // Bấm vào một lỗi trong khối tóm tắt: chuyển focus (và cuộn tới) đúng ô của lỗi đó.
+  function focusIssueField(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    field: string,
+  ) {
+    // Luôn chặn cú nhảy hash của trình duyệt: khi không tìm thấy ô thì link vẫn
+    // không trở thành link chết trỏ tới một id không tồn tại.
+    event.preventDefault();
+    const target = resolveIssueField(form.current, field);
+    if (!target) return;
+    target.focus();
+    target.scrollIntoView?.({ block: "center" });
+  }
   const reportIssues = setIssues;
   async function run(action: () => Promise<void>, editable = false) {
     if (busyRef.current) return;
@@ -242,11 +255,29 @@ function Editor({
       {!!issues.length && (
         <div role="alert">
           <h2>{issues.length} lỗi cần sửa</h2>
-          {issues.map((issue, i) => (
-            <p key={i}>
-              {issue.field}: {issue.message}
-            </p>
-          ))}
+          <ul className="cms-error-summary">
+            {(() => {
+              // Đếm riêng từng trường để mỗi dòng lỗi có id duy nhất và khớp với
+              // `aria-describedby` của ô (một trường có thể mang nhiều lỗi).
+              const seen = new Map<string, number>();
+              return issues.map((issue, i) => {
+                const name = issueFieldName(issue.field);
+                const index = seen.get(name) ?? 0;
+                seen.set(name, index + 1);
+                return (
+                  <li key={i}>
+                    <a
+                      id={fieldErrorId(issue.field, index)}
+                      href={`#${fieldAnchorId(issue.field)}`}
+                      onClick={(event) => focusIssueField(event, issue.field)}
+                    >
+                      {issue.field}: {issue.message}
+                    </a>
+                  </li>
+                );
+              });
+            })()}
+          </ul>
         </div>
       )}
       {conflict && (
@@ -280,6 +311,7 @@ function Editor({
       )}
       {editing && value ? (
         <>
+          <FieldIssuesContext.Provider value={issues}>
           <EditorialNotesContext.Provider value={loaded.editorialNotes}>
             <fieldset
               ref={form}
@@ -319,6 +351,7 @@ function Editor({
               )}
             </fieldset>
           </EditorialNotesContext.Provider>
+          </FieldIssuesContext.Provider>
           <div className="cms-actions cms-toolbar">
             <button
               className="cms-primary"

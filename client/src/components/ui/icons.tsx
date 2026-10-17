@@ -11,8 +11,11 @@
  */
 import { createElement, forwardRef } from 'react';
 import {
+  ArrowDown as LArrowDown,
   ArrowLeft as LArrowLeft,
   ArrowRight as LArrowRight,
+  ArrowUp as LArrowUp,
+  ArrowUpDown as LArrowUpDown,
   Award as LAward,
   BookOpen as LBookOpen,
   BookOpenText as LBookOpenText,
@@ -125,8 +128,11 @@ function withDefaults(Base: LucideIcon, name: string): LucideIcon {
   return Icon as LucideIcon;
 }
 
+export const ArrowDown = withDefaults(LArrowDown, 'ArrowDown');
 export const ArrowLeft = withDefaults(LArrowLeft, 'ArrowLeft');
 export const ArrowRight = withDefaults(LArrowRight, 'ArrowRight');
+export const ArrowUp = withDefaults(LArrowUp, 'ArrowUp');
+export const ArrowUpDown = withDefaults(LArrowUpDown, 'ArrowUpDown');
 export const Award = withDefaults(LAward, 'Award');
 export const BookOpen = withDefaults(LBookOpen, 'BookOpen');
 export const BookOpenText = withDefaults(LBookOpenText, 'BookOpenText');

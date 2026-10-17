@@ -4,6 +4,8 @@ import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import { useNoteDescription } from "./editorialNotesContext.js";
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 import { TranslationEditor } from "./TranslationEditor.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function CultureEditor({
@@ -22,11 +24,14 @@ export function CultureEditor({
   const patch = (change: Partial<CultureContent>) =>
     onChange({ ...value, ...change });
   const legacy = !(value.category in categories);
+  const categoryNoteId = useNoteDescription("category");
+  const categoryA11y = useFieldErrorA11y("category", categoryNoteId);
   return (
     <div>
       <label className="cms-field">
         <span>Chủ đề văn hóa</span>
         <select
+          {...categoryA11y}
           name="category"
           value={value.category}
           onChange={(e) => patch({ category: e.target.value })}
@@ -43,7 +48,7 @@ export function CultureEditor({
           ))}
         </select>
       </label>
-      <FieldNotes field="category" />
+      <FieldNotes field="category" id={categoryNoteId} />
       {legacy && (
         <p role="alert">
           Chủ đề cũ chưa hợp lệ. Chọn một trong tám chủ đề trước xuất bản.

@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { TextField } from "./FormFields.js";
 import type { Quiz } from "./content.types.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 function QuestionEditor({
   value,
   onChange,
@@ -27,6 +28,7 @@ function QuestionEditor({
   };
   const n = index + 1;
   const path = `quiz.${index}`;
+  const answerA11y = useFieldErrorA11y(`${path}.correctAnswer`);
   return (
     <>
       <TextField
@@ -79,6 +81,7 @@ function QuestionEditor({
       <label className="cms-field">
         <span>Đáp án đúng câu {n}</span>
         <select
+          {...answerA11y}
           name={`${path}.correctAnswer`}
           value={correctId}
           onChange={(event) =>

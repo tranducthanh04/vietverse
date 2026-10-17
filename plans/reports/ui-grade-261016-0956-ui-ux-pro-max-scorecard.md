@@ -82,7 +82,7 @@
 
 ### Low còn lại (chưa sửa, có chủ đích hoặc ngoài phạm vi)
 - ~~`transition-all` còn rải rác ở nhiều component~~ **Đã sửa (2026-10-17, nhánh `chore/transition-props`):** thay toàn bộ 47 chỗ `transition-all` trong `client/src/**` bằng utility hẹp (`transition-colors`/`transition-shadow`/`transition-[...]`) liệt kê đúng thuộc tính đổi theo class trạng thái; thêm `motion-reduce:transition-none` cho các chỗ transform/scale. Ngoại lệ ghi nhận: thanh tiến trình onboarding (`OnboardingWizard.tsx:108`) vẫn animate `width` (chuyển sang `transition-[width]`), không đổi sang `transform` để giữ nguyên hành vi.
-- Bảng doanh thu chưa sắp xếp được; bộ lọc ngày trang Doanh thu chưa lên URL; tóm tắt lỗi CMS chưa có link neo tới trường.
+- ~~Bảng doanh thu chưa sắp xếp được; bộ lọc ngày trang Doanh thu chưa lên URL; tóm tắt lỗi CMS chưa có link neo tới trường~~ **Đã sửa (2026-10-17, nhánh `chore/admin-revenue-cms-polish`)**, xem mục riêng.
 - ~~Popup hết giờ dùng màu indigo "ban đêm" ngoài token~~ **Đã sửa (2026-10-16, commit `6cbdf42`):** đưa về token thương hiệu.
 
 ## Review lượt cuối toàn nhánh (so với `main`)
@@ -91,3 +91,13 @@
 - Sửa ở `704f108`: `Modal` đếm số modal đang mở, chỉ mở khoá khi về 0; test hồi quy `modalScrollLock.test.tsx` (đỏ trên bản cũ, xanh trên bản sửa); chuyển focus khi đổi bước; `aria-controls` có điều kiện.
 - Lượt 2: **PASS** — client typecheck, 234/234 test, lint 0 lỗi (102 cảnh báo); server typecheck.
 - Chưa kiểm tay trên thiết bị thật: luồng "hết giờ → Ba mẹ mở thêm giờ → Parent Gate đúng" (tự động hoá không đi tới được).
+
+## Ba Low admin/CMS — đã sửa 2026-10-17 (nhánh `chore/admin-revenue-cms-polish`)
+
+Ba Low còn lại ở mục trên đã xử lý, chỉ phía client (không đổi API, nghiệp vụ, điểm hay quyền):
+
+- **Bảng doanh thu sắp xếp được.** Bảng "Theo tháng trong kỳ" ở trang Doanh thu cho sắp xếp theo Tháng, Đơn đã thanh toán và Doanh thu bằng nút ở tiêu đề cột, có `aria-sort` (`ascending`/`descending`/`none`) và chỉ báo chiều bằng icon SVG (`ArrowUp`/`ArrowDown`/`ArrowUpDown` thêm vào `icons.tsx`), không dùng ký tự ▲▼. Series tải đủ cả kỳ nên sắp xếp phía client trên toàn tập; không cần đổi server.
+- **Bộ lọc ngày + sắp xếp lên URL.** Khoảng ngày (`from`/`to`) và cột/chiều sắp xếp (`sort`/`dir`) nằm trong query string, nên tải lại hoặc chia sẻ link giữ nguyên trạng thái. Giá trị URL sai định dạng (ngày không có thật trên lịch, cột/chiều lạ) bị bỏ qua và dùng mặc định; khi ghi URL chỉ ghi các tham số hợp lệ nên tham số rác bị dọn, không bị sao chép tiếp. Việc lọc/sắp xếp dùng `replace` nên không đẩy lịch sử trình duyệt thừa (bấm Back vẫn rời trang bình thường).
+- **Tóm tắt lỗi CMS có link neo tới trường.** Khối "N lỗi cần sửa" ở form bài học/truyện/văn hoá hiển thị mỗi lỗi thành link `href="#<id>"`; bấm thì focus đúng ô. Mọi ô được validate đều có `id` ổn định (`cms-field-<name>`), gồm cả ô chọn (`<select>`: `category`, `*.correctAnswer`) và nhóm ô tick (`ageGroups`, đáp án chọn nhiều/phân nhóm) — nhóm neo ở `fieldset`/`role="group"` còn focus tới ô thật đầu tiên. Khi lỗi, ô có `aria-invalid="true"` và `aria-describedby` trỏ **tất cả** dòng lỗi của trường (id lỗi có chỉ số nên không trùng khi một trường nhiều lỗi). Xem `docs/cms-operations.md`.
+
+Kiểm chứng: typecheck sạch (client + server); client 274/274 test qua (thêm 4 ca doanh thu ban đầu + 2 ca URL replace/dọn tham số, 2 ca link lỗi CMS ban đầu + 3 ca link lỗi select/checkbox-group và trường nhiều lỗi); lint client 0 lỗi (103 cảnh báo có sẵn, không phát sinh từ các file đã sửa). Server không đổi nên không chạy lại test server.
