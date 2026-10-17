@@ -1,9 +1,10 @@
 import React from "react";
-import { categories, type CultureContent } from "./content.types.js";
+import { categories, type CultureContent, type CultureTranslations } from "./content.types.js";
 import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import { TranslationEditor } from "./TranslationEditor.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function CultureEditor({
   value,
@@ -85,6 +86,22 @@ export function CultureEditor({
         }
       />
       <QuizEditor value={value.quiz} onChange={(quiz) => patch({ quiz })} />
+      <TranslationEditor
+        translations={value.translations ?? {}}
+        onChange={(translations) =>
+          patch({ translations: translations as CultureTranslations })
+        }
+        sections={[
+          { kind: "text", key: "title", label: "Tiêu đề" },
+          { kind: "text", key: "intro", label: "Mở đầu", multiline: true },
+          {
+            kind: "list",
+            key: "funFacts",
+            label: "Thông tin thú vị",
+            source: value.funFacts,
+          },
+        ]}
+      />
     </div>
   );
 }

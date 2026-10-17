@@ -75,6 +75,14 @@ Preview bốn dạng dùng renderer thuần và state local, phản hồi trung 
 - Nếu Cloudinary UI không có `max_file_size`, 5 MiB vẫn được chặn ở client/backend; không ghi nhận provider đã chặn vượt cỡ nếu chưa có bằng chứng thật.
 - Không upload ảnh khách hàng để smoke test nếu chưa có yêu cầu riêng. Asset mồ côi do mất response cần đối soát theo public ID; không xóa wildcard.
 
+## Bản dịch theo ngôn ngữ hỗ trợ (2026-10-17)
+
+Đây là **quyết định triển khai** cho story/đồng dao và văn hóa: form nháp có khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn theo từng ngôn ngữ (`en`, `ja`, `ko`, `zh`, `fr`). Admin nhập bản dịch cho tiêu đề, phần giới thiệu/mô tả, từng thẻ "Có thể bé chưa biết?"/từng dòng đọc và từ vựng; mỗi ô dịch hiện nội dung tiếng Việt gốc làm gợi ý (placeholder) để đối chiếu. Lưu bằng **Lưu nháp** và kiểm tra bằng **Xem trước** như các trường khác; bản dịch là tùy chọn và **không** là điều kiện publish.
+
+- Bản dịch chỉ bổ sung hiển thị cho bé (dưới đoạn tiếng Việt), không đổi quiz, chấm điểm, exploration hay ViVi Points. Ngôn ngữ ngoài tập hỗ trợ (kể cả `other`) bị schema từ chối.
+- Mảng bản dịch (facts/lyrics/vocab) song song theo index với bản tiếng Việt; sửa thứ tự hoặc xóa dòng nguồn thì cần soát lại bản dịch tương ứng.
+- **Giả định chờ duyệt**: bản dịch tiếng Anh trong seed demo là bản nháp chưa duyệt, chỉ để xem thử; content owner cần duyệt văn bản và bản quyền trước production. Không có migration ghi bản dịch lên production trong thay đổi này.
+
 ## Rollback
 
 Tắt `CMS_PUBLISH_ENABLED` để ngừng publish/visibility. Giữ backend reader phiên bản và client/session/outbox hiểu version. Không hạ về grader chỉ đọc live sau khi đã xuất bản revisions. Không xóa revisions, drafts, progress, recording hay ledger. Khôi phục nội dung cũ bằng lần xuất bản mới có kiểm tra từ snapshot; chưa có nút khôi phục một chạm.

@@ -99,6 +99,9 @@ Nguyên tắc bắt buộc:
 - Câu trả lời phải đúng schema: chỉ số câu hợp lệ, một lựa chọn hợp lệ, không dư dữ liệu không dùng.
 - Khám phá story/culture ghi một lần cho mỗi bé/nội dung qua compound unique index `{ childId: 1, kind: 1, refId: 1 }`.
 - Log khám phá dùng cho dashboard phụ huynh không bị đếm trùng lặp.
+- *Quyết định nghiệp vụ (2026-10-17, feedback khách hàng "mấy này nên kèm với ngôn ngữ hỗ trợ đã chọn")*: nội dung văn hóa (giới thiệu, các thẻ "Có thể bé chưa biết?", tiêu đề) và truyện (tiêu đề, mô tả, từng dòng đọc, từ vựng nổi bật) có thể kèm bản dịch theo ngôn ngữ trong tập `companionLanguages` trừ `other` (`en`, `ja`, `ko`, `zh`, `fr`). Khu bé hiển thị bản dịch ngay dưới đoạn tiếng Việt, theo ngôn ngữ hỗ trợ **đầu tiên có bản dịch** trong danh sách ưu tiên của bé đang chọn; tiếng Việt luôn là nội dung chính. Bản dịch là tùy chọn và chỉ bổ sung hiển thị: không thay đổi quiz, chấm điểm, exploration hay ViVi Points. Nội dung không có bản dịch (gồm dữ liệu cũ) hiển thị như trước, không cần migration.
+- *Quyết định nghiệp vụ (2026-10-17, owner duyệt)*: trang chi tiết truyện của bé hiển thị đoạn tóm tắt (`description`) ngay dưới dòng tác giả, kèm bản dịch tóm tắt theo cùng quy tắc trên. Truyện không có mô tả thì không hiện khối này. CMS admin lưu nháp sẽ bỏ các ô dịch đã xoá trắng và các ngôn ngữ không còn ô nào, nên payload không chứa chuỗi rỗng.
+- *Giả định triển khai*: thứ tự `companionLanguages` là thứ tự ưu tiên chọn bản dịch; mảng bản dịch song song theo index với bản tiếng Việt. Bản dịch tiếng Anh trong seed demo là bản nháp chưa duyệt, cần content owner duyệt trước phát hành.
 
 ## 6. Đổi quà
 

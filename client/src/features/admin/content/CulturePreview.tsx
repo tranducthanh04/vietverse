@@ -2,6 +2,7 @@ import React from "react";
 import type { CultureContent } from "./content.types.js";
 import { MediaAsset } from "./MediaFields.js";
 import { QuizPreview } from "./QuizPreview.js";
+import { TranslationPreview } from "./TranslationEditor.js";
 export function CulturePreview({ payload }: { payload: CultureContent }) {
   return (
     <article className="cms">
@@ -16,6 +17,14 @@ export function CulturePreview({ payload }: { payload: CultureContent }) {
       ))}
       <p>{payload.tags.join(" · ")}</p>
       <QuizPreview value={payload.quiz} />
+      <TranslationPreview
+        translations={payload.translations}
+        sections={[
+          { key: "title", label: "Tiêu đề" },
+          { key: "intro", label: "Mở đầu" },
+          { key: "funFacts", label: "Thông tin thú vị", list: true },
+        ]}
+      />
     </article>
   );
 }

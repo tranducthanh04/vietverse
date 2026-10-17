@@ -19,6 +19,7 @@ import { Card } from "../../components/ui/Card.js";
 import { Button } from "../../components/ui/Button.js";
 import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
+import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { VI_LOCALES } from "../../locales/vi.js";
 import { useNarration } from "../../hooks/useNarration.js";
 
@@ -163,9 +164,27 @@ export const StoryDetailPage: React.FC = () => {
               <h1 className="mt-3 text-kid-xl sm:text-kid-2xl font-black font-display text-stone-800 text-balance">
                 {story.title}
               </h1>
+              <SupportTranslation
+                translations={story.translations}
+                select={(t: { title?: string }) => t.title}
+                className="mt-1 block text-sm sm:text-base font-semibold text-stone-500"
+              />
               <span className="mt-1 text-sm text-stone-500 font-semibold">
                 Tác giả: {story.author || "Dân gian Việt Nam"}
               </span>
+
+              {story.description?.trim() && (
+                <div className="mt-3 max-w-prose">
+                  <p className="text-kid-base text-stone-700 leading-relaxed text-pretty">
+                    {story.description}
+                  </p>
+                  <SupportTranslation
+                    translations={story.translations}
+                    select={(t: { description?: string }) => t.description}
+                    className="mt-1 block text-sm sm:text-base text-stone-500 leading-relaxed"
+                  />
+                </div>
+              )}
 
               {/* Karaoke Play / Pause Controls */}
               <div className="mt-5 w-full flex items-center gap-3 sm:gap-4 bg-cream-muted/70 border border-cream-border rounded-kid p-3 sm:p-4">
@@ -258,16 +277,22 @@ export const StoryDetailPage: React.FC = () => {
               const isActive = idx === currentLineIndex;
 
               return (
-                <p
-                  key={idx}
-                  className={`px-4 py-3 rounded-2xl border-l-4 transition-colors duration-300 text-kid-base sm:text-kid-lg ${
-                    isActive
-                      ? "bg-amber-100/90 text-primary border-primary font-black"
-                      : "border-transparent text-stone-700 font-bold"
-                  }`}
-                >
-                  {line.text}
-                </p>
+                <div key={idx}>
+                  <p
+                    className={`px-4 py-3 rounded-2xl border-l-4 transition-colors duration-300 text-kid-base sm:text-kid-lg ${
+                      isActive
+                        ? "bg-amber-100/90 text-primary border-primary font-black"
+                        : "border-transparent text-stone-700 font-bold"
+                    }`}
+                  >
+                    {line.text}
+                  </p>
+                  <SupportTranslation
+                    translations={story.translations}
+                    select={(t: { lyrics?: string[] }) => t.lyrics?.[idx]}
+                    className="block px-4 pb-1 text-sm text-stone-500"
+                  />
+                </div>
               );
             })}
           </div>
@@ -282,9 +307,14 @@ export const StoryDetailPage: React.FC = () => {
                 {story.vocab.map((v: string, i: number) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-sm font-bold"
+                    className="inline-flex flex-col items-start px-3 py-1.5 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-sm font-bold"
                   >
-                    {v}
+                    <span>{v}</span>
+                    <SupportTranslation
+                      translations={story.translations}
+                      select={(t: { vocab?: string[] }) => t.vocab?.[i]}
+                      className="text-xs font-normal text-stone-500"
+                    />
                   </span>
                 ))}
               </div>
