@@ -2,20 +2,23 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
- * Whether the app has already rendered its first route.
+ * The pathname the app first rendered, and whether the user has navigated since.
  *
  * Shared across every layout instance so that a client-side navigation into a
  * *different* layout (e.g. public → kids) still counts as a navigation, while
- * the very first page load does not. A per-component ref could not tell these
- * apart because a fresh layout mount always looks like a "first render".
+ * the very first page load does not. Remembering the first pathname (instead of
+ * a plain "already rendered" flag) keeps React StrictMode's double-run of the
+ * mount effect in dev from being mistaken for a navigation.
  *
  * Reset only from tests via {@link resetMainFocusTracking}.
  */
-let hasRenderedInitialRoute = false;
+let initialPathname: string | null = null;
+let hasNavigated = false;
 
 /** Test-only: forget that the first route has rendered. */
 export function resetMainFocusTracking(): void {
-  hasRenderedInitialRoute = false;
+  initialPathname = null;
+  hasNavigated = false;
 }
 
 /**
@@ -29,7 +32,8 @@ export function resetMainFocusTracking(): void {
  *   must not scroll on load);
  * - query-string/hash-only changes within the same page (the effect only reruns
  *   when `pathname` changes);
- * - any moment a modal dialog is open, so it never pulls focus out of a dialog.
+ * - any moment a modal dialog is open, so it never pulls focus out of a dialog;
+ * - a page that already focused an element inside `<main>` on mount.
  *
  * If no `#main-content` exists (standalone pages such as onboarding or the
  * lesson player), the call is a harmless no-op.
@@ -38,12 +42,19 @@ export function useFocusMainOnRouteChange(): void {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (!hasRenderedInitialRoute) {
-      hasRenderedInitialRoute = true;
+    if (initialPathname === null) {
+      initialPathname = pathname;
       return;
     }
+    if (!hasNavigated && pathname === initialPathname) return;
+    hasNavigated = true;
     // A modal traps focus; never yank it out mid-dialog.
     if (document.querySelector('[aria-modal="true"]')) return;
-    document.getElementById('main-content')?.focus();
+    const main = document.getElementById('main-content');
+    // Layout effects run after the page's own effects, so respect a page that
+    // already moved focus to something inside <main> when it mounted.
+    const active = document.activeElement;
+    if (!main || (active && active !== main && main.contains(active))) return;
+    main.focus();
   }, [pathname]);
 }

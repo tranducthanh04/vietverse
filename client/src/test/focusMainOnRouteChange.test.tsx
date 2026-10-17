@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -10,6 +10,12 @@ import {
 // A minimal layout that mirrors how the real layouts use the hook: it renders a
 // persistent <main id="main-content"> around the routed content and (optionally)
 // an open modal dialog.
+const SelfFocusingPage: React.FC = () => {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => { ref.current?.focus(); }, []);
+  return <input ref={ref} aria-label="Ô tự focus" />;
+};
+
 const Shell: React.FC<{ withModal?: boolean }> = ({ withModal = false }) => {
   useFocusMainOnRouteChange();
   return (
@@ -17,10 +23,12 @@ const Shell: React.FC<{ withModal?: boolean }> = ({ withModal = false }) => {
       <Link to="/a">Tới A</Link>
       <Link to="/a?tab=2">Cùng trang, khác query</Link>
       <Link to="/b">Tới B</Link>
+      <Link to="/c">Tới C</Link>
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
         <Routes>
           <Route path="/a" element={<h1>Trang A</h1>} />
           <Route path="/b" element={<h1>Trang B</h1>} />
+          <Route path="/c" element={<SelfFocusingPage />} />
         </Routes>
       </main>
       {withModal && (
@@ -85,5 +93,24 @@ describe('useFocusMainOnRouteChange', () => {
     fireEvent.click(screen.getByText('Cùng trang, khác query'));
     await screen.findByText('Trang A');
     expect(document.activeElement).not.toBe(mainEl());
+  });
+  it('ignores the dev StrictMode double-run on the first page load', async () => {
+    render(
+      <React.StrictMode>
+        <MemoryRouter initialEntries={['/a']}>
+          <Shell />
+        </MemoryRouter>
+      </React.StrictMode>,
+    );
+    await screen.findByText('Trang A');
+    expect(document.activeElement).not.toBe(mainEl());
+  });
+
+  it('keeps focus a page placed inside <main> on mount', async () => {
+    renderAt('/a');
+    await screen.findByText('Trang A');
+    fireEvent.click(screen.getByText('Tới C'));
+    const input = await screen.findByLabelText('Ô tự focus');
+    expect(document.activeElement).toBe(input);
   });
 });
