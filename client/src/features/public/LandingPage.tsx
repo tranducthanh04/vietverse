@@ -115,7 +115,7 @@ export const LandingPage: React.FC = () => {
                   <div className="overflow-hidden rounded-2xl relative aspect-[16/10] lg:aspect-[4/3] w-full bg-amber-50">
                     <img
                       alt={t('landing.mascotAlt')}
-                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700 ease-out"
+                      className="w-full h-full object-cover transform transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100"
                       src="/images/mascot/sao-li-lac-river-journey.webp"
                       width={512}
                       height={286}
@@ -167,7 +167,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 1 */}
             <Link
               to="/kho-truyen"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary">
                 <DomainIcon.stories className="w-8 h-8" />
@@ -190,7 +190,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 2 */}
             <Link
               to="/kham-pha"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-secondary">
                 <Gamepad2 className="w-8 h-8" />
@@ -213,7 +213,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 3 */}
             <Link
               to="/van-hoa"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-tertiary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-tertiary">
                 <DomainIcon.culture className="w-8 h-8" />
@@ -333,7 +333,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <span className="text-xs text-secondary uppercase font-bold tracking-wider mb-1">{t('landing.stage1Tag')}</span>
                 <h3 className="font-display text-lg text-on-surface font-bold mb-2">{t('landing.stage1Title')}</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t('landing.stage1Body')}
                 </p>
               </div>
@@ -345,7 +345,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <span className="text-xs text-secondary uppercase font-bold tracking-wider mb-1">{t('landing.stage2Tag')}</span>
                 <h3 className="font-display text-lg text-on-surface font-bold mb-2">{t('landing.stage2Title')}</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t('landing.stage2Body')}
                 </p>
               </div>
@@ -357,7 +357,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <span className="text-xs text-secondary uppercase font-bold tracking-wider mb-1">{t('landing.stage3Tag')}</span>
                 <h3 className="font-display text-lg text-on-surface font-bold mb-2">{t('landing.stage3Title')}</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t('landing.stage3Body')}
                 </p>
               </div>
@@ -369,7 +369,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <span className="text-xs text-secondary uppercase font-bold tracking-wider mb-1">{t('landing.stage4Tag')}</span>
                 <h3 className="font-display text-lg text-on-surface font-bold mb-2">{t('landing.stage4Title')}</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t('landing.stage4Body')}
                 </p>
               </div>
@@ -381,7 +381,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <span className="text-xs text-secondary uppercase font-bold tracking-wider mb-1">{t('landing.stage5Tag')}</span>
                 <h3 className="font-display text-lg text-on-surface font-bold mb-2">{t('landing.stage5Title')}</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t('landing.stage5Body')}
                 </p>
               </div>

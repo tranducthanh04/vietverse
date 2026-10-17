@@ -8,10 +8,13 @@ import {
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  useFocusMainOnRouteChange();
 
   useEffect(() => {
     if (user && user.role !== 'admin') {
@@ -82,7 +85,7 @@ export const AdminLayout: React.FC = () => {
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `min-h-[44px] px-3.5 py-2 rounded-xl font-bold text-xs flex items-center space-x-2 whitespace-nowrap transition-all shrink-0 ${
+              `min-h-[44px] px-3.5 py-2 rounded-xl font-bold text-xs flex items-center space-x-2 whitespace-nowrap transition-[color,background-color,box-shadow] shrink-0 ${
                 isActive
                   ? 'bg-primary text-white shadow-md font-black'
                   : 'text-stone-300 hover:text-white hover:bg-stone-800'
@@ -107,7 +110,7 @@ export const AdminLayout: React.FC = () => {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-sm transition-all min-h-[44px] ${
+                `flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-sm transition-[color,background-color,box-shadow] min-h-[44px] ${
                   isActive
                     ? 'bg-primary text-white shadow-sm font-black'
                     : 'text-stone-600 hover:bg-stone-100'

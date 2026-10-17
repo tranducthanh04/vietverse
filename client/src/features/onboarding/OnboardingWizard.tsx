@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -31,6 +31,20 @@ export const OnboardingWizard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const isFirstStep = useRef(true);
+
+  // Move focus to the step panel when the wizard advances, so keyboard and
+  // screen-reader users land on the new step. We skip the first render (no
+  // `autoFocus` on the name field — that popped the mobile keyboard on load)
+  // and never focus an input, so the soft keyboard stays closed until tapped.
+  useEffect(() => {
+    if (isFirstStep.current) {
+      isFirstStep.current = false;
+      return;
+    }
+    stageRef.current?.focus();
+  }, [step]);
 
   const handleNext = async () => {
     setErrorMsg('');
@@ -82,7 +96,7 @@ export const OnboardingWizard: React.FC = () => {
           {step > 1 ? (
             <button
               onClick={() => setStep(step - 1)}
-              className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-all active:scale-95 shadow-sm"
+              className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-[background-color,transform] motion-reduce:transition-none active:scale-95 shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>{t('common.back')}</span>
@@ -105,7 +119,7 @@ export const OnboardingWizard: React.FC = () => {
             {/* Connecting ribbon track */}
             <div className="absolute top-6 left-8 right-8 h-2 bg-surface-container-high rounded-full -translate-y-1/2 pointer-events-none" />
             <div
-              className="absolute top-6 left-8 h-2 bg-gradient-to-r from-primary to-secondary-container rounded-full -translate-y-1/2 transition-all duration-300 pointer-events-none"
+              className="absolute top-6 left-8 h-2 bg-gradient-to-r from-primary to-secondary-container rounded-full -translate-y-1/2 transition-[width] duration-300 pointer-events-none"
               style={{ width: `${((step - 1) / 3) * 85 + 5}%` }}
             />
 
@@ -122,7 +136,7 @@ export const OnboardingWizard: React.FC = () => {
               return (
                 <div key={node.num} className="relative flex flex-col items-center gap-2 z-10">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-[color,background-color,box-shadow,transform] motion-reduce:transition-none ${
                       isActive
                         ? 'bg-primary text-on-primary ring-4 ring-primary/20 scale-110'
                         : isPast
@@ -146,7 +160,11 @@ export const OnboardingWizard: React.FC = () => {
         </div>
 
         {/* Main Stage Container (Wizard Showcase) */}
-        <div className="relative w-full bg-surface-container-lowest rounded-3xl p-6 sm:p-10 shadow-[0_12px_36px_-6px_rgba(180,83,9,0.1)] border border-outline-variant/30">
+        <div
+          ref={stageRef}
+          tabIndex={-1}
+          className="relative w-full bg-surface-container-lowest rounded-3xl p-6 sm:p-10 shadow-[0_12px_36px_-6px_rgba(180,83,9,0.1)] border border-outline-variant/30 focus:outline-none"
+        >
           {errorMsg && (
             <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
               {errorMsg}
@@ -194,8 +212,7 @@ export const OnboardingWizard: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t('onboarding.namePlaceholder')}
-                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
-                    autoFocus
+                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-[background-color,box-shadow] border border-outline-variant/30 text-center"
                   />
                 </div>
 
@@ -232,7 +249,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   aria-pressed={ageGroup === '5-6'}
                   onClick={() => setAgeGroup('5-6')}
-                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-all duration-200 shadow-md ${
+                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-[background-color,border-color,box-shadow] duration-200 shadow-md ${
                     ageGroup === '5-6'
                       ? 'bg-surface-container-low ring-4 ring-primary shadow-lg'
                       : 'bg-surface-container-lowest hover:bg-surface-container-low border border-outline-variant/40'
@@ -250,7 +267,7 @@ export const OnboardingWizard: React.FC = () => {
                     <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age56')}</span>
                     <span className="text-xs text-primary font-bold">{t('onboarding.age56Tag')}</span>
                   </div>
-                  <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
+                  <span className="block text-sm sm:text-base text-on-surface-variant leading-relaxed font-medium">
                     {t('onboarding.age56Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">
@@ -264,7 +281,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   aria-pressed={ageGroup === '6-8'}
                   onClick={() => setAgeGroup('6-8')}
-                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-all duration-200 shadow-md ${
+                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-[background-color,border-color,box-shadow] duration-200 shadow-md ${
                     ageGroup === '6-8'
                       ? 'bg-surface-container-low ring-4 ring-primary shadow-lg'
                       : 'bg-surface-container-lowest hover:bg-surface-container-low border border-outline-variant/40'
@@ -282,7 +299,7 @@ export const OnboardingWizard: React.FC = () => {
                     <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age68')}</span>
                     <span className="text-xs text-tertiary font-bold">{t('onboarding.age68Tag')}</span>
                   </div>
-                  <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
+                  <span className="block text-sm sm:text-base text-on-surface-variant leading-relaxed font-medium">
                     {t('onboarding.age68Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">
@@ -338,7 +355,7 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => setCompanionLanguages((current) => current.includes(item.code)
                         ? current.filter((code) => code !== item.code)
                         : [...current, item.code])}
-                      className={`p-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                      className={`p-4 rounded-2xl border-2 text-center transition-[background-color,border-color,box-shadow] cursor-pointer ${
                         isSelected
                           ? 'border-primary bg-primary-fixed/40 shadow-md ring-2 ring-primary'
                           : 'border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container-low'

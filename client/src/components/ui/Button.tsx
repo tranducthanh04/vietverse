@@ -19,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const t = useT();
   const baseStyles =
-    'inline-flex items-center justify-center font-bold transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50 disabled:pointer-events-none select-none min-h-[48px] min-w-[48px]';
+    'inline-flex items-center justify-center font-bold transition-[color,background-color,border-color,box-shadow,transform,opacity] motion-reduce:transition-none active:scale-95 disabled:opacity-50 disabled:pointer-events-none select-none min-h-[48px] min-w-[48px]';
 
   const variants = {
     primary:

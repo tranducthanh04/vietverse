@@ -3,9 +3,11 @@ import { OptionRows,answerMap,type NewEditorProps } from './NewActivityEditorFie
 import { TextField } from './FormFields.js';
 import { FieldNotes } from './EditorialNotes.js';
 import { useNoteDescription } from './editorialNotesContext.js';
+import { useFieldErrorA11y } from './fieldIssuesContext.js';
 export function GroupSortEditor({activity,onChange,index}:NewEditorProps){
   const [warning,setWarning]=useState(''); const n=index+1,path=`activities.${index}`,map=answerMap(activity);
   const note=useNoteDescription(`${path}.correctAnswer`);
+  const answerA11y=useFieldErrorA11y(`${path}.correctAnswer`,note);
   return <>
     <fieldset><legend>Nhóm {n}</legend><FieldNotes field={`${path}.groups`}/>
       {(activity.groups??[]).map((group,i)=><div key={group.id}>
@@ -25,7 +27,7 @@ export function GroupSortEditor({activity,onChange,index}:NewEditorProps){
       onChange({...activity,options:activity.options?.filter(o=>o.id!==id),correctAnswer:next});
     }}/>
     {warning&&<p role="status">{warning}</p>}
-    <fieldset><legend>Đáp án phân nhóm {n}</legend><FieldNotes field={`${path}.correctAnswer`} id={note}/>
+    <fieldset {...answerA11y}><legend>Đáp án phân nhóm {n}</legend><FieldNotes field={`${path}.correctAnswer`} id={note}/>
       {(activity.options??[]).map((option,i)=><label key={option.id} className="cms-field"><span>Nhóm đúng {n}.{i+1}: {option.text||option.id}</span>
         <select aria-describedby={note} name={`${path}.correctAnswer.${option.id}`} value={map[option.id]||''} onChange={event=>onChange({...activity,correctAnswer:{...map,[option.id]:event.target.value}})}>
           <option value="">Chưa phân nhóm</option>{activity.groups?.map(group=><option key={group.id} value={group.id}>{group.label||group.id}</option>)}

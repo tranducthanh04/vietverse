@@ -8,6 +8,14 @@ describe('Client Utilities', () => {
     expect(formatPoints(0)).toBe('0');
   });
 
+  it('should group thousands per the interface language', () => {
+    // Vietnamese uses a dot as the thousands separator, English a comma.
+    expect(formatPoints(1500, 'vi')).toBe('1.500');
+    expect(formatPoints(1500, 'en')).toBe('1,500');
+    // Defaulting (no language) keeps the Vietnamese grouping callers relied on.
+    expect(formatPoints(1500)).toBe(formatPoints(1500, 'vi'));
+  });
+
   it('should merge tailwind class names properly', () => {
     const result = cn('bg-red-500 text-white', 'p-4', undefined, 'bg-blue-500');
     expect(result).toContain('bg-blue-500');

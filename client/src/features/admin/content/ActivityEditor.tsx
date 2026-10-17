@@ -5,6 +5,7 @@ import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 import { MultiSelectEditor } from './MultiSelectEditor.js';
 import { GroupSortEditor } from './GroupSortEditor.js';
 import { FillBlanksEditor } from './FillBlanksEditor.js';
@@ -21,6 +22,7 @@ export function ActivityEditor({
 }) {
   const path = `activities.${index}`;
   const answerNoteId = useNoteDescription(`${path}.correctAnswer`);
+  const answerA11y = useFieldErrorA11y(`${path}.correctAnswer`, answerNoteId);
   const [pendingType, setPendingType] = useState<ActivityType | null>(null);
   const n = index + 1;
   const patch = (change: Partial<Activity>) =>
@@ -146,8 +148,8 @@ export function ActivityEditor({
           <label className="cms-field">
             <span>Đáp án {n}</span>
             <select
+              {...answerA11y}
               name={`${path}.correctAnswer`}
-              aria-describedby={answerNoteId}
               value={
                 typeof value.correctAnswer === "string"
                   ? value.correctAnswer

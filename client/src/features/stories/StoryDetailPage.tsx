@@ -192,7 +192,7 @@ export const StoryDetailPage: React.FC = () => {
                 <button
                   onClick={narration.toggle}
                   disabled={audioUnavailable}
-                  className="shrink-0 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:bg-primary-hover active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  className="shrink-0 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:bg-primary-hover active:translate-y-1 active:shadow-none transition-[background-color,box-shadow,transform,opacity] motion-reduce:transition-none disabled:opacity-50 disabled:pointer-events-none"
                   aria-label={
                     narration.isPlaying
                       ? narration.mode === "tts"
@@ -367,7 +367,7 @@ export const StoryDetailPage: React.FC = () => {
                       setSelectedQuizAnswer(idx);
                       setIsQuizChecked(true);
                     }}
-                    className={`w-full p-4 rounded-2xl font-bold font-display text-left border-2 transition-all flex items-center justify-between min-h-[50px] ${
+                    className={`w-full p-4 rounded-2xl font-bold font-display text-left border-2 transition-colors flex items-center justify-between min-h-[50px] ${
                       isCorrect
                         ? "bg-emerald-50 border-emerald-500 text-emerald-800"
                         : isWrong

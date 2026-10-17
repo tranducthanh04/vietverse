@@ -328,7 +328,7 @@ export const AdminRedemptionsPage: React.FC = () => {
         <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-cream-border">
           <button
             onClick={() => updateParams({ tab: '' })}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center space-x-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-[color,background-color,box-shadow] min-h-[44px] flex items-center space-x-1.5 ${
               activeTab === 'orders'
                 ? 'bg-white text-stone-800 shadow-sm'
                 : 'text-stone-500 hover:text-stone-800'
@@ -339,7 +339,7 @@ export const AdminRedemptionsPage: React.FC = () => {
           </button>
           <button
             onClick={() => updateParams({ tab: 'inventory' })}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] flex items-center space-x-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-[color,background-color,box-shadow] min-h-[44px] flex items-center space-x-1.5 ${
               activeTab === 'inventory'
                 ? 'bg-white text-stone-800 shadow-sm'
                 : 'text-stone-500 hover:text-stone-800'
@@ -387,7 +387,7 @@ export const AdminRedemptionsPage: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => updateParams({ status: tab.id === 'all' ? '' : tab.id })}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-h-[44px] ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-[color,background-color,box-shadow] whitespace-nowrap min-h-[44px] ${
                     filterStatus === tab.id
                       ? 'bg-primary text-white shadow-xs'
                       : 'text-stone-600 hover:bg-stone-50'

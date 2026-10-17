@@ -5,7 +5,8 @@ import {
   LockKeyhole,
 } from '../../components/ui/icons.js';
 import { Card } from '../../components/ui/Card.js';
-import { useT, type Translate } from '../../i18n/index.js';
+import { formatPoints } from '../../lib/utils.js';
+import { useT, useUiLanguage, type Translate } from '../../i18n/index.js';
 import type { ParentProgress, ParentRecentActivity, ParentStageProgress } from './parentProgress.types.js';
 
 function stageDescription(stage: ParentStageProgress, t: Translate) {
@@ -20,6 +21,7 @@ function stageDescription(stage: ParentStageProgress, t: Translate) {
 
 export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey' | 'child'>) {
   const t = useT();
+  const { language } = useUiLanguage();
   const current = journey?.stages.find(stage => stage.id === journey.currentStageId);
   return (
     <section aria-labelledby="parent-journey-title" className="space-y-4">
@@ -37,7 +39,7 @@ export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey'
             ) : <p className="text-stone-600">{t('parentPortal.journeyNoData')}</p>}
           </div>
           <div className="sm:text-right shrink-0">
-            {child && <p className="font-black text-xl text-primary">{child.viviPoints.toLocaleString('vi-VN')} {t('parentPortal.journeyPointsUnit')}</p>}
+            {child && <p className="font-black text-xl text-primary">{formatPoints(child.viviPoints, language)} {t('parentPortal.journeyPointsUnit')}</p>}
             <Link to="/diem-thuong" className="inline-flex items-center min-h-[44px] text-sm font-bold text-primary underline underline-offset-4 rounded focus-visible:outline focus-visible:outline-2">
               {t('parentPortal.viewPoints')}
             </Link>

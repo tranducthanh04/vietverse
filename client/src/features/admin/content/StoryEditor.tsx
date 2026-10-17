@@ -4,6 +4,8 @@ import { TextField, NumberField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import { useNoteDescription } from "./editorialNotesContext.js";
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 import { TranslationEditor } from "./TranslationEditor.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function StoryEditor({
@@ -21,6 +23,8 @@ export function StoryEditor({
 }) {
   const patch = (change: Partial<StoryContent>) =>
     onChange({ ...value, ...change });
+  const ageGroupsNoteId = useNoteDescription("ageGroups");
+  const ageGroupsA11y = useFieldErrorA11y("ageGroups", ageGroupsNoteId);
   return (
     <div>
       <label className="cms-field">
@@ -81,13 +85,14 @@ export function StoryEditor({
         value={value.durationSec}
         onChange={(durationSec) => patch({ durationSec })}
       />
-      <fieldset>
+      <fieldset {...ageGroupsA11y}>
         <legend>Nhóm tuổi</legend>
-        <FieldNotes field="ageGroups" />
+        <FieldNotes field="ageGroups" id={ageGroupsNoteId} />
         {(["5-6", "6-8"] as const).map((age) => (
           <label className="cms-row" key={age}>
             <input
               type="checkbox"
+              name="ageGroups"
               checked={value.ageGroups.includes(age)}
               onChange={(e) =>
                 patch({

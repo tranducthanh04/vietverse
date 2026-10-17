@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
+  ChevronDown,
   DomainIcon,
   Lock,
   Shield,
@@ -11,14 +12,18 @@ import { formatPoints } from '../../lib/utils.js';
 import { ParentGateModal } from '../../features/parent/ParentGateModal.js';
 import { EquippedAvatar } from '../../features/points/EquippedAvatar.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
-import { useT } from '../../i18n/index.js';
+import { useT, useUiLanguage } from '../../i18n/index.js';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const KidsLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { activeChild, children, selectChild } = useChildStore();
   const t = useT();
+  const { language } = useUiLanguage();
+
+  useFocusMainOnRouteChange();
 
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [showChildPicker, setShowChildPicker] = useState(false);
@@ -92,7 +97,7 @@ export const KidsLayout: React.FC = () => {
               <span className="font-bold font-display text-stone-800 text-sm md:text-base whitespace-nowrap truncate max-w-[5.5rem] sm:max-w-[10rem]">
                 {activeChild?.name || t('kidsLayout.childFallback')}
               </span>
-              <span className="text-[10px] text-stone-500" aria-hidden="true">▼</span>
+              <ChevronDown className="w-3.5 h-3.5 text-stone-500 shrink-0" aria-hidden="true" />
             </button>
 
             {/* Child Switcher Dropdown */}
@@ -115,7 +120,7 @@ export const KidsLayout: React.FC = () => {
                     }`}
                   >
                     <span>{c.name}</span>
-                    <span className="text-xs opacity-75">{c.viviPoints} {t('kidsLayout.pointsUnit')}</span>
+                    <span className="text-xs opacity-75">{formatPoints(c.viviPoints, language)} {t('kidsLayout.pointsUnit')}</span>
                   </button>
                 ))}
                 <div className="pt-2 mt-1 border-t border-cream-border">
@@ -140,14 +145,14 @@ export const KidsLayout: React.FC = () => {
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
               <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
-                {formatPoints(activeChild?.viviPoints || 0)}
+                {formatPoints(activeChild?.viviPoints || 0, language)}
               </span>
             </div>
 
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
               onClick={handleOpenParent}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-[background-color,box-shadow] shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
               title={t('kidsLayout.parentCornerAria')}
               aria-label={t('kidsLayout.parentCornerAria')}
             >
@@ -185,7 +190,7 @@ export const KidsLayout: React.FC = () => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center p-2 rounded-2xl transition-all min-w-[56px] min-h-[48px] ${
+                `flex flex-col items-center justify-center p-2 rounded-2xl transition-[color,transform] motion-reduce:transition-none min-w-[56px] min-h-[48px] ${
                   isActive
                     ? 'text-primary font-black scale-110'
                     : 'text-stone-500 font-bold hover:text-stone-800'

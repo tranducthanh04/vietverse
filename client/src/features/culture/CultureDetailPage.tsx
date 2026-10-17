@@ -14,6 +14,7 @@ import {
   Headphones,
 } from '../../components/ui/icons.js';
 import { api } from "../../lib/api.js";
+import { formatPoints } from "../../lib/utils.js";
 import { useChildStore } from "../../store/childStore.js";
 import { useAuthStore } from "../../store/authStore.js";
 import { Card } from "../../components/ui/Card.js";
@@ -22,7 +23,7 @@ import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
 import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { useNarration } from "../../hooks/useNarration.js";
-import { useT } from "../../i18n/index.js";
+import { useT, useUiLanguage } from "../../i18n/index.js";
 
 export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export const CultureDetailPage: React.FC = () => {
 const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> = ({ id, childId, userId }) => {
   const navigate = useNavigate();
   const t = useT();
+  const { language } = useUiLanguage();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
   const [viewId] = useState(() => crypto.randomUUID());
@@ -190,7 +192,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <button
             onClick={narration.toggle}
             disabled={!narration.canPlay}
-            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all min-h-[44px] ${
+            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-[box-shadow,filter] min-h-[44px] ${
               narration.isPlaying
                 ? "bg-amber-500 text-white animate-pulse shadow-amber-300"
                 : "bg-gradient-to-r from-culture-dark to-culture text-white hover:brightness-105"
@@ -347,7 +349,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                         key={optIdx}
                         onClick={() => handleSelectOption(qIdx, optIdx)}
                         disabled={quizSubmitted || isSubmitting}
-                        className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
+                        className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-colors flex items-center justify-between min-h-[44px] ${
                           isSelected
                             ? "bg-culture/10 border-culture text-culture-dark font-bold"
                             : "bg-white border-cream-border hover:border-culture/60 hover:bg-emerald-50/40 text-stone-700"
@@ -425,7 +427,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                     </h3>
                     <p className="text-xs text-emerald-600">
                       {pointsResult && pointsResult > 0
-                        ? t("cultureDetail.pointsEarned", { points: pointsResult })
+                        ? t("cultureDetail.pointsEarned", { points: formatPoints(pointsResult, language) })
                         : t("cultureDetail.noNewPoints")}
                     </p>
                   </div>

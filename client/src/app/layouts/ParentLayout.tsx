@@ -10,12 +10,15 @@ import { useChildStore } from '../../store/childStore.js';
 import { useT } from '../../i18n/index.js';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const ParentLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { activeChild } = useChildStore();
   const t = useT();
+
+  useFocusMainOnRouteChange();
 
   // Guard: Ensure parent gate unlock token and timestamp are valid
   useEffect(() => {
@@ -89,7 +92,7 @@ export const ParentLayout: React.FC = () => {
               key={tab.to}
               to={tab.to}
               className={({ isActive }) =>
-                `flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 min-h-[44px] whitespace-nowrap ${
+                `flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-[color,background-color,border-color,box-shadow] border-2 min-h-[44px] whitespace-nowrap ${
                   isActive
                     ? 'bg-primary text-white border-primary shadow-sm'
                     : 'bg-white text-stone-600 border-cream-border hover:border-accent'

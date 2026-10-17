@@ -2,6 +2,8 @@ import React from "react";
 import "./content.css";
 import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
+
 export function TextField({
   label,
   name,
@@ -18,9 +20,10 @@ export function TextField({
   readOnly?: boolean;
 }) {
   const noteId = useNoteDescription(name);
+  const a11y = useFieldErrorA11y(name, noteId);
   const props = {
+    ...a11y,
     name,
-    "aria-describedby": noteId,
     value,
     readOnly,
     onChange: (
@@ -49,13 +52,14 @@ export function NumberField({
   onChange: (value: number) => void;
 }) {
   const noteId = useNoteDescription(name);
+  const a11y = useFieldErrorA11y(name, noteId);
   return (
     <div className="cms-field">
       <label className="cms-field-label">
         <span>{label}</span>
         <input
+          {...a11y}
           name={name}
-          aria-describedby={noteId}
           type="number"
           min="0"
           step="any"

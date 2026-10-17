@@ -10,7 +10,8 @@ import {
   CloudOff,
 } from './icons.js';
 import { Modal } from './Modal.js';
-import { useT } from '../../i18n/index.js';
+import { formatPoints } from '../../lib/utils.js';
+import { useT, useUiLanguage } from '../../i18n/index.js';
 
 export interface VictoryModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   onPlayAgain,
 }) => {
   const t = useT();
+  const { language } = useUiLanguage();
   useEffect(() => {
     if (isOpen && passed && !isOfflinePending) {
       try {
@@ -93,7 +95,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           return (
             <div
               key={starIdx}
-              className="transform transition-all duration-500 scale-110"
+              className="transform transition-transform duration-500 scale-110 motion-reduce:transition-none"
               style={{ animationDelay: `${starIdx * 150}ms` }}
             >
               <Star
@@ -118,10 +120,10 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
         <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">
           <div className="flex items-center justify-center gap-2 text-secondary font-display font-extrabold text-2xl">
             <Award className="w-8 h-8 text-secondary-container" />
-            <span>{t('victory.pointsEarned', { points: pointsEarned })}</span>
+            <span>{t('victory.pointsEarned', { points: formatPoints(pointsEarned, language) })}</span>
           </div>
           <p className="text-xs text-on-secondary-fixed font-bold mt-1">
-            {t('victory.totalLabel')} <span className="text-primary font-black text-sm">{t('victory.totalPoints', { points: totalPoints })}</span>
+            {t('victory.totalLabel')} <span className="text-primary font-black text-sm">{t('victory.totalPoints', { points: formatPoints(totalPoints, language) })}</span>
           </p>
         </div>
       )}
@@ -142,7 +144,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           {onPlayAgain && (
             <button
               onClick={onPlayAgain}
-              className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span>{passed ? t('victory.btnPlayAgain') : t('victory.practiceAgain')}</span>

@@ -64,7 +64,7 @@ export const CulturePage: React.FC = () => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-all border-2 ${
+            className={`inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-2xl font-bold font-display text-sm whitespace-nowrap transition-[color,background-color,border-color,box-shadow] border-2 ${
               selectedCategory === cat.id
                 ? 'bg-culture text-white border-culture shadow-kid-culture'
                 : 'bg-white text-stone-700 border-cream-border hover:border-culture'
@@ -94,7 +94,7 @@ export const CulturePage: React.FC = () => {
             <Link
               key={article._id}
               to={`/van-hoa/${article._id}`}
-              className="group bg-white rounded-kid-lg shadow-kid border-2 border-cream-border p-3 sm:p-5 flex sm:flex-col gap-4 sm:gap-0 sm:justify-between hover:-translate-y-1 hover:border-culture/60 transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-culture/30"
+              className="group bg-white rounded-kid-lg shadow-kid border-2 border-cream-border p-3 sm:p-5 flex sm:flex-col gap-4 sm:gap-0 sm:justify-between hover:-translate-y-1 hover:border-culture/60 transition-[border-color,box-shadow,transform] motion-reduce:transition-none focus:outline-none focus-visible:ring-4 focus-visible:ring-culture/30"
             >
               <div className="relative shrink-0 w-28 h-28 sm:w-auto sm:h-48 rounded-2xl overflow-hidden sm:mb-4 bg-stone-100">
                 {article.coverImage ? (

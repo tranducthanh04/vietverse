@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  ArrowRight,
   Check,
   Gift,
   History,
@@ -193,7 +194,7 @@ export const PointsShopPage: React.FC = () => {
               {t('shop.balancePrefix')} {!activeChild?.name ? t('shop.childFallback') : /^bé\s/i.test(activeChild.name) ? activeChild.name : t('shop.childWithPrefix', { name: activeChild.name })}
             </h1>
             <p className="font-display text-4xl md:text-5xl text-secondary font-extrabold tracking-tight" data-testid="points-balance">
-              {formatPoints(currentPoints)} ViVi Points
+              {formatPoints(currentPoints, language)} ViVi Points
             </p>
             <p className="text-sm md:text-base text-on-secondary-container font-medium leading-relaxed">
               {t('shop.balanceDesc')}
@@ -205,7 +206,7 @@ export const PointsShopPage: React.FC = () => {
                 <div className="flex flex-col">
                   <span className="text-[11px] text-on-surface-variant font-bold">{t('shop.totalLabel')}</span>
                   <span className="text-sm font-extrabold text-on-surface" data-testid="points-total-earned">
-                    {totalEarned === undefined ? '—' : `${totalEarned} ViVi Points`}
+                    {totalEarned === undefined ? '—' : `${formatPoints(totalEarned, language)} ViVi Points`}
                   </span>
                 </div>
               </div>
@@ -313,7 +314,7 @@ export const PointsShopPage: React.FC = () => {
                 type="button"
                 aria-pressed={filter === tab.value}
                 onClick={() => setFilter(tab.value)}
-                className={`px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-full font-bold text-xs transition-[color,background-color,border-color,box-shadow] cursor-pointer ${
                   filter === tab.value
                     ? 'btn-3d-primary'
                     : 'bg-surface-container-low hover:bg-surface-container text-on-surface-variant border border-outline-variant/30'
@@ -347,7 +348,7 @@ export const PointsShopPage: React.FC = () => {
               return (
                 <article
                   key={item._id}
-                  className="bg-surface-container-lowest rounded-3xl p-5 border-2 border-outline-variant/30 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between"
+                  className="bg-surface-container-lowest rounded-3xl p-5 border-2 border-outline-variant/30 shadow-sm hover:shadow-lg transition-shadow flex flex-col justify-between"
                 >
                   <div>
                     <div className="relative aspect-square w-full rounded-2xl bg-secondary-fixed/20 flex items-center justify-center overflow-hidden mb-4 border border-outline-variant/20">
@@ -372,7 +373,7 @@ export const PointsShopPage: React.FC = () => {
                     </div>
 
                     <h3 className="font-display text-base font-bold text-on-surface mb-1">{item.name}</h3>
-                    <p className="text-xs text-on-surface-variant mb-2">
+                    <p className="text-sm text-on-surface-variant mb-2">
                       {item.description || t('shop.itemDescFallback')}
                     </p>
 
@@ -396,7 +397,7 @@ export const PointsShopPage: React.FC = () => {
                   <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                     <span className="font-display font-black text-secondary text-sm inline-flex items-center gap-1">
                       <Sparkles className="w-4 h-4 shrink-0" />
-                      {item.costPoints} ViVi Points
+                      {formatPoints(item.costPoints, language)} ViVi Points
                     </span>
 
                     {owned ? (
@@ -416,13 +417,18 @@ export const PointsShopPage: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedItem(item)}
                         disabled={!canAfford}
-                        className={`px-4 py-2 rounded-full font-bold text-xs select-none whitespace-nowrap ${
+                        className={`px-4 py-2 rounded-full font-bold text-xs select-none whitespace-nowrap inline-flex items-center justify-center gap-1 ${
                           canAfford
                             ? 'btn-3d-accent cursor-pointer'
                             : 'bg-surface-container text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30'
                         }`}
                       >
-                        {canAfford ? t('shop.redeemBtn') : t('shop.notEnough')}
+                        {canAfford ? (
+                          <>
+                            <span>{t('shop.redeemBtn')}</span>
+                            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                          </>
+                        ) : t('shop.notEnough')}
                       </button>
                     )}
                   </div>
@@ -446,7 +452,7 @@ export const PointsShopPage: React.FC = () => {
               <span className="text-sm font-bold text-on-surface">{t('shop.pointsNeeded')}</span>
               <span className="font-display font-black text-xl text-secondary">
                 <Sparkles className="inline w-4 h-4 mr-1" aria-hidden="true" />
-                {selectedItem.costPoints} ViVi Points
+                {formatPoints(selectedItem.costPoints, language)} ViVi Points
               </span>
             </div>
 
