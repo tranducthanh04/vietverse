@@ -41,7 +41,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
           {sentenceParts[0]}
         </span>
 
-        <div className="shrink-0 min-w-[3.5rem] sm:min-w-[4rem] h-16 sm:h-20 px-2 border-4 border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-3xl sm:text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
+        <div className="shrink-0 min-w-[3.5rem] sm:min-w-[4rem] max-w-full min-h-16 sm:min-h-20 px-2 border-4 break-words text-center border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-3xl sm:text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
           {filledLetter || '?'}
         </div>
 

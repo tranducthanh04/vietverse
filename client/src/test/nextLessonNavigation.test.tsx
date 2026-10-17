@@ -92,4 +92,22 @@ describe('next lesson navigation after completion', () => {
     await screen.findByText('Bé hãy luyện tập thêm nhé!');
     expect(screen.queryByRole('button', { name: 'Bài tiếp theo' })).not.toBeInTheDocument();
   });
+  it('crosses into the next stage only when that stage reports its first lesson unlocked', async () => {
+    const twoStages = (unlocked: boolean) => [
+      { _id: 's1', order: 1, lessons: [{ _id: 'lesson1', order: 1, isUnlocked: true, status: 'completed' }] },
+      { _id: 's2', order: 2, lessons: [{ _id: 'lesson2', order: 1, isUnlocked: unlocked, status: 'not_started' }] },
+    ];
+    stages = twoStages(false);
+    show(); await screen.findByText('Bài một');
+    fireEvent.click(screen.getByRole('button', { name: 'Hoàn thành bài' }));
+    await screen.findByRole('button', { name: 'Về bản đồ' });
+    expect(screen.queryByRole('button', { name: 'Bài tiếp theo' })).not.toBeInTheDocument();
+
+    cleanup(); client.clear();
+    stages = twoStages(true);
+    show(); await screen.findByText('Bài một');
+    fireEvent.click(screen.getByRole('button', { name: 'Hoàn thành bài' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Bài tiếp theo' }));
+    await screen.findByText('Bài hai');
+  });
 });
