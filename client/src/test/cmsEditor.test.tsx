@@ -423,3 +423,81 @@ it("associates source notes with fields and empty activity/vocabulary groups wit
   ).toHaveTextContent("Cần nghĩa từ nguồn");
   expect(requests.every((request) => request.method === "get")).toBe(true);
 });
+
+it("renders each save error as an anchor link that focuses the matching field", async () => {
+  respond = (method) => {
+    if (method === "put")
+      throw {
+        response: {
+          status: 400,
+          data: {
+            error: { details: [{ field: "payload.title", message: "Quá dài" }] },
+          },
+        },
+      };
+    return { live: null, draft: draft() };
+  };
+  show();
+  const title = await screen.findByLabelText("Tiêu đề");
+  fireEvent.change(title, { target: { value: "Bản dài" } });
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  const link = await screen.findByRole("link", { name: /Quá dài/ });
+  expect(link).toHaveAttribute("href", "#cms-field-title");
+  expect(title).toHaveAttribute("id", "cms-field-title");
+  expect(title).toHaveAttribute("aria-invalid", "true");
+  expect(title).toHaveAccessibleDescription(/Quá dài/);
+  // Bỏ focus tự động để chứng minh chính cú bấm link mới là thứ đưa focus về ô.
+  (document.activeElement as HTMLElement | null)?.blur();
+  fireEvent.click(link);
+  expect(title).toHaveFocus();
+});
+
+it("links nested activity errors to the right field via a sanitized anchor id", async () => {
+  respond = (method) => {
+    if (method === "put")
+      throw {
+        response: {
+          status: 400,
+          data: {
+            error: {
+              details: [
+                { field: "payload.activities.0.prompt", message: "Thiếu hướng dẫn" },
+              ],
+            },
+          },
+        },
+      };
+    return {
+      live: null,
+      draft: {
+        ...draft(),
+        payload: {
+          ...payload,
+          activities: [
+            {
+              id: "a",
+              type: "word_card",
+              prompt: "Đọc",
+              targetWord: "mẹ",
+              audioUrl: "",
+              imageUrl: "",
+            },
+          ],
+        },
+      },
+    };
+  };
+  show();
+  fireEvent.change(await screen.findByLabelText("Hướng dẫn 1"), {
+    target: { value: "x" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  const link = await screen.findByRole("link", { name: /Thiếu hướng dẫn/ });
+  expect(link).toHaveAttribute("href", "#cms-field-activities-0-prompt");
+  const prompt = screen.getByLabelText("Hướng dẫn 1");
+  expect(prompt).toHaveAttribute("id", "cms-field-activities-0-prompt");
+  expect(prompt).toHaveAttribute("aria-invalid", "true");
+  (document.activeElement as HTMLElement | null)?.blur();
+  fireEvent.click(link);
+  expect(prompt).toHaveFocus();
+});

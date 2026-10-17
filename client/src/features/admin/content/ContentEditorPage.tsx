@@ -21,6 +21,11 @@ import { CultureEditor } from "./CultureEditor.js";
 import { useUnsavedChanges } from "./useUnsavedChanges.js";
 import { ConfirmationDialog } from "./ConfirmationDialog.js";
 import { EditorialNotesContext } from "./editorialNotesContext.js";
+import {
+  FieldIssuesContext,
+  fieldAnchorId,
+  resolveIssueField,
+} from "./fieldIssuesContext.js";
 
 export function ContentEditorPage({ kind }: { kind: ContentKind }) {
   const { id = "" } = useParams();
@@ -86,16 +91,20 @@ function Editor({
   const blocker = useUnsavedChanges(dirty || busy);
   useEffect(() => {
     if (!busy && issues.length) {
-      const name = issues[0].field.replace(/^payload\./, "");
-      const fields = Array.from(
-        form.current?.querySelectorAll<HTMLElement>("[name]") ?? [],
-      );
-      (
-        fields.find((field) => field.getAttribute("name") === name) ??
-        fields.find((field) => field.getAttribute("name")?.startsWith(name))
-      )?.focus();
+      resolveIssueField(form.current, issues[0].field)?.focus();
     }
   }, [busy, issues]);
+  // Bấm vào một lỗi trong khối tóm tắt: chuyển focus (và cuộn tới) đúng ô của lỗi đó.
+  function focusIssueField(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    field: string,
+  ) {
+    const target = resolveIssueField(form.current, field);
+    if (!target) return;
+    event.preventDefault();
+    target.focus();
+    target.scrollIntoView?.({ block: "center" });
+  }
   const reportIssues = setIssues;
   async function run(action: () => Promise<void>, editable = false) {
     if (busyRef.current) return;
@@ -242,11 +251,19 @@ function Editor({
       {!!issues.length && (
         <div role="alert">
           <h2>{issues.length} lỗi cần sửa</h2>
-          {issues.map((issue, i) => (
-            <p key={i}>
-              {issue.field}: {issue.message}
-            </p>
-          ))}
+          <ul className="cms-error-summary">
+            {issues.map((issue, i) => (
+              <li key={i}>
+                <a
+                  id={`${fieldAnchorId(issue.field)}-error`}
+                  href={`#${fieldAnchorId(issue.field)}`}
+                  onClick={(event) => focusIssueField(event, issue.field)}
+                >
+                  {issue.field}: {issue.message}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       {conflict && (
@@ -280,6 +297,7 @@ function Editor({
       )}
       {editing && value ? (
         <>
+          <FieldIssuesContext.Provider value={issues}>
           <EditorialNotesContext.Provider value={loaded.editorialNotes}>
             <fieldset
               ref={form}
@@ -319,6 +337,7 @@ function Editor({
               )}
             </fieldset>
           </EditorialNotesContext.Provider>
+          </FieldIssuesContext.Provider>
           <div className="cms-actions cms-toolbar">
             <button
               className="cms-primary"

@@ -73,7 +73,6 @@
 
 ### Low còn lại (chưa sửa, có chủ đích hoặc ngoài phạm vi)
 - `transition-all` còn rải rác ở nhiều component (đã sửa ở `Button` và `.btn-3d-*`, nơi dùng nhiều nhất).
-- Bảng doanh thu chưa sắp xếp được; bộ lọc ngày trang Doanh thu chưa lên URL; tóm tắt lỗi CMS chưa có link neo tới trường.
 - Chưa tự chuyển focus về `<main>` khi đổi route (đã có skip-link).
 - Popup hết giờ dùng màu indigo "ban đêm" ngoài token — giữ, chờ chủ sản phẩm quyết.
 - Footer link cao 32px; mũi tên "→"/"▼" dạng ký tự trang trí; hover zoom ảnh hero 700ms; vài mô tả 12–14px trên mobile; `autoFocus` ô tên ở onboarding; vài số điểm chưa qua `formatPoints`.
@@ -84,3 +83,13 @@
 - Sửa ở `704f108`: `Modal` đếm số modal đang mở, chỉ mở khoá khi về 0; test hồi quy `modalScrollLock.test.tsx` (đỏ trên bản cũ, xanh trên bản sửa); chuyển focus khi đổi bước; `aria-controls` có điều kiện.
 - Lượt 2: **PASS** — client typecheck, 234/234 test, lint 0 lỗi (102 cảnh báo); server typecheck.
 - Chưa kiểm tay trên thiết bị thật: luồng "hết giờ → Ba mẹ mở thêm giờ → Parent Gate đúng" (tự động hoá không đi tới được).
+
+## Ba Low admin/CMS — đã sửa 2026-10-17 (nhánh `chore/admin-revenue-cms-polish`)
+
+Ba Low còn lại ở mục trên đã xử lý, chỉ phía client (không đổi API, nghiệp vụ, điểm hay quyền):
+
+- **Bảng doanh thu sắp xếp được.** Bảng "Theo tháng trong kỳ" ở trang Doanh thu cho sắp xếp theo Tháng, Đơn đã thanh toán và Doanh thu bằng nút ở tiêu đề cột, có `aria-sort` (`ascending`/`descending`/`none`) và chỉ báo chiều bằng icon SVG (`ArrowUp`/`ArrowDown`/`ArrowUpDown` thêm vào `icons.tsx`), không dùng ký tự ▲▼. Series tải đủ cả kỳ nên sắp xếp phía client trên toàn tập; không cần đổi server.
+- **Bộ lọc ngày + sắp xếp lên URL.** Khoảng ngày (`from`/`to`) và cột/chiều sắp xếp (`sort`/`dir`) nằm trong query string, nên tải lại hoặc chia sẻ link giữ nguyên trạng thái. Giá trị URL sai định dạng (ngày không có thật trên lịch, cột/chiều lạ) bị bỏ qua và dùng mặc định.
+- **Tóm tắt lỗi CMS có link neo tới trường.** Khối "N lỗi cần sửa" ở form bài học/truyện/văn hoá hiển thị mỗi lỗi thành link `href="#<id>"`; bấm thì focus đúng ô. Ô có `id` ổn định (`cms-field-<name>`), và khi lỗi thì có `aria-invalid="true"` cùng `aria-describedby` trỏ dòng lỗi. Xem `docs/cms-operations.md`.
+
+Kiểm chứng: typecheck sạch (client + server); client 269/269 test qua (thêm 4 ca doanh thu và 2 ca link lỗi CMS); lint client 0 lỗi (103 cảnh báo có sẵn, không phát sinh từ các file đã sửa). Server không đổi nên không chạy lại test server.
