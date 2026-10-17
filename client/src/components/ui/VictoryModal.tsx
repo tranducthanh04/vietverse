@@ -93,7 +93,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           return (
             <div
               key={starIdx}
-              className="transform transition-all duration-500 scale-110"
+              className="transform transition-transform duration-500 scale-110 motion-reduce:transition-none"
               style={{ animationDelay: `${starIdx * 150}ms` }}
             >
               <Star
@@ -142,7 +142,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           {onPlayAgain && (
             <button
               onClick={onPlayAgain}
-              className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span>{passed ? t('victory.btnPlayAgain') : t('victory.practiceAgain')}</span>

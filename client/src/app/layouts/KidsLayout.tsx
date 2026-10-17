@@ -147,7 +147,7 @@ export const KidsLayout: React.FC = () => {
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
               onClick={handleOpenParent}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-all shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-white hover:bg-stone-50 rounded-2xl border-2 border-cream-border text-stone-700 text-xs font-bold transition-[background-color,box-shadow] shadow-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/40"
               title={t('kidsLayout.parentCornerAria')}
               aria-label={t('kidsLayout.parentCornerAria')}
             >
@@ -185,7 +185,7 @@ export const KidsLayout: React.FC = () => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center p-2 rounded-2xl transition-all min-w-[56px] min-h-[48px] ${
+                `flex flex-col items-center justify-center p-2 rounded-2xl transition-[color,transform] motion-reduce:transition-none min-w-[56px] min-h-[48px] ${
                   isActive
                     ? 'text-primary font-black scale-110'
                     : 'text-stone-500 font-bold hover:text-stone-800'

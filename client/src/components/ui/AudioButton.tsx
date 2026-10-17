@@ -63,7 +63,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         onClick={handlePlay}
         disabled={!narration.canPlay}
         className={cn(
-          "inline-flex items-center justify-center space-x-2 bg-accent/20 hover:bg-accent/40 active:scale-95 text-stone-900 border-2 border-accent rounded-full transition-all shadow-sm",
+          "inline-flex items-center justify-center space-x-2 bg-accent/20 hover:bg-accent/40 active:scale-95 text-stone-900 border-2 border-accent rounded-full transition-[background-color,box-shadow,transform] motion-reduce:transition-none shadow-sm",
           sizes[size],
           isPlaying && "ring-4 ring-accent animate-pulse bg-accent/50",
           className,

@@ -70,11 +70,11 @@ export const PaymentResultPage: React.FC = () => {
         <p role="status" className="mt-4 text-stone-700">{message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {isComplete ? (
-            <Link to={nextPath} className="inline-flex min-h-[48px] items-center rounded-2xl bg-primary hover:bg-primary-hover shadow-kid-primary active:translate-y-1 active:shadow-none transition-all px-6 py-3 font-bold text-white">
+            <Link to={nextPath} className="inline-flex min-h-[48px] items-center rounded-2xl bg-primary hover:bg-primary-hover shadow-kid-primary active:translate-y-1 active:shadow-none transition-[background-color,box-shadow,transform] motion-reduce:transition-none px-6 py-3 font-bold text-white">
               {nextPath === '/bat-dau' ? t('payment.createChild') : t('payment.continueLearning')}
             </Link>
           ) : (
-            <Link to="/gia" className="inline-flex min-h-[48px] items-center rounded-2xl bg-primary hover:bg-primary-hover shadow-kid-primary active:translate-y-1 active:shadow-none transition-all px-6 py-3 font-bold text-white">
+            <Link to="/gia" className="inline-flex min-h-[48px] items-center rounded-2xl bg-primary hover:bg-primary-hover shadow-kid-primary active:translate-y-1 active:shadow-none transition-[background-color,box-shadow,transform] motion-reduce:transition-none px-6 py-3 font-bold text-white">
               {t('payment.backToPricing')}
             </Link>
           )}

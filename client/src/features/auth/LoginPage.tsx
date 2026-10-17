@@ -144,7 +144,7 @@ export const LoginPage: React.FC = () => {
                     setEmail('phuhuynh@vietverse.edu.vn');
                     setPassword('ParentPass123!');
                   }}
-                  className="p-2.5 min-h-[44px] text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
+                  className="p-2.5 min-h-[44px] text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-colors shadow-sm flex flex-col items-center justify-center text-center"
                 >
                   <span className="inline-flex items-center gap-1"><UserRound className="w-3.5 h-3.5" />{t('auth.demoParent')}</span>
                   <span className="text-[10px] text-amber-700 font-normal">{t('auth.demoParentNote')}</span>
@@ -155,7 +155,7 @@ export const LoginPage: React.FC = () => {
                     setEmail('admin@vietverse.edu.vn');
                     setPassword('AdminPass123!');
                   }}
-                  className="p-2.5 min-h-[44px] text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
+                  className="p-2.5 min-h-[44px] text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-colors shadow-sm flex flex-col items-center justify-center text-center"
                 >
                   <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" />{t('auth.demoAdmin')}</span>
                   <span className="text-[10px] text-red-700 font-normal">{t('auth.demoAdminNote')}</span>

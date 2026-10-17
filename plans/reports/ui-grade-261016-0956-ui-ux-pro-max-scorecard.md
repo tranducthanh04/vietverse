@@ -72,7 +72,7 @@
 - Finding mới khi chấm lại: 1 Medium (admin thiếu skip-link) và các Low. Đã sửa tiếp trong commit `f3a042f`: `SkipLink` dùng chung cho cả 4 layout; lỗi gửi quiz văn hoá có `role="alert"`; chữ thời gian trình phát audio `stone-600`; placeholder onboarding `stone-500`.
 
 ### Low còn lại (chưa sửa, có chủ đích hoặc ngoài phạm vi)
-- `transition-all` còn rải rác ở nhiều component (đã sửa ở `Button` và `.btn-3d-*`, nơi dùng nhiều nhất).
+- ~~`transition-all` còn rải rác ở nhiều component~~ **Đã sửa (2026-10-17, nhánh `chore/transition-props`):** thay toàn bộ 47 chỗ `transition-all` trong `client/src/**` bằng utility hẹp (`transition-colors`/`transition-shadow`/`transition-[...]`) liệt kê đúng thuộc tính đổi theo class trạng thái; thêm `motion-reduce:transition-none` cho các chỗ transform/scale. Ngoại lệ ghi nhận: thanh tiến trình onboarding (`OnboardingWizard.tsx:108`) vẫn animate `width` (chuyển sang `transition-[width]`), không đổi sang `transform` để giữ nguyên hành vi.
 - Bảng doanh thu chưa sắp xếp được; bộ lọc ngày trang Doanh thu chưa lên URL; tóm tắt lỗi CMS chưa có link neo tới trường.
 - Chưa tự chuyển focus về `<main>` khi đổi route (đã có skip-link).
 - Popup hết giờ dùng màu indigo "ban đêm" ngoài token — giữ, chờ chủ sản phẩm quyết.

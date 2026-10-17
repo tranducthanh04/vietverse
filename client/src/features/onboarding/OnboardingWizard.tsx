@@ -82,7 +82,7 @@ export const OnboardingWizard: React.FC = () => {
           {step > 1 ? (
             <button
               onClick={() => setStep(step - 1)}
-              className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-all active:scale-95 shadow-sm"
+              className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-[background-color,transform] motion-reduce:transition-none active:scale-95 shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>{t('common.back')}</span>
@@ -105,7 +105,7 @@ export const OnboardingWizard: React.FC = () => {
             {/* Connecting ribbon track */}
             <div className="absolute top-6 left-8 right-8 h-2 bg-surface-container-high rounded-full -translate-y-1/2 pointer-events-none" />
             <div
-              className="absolute top-6 left-8 h-2 bg-gradient-to-r from-primary to-secondary-container rounded-full -translate-y-1/2 transition-all duration-300 pointer-events-none"
+              className="absolute top-6 left-8 h-2 bg-gradient-to-r from-primary to-secondary-container rounded-full -translate-y-1/2 transition-[width] duration-300 pointer-events-none"
               style={{ width: `${((step - 1) / 3) * 85 + 5}%` }}
             />
 
@@ -122,7 +122,7 @@ export const OnboardingWizard: React.FC = () => {
               return (
                 <div key={node.num} className="relative flex flex-col items-center gap-2 z-10">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-[color,background-color,box-shadow,transform] motion-reduce:transition-none ${
                       isActive
                         ? 'bg-primary text-on-primary ring-4 ring-primary/20 scale-110'
                         : isPast
@@ -194,7 +194,7 @@ export const OnboardingWizard: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t('onboarding.namePlaceholder')}
-                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
+                    className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-[background-color,box-shadow] border border-outline-variant/30 text-center"
                     autoFocus
                   />
                 </div>
@@ -232,7 +232,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   aria-pressed={ageGroup === '5-6'}
                   onClick={() => setAgeGroup('5-6')}
-                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-all duration-200 shadow-md ${
+                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-[background-color,border-color,box-shadow] duration-200 shadow-md ${
                     ageGroup === '5-6'
                       ? 'bg-surface-container-low ring-4 ring-primary shadow-lg'
                       : 'bg-surface-container-lowest hover:bg-surface-container-low border border-outline-variant/40'
@@ -264,7 +264,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   aria-pressed={ageGroup === '6-8'}
                   onClick={() => setAgeGroup('6-8')}
-                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-all duration-200 shadow-md ${
+                  className={`group relative text-left w-full cursor-pointer p-6 sm:p-7 rounded-2xl transition-[background-color,border-color,box-shadow] duration-200 shadow-md ${
                     ageGroup === '6-8'
                       ? 'bg-surface-container-low ring-4 ring-primary shadow-lg'
                       : 'bg-surface-container-lowest hover:bg-surface-container-low border border-outline-variant/40'
@@ -338,7 +338,7 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => setCompanionLanguages((current) => current.includes(item.code)
                         ? current.filter((code) => code !== item.code)
                         : [...current, item.code])}
-                      className={`p-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                      className={`p-4 rounded-2xl border-2 text-center transition-[background-color,border-color,box-shadow] cursor-pointer ${
                         isSelected
                           ? 'border-primary bg-primary-fixed/40 shadow-md ring-2 ring-primary'
                           : 'border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container-low'

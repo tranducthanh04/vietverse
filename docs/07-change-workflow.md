@@ -33,6 +33,7 @@
 - [ ] Cập nhật `06-review-findings.md` nếu phát hiện rủi ro mới hoặc đã đóng finding.
 - [ ] Cập nhật tài liệu API/data và ADR nếu có quyết định dài hạn.
 - [ ] Chạy các kiểm tra phù hợp với phạm vi thay đổi và ghi lại kết quả thật.
+  - Lint: `npm run lint` ở gốc giờ chạy được (lint client, phần lint server được bỏ qua bằng `--if-present` cho tới khi `server` có cấu hình ESLint riêng). Lint riêng client: `npm run lint -w client`.
 - [ ] Kiểm tra diff chỉ chứa thay đổi đã được yêu cầu; không ghi đè thay đổi chưa commit của người khác.
 - [ ] Ghi rõ giới hạn còn lại và cách rollback.
 

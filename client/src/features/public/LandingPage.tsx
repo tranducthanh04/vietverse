@@ -167,7 +167,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 1 */}
             <Link
               to="/kho-truyen"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary">
                 <DomainIcon.stories className="w-8 h-8" />
@@ -190,7 +190,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 2 */}
             <Link
               to="/kham-pha"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-secondary">
                 <Gamepad2 className="w-8 h-8" />
@@ -213,7 +213,7 @@ export const LandingPage: React.FC = () => {
             {/* Thẻ 3 */}
             <Link
               to="/van-hoa"
-              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
+              className="group bg-surface-container-lowest rounded-[24px] p-8 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col items-start relative overflow-hidden border border-outline-variant/30 cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl bg-tertiary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-tertiary">
                 <DomainIcon.culture className="w-8 h-8" />

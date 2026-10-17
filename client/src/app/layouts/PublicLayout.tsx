@@ -65,7 +65,7 @@ export const PublicLayout: React.FC = () => {
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `relative min-h-[44px] px-3 py-2 inline-flex items-center whitespace-nowrap text-sm font-bold transition-all duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+                  `relative min-h-[44px] px-3 py-2 inline-flex items-center whitespace-nowrap text-sm font-bold transition-[color,background-color,border-color,box-shadow] duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
                     isActive
                       ? 'text-primary border-primary bg-primary/5 font-black'
                       : 'text-on-surface-variant hover:text-primary border-transparent hover:bg-surface-container/60'

@@ -43,7 +43,7 @@ export const ReviewActivity: React.FC<ReviewActivityProps> = ({
               key={option.id}
               onClick={() => handleSelect(option.id)}
               className={cn(
-                'relative min-h-[72px] rounded-2xl font-display font-black text-3xl border-3 shadow-kid transition-all active:scale-95 flex items-center justify-center p-4',
+                'relative min-h-[72px] rounded-2xl font-display font-black text-3xl border-3 shadow-kid transition-[color,background-color,border-color,transform] motion-reduce:transition-none active:scale-95 flex items-center justify-center p-4',
                 isSelected
                   ? isCorrect
                     ? 'bg-emerald-100 border-kidSuccess text-emerald-800'

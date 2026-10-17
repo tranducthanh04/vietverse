@@ -108,7 +108,7 @@ export const ParentSettingsPage: React.FC = () => {
               role="radio"
               aria-checked={selectedLimit === opt.value}
               onClick={() => setSelectedLimit(opt.value)}
-              className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between ${
+              className={`w-full p-4 rounded-2xl border-2 text-left transition-[background-color,border-color,box-shadow] flex items-center justify-between ${
                 selectedLimit === opt.value
                   ? 'border-primary bg-primary-light/40 shadow-sm'
                   : 'border-cream-border bg-white hover:border-accent'
