@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -31,6 +31,20 @@ export const OnboardingWizard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const isFirstStep = useRef(true);
+
+  // Move focus to the step panel when the wizard advances, so keyboard and
+  // screen-reader users land on the new step. We skip the first render (no
+  // `autoFocus` on the name field — that popped the mobile keyboard on load)
+  // and never focus an input, so the soft keyboard stays closed until tapped.
+  useEffect(() => {
+    if (isFirstStep.current) {
+      isFirstStep.current = false;
+      return;
+    }
+    stageRef.current?.focus();
+  }, [step]);
 
   const handleNext = async () => {
     setErrorMsg('');
@@ -146,7 +160,11 @@ export const OnboardingWizard: React.FC = () => {
         </div>
 
         {/* Main Stage Container (Wizard Showcase) */}
-        <div className="relative w-full bg-surface-container-lowest rounded-3xl p-6 sm:p-10 shadow-[0_12px_36px_-6px_rgba(180,83,9,0.1)] border border-outline-variant/30">
+        <div
+          ref={stageRef}
+          tabIndex={-1}
+          className="relative w-full bg-surface-container-lowest rounded-3xl p-6 sm:p-10 shadow-[0_12px_36px_-6px_rgba(180,83,9,0.1)] border border-outline-variant/30 focus:outline-none"
+        >
           {errorMsg && (
             <div role="alert" className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 mb-6 text-sm text-center font-bold">
               {errorMsg}
@@ -195,7 +213,6 @@ export const OnboardingWizard: React.FC = () => {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t('onboarding.namePlaceholder')}
                     className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
-                    autoFocus
                   />
                 </div>
 
@@ -250,7 +267,7 @@ export const OnboardingWizard: React.FC = () => {
                     <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age56')}</span>
                     <span className="text-xs text-primary font-bold">{t('onboarding.age56Tag')}</span>
                   </div>
-                  <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
+                  <span className="block text-sm sm:text-base text-on-surface-variant leading-relaxed font-medium">
                     {t('onboarding.age56Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">
@@ -282,7 +299,7 @@ export const OnboardingWizard: React.FC = () => {
                     <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age68')}</span>
                     <span className="text-xs text-tertiary font-bold">{t('onboarding.age68Tag')}</span>
                   </div>
-                  <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
+                  <span className="block text-sm sm:text-base text-on-surface-variant leading-relaxed font-medium">
                     {t('onboarding.age68Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">

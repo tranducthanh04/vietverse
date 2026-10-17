@@ -215,7 +215,7 @@ export const TreasureRoomPage: React.FC = () => {
               <h3 className="text-kid-base font-bold font-display text-stone-800 mb-1">
                 {b.name}
               </h3>
-              <p className="text-stone-500 text-xs">
+              <p className="text-stone-500 text-sm">
                 {b.desc}
               </p>
             </div>

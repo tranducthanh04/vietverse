@@ -357,7 +357,7 @@ export const en: Dictionary = {
     outOfStockLabel: 'Temporarily out of stock',
     owned: 'Owned',
     outOfStockBtn: 'Out of stock',
-    redeemBtn: 'Redeem →',
+    redeemBtn: 'Redeem',
     notEnough: 'Not enough points',
     modalTitle: 'Confirm redemption: {name}',
     pointsNeeded: 'Points needed:',

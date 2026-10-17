@@ -13,13 +13,14 @@ import {
 import { api } from '../../lib/api.js';
 import { formatPoints } from '../../lib/utils.js';
 import { useChildStore } from '../../store/childStore.js';
-import { useT } from '../../i18n/index.js';
+import { useT, useUiLanguage } from '../../i18n/index.js';
 import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
 
 export const QuestMapPage: React.FC = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildStore();
   const t = useT();
+  const { language } = useUiLanguage();
   const [selectedStageOrder, setSelectedStageOrder] = useState<number>(1);
 
   const { data: stages = [], isLoading } = useQuery({
@@ -67,7 +68,7 @@ export const QuestMapPage: React.FC = () => {
                   {t('map.pointsLabel')}
                 </span>
                 <span className="text-2xl font-black font-display text-secondary">
-                  {formatPoints(activeChild?.viviPoints || 0)} {t('map.pointsUnit')}
+                  {formatPoints(activeChild?.viviPoints || 0, language)} {t('map.pointsUnit')}
                 </span>
               </div>
             </div>

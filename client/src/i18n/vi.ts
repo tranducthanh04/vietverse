@@ -358,7 +358,7 @@ export const vi = {
     outOfStockLabel: 'Tạm thời hết hàng',
     owned: 'Đã sở hữu',
     outOfStockBtn: 'Hết hàng',
-    redeemBtn: 'Đổi thưởng →',
+    redeemBtn: 'Đổi thưởng',
     notEnough: 'Chưa đủ điểm',
     modalTitle: 'Xác Nhận Đổi: {name}',
     pointsNeeded: 'Điểm cần dùng:',

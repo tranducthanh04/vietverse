@@ -279,7 +279,7 @@ describe('gift redemption', () => {
       return { history: [] };
     };
     show(<PointsShopPage />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Đổi thưởng →' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Đổi thưởng' }));
     fireEvent.change(screen.getByPlaceholderText('Tên người nhận (Phụ huynh)'), { target: { value: '  Parent  ' } });
     fireEvent.change(screen.getByPlaceholderText('Số điện thoại nhận hàng'), { target: { value: '  0901234567  ' } });
     fireEvent.change(screen.getByPlaceholderText('Địa chỉ số nhà, tên đường, phường/xã'), { target: { value: '  12 Street  ' } });
@@ -301,7 +301,7 @@ describe('gift redemption', () => {
       return { history: redeemed ? [{ _id: 'tx', delta: -10, reason: 'redeem', createdAt: '2026-10-08' }] : [] };
     };
     show(<PointsShopPage />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Đổi thưởng →' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Đổi thưởng' }));
     fireEvent.click(screen.getByRole('button', { name: 'Xác Nhận Đổi Quà' }));
     expect(await screen.findByText('Đã sở hữu')).toBeInTheDocument();
     expect(await screen.findByText('−10')).toBeInTheDocument();
