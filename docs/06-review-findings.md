@@ -10,7 +10,7 @@ Xử lý nhóm Low còn lại từ bảng điểm UI (`plans/reports/ui-grade-26
 - **Cỡ chữ mobile:** một số đoạn mô tả nội dung đang 12px (thẻ chặng Landing, mô tả vật phẩm Phòng điểm thưởng, mô tả huy hiệu Phòng báu vật, mô tả độ tuổi onboarding) nâng tối thiểu lên 14px. Giữ bản xem trước thẻ truyện/văn hoá (14px, line-clamp) và các nhãn/badge ngắn ở 12px.
 - **Onboarding:** bỏ `autoFocus` ô tên bé (gây bật bàn phím khi tải trang trên mobile); thay bằng việc focus khung bước khi đổi bước, không focus thẳng vào input.
 - **Hiển thị điểm:** mọi số ViVi Points hiển thị đều qua `formatPoints` (`client/src/lib/utils.ts`). **[Giả định trình bày]** Hàm thêm tham số `language` (`vi` → nhóm hàng nghìn kiểu `vi-VN`, `en` → `en-US`), mặc định `vi`; các màn truyền ngôn ngữ giao diện hiện hành. Không đổi cách tính điểm. Có test (`client/src/test/utils.test.ts`).
-- **Kiểm chứng:** `npm run typecheck` sạch (server + client); client 268/268 test qua; `npm run lint -w client` 0 lỗi (còn cảnh báo `any`/`act()` có sẵn). Không sửa server. Chưa nghiệm thu trên thiết bị thật.
+- **Kiểm chứng:** `npm run typecheck` sạch (server + client); client 268/268 (sau khi gộp cả ba nhánh dọn lỗi Low: 281/281) test qua; `npm run lint -w client` 0 lỗi (còn cảnh báo `any`/`act()` có sẵn). Không sửa server. Chưa nghiệm thu trên thiết bị thật.
 
 ## Bài "Xếp để đọc" và chuyển bài tiếp theo — 2026-10-17, sửa local
 
