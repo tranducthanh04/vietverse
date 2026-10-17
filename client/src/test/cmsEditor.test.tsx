@@ -46,6 +46,41 @@ const draft = () => ({
   updatedBy: "admin",
   editorialNotes: [],
 });
+const culturePayload = {
+  title: "Văn hoá",
+  category: "tet",
+  intro: "",
+  coverImage: "",
+  audioUrl: "",
+  funFacts: [],
+  tags: [],
+  quiz: [],
+  translations: {},
+};
+const storyPayload = {
+  title: "Truyện",
+  description: "",
+  author: "",
+  type: "co_tich",
+  coverImage: "",
+  audioUrl: "",
+  durationSec: 0,
+  ageGroups: [],
+  vocab: [],
+  lyrics: [],
+  quiz: [],
+  translations: {},
+};
+const cultureDraft = () => ({
+  ...draft(),
+  kind: "culture",
+  payload: structuredClone(culturePayload),
+});
+const storyDraft = () => ({
+  ...draft(),
+  kind: "story",
+  payload: structuredClone(storyPayload),
+});
 beforeEach(() => {
   client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -500,4 +535,103 @@ it("links nested activity errors to the right field via a sanitized anchor id", 
   (document.activeElement as HTMLElement | null)?.blur();
   fireEvent.click(link);
   expect(prompt).toHaveFocus();
+});
+
+it("links a <select> error (culture category) to the field and focuses it", async () => {
+  respond = (method) => {
+    if (method === "put")
+      throw {
+        response: {
+          status: 400,
+          data: {
+            error: {
+              details: [
+                { field: "payload.category", message: "Chọn chủ đề hợp lệ" },
+              ],
+            },
+          },
+        },
+      };
+    return { live: null, draft: cultureDraft() };
+  };
+  show(<ContentEditorPage kind="culture" />);
+  fireEvent.change(await screen.findByLabelText("Tiêu đề"), {
+    target: { value: "Văn hoá mới" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  const link = await screen.findByRole("link", { name: /Chọn chủ đề hợp lệ/ });
+  expect(link).toHaveAttribute("href", "#cms-field-category");
+  const select = screen.getByLabelText("Chủ đề văn hóa");
+  expect(select).toHaveAttribute("id", "cms-field-category");
+  expect(select).toHaveAttribute("aria-invalid", "true");
+  expect(select).toHaveAccessibleDescription(/Chọn chủ đề hợp lệ/);
+  (document.activeElement as HTMLElement | null)?.blur();
+  fireEvent.click(link);
+  expect(select).toHaveFocus();
+});
+
+it("links an ageGroups checkbox-group error to the group and focuses a real control", async () => {
+  respond = (method) => {
+    if (method === "put")
+      throw {
+        response: {
+          status: 400,
+          data: {
+            error: {
+              details: [
+                { field: "payload.ageGroups", message: "Chọn ít nhất một nhóm tuổi" },
+              ],
+            },
+          },
+        },
+      };
+    return { live: null, draft: storyDraft() };
+  };
+  show(<ContentEditorPage kind="story" />);
+  fireEvent.change(await screen.findByLabelText("Tiêu đề"), {
+    target: { value: "Truyện mới" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  const link = await screen.findByRole("link", {
+    name: /Chọn ít nhất một nhóm tuổi/,
+  });
+  expect(link).toHaveAttribute("href", "#cms-field-ageGroups");
+  const group = screen.getByRole("group", { name: "Nhóm tuổi" });
+  expect(group).toHaveAttribute("id", "cms-field-ageGroups");
+  expect(group).toHaveAttribute("aria-invalid", "true");
+  // Nhóm checkbox neo id, nhưng focus phải tới được một ô thật (checkbox đầu).
+  (document.activeElement as HTMLElement | null)?.blur();
+  fireEvent.click(link);
+  expect(screen.getByLabelText("5-6 tuổi")).toHaveFocus();
+});
+
+it("keeps a single field's multiple errors as distinct anchors described together", async () => {
+  respond = (method) => {
+    if (method === "put")
+      throw {
+        response: {
+          status: 400,
+          data: {
+            error: {
+              details: [
+                { field: "payload.title", message: "Lỗi một" },
+                { field: "payload.title", message: "Lỗi hai" },
+              ],
+            },
+          },
+        },
+      };
+    return { live: null, draft: draft() };
+  };
+  show();
+  const title = await screen.findByLabelText("Tiêu đề");
+  fireEvent.change(title, { target: { value: "Bản sửa" } });
+  fireEvent.click(screen.getByRole("button", { name: "Lưu nháp" }));
+  const first = await screen.findByRole("link", { name: /Lỗi một/ });
+  const second = screen.getByRole("link", { name: /Lỗi hai/ });
+  expect(first).toHaveAttribute("id", "cms-field-title-error-0");
+  expect(second).toHaveAttribute("id", "cms-field-title-error-1");
+  expect(title.getAttribute("aria-describedby")).toContain("cms-field-title-error-0");
+  expect(title.getAttribute("aria-describedby")).toContain("cms-field-title-error-1");
+  expect(title).toHaveAccessibleDescription(/Lỗi một.*Lỗi hai/s);
 });

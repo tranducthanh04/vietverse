@@ -65,7 +65,13 @@ Preview bốn dạng dùng renderer thuần và state local, phản hồi trung 
 
 ### Khối tóm tắt lỗi neo tới trường (2026-10-17)
 
-Đây là **quyết định triển khai** (chỉ giao diện biên tập, không đổi nghiệp vụ, điểm, quyền hay quy tắc validate/publish). Khi lưu hoặc kiểm tra bản nháp mà server trả lỗi theo trường, khối "N lỗi cần sửa" ở form bài học/truyện/văn hoá hiển thị mỗi lỗi thành một link neo `href="#<id>"`; bấm vào link sẽ chuyển focus (và cuộn tới) đúng ô của lỗi đó. Mỗi ô có `id` ổn định sinh từ `name` (tiền tố `cms-field-`), và khi đang lỗi thì mang `aria-invalid="true"` cùng `aria-describedby` trỏ tới dòng lỗi tương ứng. Với lỗi ở nhóm/mảng (ví dụ một hoạt động), link đưa focus tới ô con đầu tiên của nhóm. Thông báo lỗi vẫn do server quyết định; phần này chỉ thêm điều hướng và ngữ nghĩa khả truy cập.
+Đây là **quyết định triển khai** (chỉ giao diện biên tập, không đổi nghiệp vụ, điểm, quyền hay quy tắc validate/publish). Khi lưu hoặc kiểm tra bản nháp mà server trả lỗi theo trường, khối "N lỗi cần sửa" ở form bài học/truyện/văn hoá hiển thị mỗi lỗi thành một link neo `href="#<id>"`; bấm vào link sẽ chuyển focus (và cuộn tới) đúng ô của lỗi đó. Mỗi ô (hoặc nhóm ô) được validate có `id` ổn định sinh từ `name` (tiền tố `cms-field-`), và khi đang lỗi thì mang `aria-invalid="true"` cùng `aria-describedby` trỏ tới dòng lỗi tương ứng.
+
+- **Mọi kiểu ô được validate đều có neo**, không chỉ ô chữ/số: ô chọn (`<select>`) như chủ đề văn hoá (`category`), đáp án đúng của quiz và của hoạt động (`*.correctAnswer`); và nhóm ô tick như đáp án chọn nhiều, phân nhóm, hay nhóm tuổi của truyện (`ageGroups`). Với nhóm ô tick/nhiều `<select>`, `id`/`aria-invalid`/`aria-describedby` đặt trên phần tử nhóm (`fieldset`/`role="group"`), còn focus luôn đưa tới một ô thật đầu tiên của nhóm (mỗi ô trong nhóm mang chung `name` của trường để tìm được).
+- Một trường có thể mang **nhiều lỗi cùng lúc**; mỗi dòng lỗi có `id` riêng theo chỉ số (`<id>-error-<i>`) nên không trùng, và `aria-describedby` của ô ghép **tất cả** các dòng lỗi của trường đó (cùng ghi chú nguồn nếu có).
+- Khi lỗi ở nhóm/mảng (ví dụ một hoạt động), link đưa focus tới ô con đầu tiên của nhóm. Cú bấm link **luôn** chặn hành vi nhảy hash của trình duyệt, nên nếu không tìm thấy ô thì link cũng không trở thành link chết trỏ tới một id không tồn tại.
+
+Thông báo lỗi vẫn do server quyết định; phần này chỉ thêm điều hướng và ngữ nghĩa khả truy cập.
 
 ## Ảnh bìa demo story/culture (2026-10-09)
 

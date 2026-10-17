@@ -130,6 +130,30 @@ it('ignores malformed URL values and falls back to defaults without filtering', 
   expect(monthsOf(table)).toEqual(['2026-08', '2026-09', '2026-10']);
   expect(within(table).getByRole('columnheader', { name: /Tháng/ }).getAttribute('aria-sort')).toBe('ascending');
 });
+it('replaces history instead of pushing when filtering or sorting', async () => {
+  api.defaults.adapter = async config => ({ data: { data: multiMonth }, status: 200, statusText: 'OK', headers: {}, config });
+  show();
+  const table = await screen.findByRole('table', { name: 'Doanh thu theo tháng' });
+  expect(router.state.historyAction).toBe('POP');
+  fireEvent.click(within(table).getByRole('button', { name: /Sắp xếp theo Doanh thu/ }));
+  await waitFor(() => expect(new URLSearchParams(router.state.location.search).get('sort')).toBe('revenue'));
+  expect(router.state.historyAction).toBe('REPLACE');
+  // Đổi cột nhiều lần vẫn là REPLACE nên không chồng thêm mục lịch sử (Back vẫn rời được trang).
+  fireEvent.click(within(screen.getByRole('table', { name: 'Doanh thu theo tháng' })).getByRole('button', { name: /Sắp xếp theo Đơn đã thanh toán/ }));
+  await waitFor(() => expect(new URLSearchParams(router.state.location.search).get('sort')).toBe('orders'));
+  expect(router.state.historyAction).toBe('REPLACE');
+});
+it('drops malformed URL params when writing a new sort to the URL', async () => {
+  api.defaults.adapter = async config => ({ data: { data: multiMonth }, status: 200, statusText: 'OK', headers: {}, config });
+  show('/admin/doanh-thu?from=2026-13-40&to=nope&sort=bogus&dir=sideways');
+  const table = await screen.findByRole('table', { name: 'Doanh thu theo tháng' });
+  fireEvent.click(within(table).getByRole('button', { name: /Sắp xếp theo Doanh thu/ }));
+  await waitFor(() => expect(new URLSearchParams(router.state.location.search).get('sort')).toBe('revenue'));
+  const params = new URLSearchParams(router.state.location.search);
+  expect(params.get('from')).toBeNull();
+  expect(params.get('to')).toBeNull();
+  expect(params.get('dir')).toBe('asc');
+});
 it('does not expose cached revenue after the session loses admin access', async () => {
   show();
   await screen.findByRole('table', { name: 'Doanh thu theo tháng' });

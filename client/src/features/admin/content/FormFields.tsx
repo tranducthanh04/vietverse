@@ -2,12 +2,7 @@ import React from "react";
 import "./content.css";
 import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
-import { fieldAnchorId, useFieldIssue } from "./fieldIssuesContext.js";
-
-/** Gom `aria-describedby` (ghi chú nguồn + thông báo lỗi) và cờ `aria-invalid` cho một ô. */
-function describedBy(noteId: string | undefined, errorId: string | undefined) {
-  return [noteId, errorId].filter(Boolean).join(" ") || undefined;
-}
+import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 
 export function TextField({
   label,
@@ -25,13 +20,10 @@ export function TextField({
   readOnly?: boolean;
 }) {
   const noteId = useNoteDescription(name);
-  const issue = useFieldIssue(name);
-  const errorId = issue ? `${fieldAnchorId(name)}-error` : undefined;
+  const a11y = useFieldErrorA11y(name, noteId);
   const props = {
-    id: fieldAnchorId(name),
+    ...a11y,
     name,
-    "aria-describedby": describedBy(noteId, errorId),
-    "aria-invalid": issue ? true : undefined,
     value,
     readOnly,
     onChange: (
@@ -60,17 +52,14 @@ export function NumberField({
   onChange: (value: number) => void;
 }) {
   const noteId = useNoteDescription(name);
-  const issue = useFieldIssue(name);
-  const errorId = issue ? `${fieldAnchorId(name)}-error` : undefined;
+  const a11y = useFieldErrorA11y(name, noteId);
   return (
     <div className="cms-field">
       <label className="cms-field-label">
         <span>{label}</span>
         <input
-          id={fieldAnchorId(name)}
+          {...a11y}
           name={name}
-          aria-describedby={describedBy(noteId, errorId)}
-          aria-invalid={issue ? true : undefined}
           type="number"
           min="0"
           step="any"

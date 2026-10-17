@@ -24,6 +24,8 @@ import { EditorialNotesContext } from "./editorialNotesContext.js";
 import {
   FieldIssuesContext,
   fieldAnchorId,
+  fieldErrorId,
+  issueFieldName,
   resolveIssueField,
 } from "./fieldIssuesContext.js";
 
@@ -99,9 +101,11 @@ function Editor({
     event: React.MouseEvent<HTMLAnchorElement>,
     field: string,
   ) {
+    // Luôn chặn cú nhảy hash của trình duyệt: khi không tìm thấy ô thì link vẫn
+    // không trở thành link chết trỏ tới một id không tồn tại.
+    event.preventDefault();
     const target = resolveIssueField(form.current, field);
     if (!target) return;
-    event.preventDefault();
     target.focus();
     target.scrollIntoView?.({ block: "center" });
   }
@@ -252,17 +256,27 @@ function Editor({
         <div role="alert">
           <h2>{issues.length} lỗi cần sửa</h2>
           <ul className="cms-error-summary">
-            {issues.map((issue, i) => (
-              <li key={i}>
-                <a
-                  id={`${fieldAnchorId(issue.field)}-error`}
-                  href={`#${fieldAnchorId(issue.field)}`}
-                  onClick={(event) => focusIssueField(event, issue.field)}
-                >
-                  {issue.field}: {issue.message}
-                </a>
-              </li>
-            ))}
+            {(() => {
+              // Đếm riêng từng trường để mỗi dòng lỗi có id duy nhất và khớp với
+              // `aria-describedby` của ô (một trường có thể mang nhiều lỗi).
+              const seen = new Map<string, number>();
+              return issues.map((issue, i) => {
+                const name = issueFieldName(issue.field);
+                const index = seen.get(name) ?? 0;
+                seen.set(name, index + 1);
+                return (
+                  <li key={i}>
+                    <a
+                      id={fieldErrorId(issue.field, index)}
+                      href={`#${fieldAnchorId(issue.field)}`}
+                      onClick={(event) => focusIssueField(event, issue.field)}
+                    >
+                      {issue.field}: {issue.message}
+                    </a>
+                  </li>
+                );
+              });
+            })()}
           </ul>
         </div>
       )}

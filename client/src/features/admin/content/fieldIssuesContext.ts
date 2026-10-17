@@ -17,11 +17,40 @@ export function fieldAnchorId(field: string) {
   return `cms-field-${issueFieldName(field).replace(/[^A-Za-z0-9_-]+/g, "-")}`;
 }
 
-/** Lỗi khớp đúng một ô theo `name` (so khớp chính xác sau khi bỏ tiền tố). */
-export function useFieldIssue(name: string) {
-  return useContext(FieldIssuesContext).find(
+/**
+ * Id DOM cho dòng lỗi thứ `index` của một trường. Có chỉ số nên vẫn duy nhất
+ * khi một trường mang nhiều lỗi cùng lúc, và `aria-describedby` của ô trỏ được
+ * tới tất cả các dòng lỗi đó.
+ */
+export function fieldErrorId(field: string, index: number) {
+  return `${fieldAnchorId(field)}-error-${index}`;
+}
+
+/** Mọi lỗi khớp đúng một ô theo `name` (so khớp chính xác sau khi bỏ tiền tố). */
+export function useFieldIssues(name: string) {
+  return useContext(FieldIssuesContext).filter(
     (issue) => issueFieldName(issue.field) === name,
   );
+}
+
+/**
+ * Thuộc tính khả truy cập dùng chung cho mọi ô (hoặc nhóm ô) được validate:
+ * `id` neo ổn định, cờ `aria-invalid` khi có lỗi, và `aria-describedby` ghép ghi
+ * chú nguồn với *tất cả* dòng lỗi của trường. Dùng cho text/number lẫn
+ * select/checkbox để link tóm tắt lỗi luôn có đích hợp lệ và trình đọc màn hình
+ * đọc đủ lỗi.
+ */
+export function useFieldErrorA11y(name: string, noteId?: string) {
+  const issues = useFieldIssues(name);
+  const describedBy =
+    [noteId, ...issues.map((_, index) => fieldErrorId(name, index))]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  return {
+    id: fieldAnchorId(name),
+    "aria-invalid": issues.length ? true : undefined,
+    "aria-describedby": describedBy,
+  };
 }
 
 /**

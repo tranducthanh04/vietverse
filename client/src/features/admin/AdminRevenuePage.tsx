@@ -75,18 +75,23 @@ export function AdminRevenuePage() {
 
   if (user?.role !== 'admin') return null;
 
-  const applyRange = (nextFrom: string, nextTo: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (nextFrom) next.set('from', nextFrom); else next.delete('from');
-    if (nextTo) next.set('to', nextTo); else next.delete('to');
-    setSearchParams(next);
+  // Ghi URL chỉ từ trạng thái hợp lệ hiện tại nên tham số sai định dạng bị dọn khỏi URL,
+  // và dùng `replace` để lọc/sắp xếp không đẩy thêm mục lịch sử trình duyệt.
+  const writeParams = (nextState: { from: string; to: string; sort: SortKey; dir: SortDir }) => {
+    const next = new URLSearchParams();
+    if (nextState.from) next.set('from', nextState.from);
+    if (nextState.to) next.set('to', nextState.to);
+    if (nextState.sort !== 'month' || nextState.dir !== 'asc') {
+      next.set('sort', nextState.sort);
+      next.set('dir', nextState.dir);
+    }
+    setSearchParams(next, { replace: true });
   };
+  const applyRange = (nextFrom: string, nextTo: string) =>
+    writeParams({ from: nextFrom, to: nextTo, sort: sortKey, dir: sortDir });
   const toggleSort = (key: SortKey) => {
     const nextDir: SortDir = sortKey === key && sortDir === 'asc' ? 'desc' : 'asc';
-    const next = new URLSearchParams(searchParams);
-    next.set('sort', key);
-    next.set('dir', nextDir);
-    setSearchParams(next);
+    writeParams({ from: appliedFrom, to: appliedTo, sort: key, dir: nextDir });
   };
   const columns: { key: SortKey; label: string; numeric: boolean }[] = [
     { key: 'month', label: 'Tháng', numeric: false },
