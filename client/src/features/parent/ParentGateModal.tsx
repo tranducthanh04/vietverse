@@ -6,7 +6,7 @@ import {
   CircleAlert,
   LoaderCircle,
 } from '../../components/ui/icons.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 import { api } from '../../lib/api.js';
 
 export interface ParentGateModalProps {
@@ -20,6 +20,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
   onSuccess,
   onClose,
 }) => {
+  const t = useT();
   const [num1, setNum1] = useState(7);
   const [num2, setNum2] = useState(8);
   const [challengeToken, setChallengeToken] = useState<string>('');
@@ -40,7 +41,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
       setChallengeToken(res.data.data.challengeToken);
       setUserAnswer('');
     } catch {
-      setErrorMsg((previous) => [preserveError ? previous : '', 'Không thể tải phép tính. Vui lòng thử lại.'].filter(Boolean).join(' '));
+      setErrorMsg((previous) => [preserveError ? previous : '', t('parentGate.loadError')].filter(Boolean).join(' '));
     } finally {
       setLoadingChallenge(false);
     }
@@ -77,7 +78,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
       sessionStorage.setItem('vietverse_parent_gate_unlocked', (Date.now() + 15 * 60 * 1000).toString());
       onSuccess();
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || VI_LOCALES.parentGate.errorWrongAnswer;
+      const msg = err.response?.data?.error?.message || t('parentGate.errorWrongAnswer');
       setErrorMsg(msg);
       setUserAnswer('');
       await fetchChallenge(true);
@@ -87,14 +88,14 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={VI_LOCALES.parentGate.modalTitle} className="max-w-md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('parentGate.modalTitle')} className="max-w-md">
       <div className="flex flex-col items-center text-center">
         <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
           <ShieldCheck className="w-8 h-8" />
         </div>
 
         <p className="text-stone-600 text-sm mb-6">
-          {VI_LOCALES.parentGate.modalDesc}
+          {t('parentGate.modalDesc')}
         </p>
 
         {errorMsg && (
@@ -103,39 +104,39 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({
             <span>{errorMsg}</span>
           </div>
         )}
-        {!challengeToken && !loadingChallenge && <Button type="button" onClick={() => fetchChallenge()} className="mb-4">Thử lại</Button>}
+        {!challengeToken && !loadingChallenge && <Button type="button" onClick={() => fetchChallenge()} className="mb-4">{t('common.retry')}</Button>}
 
         <form onSubmit={handleVerify} className="w-full">
           {/* Math challenge */}
           <div className="bg-cream-muted border-2 border-cream-border rounded-2xl p-4 mb-6 text-center">
             <span className="text-2xl font-black font-display text-stone-800">
-              {challengeToken ? `${num1} × ${num2} = ?` : loadingChallenge ? 'Đang tải phép tính…' : 'Phép tính chưa sẵn sàng'}
+              {challengeToken ? `${num1} × ${num2} = ?` : loadingChallenge ? t('parentGate.loadingChallenge') : t('parentGate.notReady')}
             </span>
           </div>
 
           <input
             ref={answerRef}
             type="number"
-            aria-label="Nhập kết quả phép tính"
+            aria-label={t('parentGate.inputAriaLabel')}
             disabled={!challengeToken || loadingChallenge || isSubmitting}
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder={loadingChallenge ? 'Đang tạo phép tính…' : VI_LOCALES.parentGate.inputPlaceholder}
+            placeholder={loadingChallenge ? t('parentGate.creatingChallenge') : t('parentGate.inputPlaceholder')}
             className="w-full text-center text-xl font-bold p-3 rounded-2xl border-2 border-cream-border placeholder:text-stone-500 focus:border-primary focus:outline-none mb-6 min-h-[48px] disabled:opacity-50"
           />
 
           <div className="flex space-x-3">
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting} className="flex-1">
-              Đóng
+              {t('common.close')}
             </Button>
             <Button type="submit" variant="primary" disabled={!challengeToken || loadingChallenge || isSubmitting} className="flex-1 flex items-center justify-center">
               {isSubmitting ? (
                 <>
                   <LoaderCircle className="w-5 h-5 animate-spin mr-2" />
-                  <span>Đang kiểm tra…</span>
+                  <span>{t('common.checking')}</span>
                 </>
               ) : (
-                VI_LOCALES.parentGate.btnConfirm
+                t('parentGate.btnConfirm')
               )}
             </Button>
           </div>

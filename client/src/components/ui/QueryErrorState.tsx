@@ -5,6 +5,7 @@ import {
   WifiOff,
 } from './icons.js';
 import { Button } from './Button.js';
+import { useT } from '../../i18n/index.js';
 
 export interface QueryErrorStateProps {
   title?: string;
@@ -15,22 +16,24 @@ export interface QueryErrorStateProps {
 }
 
 export const QueryErrorState: React.FC<QueryErrorStateProps> = ({
-  title = 'Không thể tải dữ liệu',
+  title,
   message,
   error,
   onRetry,
   className = '',
 }) => {
+  const t = useT();
   const isNetworkError = error?.code === 'ERR_NETWORK' || !error?.response;
   const isAuthError = error?.response?.status === 401 || error?.response?.status === 403;
+  const resolvedTitle = title ?? t('common.loadDataError');
 
   const displayMessage =
     message ||
     (isNetworkError
-      ? 'Kết nối mạng bị gián đoạn. Vui lòng kiểm tra đường truyền Internet của bạn.'
+      ? t('common.networkError')
       : isAuthError
-      ? 'Phiên làm việc đã hết hạn hoặc bạn không có quyền truy cập.'
-      : error?.response?.data?.error?.message || 'Hệ thống gặp sự cố tạm thời khi tải dữ liệu.');
+      ? t('common.authError')
+      : error?.response?.data?.error?.message || t('common.genericLoadError'));
 
   return (
     <div
@@ -42,7 +45,7 @@ export const QueryErrorState: React.FC<QueryErrorStateProps> = ({
       </div>
 
       <div className="space-y-1">
-        <h3 className="text-lg font-bold font-display text-stone-800">{title}</h3>
+        <h3 className="text-lg font-bold font-display text-stone-800">{resolvedTitle}</h3>
         <p className="text-stone-600 text-sm max-w-sm leading-relaxed">{displayMessage}</p>
       </div>
 
@@ -54,7 +57,7 @@ export const QueryErrorState: React.FC<QueryErrorStateProps> = ({
           className="flex items-center space-x-2 mt-2"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Thử lại ngay</span>
+          <span>{t('common.retryNow')}</span>
         </Button>
       )}
     </div>

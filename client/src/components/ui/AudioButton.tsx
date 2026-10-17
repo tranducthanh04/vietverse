@@ -5,6 +5,7 @@ import {
 } from './icons.js';
 import { cn } from "../../lib/utils.js";
 import { useNarration } from "../../hooks/useNarration.js";
+import { useT } from "../../i18n/index.js";
 
 export interface AudioButtonProps {
   audioUrl?: string;
@@ -25,6 +26,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
   lang = "vi-VN",
   contentKey,
 }) => {
+  const t = useT();
   const narration = useNarration({
     audioUrl,
     text: textToSpeak,
@@ -69,9 +71,9 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         aria-label={
           isPlaying
             ? narration.mode === "tts"
-              ? "Dừng đọc"
-              : "Tạm dừng"
-            : label || "Phát âm thanh"
+              ? t('audio.stop')
+              : t('audio.pause')
+            : label || t('audio.playDefault')
         }
         aria-pressed={isPlaying}
       >
@@ -83,7 +85,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         {label && <span className="font-bold font-display px-1">{label}</span>}
       </button>
       {narration.mode === "tts" && narration.canPlay && (
-        <span className="text-xs text-stone-600">Giọng đọc thiết bị</span>
+        <span className="text-xs text-stone-600">{t('audio.deviceVoice')}</span>
       )}
       {narration.error && (
         <span role="status" className="text-xs text-amber-800">
@@ -92,7 +94,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
       )}
       {!narration.canPlay && !narration.error && (
         <span className="text-xs text-stone-600">
-          Chưa có âm thanh khả dụng.
+          {t('audio.unavailable')}
         </span>
       )}
     </span>

@@ -12,13 +12,15 @@ import {
   X,
 } from '../../components/ui/icons.js';
 import { useAuthStore } from '../../store/authStore.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
+import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
+  const t = useT();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Close mobile menu on route change
@@ -27,11 +29,11 @@ export const PublicLayout: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { to: '/', label: 'Trang chủ', end: true },
-    { to: '/gia', label: 'Gói học & Bảng giá' },
-    { to: '/kham-pha', label: 'Bản đồ 5 chặng' },
-    { to: '/kho-truyen', label: 'Kho truyện đồng dao' },
-    { to: '/van-hoa', label: 'Khám phá văn hóa' },
+    { to: '/', label: t('publicNav.home'), end: true },
+    { to: '/gia', label: t('publicNav.pricing') },
+    { to: '/kham-pha', label: t('publicNav.map') },
+    { to: '/kho-truyen', label: t('publicNav.stories') },
+    { to: '/van-hoa', label: t('publicNav.culture') },
   ];
 
   return (
@@ -50,13 +52,13 @@ export const PublicLayout: React.FC = () => {
                 <Star className="w-[22px] h-[22px] text-secondary-container select-none" aria-hidden="true" />
               </div>
               <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden sm:inline xl:hidden 2xl:inline">
-                CÙNG CON MỞ KHO BÁU, TIẾNG VIỆT THÊM NHIỆM MÀU
+                {t('publicNav.subtagline')}
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation with Active States */}
-          <nav aria-label="Điều hướng chính" className="hidden xl:flex items-center gap-1 2xl:gap-3">
+          <nav aria-label={t('publicNav.mainNavAria')} className="hidden xl:flex items-center gap-1 2xl:gap-3">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -77,12 +79,13 @@ export const PublicLayout: React.FC = () => {
 
           {/* Desktop & Mobile Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <LanguageSwitcher />
             {user ? (
               <button
                 onClick={() => navigate('/kham-pha')}
                 className="btn-3d-primary inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
               >
-                Vào học ngay
+                {t('nav.enterLearning')}
               </button>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
@@ -90,13 +93,13 @@ export const PublicLayout: React.FC = () => {
                   onClick={() => navigate('/dang-nhap')}
                   className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
-                  {VI_LOCALES.nav.login}
+                  {t('nav.login')}
                 </button>
                 <button
                   onClick={() => navigate('/dang-ky')}
                   className="btn-3d-primary inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
-                  {VI_LOCALES.nav.register}
+                  {t('nav.register')}
                 </button>
               </div>
             )}
@@ -106,7 +109,7 @@ export const PublicLayout: React.FC = () => {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="xl:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-2xl border-2 border-cream-border bg-white text-stone-700 hover:text-primary hover:border-primary flex items-center justify-center transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              aria-label={mobileMenuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+              aria-label={mobileMenuOpen ? t('publicNav.closeMenu') : t('publicNav.openMenu')}
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6 text-primary" /> : <Menu className="w-6 h-6" />}
@@ -144,7 +147,7 @@ export const PublicLayout: React.FC = () => {
                   onClick={() => navigate('/kham-pha')}
                   className="btn-3d-primary w-full min-h-[44px] py-3 rounded-2xl font-bold text-sm text-center flex items-center justify-center"
                 >
-                  Vào học ngay
+                  {t('nav.enterLearning')}
                 </button>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
@@ -152,13 +155,13 @@ export const PublicLayout: React.FC = () => {
                     onClick={() => navigate('/dang-nhap')}
                     className="min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-stone-200 font-bold text-sm text-stone-700 hover:bg-stone-100 text-center flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
-                    {VI_LOCALES.nav.login}
+                    {t('nav.login')}
                   </button>
                   <button
                     onClick={() => navigate('/dang-ky')}
                     className="btn-3d-primary min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
-                    {VI_LOCALES.nav.register}
+                    {t('nav.register')}
                   </button>
                 </div>
               )}
@@ -189,51 +192,51 @@ export const PublicLayout: React.FC = () => {
                 <Sparkles className="w-5 h-5 text-secondary-container" aria-hidden="true" />
               </div>
               <p className="text-sm text-on-surface-variant leading-relaxed">
-                Cùng con giữ gìn tiếng Việt diệu kỳ. Không gian nuôi dưỡng tình yêu cội nguồn qua truyện tranh dân gian và trò chơi ngôn ngữ giàu bản sắc.
+                {t('footer.blurb')}
               </p>
               <div className="flex items-center gap-2 pt-2 text-secondary">
                 <Flower2 className="w-6 h-6" aria-hidden="true" />
-                <span className="text-xs font-semibold">Văn hóa truyền thống & Công nghệ hiện đại</span>
+                <span className="text-xs font-semibold">{t('footer.cultureTech')}</span>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-base font-bold text-on-surface">Khám Phá Học Tập</h4>
+              <h4 className="text-base font-bold text-on-surface">{t('footer.exploreTitle')}</h4>
               <ul className="space-y-1 text-sm">
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/" className="inline-flex items-center min-h-[32px]">VietVerse là gì</Link>
+                  <Link to="/" className="inline-flex items-center min-h-[32px]">{t('footer.exploreWhat')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/kham-pha" className="inline-flex items-center min-h-[32px]">Lộ trình 5 chặng thám hiểm</Link>
+                  <Link to="/kham-pha" className="inline-flex items-center min-h-[32px]">{t('footer.exploreMap')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/kho-truyen" className="inline-flex items-center min-h-[32px]">Kho truyện dân gian tương tác</Link>
+                  <Link to="/kho-truyen" className="inline-flex items-center min-h-[32px]">{t('footer.exploreStories')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/van-hoa" className="inline-flex items-center min-h-[32px]">Khám phá văn hóa truyền thống</Link>
+                  <Link to="/van-hoa" className="inline-flex items-center min-h-[32px]">{t('footer.exploreCulture')}</Link>
                 </li>
               </ul>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-base font-bold text-on-surface">Quy Định & Quyền Riêng Tư</h4>
+              <h4 className="text-base font-bold text-on-surface">{t('footer.policyTitle')}</h4>
               <ul className="space-y-2.5 text-sm">
                 {[
-                  'Điều khoản dịch vụ',
-                  'Chính sách bảo mật dữ liệu',
-                  'Bảo vệ quyền riêng tư trẻ em',
-                  'Cẩm nang dành cho phụ huynh',
+                  t('footer.policyTerms'),
+                  t('footer.policyPrivacy'),
+                  t('footer.policyChild'),
+                  t('footer.policyGuide'),
                 ].map((label) => (
                   <li key={label}>
                     <span>{label}</span>
-                    <span className="block text-xs mt-0.5">Chưa khả dụng</span>
+                    <span className="block text-xs mt-0.5">{t('footer.comingSoon')}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-base font-bold text-on-surface">Liên Hệ VietVerse</h4>
+              <h4 className="text-base font-bold text-on-surface">{t('footer.contactTitle')}</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
@@ -241,21 +244,21 @@ export const PublicLayout: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
-                  <a className="hover:underline" href="tel:+84868261075">0868 261 075 (Tư vấn giáo dục)</a>
+                  <a className="hover:underline" href="tel:+84868261075">{t('footer.contactPhone')}</a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
-                  <span>Thứ 2 - Thứ 7: 8:00 - 20:00</span>
+                  <span>{t('footer.contactHours')}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="mt-12 pt-8 border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
-            <p>Bản quyền © 2026 VietVerse Foundation. Tất cả các quyền được bảo lưu.</p>
+            <p>{t('footer.copyright')}</p>
             <p className="flex items-center gap-1.5">
               <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
-              <span>Nuôi dưỡng tiếng mẹ đẻ cho thế hệ tương lai</span>
+              <span>{t('footer.tagline')}</span>
             </p>
           </div>
         </div>

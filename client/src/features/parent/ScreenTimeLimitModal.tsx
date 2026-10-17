@@ -8,6 +8,7 @@ import {
 import { Button } from '../../components/ui/Button.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { ParentGateModal } from './ParentGateModal.js';
+import { useT } from '../../i18n/index.js';
 
 export interface ScreenTimeLimitModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
   onRest,
 }) => {
   const [showGate, setShowGate] = useState(false);
+  const t = useT();
 
   if (!isOpen) return null;
 
@@ -36,7 +38,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
         onClose={() => {}}
         hideCloseBtn
         role="alertdialog"
-        ariaLabel="Đến giờ cho mắt nghỉ ngơi!"
+        ariaLabel={t('screenTime.dialogAria')}
         className="bg-white border-accent rounded-3xl p-0 text-center"
       >
         {/* Inner wrapper fills the dialog and clips the decorative glows to its rounded corners. */}
@@ -52,18 +54,17 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
           </div>
 
           <h2 className="text-2xl md:text-3xl font-black font-display text-primary mb-3">
-            Đến giờ cho mắt nghỉ ngơi!
+            {t('screenTime.title')}
           </h2>
 
           <p className="text-stone-600 text-base md:text-lg mb-6 leading-relaxed">
-            Bé <strong className="text-primary">{childName}</strong> ơi, bé đã học tập chăm chỉ suốt{' '}
-            <span className="font-black text-primary">{limitMinutes} phút</span> rồi đấy!
-            Hãy đứng dậy, vươn vai và nhìn ra cửa sổ thật xa để bảo vệ đôi mắt sáng tinh anh nhé!
+            {t('screenTime.bodyPrefix')}<strong className="text-primary">{childName}</strong>{t('screenTime.bodyMiddle')}
+            <span className="font-black text-primary">{limitMinutes} {t('screenTime.minutes')}</span>{t('screenTime.bodySuffix')}
           </p>
 
           <div className="bg-cream-muted border border-cream-border rounded-2xl p-4 mb-6 text-sm text-on-surface-variant flex items-center justify-center space-x-2">
             <HeartHandshake className="w-5 h-5 text-primary flex-shrink-0" />
-            <span>Mẹo nhỏ: Uống một ngụm nước ấm và chớp mắt 10 lần bé nha!</span>
+            <span>{t('screenTime.tip')}</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -74,7 +75,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
               className="flex-1 py-3 rounded-2xl font-bold flex items-center justify-center space-x-1.5"
             >
               <ShieldCheck className="w-5 h-5" />
-              <span>Ba mẹ mở thêm giờ</span>
+              <span>{t('screenTime.extend')}</span>
             </Button>
 
             <Button
@@ -83,7 +84,7 @@ export const ScreenTimeLimitModal: React.FC<ScreenTimeLimitModalProps> = ({
               onClick={onRest}
               className="flex-1 py-3 rounded-2xl font-black"
             >
-              Bé đi nghỉ ngơi thôi
+              {t('screenTime.rest')}
             </Button>
           </div>
         </div>

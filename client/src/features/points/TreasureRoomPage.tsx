@@ -15,8 +15,9 @@ import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { EquippedAvatar } from './EquippedAvatar.js';
-import { SHOP_CATEGORY_LABELS, apiErrorMessage, type ShopCategory, type ShopItemView } from './pointLabels.js';
+import { apiErrorMessage, type ShopCategory, type ShopItemView } from './pointLabels.js';
 import { useChildCollection, useEquipItem, type EquipSlot } from './useChildCollection.js';
+import { useT, type TKey } from '../../i18n/index.js';
 
 const COLLECTION_ORDER: ShopCategory[] = ['avatar', 'profile_decoration', 'badge', 'collectible'];
 const EQUIPPABLE: Partial<Record<ShopCategory, EquipSlot>> = {
@@ -24,9 +25,17 @@ const EQUIPPABLE: Partial<Record<ShopCategory, EquipSlot>> = {
   profile_decoration: 'profile_decoration',
 };
 
+const CATEGORY_LABEL_KEYS: Record<ShopCategory, TKey> = {
+  badge: 'shop.categoryBadge',
+  avatar: 'shop.categoryAvatar',
+  profile_decoration: 'shop.categoryProfileDecoration',
+  collectible: 'shop.categoryCollectible',
+};
+
 export const TreasureRoomPage: React.FC = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildStore();
+  const t = useT();
   const collection = useChildCollection(activeChild?._id);
   const equip = useEquipItem(activeChild?._id);
   const [equipError, setEquipError] = useState<string | null>(null);
@@ -41,7 +50,7 @@ export const TreasureRoomPage: React.FC = () => {
       { slot, itemId },
       {
         onError: (err) =>
-          setEquipError(apiErrorMessage(err, 'Chưa đổi được vật phẩm đang dùng, bé thử lại nhé.')),
+          setEquipError(apiErrorMessage(err, t('treasure.equipError'))),
       }
     );
   };
@@ -63,7 +72,7 @@ export const TreasureRoomPage: React.FC = () => {
           inUse ? (
             <div className="flex flex-col items-center gap-1">
               <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-300">
-                Đang dùng
+                {t('treasure.inUse')}
               </span>
               <button
                 type="button"
@@ -71,7 +80,7 @@ export const TreasureRoomPage: React.FC = () => {
                 disabled={equip.isPending}
                 className="text-[11px] font-bold text-stone-500 hover:underline min-h-[44px]"
               >
-                Bỏ dùng
+                {t('treasure.unequip')}
               </button>
             </div>
           ) : (
@@ -79,10 +88,10 @@ export const TreasureRoomPage: React.FC = () => {
               type="button"
               onClick={() => handleEquip(slot, item._id)}
               disabled={equip.isPending}
-              aria-label={`Dùng ${item.name}`}
+              aria-label={t('treasure.useItemAria', { name: item.name })}
               className="btn-3d-primary px-4 py-2 rounded-full text-xs font-bold min-h-[44px] disabled:opacity-60"
             >
-              Dùng
+              {t('treasure.use')}
             </button>
           )
         )}
@@ -93,36 +102,36 @@ export const TreasureRoomPage: React.FC = () => {
   const badges = [
     {
       id: 'tan-binh-vietverse',
-      name: 'Tân Binh Vietverse',
-      desc: 'Bắt đầu bước chân vào thế giới ngôn ngữ diệu kỳ',
+      name: t('treasure.badgeRecruitName'),
+      desc: t('treasure.badgeRecruitDesc'),
       Icon: Sprout,
       isUnlocked: true,
     },
     {
       id: 'ngoi-sao-cham-chi',
-      name: 'Ngôi Sao Chăm Chỉ',
-      desc: 'Hoàn thành bài học liên tiếp mỗi ngày',
+      name: t('treasure.badgeStarName'),
+      desc: t('treasure.badgeStarDesc'),
       Icon: Star,
       isUnlocked: (activeChild?.viviPoints || 0) >= 30,
     },
     {
       id: 'dung-si-phat-am',
-      name: 'Dũng Sĩ Phát Âm',
-      desc: 'Tự tin thu âm 5 bản đọc tiếng Việt chuẩn xác',
+      name: t('treasure.badgeVoiceName'),
+      desc: t('treasure.badgeVoiceDesc'),
       Icon: Mic,
       isUnlocked: (activeChild?.viviPoints || 0) >= 50,
     },
     {
       id: 'nha-thong-thai-van-hoa',
-      name: 'Nhà Thông Thái Văn Hóa',
-      desc: 'Trả lời đúng toàn bộ câu hỏi trắc nghiệm văn hóa',
+      name: t('treasure.badgeCultureName'),
+      desc: t('treasure.badgeCultureDesc'),
       Icon: DomainIcon.culture,
       isUnlocked: (activeChild?.viviPoints || 0) >= 70,
     },
     {
       id: 'bau-vat-nuoc-nam',
-      name: 'Báu Vật Nước Nam',
-      desc: 'Chinh phục toàn bộ 5 chặng học và bài học Bài 20',
+      name: t('treasure.badgeTreasureName'),
+      desc: t('treasure.badgeTreasureDesc'),
       Icon: Crown,
       isUnlocked: (activeChild?.viviPoints || 0) >= 150,
     },
@@ -135,7 +144,7 @@ export const TreasureRoomPage: React.FC = () => {
         className="inline-flex items-center space-x-2 text-stone-600 hover:text-primary font-bold mb-6 min-h-[44px]"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>Về bản đồ chặng</span>
+        <span>{t('treasure.backToMap')}</span>
       </button>
 
       <div className="text-center mb-8">
@@ -143,16 +152,16 @@ export const TreasureRoomPage: React.FC = () => {
           <EquippedAvatar child={activeChild} size="lg" />
         </div>
         <h1 className="text-kid-xl md:text-kid-2xl font-black font-display text-primary">
-          Phòng Báu Vật Của {activeChild?.name || 'Bé'}
+          {t('treasure.title', { name: activeChild?.name || t('treasure.childFallback') })}
         </h1>
         <p className="text-stone-600 text-sm mt-1">
-          Nơi lưu giữ các huy hiệu danh giá và chiến tích chinh phục tiếng Việt!
+          {t('treasure.subtitle')}
         </p>
       </div>
 
       <section aria-labelledby="owned-items-title" className="mb-10">
         <h2 id="owned-items-title" className="text-kid-lg font-black font-display text-stone-800 mb-4">
-          Vật phẩm của bé
+          {t('treasure.ownedTitle')}
         </h2>
         {equipError && (
           <p role="alert" className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm font-bold">
@@ -162,10 +171,10 @@ export const TreasureRoomPage: React.FC = () => {
         {collection.error ? (
           <QueryErrorState error={collection.error} onRetry={() => collection.refetch()} />
         ) : collection.isLoading ? (
-          <p className="text-sm text-stone-500 font-bold">Đang mở rương báu vật…</p>
+          <p className="text-sm text-stone-500 font-bold">{t('treasure.loading')}</p>
         ) : ownedItems.length === 0 ? (
           <p className="text-sm text-stone-500 bg-white rounded-2xl p-5 border-2 border-cream-border">
-            Bé chưa có vật phẩm nào. Hãy đổi ViVi Points lấy avatar, trang trí hồ sơ hoặc huy hiệu ở trang Đổi quà nhé!
+            {t('treasure.empty')}
           </p>
         ) : (
           <div className="space-y-6">
@@ -175,7 +184,7 @@ export const TreasureRoomPage: React.FC = () => {
               return (
                 <div key={category}>
                   <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500 mb-3">
-                    {SHOP_CATEGORY_LABELS[category]}
+                    {t(CATEGORY_LABEL_KEYS[category])}
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {group.map((item) => renderOwnedItem(item, category))}
@@ -187,7 +196,7 @@ export const TreasureRoomPage: React.FC = () => {
         )}
       </section>
 
-      <h2 className="text-kid-lg font-black font-display text-stone-800 mb-4">Huy hiệu hành trình</h2>
+      <h2 className="text-kid-lg font-black font-display text-stone-800 mb-4">{t('treasure.badgesTitle')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {badges.map((b) => (
           <Card
@@ -214,7 +223,7 @@ export const TreasureRoomPage: React.FC = () => {
             <div className="mt-4 pt-3 border-t border-cream-border w-full">
               <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase ${b.isUnlocked ? 'text-emerald-700' : 'text-stone-500'}`}>
                 {b.isUnlocked ? <CircleCheck className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                {b.isUnlocked ? 'Đã mở khóa' : 'Chưa đạt'}
+                {b.isUnlocked ? t('treasure.unlocked') : t('treasure.notAchieved')}
               </span>
             </div>
           </Card>

@@ -10,7 +10,7 @@ import {
   CloudOff,
 } from './icons.js';
 import { Modal } from './Modal.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 
 export interface VictoryModalProps {
   isOpen: boolean;
@@ -37,6 +37,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   onBackToMap,
   onPlayAgain,
 }) => {
+  const t = useT();
   useEffect(() => {
     if (isOpen && passed && !isOfflinePending) {
       try {
@@ -57,7 +58,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn ariaLabel="Kết quả bài học" className="max-w-lg text-center p-8 bg-surface-container-lowest border-4 border-secondary-container/40 rounded-3xl shadow-2xl">
+    <Modal isOpen={isOpen} onClose={onBackToMap} hideCloseBtn ariaLabel={t('victory.resultAria')} className="max-w-lg text-center p-8 bg-surface-container-lowest border-4 border-secondary-container/40 rounded-3xl shadow-2xl">
       {/* Celebration Mascot Badge */}
       <div className="flex justify-center mb-3">
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-secondary-fixed ring-8 ring-secondary-container/30 shadow-xl flex items-center justify-center">
@@ -74,15 +75,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 
       <div className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase tracking-wider mb-2">
         <Sparkles className="w-3.5 h-3.5 text-secondary" />
-        <span>{passed ? 'HOÀN THÀNH BÀI HỌC!' : 'CÙNG LUYỆN TẬP THÊM'}</span>
+        <span>{passed ? t('victory.passedBadge') : t('victory.retryBadge')}</span>
       </div>
 
       <h2 className="text-3xl font-display font-black text-primary mb-2">
-        {passed ? VI_LOCALES.victory.congrats : 'Bé hãy luyện tập thêm nhé!'}
+        {passed ? t('victory.congrats') : t('victory.notPassedTitle')}
       </h2>
       <p className="text-sm text-on-surface-variant max-w-sm mx-auto mb-4 font-medium">
-        {passed ? 'Bé đã rất nỗ lực vượt qua các hoạt động bài học hôm nay!'
-          : `Bài này chưa đạt mức hoàn thành.${typeof scorePercent === 'number' ? ` Bé đạt ${scorePercent}%; cần ít nhất 50%.` : ''} Mình cùng thử lại nhé!`}
+        {passed ? t('victory.passedDesc')
+          : `${t('victory.notPassedDesc')}${typeof scorePercent === 'number' ? ` ${t('victory.notPassedScore', { score: scorePercent })}` : ''} ${t('victory.notPassedRetry')}`}
       </p>
 
       {/* 3 Bouncing Stars */}
@@ -111,16 +112,16 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
       {isOfflinePending ? (
         <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 my-4 text-amber-900 text-xs sm:text-sm font-bold text-center leading-relaxed flex items-start justify-center gap-2">
           <CloudOff className="w-5 h-5 shrink-0" />
-          <span>Đang lưu bài học trên thiết bị! Khi có mạng Internet, điểm ViVi Points sẽ tự động được đồng bộ vào kho báu của bé.</span>
+          <span>{t('victory.offlinePending')}</span>
         </div>
       ) : (
         <div className="bg-secondary-fixed/50 border-2 border-secondary-container/40 rounded-2xl p-5 my-4 shadow-inner">
           <div className="flex items-center justify-center gap-2 text-secondary font-display font-extrabold text-2xl">
             <Award className="w-8 h-8 text-secondary-container" />
-            <span>+{pointsEarned} ViVi Points</span>
+            <span>{t('victory.pointsEarned', { points: pointsEarned })}</span>
           </div>
           <p className="text-xs text-on-secondary-fixed font-bold mt-1">
-            Tổng kho báu hiện tại: <span className="text-primary font-black text-sm">{totalPoints} điểm</span>
+            {t('victory.totalLabel')} <span className="text-primary font-black text-sm">{t('victory.totalPoints', { points: totalPoints })}</span>
           </p>
         </div>
       )}
@@ -132,7 +133,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             onClick={onNextLesson}
             className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
-            <span>{VI_LOCALES.victory.btnNextLesson}</span>
+            <span>{t('victory.btnNextLesson')}</span>
             <ArrowRight className="w-5 h-5" />
           </button>
         )}
@@ -144,7 +145,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
               className="flex-1 h-12 rounded-full border-2 border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>{passed ? VI_LOCALES.victory.btnPlayAgain : 'Luyện tập lại'}</span>
+              <span>{passed ? t('victory.btnPlayAgain') : t('victory.practiceAgain')}</span>
             </button>
           )}
 
@@ -153,7 +154,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             className="btn-3d-accent flex-1 h-12 rounded-full font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
           >
             <MapPin className="w-4 h-4" />
-            <span>{VI_LOCALES.victory.btnBackMap}</span>
+            <span>{t('victory.btnBackMap')}</span>
           </button>
         </div>
       </div>

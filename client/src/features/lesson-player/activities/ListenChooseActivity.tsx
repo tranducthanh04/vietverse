@@ -3,6 +3,7 @@ import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { CircleCheck, CircleX, Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface ListenChooseActivityProps {
   activity: {
@@ -25,6 +26,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
   activity,
   onComplete,
 }) => {
+  const t = useT();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleSelect = (id: string) => {
@@ -47,10 +49,10 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
           audioUrl={activity.audioUrl}
           textToSpeak={activity.prompt}
           size="lg"
-          label={activity.audioUrl ? 'Bấm để nghe âm thanh' : 'Nghe đọc câu hỏi'}
+          label={activity.audioUrl ? t('lesson.listenAudio') : t('lesson.listenQuestion')}
         />
         {/* Without source audio, device speech can only read the prompt; do not imply a listening clip exists. */}
-        {!activity.audioUrl && <MissingSourceAudioNotice hint="đọc câu hỏi phía trên" />}
+        {!activity.audioUrl && <MissingSourceAudioNotice hint={t('lesson.hintReadAbove')} />}
       </div>
 
       {/* Options: picture cards when the lesson has images, compact lettered rows otherwise */}
@@ -88,7 +90,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
                   ) : (
                     <CircleX className="w-6 h-6 text-red-600" />
                   )}
-                  <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
+                  <span className="sr-only">{isCorrect ? t('lesson.correct') : t('lesson.incorrect')}</span>
                 </span>
               )}
               {hasImages ? (

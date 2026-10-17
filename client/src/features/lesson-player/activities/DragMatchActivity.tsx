@@ -4,6 +4,7 @@ import {
   CircleCheck,
   CircleX,
 } from '../../../components/ui/icons.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface DragMatchActivityProps {
   activity: {
@@ -18,6 +19,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
   activity,
   onComplete,
 }) => {
+  const t = useT();
   const pairs = activity.pairs || [];
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
@@ -65,7 +67,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
       <div className="grid grid-cols-2 gap-3 sm:gap-8 w-full max-w-lg">
         {/* Left Column */}
         <div className="flex flex-col gap-3 sm:gap-4">
-          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">Từ</span>
+          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">{t('lesson.dragLeftHeader')}</span>
           {pairs.map((p) => {
             const isMatched = !!matchedPairs[p.left];
             const isSelected = selectedLeft === p.left;
@@ -93,7 +95,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
 
         {/* Right Column (shuffled order or fixed for kid ergonomics) */}
         <div className="flex flex-col gap-3 sm:gap-4">
-          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">Ý nghĩa</span>
+          <span className="font-bold text-stone-500 text-xs sm:text-sm uppercase tracking-wider">{t('lesson.dragRightHeader')}</span>
           {pairs.map((p) => {
             const isMatched = Object.values(matchedPairs).includes(p.right);
             const isWrong = wrongRight === p.right;
@@ -125,7 +127,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
 
       {/* Polite announcement so screen-reader users hear the retry hint for a wrong match. */}
       <span className="sr-only" role="status" aria-live="polite">
-        {wrongRight ? 'Chưa đúng, thử lại nhé' : ''}
+        {wrongRight ? t('lesson.tryAgainShort') : ''}
       </span>
     </div>
   );

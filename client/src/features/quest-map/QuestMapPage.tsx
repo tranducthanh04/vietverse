@@ -13,12 +13,13 @@ import {
 import { api } from '../../lib/api.js';
 import { formatPoints } from '../../lib/utils.js';
 import { useChildStore } from '../../store/childStore.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
 
 export const QuestMapPage: React.FC = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildStore();
+  const t = useT();
   const [selectedStageOrder, setSelectedStageOrder] = useState<number>(1);
 
   const { data: stages = [], isLoading } = useQuery({
@@ -46,13 +47,13 @@ export const QuestMapPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full w-fit mb-3 text-xs uppercase font-extrabold tracking-wider">
               <Sparkles className="w-4 h-4 text-secondary-fixed" />
-              <span>BẢN ĐỒ KHO BÁU 5 CHẶNG</span>
+              <span>{t('map.bannerBadge')}</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-display font-extrabold tracking-tight">
-              {VI_LOCALES.map.title}
+              {t('map.title')}
             </h1>
             <p className="text-white/90 text-sm md:text-base mt-2 max-w-xl font-medium leading-relaxed">
-              Cùng Sao Lí Lắc vượt qua 5 chặng thử thách, thu thập điểm ViVi Points và mở khóa Báu vật Nước Nam!
+              {t('map.subtitle')}
             </p>
           </div>
 
@@ -63,10 +64,10 @@ export const QuestMapPage: React.FC = () => {
               </div>
               <div>
                 <span className="text-[11px] text-on-surface-variant block uppercase font-bold tracking-wider">
-                  ViVi Points của bé
+                  {t('map.pointsLabel')}
                 </span>
                 <span className="text-2xl font-black font-display text-secondary">
-                  {formatPoints(activeChild?.viviPoints || 0)} Điểm
+                  {formatPoints(activeChild?.viviPoints || 0)} {t('map.pointsUnit')}
                 </span>
               </div>
             </div>
@@ -111,7 +112,7 @@ export const QuestMapPage: React.FC = () => {
               ) : (
                 <Compass className="w-4 h-4 text-secondary-container" />
               )}
-              <span>Chặng {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
+              <span>{t('map.stagePrefix')} {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
             </button>
           );
         })}
@@ -124,7 +125,7 @@ export const QuestMapPage: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase mb-2">
                 <MapPin className="w-3.5 h-3.5 text-secondary" />
-                <span>MỤC TIÊU CHẶNG {activeStage.order}</span>
+                <span>{t('map.stageGoalBadge')} {activeStage.order}</span>
               </div>
               <h2 className="font-display text-2xl sm:text-3xl text-on-surface font-extrabold">
                 {activeStage.title}
@@ -137,7 +138,7 @@ export const QuestMapPage: React.FC = () => {
             <div className="flex items-center gap-4 bg-surface-container rounded-2xl px-6 py-4 border border-outline-variant/30 shrink-0">
               <div className="text-center">
                 <span className="text-xs text-on-surface-variant font-bold block uppercase tracking-wider">
-                  Tiến độ bài học
+                  {t('map.lessonProgress')}
                 </span>
                 <span className="text-2xl font-black font-display text-primary">
                   {formatPoints(activeStage.completedCount || 0)} / {formatPoints(activeStage.totalLessons || 4)}
@@ -152,7 +153,7 @@ export const QuestMapPage: React.FC = () => {
       {isLoading ? (
         <div className="text-center py-16">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-bold text-on-surface-variant">Đang tải bản đồ phiêu lưu…</p>
+          <p className="font-bold text-on-surface-variant">{t('map.loading')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -172,11 +173,11 @@ export const QuestMapPage: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed">
-                      Bài {lesson.order}
+                      {t('map.lessonPrefix')} {lesson.order}
                     </span>
 
                     {/* Stars */}
-                    <div className="flex items-center space-x-1" role="img" aria-label={`${lesson.stars || 0}/3 sao`}>
+                    <div className="flex items-center space-x-1" role="img" aria-label={t('map.starsAria', { count: lesson.stars || 0 })}>
                       {[1, 2, 3].map((s) => (
                         <Star
                           key={s}
@@ -194,14 +195,14 @@ export const QuestMapPage: React.FC = () => {
                     {lesson.title}
                   </h3>
                   <p className="text-on-surface-variant text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
-                    {lesson.description || 'Bài học tương tác phong phú gồm phát âm chuẩn, thẻ chữ, nối từ và thu âm giọng nói.'}
+                    {lesson.description || t('map.lessonDescFallback')}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
                   <div className="flex items-center space-x-1.5 text-xs font-bold text-secondary">
                     <Sparkles className="w-4 h-4" />
-                    <span>+10 ViVi Points</span>
+                    <span>{t('map.rewardHint')}</span>
                   </div>
 
                   {isUnlocked ? (
@@ -214,12 +215,12 @@ export const QuestMapPage: React.FC = () => {
                       }`}
                     >
                       <Play className="w-4 h-4 fill-current" />
-                      <span>{isCompleted ? VI_LOCALES.map.reviewLesson : VI_LOCALES.map.startLesson}</span>
+                      <span>{isCompleted ? t('map.reviewLesson') : t('map.startLesson')}</span>
                     </button>
                   ) : (
                     <div className="flex items-center space-x-1.5 text-on-surface-variant/60 text-sm font-semibold">
                       <Lock className="w-4 h-4" />
-                      <span>Chưa mở</span>
+                      <span>{t('map.locked')}</span>
                     </div>
                   )}
                 </div>

@@ -5,6 +5,15 @@
 - Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.
 - **Quyết định nghiệp vụ/giả định:** chỉ hiện nút khi `passed`; bài kế cùng chặng mở ngay sau khi đạt, bài đầu chặng sau vẫn theo cổng gói trả phí/hoàn thành chặng (dùng cờ `isUnlocked` từ `/stages`). Quyền mở khóa vẫn do server `assertLessonUnlocked` thực thi; không đổi API/điểm/quyền.
 
+## i18n giao diện + nút chuyển ngôn ngữ — 2026-10-17, local
+
+- **Hạ tầng i18n nhẹ** tại `client/src/i18n/`: từ điển typed `vi`/`en` (kiểu `Dictionary` ép `en` đủ khoá của `vi`), translator có nội suy `{param}` và rơi về `vi` rồi về chính khoá khi thiếu, hook `useT()`/`useUiLanguage()`, store zustand (`useUiLanguageStore`) nhớ lựa chọn trong `localStorage` (bọc `try/catch`). Không thêm dependency. `vi` tái dùng chuỗi sẵn có từ `client/src/locales/vi.ts`.
+- **Nút chuyển VI/EN** (`LanguageSwitcher`) ở header public, khu bé và phụ huynh; `aria-label`, vùng chạm ≥44px; `App.tsx` đồng bộ `document.documentElement.lang`.
+- **Ngôn ngữ mặc định**: manual (người dùng chọn) → `companionLanguages[0]` của bé đang chọn → `vi`. Chỉ `en` có bản dịch riêng; ngôn ngữ đồng hành khác tạm map sang `en` (giả định, chờ khách duyệt).
+- **Đã dịch chữ giao diện**: layout public + Landing/Pricing/404; layout khu bé + QuestMap, lesson player và toàn bộ activity (word_card, review, listen_choose, drag_match, sort_order, fill_blank + 4 activity mới), VictoryModal, Parent Gate, ScreenTimeLimitModal, PointsShop, TreasureRoom; layout phụ huynh + Dashboard/Journey/Recordings/Settings/PaymentResult/PaymentTest; onboarding; đăng nhập/đăng ký/Google; danh sách truyện và văn hoá; các component dùng chung (Button, Modal, PageLoader, ProtectedRoute, ProgressBar, SkipLink, AudioButton, QueryErrorState, ChildSessionGuard).
+- **Giữ tiếng Việt (có chủ đích)**: nội dung học (bài, truyện, văn hoá, câu hỏi, từ vựng, TTS đọc nội dung); Admin/CMS; chi tiết truyện/văn hoá (`StoryDetailPage`/`CultureDetailPage` — tránh xung đột với worker khác); nhãn sổ điểm dùng chung `pointLabels.ts` và nhãn năng lực do server trả. Đây là các khoản còn sót cho bản EN, ghi nhận để xử lý sau.
+- Kiểm chứng local: typecheck qua; frontend 243/243 test qua (thêm `i18n.test.tsx`: bắt khoá thiếu, chuyển ngôn ngữ đổi chữ header, bé `en` vào khu bé thấy tiếng Anh, nhớ lựa chọn thủ công); lint 0 lỗi. Chưa deploy/nghiệm thu thiết bị thật.
+
 ## Lesson word card — bố cục đoạn đọc 2026-10-15, local
 
 - Thẻ tự tăng chiều cao theo nội dung; đoạn văn dài trong `targetWord` hiển thị chữ nhỏ hơn, căn trái và xuống dòng, không tràn lên hướng dẫn/mascot. Chữ và từ ngắn vẫn nổi bật. Áp dụng chung cho lesson player và CMS preview.

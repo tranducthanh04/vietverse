@@ -20,7 +20,7 @@ import { getActivityComponent } from './activityRegistry.js';
 import { ProgressBar } from '../../components/ui/ProgressBar.js';
 import { Button } from '../../components/ui/Button.js';
 import { VictoryModal } from '../../components/ui/VictoryModal.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 import { isNewActivityType, type NewActivityInput, type NewActivitySubmission } from './activities/newActivity.types.js';
 
 // Minimal shape of the `/stages` payload that next-lesson navigation reads (same source as the map).
@@ -34,13 +34,15 @@ export const LessonPlayerPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const childId = useChildStore(state => state.activeChild?._id);
   const userId = useAuthStore(state => state.user?.id);
-  if (searchParams.get('preview') === 'true') return <div className="p-6">Xem trước nội dung qua CMS. <Link to="/admin/lessons">Về quản trị bài học</Link></div>;
-  if (!lessonId || !childId || !userId) return <p className="p-6">Hãy chọn hồ sơ bé trước khi học.</p>;
+  const t = useT();
+  if (searchParams.get('preview') === 'true') return <div className="p-6">{t('lesson.previewNotice')} <Link to="/admin/lessons">{t('lesson.previewLink')}</Link></div>;
+  if (!lessonId || !childId || !userId) return <p className="p-6">{t('lesson.selectChildFirst')}</p>;
   return <LearningSession key={`${userId}:${childId}:${lessonId}`} lessonId={lessonId} childId={childId} userId={userId} />;
 };
 
 const LearningSession: React.FC<{ lessonId: string; childId: string; userId: string }> = ({ lessonId, childId, userId }) => {
   const navigate = useNavigate();
+  const t = useT();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
   const mounted = useRef(true);
@@ -114,7 +116,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   useEffect(() => {
     let cancelled = false;
     readCachedSession(lessonId, childId).then(session => { if (!cancelled) setCached(session ?? null); })
-      .catch(() => { if (!cancelled) setCacheError('Chưa đọc được phiên học trên máy. Vui lòng tải lại trang.'); });
+      .catch(() => { if (!cancelled) setCacheError(t('lesson.cacheReadError')); });
     return () => { cancelled = true; };
   }, [lessonId, childId]);
 
@@ -123,12 +125,12 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     let cancelled = false;
     initSession(lessonId, childId, lesson.contentVersion).then(session => {
       if (cancelled) return;
-      if (session.contentVersion !== lesson.contentVersion) { setCacheError('Phiên học đã thay đổi ở tab khác. Vui lòng tải lại trang.'); return; }
+      if (session.contentVersion !== lesson.contentVersion) { setCacheError(t('lesson.sessionChangedOtherTab')); return; }
       setCurrentStep(session.currentStepIndex || 0); setHearts(session.hearts ?? 3); setAnswers(session.answers || []); setSessionReady(true);
       setPartialInputs(session.partialInputs ?? {});
       const restoredAnswer = session.answers.find(answer => answer.activityId === lesson.activities?.[session.currentStepIndex || 0]?.id);
       setStepAnswered(Boolean(restoredAnswer)); setLastAnswerCorrect(restoredAnswer?.isCorrect ?? null);
-    }).catch(() => { if (!cancelled) setCacheError('Chưa lưu được phiên học. Vui lòng kiểm tra bộ nhớ trình duyệt.'); });
+    }).catch(() => { if (!cancelled) setCacheError(t('lesson.sessionSaveError')); });
     return () => { cancelled = true; };
   }, [lesson, lessonId, childId, legacySession, initSession]);
 
@@ -138,25 +140,25 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       setSessionReady(false); setCacheError(null); setCached(null);
       setCurrentStep(0); setHearts(3); setAnswers([]); setStepAnswered(false);
       setPartialInputs({}); setInputError(null);
-    } catch { setCacheError('Chưa thể bắt đầu lại. Dữ liệu cũ vẫn được giữ.'); }
+    } catch { setCacheError(t('lesson.restartFailed')); }
   };
 
   const activityUpdateRequired = (error as { response?: { data?: { error?: { code?: string } } } } | null)?.response?.data?.error?.code === 'ACTIVITY_CLIENT_UPDATE_REQUIRED';
   if (activityUpdateRequired) return <div role="alert" className="p-6 space-y-4">
-    <p>Cập nhật trang để học hoạt động mới. Câu trả lời và phiên bản đang học vẫn được giữ.</p>
-    <Button onClick={() => window.location.reload()}>Tải lại trang</Button>
+    <p>{t('lesson.activityUpdateRequired')}</p>
+    <Button onClick={() => window.location.reload()}>{t('lesson.reloadPage')}</Button>
   </div>;
   if (legacySession || cacheError || (error && cached)) return <div className="p-6 space-y-4" role="alert">
-    <p>{legacySession ? 'Không xác định được phiên bản của bài đang làm. Câu trả lời cũ vẫn được giữ cho tới khi bạn chọn bắt đầu lại.' : cacheError ?? 'Chưa tải được phiên bản bài đang học. Bạn có thể tải lại trang hoặc bắt đầu lại bài hiện tại.'}</p>
-    <p>Tiến độ và điểm đã lưu trên máy chủ không thay đổi.</p>
-    <Button onClick={restart}>Bắt đầu lại bài học</Button>
+    <p>{legacySession ? t('lesson.legacyVersionUnknown') : cacheError ?? t('lesson.loadVersionError')}</p>
+    <p>{t('lesson.serverProgressSafe')}</p>
+    <Button onClick={restart}>{t('lesson.restartLesson')}</Button>
   </div>;
 
   if (cached === undefined || isLoading || (!error && !sessionReady)) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-kid-base font-bold text-stone-700">Đang chuẩn bị bài học vui nhộn cho bé…</p>
+        <p className="text-kid-base font-bold text-stone-700">{t('lesson.preparing')}</p>
       </div>
     );
   }
@@ -164,8 +166,8 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   if (error || !lesson) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-kid-xl font-bold text-primary mb-4">Không thể tải bài học</h2>
-        <Button onClick={() => navigate('/kham-pha')}>Trở về bản đồ</Button>
+        <h2 className="text-kid-xl font-bold text-primary mb-4">{t('lesson.loadError')}</h2>
+        <Button onClick={() => navigate('/kham-pha')}>{t('lesson.backToMapFull')}</Button>
       </div>
     );
   }
@@ -198,7 +200,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     try {
       await savePartialInput({ lessonId, childId, contentVersion: lesson.contentVersion }, currentActivity.id, value);
       setInputError(null);
-    } catch { setInputError('Chưa lưu được câu trả lời trên máy. Dữ liệu đang nhập vẫn được giữ trên trang.'); }
+    } catch { setInputError(t('lesson.saveAnswerError')); }
   };
   const handleNewSubmit = async (result: NewActivitySubmission) => {
     if (isSavingAnswer || stepAnswered) return;
@@ -208,7 +210,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       await saveStepProgress(currentStep, answer);
       setAnswers(previous => [...previous.filter(a => a.activityId !== answer.activityId), answer]);
       setStepAnswered(true); setLastAnswerCorrect(null);
-    } catch { setInputError('Chưa lưu được câu trả lời trên máy. Bé thử gửi lại, dữ liệu vẫn được giữ.'); }
+    } catch { setInputError(t('lesson.resubmitError')); }
     finally { setIsSavingAnswer(false); }
   };
 
@@ -285,7 +287,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
               savedAt: Date.now(),
             });
           } catch {
-            setSubmitError('Chưa lưu được bài lên máy chủ hoặc bộ nhớ máy. Giữ trang này và thử nộp lại.');
+            setSubmitError(t('lesson.offlineBothFail'));
             return;
           }
 
@@ -295,7 +297,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
 
           setOfflinePending(true);
         } else {
-          const msg = err.response?.data?.error?.message || 'Có lỗi khi lưu kết quả bài học. Bé bấm thử nộp lại nhé!';
+          const msg = err.response?.data?.error?.message || t('lesson.completeError');
           setSubmitError(msg);
         }
       } finally {
@@ -307,7 +309,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         await saveStepProgress(nextStep);
         setCurrentStep(nextStep); setStepAnswered(false); setLastAnswerCorrect(null);
       }
-      catch { setInputError('Chưa lưu được bước học. Vui lòng tải lại để tiếp tục phiên đã lưu.'); }
+      catch { setInputError(t('lesson.stepSaveError')); }
     }
   };
 
@@ -321,7 +323,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         <button
           onClick={() => navigate('/kham-pha')}
           className="p-2 text-stone-500 hover:text-primary rounded-full hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label="Thoát bài học"
+          aria-label={t('lesson.exitAria')}
         >
           <X className="w-7 h-7" />
         </button>
@@ -342,7 +344,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             <button
               onClick={() => setShowHint(!showHint)}
               className="p-2 text-amber-500 hover:text-amber-600 rounded-full hover:bg-amber-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Gợi ý"
+              aria-label={t('lesson.hintBtn')}
             >
               <CircleHelp className="w-7 h-7" />
             </button>
@@ -354,7 +356,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       {showHint && currentActivity?.hints && (
         <div className="bg-amber-100 border-b border-amber-300 px-6 py-3 text-center text-amber-900 font-bold animate-fade-in flex items-center justify-center space-x-2">
           <Lightbulb className="w-5 h-5 shrink-0" />
-          <span>Gợi ý: {currentActivity.hints[0]}</span>
+          <span>{t('lesson.hintPrefix')} {currentActivity.hints[0]}</span>
         </div>
       )}
 
@@ -381,9 +383,9 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
       </main>
       <PendingSubmissions childId={childId} />
       {inputError && <div role="alert" className="px-4 sm:px-6 py-3 bg-amber-50 border-t-2 border-amber-200 text-amber-900 font-bold flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2"><TriangleAlert className="w-4 h-4 shrink-0" />{inputError}</p><Button onClick={() => void persistInput(activityInput)}>Thử lưu lại</Button>
+        <p className="flex items-center gap-2"><TriangleAlert className="w-4 h-4 shrink-0" />{inputError}</p><Button onClick={() => void persistInput(activityInput)}>{t('lesson.retrySave')}</Button>
       </div>}
-      {offlinePending && <div role="status" className="px-4 sm:px-6 py-3 bg-amber-50 border-t-2 border-amber-200 text-amber-900 font-bold flex flex-wrap items-center justify-between gap-3"><span>Bài đã lưu trên máy, đang chờ đồng bộ. Chưa xác nhận điểm thưởng.</span><Button size="sm" onClick={() => navigate('/kham-pha')}>Về bản đồ</Button></div>}
+      {offlinePending && <div role="status" className="px-4 sm:px-6 py-3 bg-amber-50 border-t-2 border-amber-200 text-amber-900 font-bold flex flex-wrap items-center justify-between gap-3"><span>{t('lesson.offlinePendingBanner')}</span><Button size="sm" onClick={() => navigate('/kham-pha')}>{t('lesson.toMap')}</Button></div>}
 
       {/* Error alert banner if submission failed */}
       {submitError && (
@@ -400,7 +402,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             disabled={isSubmitting}
             className="bg-red-600 hover:bg-red-700 shadow-none"
           >
-            {isSubmitting ? 'Đang gửi…' : 'Thử lại'}
+            {isSubmitting ? t('lesson.sending') : t('common.retry')}
           </Button>
         </div>
       )}
@@ -412,15 +414,15 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             {stepAnswered && (
               <div className="flex items-center space-x-2">
                 {newActivity ? <span role="status" className="font-bold text-stone-700">
-                  {currentActivity.type === 'follow_steps' ? 'Đã ghi xác nhận của bé' : 'Đã ghi câu trả lời'}
+                  {currentActivity.type === 'follow_steps' ? t('lesson.recordedConfirmation') : t('lesson.recordedAnswer')}
                 </span> : lastAnswerCorrect ? (
                   <span className="flex items-center space-x-1 text-emerald-600 font-bold font-display text-kid-base animate-bounce-subtle">
                     <Check className="w-6 h-6 text-emerald-500" />
-                    <span>{VI_LOCALES.lesson.correctPraise}</span>
+                    <span>{t('lesson.correctPraise')}</span>
                   </span>
                 ) : (
                   <span className="text-amber-700 font-bold font-display text-kid-base">
-                    {VI_LOCALES.lesson.tryAgain}
+                    {t('lesson.tryAgain')}
                   </span>
                 )}
               </div>
@@ -434,7 +436,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             disabled={isSubmitting || offlinePending || isSavingAnswer || Boolean(inputError) || (!stepAnswered && currentActivity?.type !== 'word_card')}
             className="gap-2 px-6 sm:px-8 shrink-0"
           >
-            <span>{isSubmitting ? 'Đang lưu…' : isLastStep ? 'Hoàn thành bài' : VI_LOCALES.lesson.continueBtn}</span>
+            <span>{isSubmitting ? t('common.saving') : isLastStep ? t('lesson.finishLesson') : t('lesson.continueBtn')}</span>
             <ArrowRight className="w-6 h-6" />
           </Button>
         </div>
