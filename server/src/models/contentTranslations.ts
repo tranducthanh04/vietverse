@@ -1,0 +1,49 @@
+import { Schema } from 'mongoose';
+
+/**
+ * Companion languages that can carry a reviewed translation.
+ * This is the `companionLanguages` set minus `other` (see docs/02-business-rules.md §2):
+ * `other` is an unspecified locale, so it never keys a translation.
+ */
+export const SUPPORT_LANGUAGES = ['en', 'ja', 'ko', 'zh', 'fr'] as const;
+export type SupportLanguage = (typeof SUPPORT_LANGUAGES)[number];
+
+/** One reviewed translation of a culture article's child-facing text. Every field is optional. */
+export interface ICultureTranslation {
+  title?: string;
+  intro?: string;
+  /** Parallel by index to the source `funFacts`; a missing/empty entry hides that fact's translation. */
+  funFacts?: string[];
+}
+
+/** One reviewed translation of a story's child-facing text. Every field is optional. */
+export interface IStoryTranslation {
+  title?: string;
+  description?: string;
+  /** Parallel by index to the source `lyrics`; a missing/empty entry hides that line's translation. */
+  lyrics?: string[];
+  /** Parallel by index to the source `vocab`; a missing/empty entry hides that word's translation. */
+  vocab?: string[];
+}
+
+export type CultureTranslations = Partial<Record<SupportLanguage, ICultureTranslation>>;
+export type StoryTranslations = Partial<Record<SupportLanguage, IStoryTranslation>>;
+
+// A single reusable sub-schema per content kind, mounted under each support-language key.
+const cultureTranslationEntry = new Schema<ICultureTranslation>(
+  { title: String, intro: String, funFacts: { type: [String] } },
+  { _id: false },
+);
+const storyTranslationEntry = new Schema<IStoryTranslation>(
+  { title: String, description: String, lyrics: { type: [String] }, vocab: { type: [String] } },
+  { _id: false },
+);
+
+// Nested object keyed by support language. Absent by default so legacy documents stay valid
+// and no migration is required; a document only stores the languages an editor filled in.
+function perLanguage(entry: Schema): Record<string, { type: Schema }> {
+  return Object.fromEntries(SUPPORT_LANGUAGES.map((lang) => [lang, { type: entry }]));
+}
+
+export const cultureTranslationFields = perLanguage(cultureTranslationEntry);
+export const storyTranslationFields = perLanguage(storyTranslationEntry);

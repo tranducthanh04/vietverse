@@ -20,6 +20,7 @@ import { Card } from "../../components/ui/Card.js";
 import { Button } from "../../components/ui/Button.js";
 import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
+import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { VI_LOCALES } from "../../locales/vi.js";
 import { useNarration } from "../../hooks/useNarration.js";
 
@@ -255,6 +256,11 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <h1 className="text-2xl md:text-3xl font-black font-display drop-shadow-md">
             {article.title}
           </h1>
+          <SupportTranslation
+            translations={article.translations}
+            select={(t: { title?: string }) => t.title}
+            className="mt-1 block text-sm md:text-base font-semibold text-white/80 drop-shadow"
+          />
         </div>
       </div>
 
@@ -267,6 +273,11 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
         <p className="text-stone-700 leading-relaxed text-base md:text-lg font-medium">
           {article.intro}
         </p>
+        <SupportTranslation
+          translations={article.translations}
+          select={(t: { intro?: string }) => t.intro}
+          className="mt-3 block text-sm md:text-base leading-relaxed text-stone-500"
+        />
       </div>
 
       {/* Fun Facts Section */}
@@ -285,7 +296,14 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                 <div className="w-7 h-7 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   {idx + 1}
                 </div>
-                <p className="text-stone-700 text-sm leading-relaxed">{fact}</p>
+                <div className="min-w-0">
+                  <p className="text-stone-700 text-sm leading-relaxed">{fact}</p>
+                  <SupportTranslation
+                    translations={article.translations}
+                    select={(t: { funFacts?: string[] }) => t.funFacts?.[idx]}
+                    className="mt-1 block text-xs leading-relaxed text-stone-500"
+                  />
+                </div>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ContentKind, ContentPayloadMap, FieldIssue } from './content.types.js';
 import { isNewActivityType, isSafeActivityItemId, isPlainAnswerMap, hasExactKeys, templateSlotIds } from './newActivity.contract.js';
+import { SUPPORT_LANGUAGES } from '../../models/contentTranslations.js';
 
 export const contentKinds = ['lesson', 'story', 'culture'] as const;
 export const cultureCategories = ['tet', 'am_thuc', 'trang_phuc', 'phong_tuc', 'le_hoi', 'vat_dung', 'thien_nhien', 'tro_choi_dan_gian'] as const;
@@ -58,6 +59,15 @@ export const activityDraftSchema = rawActivity.pipe(z.object({
 }));
 const vocabularySchema = z.object({ word: text.default(''), meaning: text.default(''), phonetic: text.optional(), audioUrl: media, imageUrl: media });
 const quizSchema = z.object({ question: text.default(''), options: z.array(text).max(8).default([]), correctAnswer: z.number().int().default(-1), explanation: text.optional() });
+// Reviewed translations keyed by support language. Every field is optional and arrays are index-parallel
+// to the Vietnamese source, so a partial translation is valid and absent languages simply show nothing.
+const supportLanguage = z.enum(SUPPORT_LANGUAGES);
+const cultureTranslationSchema = z.object({ title: short.optional(), intro: text.optional(), funFacts: z.array(text).max(50).optional() });
+const storyTranslationSchema = z.object({ title: short.optional(), description: text.optional(), lyrics: z.array(text).max(500).optional(), vocab: z.array(text).max(100).optional() });
+// Optional, not defaulted: an absent map stays absent so exact-equality checks (e.g. the customer
+// bootstrap receipt) are not broken by an empty object that Mongoose `minimize` would later strip.
+const cultureTranslations = z.record(supportLanguage, cultureTranslationSchema).optional();
+const storyTranslations = z.record(supportLanguage, storyTranslationSchema).optional();
 export const lessonDraftSchema = z.object({
   stageId: z.union([objectId, z.literal('')]).default(''), order: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).default(0),
   title: short.default(''), description: text.default(''),
@@ -71,11 +81,13 @@ export const storyDraftSchema = z.object({
   audioUrl: media, durationSec: z.number().finite().nonnegative().default(0),
   ageGroups: z.array(z.enum(['5-6', '6-8'])).max(2).default(['5-6']),
   vocab: z.array(text).max(100).default([]), quiz: z.array(quizSchema).max(20).default([]),
+  translations: storyTranslations,
 });
 export const cultureDraftSchema = z.object({
   category: short.default(''), title: short.default(''), intro: text.default(''), coverImage: media,
   funFacts: z.array(text).max(50).default([]), quiz: z.array(quizSchema).max(20).default([]),
   audioUrl: media, tags: z.array(short).max(50).default([]),
+  translations: cultureTranslations,
 });
 const schemas = { lesson: lessonDraftSchema, story: storyDraftSchema, culture: cultureDraftSchema };
 

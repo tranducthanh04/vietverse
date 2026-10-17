@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { StoryContent } from "./content.types.js";
 import { MediaAsset } from "./MediaFields.js";
 import { QuizPreview } from "./QuizPreview.js";
+import { TranslationPreview } from "./TranslationEditor.js";
 export function StoryPreview({ payload }: { payload: StoryContent }) {
   const [time, setTime] = useState(0);
   return (
@@ -39,6 +40,15 @@ export function StoryPreview({ payload }: { payload: StoryContent }) {
       <p>Từ vựng: {payload.vocab.join(", ")}</p>
       <p>Quiz biên tập: chưa thêm luồng quiz truyện cho bé.</p>
       <QuizPreview value={payload.quiz} />
+      <TranslationPreview
+        translations={payload.translations}
+        sections={[
+          { key: "title", label: "Tiêu đề" },
+          { key: "description", label: "Mô tả truyện" },
+          { key: "lyrics", label: "Dòng lời", list: true },
+          { key: "vocab", label: "Từ vựng", list: true },
+        ]}
+      />
     </article>
   );
 }
