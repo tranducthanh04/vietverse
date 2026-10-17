@@ -1,5 +1,10 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Chuyển bài tiếp theo sau khi hoàn thành — 2026-10-17, local
+
+- Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.
+- **Quyết định nghiệp vụ/giả định:** chỉ hiện nút khi `passed`; bài kế cùng chặng mở ngay sau khi đạt, bài đầu chặng sau vẫn theo cổng gói trả phí/hoàn thành chặng (dùng cờ `isUnlocked` từ `/stages`). Quyền mở khóa vẫn do server `assertLessonUnlocked` thực thi; không đổi API/điểm/quyền.
+
 ## Lesson word card — bố cục đoạn đọc 2026-10-15, local
 
 - Thẻ tự tăng chiều cao theo nội dung; đoạn văn dài trong `targetWord` hiển thị chữ nhỏ hơn, căn trái và xuống dòng, không tràn lên hướng dẫn/mascot. Chữ và từ ngắn vẫn nổi bật. Áp dụng chung cho lesson player và CMS preview.

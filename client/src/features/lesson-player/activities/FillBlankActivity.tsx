@@ -41,7 +41,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
           {sentenceParts[0]}
         </span>
 
-        <div className="shrink-0 min-w-[3.5rem] sm:min-w-[4rem] h-16 sm:h-20 px-2 border-4 border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-3xl sm:text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
+        <div className="shrink-0 min-w-[3.5rem] sm:min-w-[4rem] max-w-full min-h-16 sm:min-h-20 px-2 border-4 break-words text-center border-dashed border-primary rounded-2xl flex items-center justify-center bg-cream text-3xl sm:text-4xl md:text-5xl font-display font-black text-primary animate-pulse">
           {filledLetter || '?'}
         </div>
 
@@ -57,7 +57,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
             key={opt.id}
             onClick={() => handleSelect(opt.text, opt.id)}
             className={cn(
-              'min-w-[4.5rem] h-16 sm:h-20 px-4 bg-white border-3 border-cream-border rounded-2xl text-2xl sm:text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center',
+              'min-w-[4.5rem] max-w-full min-h-16 sm:min-h-20 px-4 py-2 bg-white border-3 border-cream-border rounded-2xl text-2xl sm:text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center text-center whitespace-normal break-words',
               filledLetter === opt.text && 'border-primary bg-primary-light/30'
             )}
           >

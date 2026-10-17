@@ -1,5 +1,13 @@
 # 06 — Kết quả review senior BA/code
 
+## Bài "Xếp để đọc" và chuyển bài tiếp theo — 2026-10-17, sửa local
+
+- **Mục 2 (không qua được bài tiếp theo) — nguyên nhân gốc đã sửa, phía client:** màn hình hoàn thành (`VictoryModal`) vốn đã có sẵn nút "Bài tiếp theo" nhưng `LessonPlayerPage` chưa bao giờ truyền `onNextLesson`, nên làm xong bài chỉ còn "Về bản đồ"/"Chơi lại". Ngoài ra, nộp bài chỉ invalidate `['childPoints']` chứ không invalidate `['stages']`; với `staleTime` 60s của bản đồ, bài kế vẫn hiển thị khóa khi quay lại. Đã: (1) tính bài kế từ chính danh mục `/stages` (dùng chung cache với bản đồ, chỉ tải khi modal hiện), (2) truyền `onNextLesson` điều hướng `/hoc/:id`, (3) invalidate `['stages']` sau khi nộp để bản đồ mở khóa ngay. Không đổi API, quyền hay cách chấm điểm; không sửa server.
+- **Quyết định nghiệp vụ:** nút "Bài tiếp theo" chỉ hiện khi bài vừa làm đã đạt (`passed`). Bài kế trong cùng chặng mở ngay khi đạt; bài đầu của chặng sau vẫn theo cổng hiện có (gói trả phí + hoàn thành chặng trước) qua cờ `isUnlocked` đã làm mới từ `/stages`, không bỏ qua cổng. `assertLessonUnlocked` ở server vẫn là nơi thực thi quyền mở khóa.
+- **Mục 1 & 3 (không đặt được thẻ / thẻ chồng và cắt chữ "Bé thương mẹ") — không tái hiện trên nhánh hiện tại:** bản production cũ (trước đợt làm lại UI `afa1393`) dùng thẻ cố định `w-18 h-18` không hợp lệ, hàng chọn không `flex-wrap`, nút co nhỏ dưới nội dung nên "thương" tràn ra ngoài, chồng thẻ bên cạnh và trông bị cắt. Nhánh hiện tại đã dùng `flex-wrap` + thẻ co theo nội dung từ đợt làm lại UI, nên tại 390×844 và 1366×900 (chuột/chạm/bàn phím) thẻ không chồng, không tràn, bấm chọn đưa được thẻ vào ô và chấm đúng. Kiểm bằng Chrome thật: `overlaps=[]`, không cuộn ngang, đặt đúng `['Bé','thương','mẹ']` → "Tuyệt vời! Bé giỏi lắm!".
+- **Gia cố để không tái phát:** `SortOrderActivity` và `FillBlankActivity` đổi chiều cao cố định thành `min-h` (giữ vùng chạm ≥56px) và thêm `whitespace-normal break-words max-w-full` để thẻ co giãn theo độ dài chữ, không bao giờ cắt chữ kể cả với token dài hơn dữ liệu mẫu.
+- **Kiểm chứng:** typecheck sạch; client 241/241 test qua (thêm `sortOrderActivity` 3 ca đặt thẻ/chấm/đặt lại, `nextLessonNavigation` 3 ca nút bài kế); lint 0 lỗi. Ảnh trước/sau lưu ở thư mục tạm của worker. Chưa push/deploy, chưa nghiệm thu iOS/Android thật.
+
 ## QA trình duyệt toàn dự án — 2026-10-15, local
 
 - **P2 — admin hiển thị sai kết quả bằng 0, chưa sửa:** API `in_progress`, `scorePercent: 0`, `stars: 0` hiện thành 100%/3 sao ở chi tiết học viên. `AdminLearnersPage.tsx` dùng `p.scorePercent || 100` và `p.stars || 3`; nhãn "Hoàn thành" không phân biệt trạng thái. Đã tái hiện trên Chrome với DB tạm, có screenshot.
