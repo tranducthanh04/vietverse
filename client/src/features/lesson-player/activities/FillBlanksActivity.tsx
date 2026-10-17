@@ -1,8 +1,10 @@
 import React from 'react';
+import { useT } from '../../../i18n/index.js';
 import { NewActivityFrame, IncompleteActivity } from './NewActivityFrame.js';
 import { activityControlClass, activitySubmitClass, distinctIds, inputMap, type NewActivityProps } from './newActivity.types.js';
 
 export function FillBlanksActivity({ activity, value, disabled, onChange, onSubmit }: NewActivityProps) {
+  const t = useT();
   if (activity.type !== 'fill_blanks' || !activity.blankSlots || activity.blankSlots.length < 2 || activity.blankSlots.length > 6 ||
     typeof activity.template !== 'string' || !distinctIds(activity.blankSlots)) return <IncompleteActivity />;
   const markers = [...activity.template.matchAll(/\{\{([A-Za-z0-9_-]+)\}\}/g)];
@@ -27,6 +29,6 @@ export function FillBlanksActivity({ activity, value, disabled, onChange, onSubm
   return <NewActivityFrame activity={activity}>
     <div className="bg-white border-4 border-accent rounded-3xl px-5 py-6 shadow-kid text-kid-base font-bold leading-loose break-words text-center">{segments}</div>
     <button type="button" className={activitySubmitClass} disabled={disabled || activity.blankSlots.some(slot => !map[slot.id]?.trim())}
-      onClick={() => onSubmit({ status: 'submitted', userAnswer: Object.fromEntries(activity.blankSlots.map(slot => [slot.id, map[slot.id]])) })}>Gửi câu trả lời</button>
+      onClick={() => onSubmit({ status: 'submitted', userAnswer: Object.fromEntries(activity.blankSlots.map(slot => [slot.id, map[slot.id]])) })}>{t('lesson.submitAnswer')}</button>
   </NewActivityFrame>;
 }

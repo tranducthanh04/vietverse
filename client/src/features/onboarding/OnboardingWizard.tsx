@@ -16,10 +16,12 @@ import {
   Earth,
 } from '../../components/ui/icons.js';
 import { useChildStore } from '../../store/childStore.js';
+import { useT } from '../../i18n/index.js';
 
 export const OnboardingWizard: React.FC = () => {
   const navigate = useNavigate();
   const { createChild } = useChildStore();
+  const t = useT();
 
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -35,7 +37,7 @@ export const OnboardingWizard: React.FC = () => {
 
     if (step === 1) {
       if (!name.trim()) {
-        setErrorMsg('Ba mẹ vui lòng nhập tên của bé nhé!');
+        setErrorMsg(t('onboarding.nameRequired'));
         nameInputRef.current?.focus();
         return;
       }
@@ -44,7 +46,7 @@ export const OnboardingWizard: React.FC = () => {
       setStep(3);
     } else if (step === 3) {
       if (companionLanguages.length === 0) {
-        setErrorMsg('Ba mẹ vui lòng chọn ít nhất một ngôn ngữ.');
+        setErrorMsg(t('onboarding.languageRequired'));
         return;
       }
       setStep(4);
@@ -60,7 +62,7 @@ export const OnboardingWizard: React.FC = () => {
         });
         navigate('/kham-pha');
       } catch (err: any) {
-        setErrorMsg(err.response?.data?.error?.message || 'Có lỗi xảy ra khi tạo hồ sơ của bé.');
+        setErrorMsg(err.response?.data?.error?.message || t('onboarding.createError'));
       } finally {
         setIsSubmitting(false);
       }
@@ -69,7 +71,7 @@ export const OnboardingWizard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-center items-center py-8 px-4 sm:px-6 lg:px-8">
-      <h1 className="sr-only">Thiết lập hồ sơ học cho bé</h1>
+      <h1 className="sr-only">{t('onboarding.heading')}</h1>
       {/* Folk Motif Floating Accents */}
       <div className="fixed -top-12 -left-12 w-64 h-64 bg-secondary-fixed/30 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed top-1/2 -right-16 w-80 h-80 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none" />
@@ -83,7 +85,7 @@ export const OnboardingWizard: React.FC = () => {
               className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold text-sm transition-all active:scale-95 shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Quay lại</span>
+              <span>{t('common.back')}</span>
             </button>
           ) : (
             <div />
@@ -92,7 +94,7 @@ export const OnboardingWizard: React.FC = () => {
           <div className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed shadow-sm">
             <Sparkles className="w-4 h-4 text-secondary-container fill-secondary-container" />
             <span className="text-xs uppercase tracking-wider font-bold">
-              Hành trình cá nhân hóa cho bé
+              {t('onboarding.badge')}
             </span>
           </div>
         </div>
@@ -108,10 +110,10 @@ export const OnboardingWizard: React.FC = () => {
             />
 
             {[
-              { num: 1, label: '1. Tên bé', icon: Smile },
-              { num: 2, label: '2. Tuổi của bé', icon: Cake },
-              { num: 3, label: '3. Ngôn ngữ', icon: Languages },
-              { num: 4, label: '4. Sẵn sàng!', icon: PartyPopper },
+              { num: 1, label: t('onboarding.stepName'), icon: Smile },
+              { num: 2, label: t('onboarding.stepAge'), icon: Cake },
+              { num: 3, label: t('onboarding.stepLanguage'), icon: Languages },
+              { num: 4, label: t('onboarding.stepReady'), icon: PartyPopper },
             ].map((node) => {
               const Icon = node.icon;
               const isActive = step === node.num;
@@ -173,9 +175,9 @@ export const OnboardingWizard: React.FC = () => {
 
                 {/* Speech Bubble */}
                 <div className="relative bg-secondary-fixed text-on-secondary-fixed p-5 rounded-2xl shadow-sm text-left border border-secondary/20">
-                  <p className="font-display text-lg text-secondary font-bold">Chào bạn nhỏ!</p>
+                  <p className="font-display text-lg text-secondary font-bold">{t('onboarding.greeting')}</p>
                   <p className="text-sm text-on-secondary-fixed mt-1 font-medium">
-                    Bé tên là gì nhỉ? Hãy để Sao Lí Lắc gọi tên bé trong suốt chuyến phiêu lưu nhé!
+                    {t('onboarding.namePrompt')}
                   </p>
                 </div>
               </div>
@@ -183,7 +185,7 @@ export const OnboardingWizard: React.FC = () => {
               <div className="w-full max-w-md mx-auto space-y-6">
                 <div className="text-left">
                   <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="child-name-input">
-                    Hôm nay chúng ta sẽ cùng ai khám phá?
+                    {t('onboarding.nameLabel')}
                   </label>
                   <input
                     ref={nameInputRef}
@@ -191,7 +193,7 @@ export const OnboardingWizard: React.FC = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ví dụ: Minh, Bắp…"
+                    placeholder={t('onboarding.namePlaceholder')}
                     className="w-full h-16 px-6 rounded-2xl bg-surface-container text-on-surface font-display text-xl sm:text-2xl font-bold placeholder:text-stone-500 placeholder:font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-4 focus:ring-primary/20 shadow-inner transition-all border border-outline-variant/30 text-center"
                     autoFocus
                   />
@@ -202,7 +204,7 @@ export const OnboardingWizard: React.FC = () => {
                   onClick={handleNext}
                   className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Tiếp tục cùng Sao Lí Lắc</span>
+                  <span>{t('onboarding.nameNext')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -214,13 +216,13 @@ export const OnboardingWizard: React.FC = () => {
             <div className="flex flex-col animate-fade-in">
               <div className="text-center max-w-xl mx-auto mb-8">
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase mb-2">
-                  Bước 2 / 4
+                  {t('onboarding.step2Badge')}
                 </span>
                 <h2 className="font-display text-2xl sm:text-3xl text-primary font-extrabold tracking-tight">
-                  Bé bao nhiêu tuổi rồi?
+                  {t('onboarding.ageTitle')}
                 </h2>
                 <p className="text-sm text-on-surface-variant mt-2 font-medium">
-                  VietVerse sẽ tự động sắp xếp độ khó của trò chơi và từ vựng phù hợp nhất với lứa tuổi của bé.
+                  {t('onboarding.ageSubtitle')}
                 </p>
               </div>
 
@@ -245,15 +247,15 @@ export const OnboardingWizard: React.FC = () => {
                     <Sprout className="w-7 h-7" />
                   </div>
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="font-display text-2xl text-on-surface font-extrabold">5–6 tuổi</span>
-                    <span className="text-xs text-primary font-bold">(Tiền Tiểu học)</span>
+                    <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age56')}</span>
+                    <span className="text-xs text-primary font-bold">{t('onboarding.age56Tag')}</span>
                   </div>
                   <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
-                    Làm quen chữ cái tiếng Việt, 6 dấu thanh diệu kỳ, ghép vần qua âm thanh và truyện đồng dao ngộ nghĩnh.
+                    {t('onboarding.age56Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">
                     <Target className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs text-on-surface font-bold">Trọng tâm: Âm vần & Trò chơi nghe nhìn</span>
+                    <span className="text-xs text-on-surface font-bold">{t('onboarding.age56Focus')}</span>
                   </div>
                 </button>
 
@@ -277,15 +279,15 @@ export const OnboardingWizard: React.FC = () => {
                     <Rocket className="w-7 h-7" />
                   </div>
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="font-display text-2xl text-on-surface font-extrabold">6–8 tuổi</span>
-                    <span className="text-xs text-tertiary font-bold">(Tiểu học cơ bản)</span>
+                    <span className="font-display text-2xl text-on-surface font-extrabold">{t('onboarding.age68')}</span>
+                    <span className="text-xs text-tertiary font-bold">{t('onboarding.age68Tag')}</span>
                   </div>
                   <span className="block text-xs sm:text-sm text-on-surface-variant leading-relaxed font-medium">
-                    Mở rộng vốn từ vựng phong phú, ghép câu hoàn chỉnh, đọc hiểu truyện cổ tích và tự tin trò chuyện tiếng Việt.
+                    {t('onboarding.age68Desc')}
                   </span>
                   <div className="mt-4 flex items-center gap-2 pt-3 bg-surface-container rounded-xl px-3 py-1.5">
                     <Target className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs text-on-surface font-bold">Trọng tâm: Đọc hiểu & Kể chuyện văn hóa</span>
+                    <span className="text-xs text-on-surface font-bold">{t('onboarding.age68Focus')}</span>
                   </div>
                 </button>
               </div>
@@ -296,7 +298,7 @@ export const OnboardingWizard: React.FC = () => {
                   onClick={handleNext}
                   className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Tiếp tục bước tiếp theo</span>
+                  <span>{t('onboarding.ageNext')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -308,24 +310,24 @@ export const OnboardingWizard: React.FC = () => {
             <div className="flex flex-col animate-fade-in">
               <div className="text-center max-w-xl mx-auto mb-8">
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase mb-2">
-                  Bước 3 / 4
+                  {t('onboarding.step3Badge')}
                 </span>
                 <h2 className="font-display text-2xl sm:text-3xl text-primary font-extrabold tracking-tight">
-                  Ngôn ngữ thường ngày của bé là gì?
+                  {t('onboarding.languageTitle')}
                 </h2>
                 <p className="text-sm text-on-surface-variant mt-2 font-medium">
-                  Ba mẹ có thể chọn nhiều ngôn ngữ bé sử dụng thường ngày.
+                  {t('onboarding.languageSubtitle')}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto w-full mb-8">
                 {[
-                  { code: 'en', badge: 'EN', label: 'English', sub: 'Tiếng Anh' },
-                  { code: 'ja', badge: 'JA', label: '日本語', sub: 'Tiếng Nhật' },
-                  { code: 'ko', badge: 'KO', label: '한국어', sub: 'Tiếng Hàn' },
-                  { code: 'zh', badge: 'ZH', label: '中文', sub: 'Tiếng Trung' },
-                  { code: 'fr', badge: 'FR', label: 'Français', sub: 'Tiếng Pháp' },
-                  { code: 'other', label: 'Khác', sub: 'Ngôn ngữ khác' },
+                  { code: 'en', badge: 'EN', label: 'English', sub: t('onboarding.langEnSub') },
+                  { code: 'ja', badge: 'JA', label: '日本語', sub: t('onboarding.langJaSub') },
+                  { code: 'ko', badge: 'KO', label: '한국어', sub: t('onboarding.langKoSub') },
+                  { code: 'zh', badge: 'ZH', label: '中文', sub: t('onboarding.langZhSub') },
+                  { code: 'fr', badge: 'FR', label: 'Français', sub: t('onboarding.langFrSub') },
+                  { code: 'other', label: t('onboarding.langOther'), sub: t('onboarding.langOtherSub') },
                 ].map((item) => {
                   const isSelected = companionLanguages.includes(item.code);
                   return (
@@ -363,7 +365,7 @@ export const OnboardingWizard: React.FC = () => {
                   onClick={handleNext}
                   className="btn-3d-primary w-full h-14 rounded-full font-bold text-base flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Hoàn tất thiết lập</span>
+                  <span>{t('onboarding.languageNext')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -385,15 +387,15 @@ export const OnboardingWizard: React.FC = () => {
                   />
                 </div>
                 <span className="absolute -bottom-2 -right-2 bg-secondary-container text-on-secondary-container font-black px-3 py-1 rounded-full text-xs shadow-md">
-                  <Sparkles className="inline w-3.5 h-3.5 -mt-0.5 mr-1" />SẴN SÀNG!
+                  <Sparkles className="inline w-3.5 h-3.5 -mt-0.5 mr-1" />{t('onboarding.readyBadge')}
                 </span>
               </div>
 
               <h2 className="font-display text-3xl sm:text-4xl text-primary font-black mb-3">
-                Chào mừng bạn nhỏ {name}!
+                {t('onboarding.readyTitle', { name })}
               </h2>
               <p className="text-on-surface-variant text-base sm:text-lg max-w-md mb-8 leading-relaxed font-medium">
-                Sao Lí Lắc đã chuẩn bị sẵn cuốn thư nhiệm màu và bản đồ 5 chặng. Hãy cùng nhau mở những cánh cửa kho báu tiếng Việt nhé!
+                {t('onboarding.readyDesc')}
               </p>
 
               <div className="w-full max-w-md">
@@ -404,7 +406,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="btn-3d-accent w-full h-16 rounded-full font-display text-xl font-black flex items-center justify-center gap-3 cursor-pointer shadow-xl"
                 >
                   <Sparkles className="w-6 h-6" />
-                  <span>{isSubmitting ? 'Đang khởi tạo…' : 'BẮT ĐẦU CHUYẾN PHIÊU LƯU!'}</span>
+                  <span>{isSubmitting ? t('onboarding.starting') : t('onboarding.startAdventure')}</span>
                   <ArrowRight className="w-6 h-6" />
                 </button>
               </div>

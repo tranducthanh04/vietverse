@@ -1,4 +1,14 @@
 import "@testing-library/jest-dom";
+import { beforeEach } from "vitest";
+import { useUiLanguageStore } from "../i18n/uiLanguageStore.js";
+
+// Keep the interface language deterministic (Vietnamese) for the whole suite so
+// existing assertions on Vietnamese copy stay valid regardless of the active
+// child's companion language. Tests that exercise the language switch set the
+// language explicitly in their own body, which runs after this hook.
+beforeEach(() => {
+  useUiLanguageStore.setState({ manualLanguage: "vi" });
+});
 
 // JSDOM has no top-layer dialog API. Test component state here; browser QA
 // verifies native modality/inert background using Chrome's actual implementation.

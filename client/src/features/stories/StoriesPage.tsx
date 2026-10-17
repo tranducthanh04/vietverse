@@ -11,12 +11,13 @@ import {
 import { api } from '../../lib/api.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT, type Translate } from '../../i18n/index.js';
 
-const storyTypeLabel = (type: string) =>
-  type === 'dong_dao' ? 'Đồng dao' : type === 'co_tich' ? 'Cổ tích' : 'Thơ ca';
+const storyTypeLabel = (type: string, t: Translate) =>
+  type === 'dong_dao' ? t('stories.badgeDongDao') : type === 'co_tich' ? t('stories.badgeCoTich') : t('stories.badgeTho');
 
 export const StoriesPage: React.FC = () => {
+  const t = useT();
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -39,11 +40,11 @@ export const StoriesPage: React.FC = () => {
   });
 
   const storyTypes = [
-    { id: '', label: VI_LOCALES.stories.allTypes },
-    { id: 'dong_dao', label: VI_LOCALES.stories.typeDongDao },
-    { id: 'co_tich', label: VI_LOCALES.stories.typeCoTich },
-    { id: 'tho', label: VI_LOCALES.stories.typeTho },
-    { id: 'ngu_ngon', label: VI_LOCALES.stories.typeNguNgon },
+    { id: '', label: t('stories.allTypes') },
+    { id: 'dong_dao', label: t('stories.typeDongDao') },
+    { id: 'co_tich', label: t('stories.typeCoTich') },
+    { id: 'tho', label: t('stories.typeTho') },
+    { id: 'ngu_ngon', label: t('stories.typeNguNgon') },
   ];
 
   return (
@@ -51,10 +52,10 @@ export const StoriesPage: React.FC = () => {
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-kid-xl md:text-kid-2xl font-black font-display text-primary">
-          {VI_LOCALES.stories.title}
+          {t('stories.title')}
         </h1>
         <p className="text-stone-600 text-kid-sm mt-1 max-w-xl mx-auto">
-          {VI_LOCALES.stories.subtitle}
+          {t('stories.subtitle')}
         </p>
       </div>
 
@@ -84,8 +85,8 @@ export const StoriesPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm truyện hoặc đồng dao…"
-            aria-label="Tìm truyện hoặc đồng dao"
+            placeholder={t('stories.searchPlaceholder')}
+            aria-label={t('stories.searchAria')}
             className="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-cream-border bg-white focus:outline-none focus:border-primary text-sm min-h-[44px]"
           />
         </div>
@@ -97,12 +98,12 @@ export const StoriesPage: React.FC = () => {
       ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang mở trang sách…</p>
+          <p className="font-bold text-stone-600">{t('stories.loading')}</p>
         </div>
       ) : stories.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-cream-border p-8">
           <DomainIcon.stories className="w-12 h-12 text-stone-400 mx-auto mb-3" />
-          <p className="text-stone-500 font-bold">Chưa có câu chuyện nào phù hợp.</p>
+          <p className="text-stone-500 font-bold">{t('stories.empty')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -125,13 +126,13 @@ export const StoriesPage: React.FC = () => {
                 )}
                 <div className="hidden sm:flex absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary items-center gap-1 shadow-sm">
                   <Music className="w-3.5 h-3.5" />
-                  <span>{storyTypeLabel(story.type)}</span>
+                  <span>{storyTypeLabel(story.type, t)}</span>
                 </div>
               </div>
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
-                  <span className="sm:hidden text-xs font-bold text-primary">{storyTypeLabel(story.type)}</span>
+                  <span className="sm:hidden text-xs font-bold text-primary">{storyTypeLabel(story.type, t)}</span>
                   <h2 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-primary transition-colors mb-1 line-clamp-2 sm:line-clamp-1">
                     {story.title}
                   </h2>
@@ -143,16 +144,16 @@ export const StoriesPage: React.FC = () => {
                 <div className="flex items-center justify-between gap-2 sm:pt-3 sm:border-t border-cream-border">
                   <span className="text-xs text-stone-500 flex items-center gap-1">
                     {!story.audioUrl?.trim() ? (
-                      <><BookOpen className="w-3.5 h-3.5" /><span>Bản đọc</span></>
+                      <><BookOpen className="w-3.5 h-3.5" /><span>{t('stories.reading')}</span></>
                     ) : Number.isFinite(story.durationSec) && story.durationSec > 0 ? (
-                      <><Clock className="w-3.5 h-3.5" /><span>{story.durationSec} giây</span></>
+                      <><Clock className="w-3.5 h-3.5" /><span>{t('stories.durationSec', { seconds: story.durationSec })}</span></>
                     ) : (
-                      <><Music className="w-3.5 h-3.5" /><span>Có bản thu</span></>
+                      <><Music className="w-3.5 h-3.5" /><span>{t('stories.hasRecording')}</span></>
                     )}
                   </span>
 
                   <span className="hidden sm:inline-flex items-center justify-center bg-accent text-stone-900 group-hover:bg-accent-hover shadow-kid-accent rounded-2xl px-4 min-h-[40px] text-xs font-bold">
-                    {VI_LOCALES.stories.btnExplore}
+                    {t('stories.btnExplore')}
                   </span>
                 </div>
               </div>

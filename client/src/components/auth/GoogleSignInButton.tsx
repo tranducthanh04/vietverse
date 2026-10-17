@@ -3,6 +3,7 @@ import { authPost } from '../../lib/api.js';
 import { loadGoogleIdentity } from '../../lib/googleIdentity.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { Button } from '../ui/Button.js';
+import { useT, useUiLanguage } from '../../i18n/index.js';
 
 type Phase = 'idle' | 'starting' | 'ready' | 'submitting' | 'link' | 'done';
 type Session = Parameters<ReturnType<typeof useAuthStore.getState>['acceptSession']>[0];
@@ -14,10 +15,12 @@ interface Props { disabled?: boolean; onActiveChange: (active: boolean) => void;
 function errorDetails(error: unknown) {
   const response = (error as { response?: { data?: { error?: { code?: string; message?: string } } } })?.response;
   return { code: response?.data?.error?.code, message: response?.data?.error?.message ||
-    (error instanceof Error ? error.message : 'Không thể đăng nhập Google. Vui lòng thử lại.') };
+    (error instanceof Error ? error.message : undefined) };
 }
 
 export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Props) {
+  const t = useT();
+  const { language } = useUiLanguage();
   const host = useRef<HTMLDivElement>(null);
   const generation = useRef(0);
   const mounted = useRef(false);
@@ -43,7 +46,7 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
     flow.current = undefined; host.current?.replaceChildren(); setPassword(''); setPhase('done');
     useAuthStore.getState().acceptSession(session);
     try { await onSuccess(); }
-    catch { if (mounted.current) setError('Đăng nhập thành công nhưng chưa tải được trang tiếp theo. Vui lòng thử tiếp tục.'); }
+    catch { if (mounted.current) setError(t('google.successLoadError')); }
   };
   const submit = async (id: number, body: SubmitBody) => {
     const current = flow.current;
@@ -64,7 +67,7 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
       const details = errorDetails(err);
       if (linking && details.code === 'GOOGLE_LINK_PASSWORD_INVALID') setPhase('link');
       else reset();
-      setError(details.message);
+      setError(details.message || t('google.genericError'));
     } finally { if (isCurrent(id)) busy.current = false; }
   };
   const begin = async () => {
@@ -80,11 +83,11 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
       identity.initialize({ client_id: data.data.clientId, nonce: data.data.nonce, auto_select: false,
         callback: response => { void submit(id, { credential: response.credential }); } });
       host.current.replaceChildren();
-      identity.renderButton(host.current, { theme: 'outline', size: 'large', text: 'continue_with', locale: 'vi',
+      identity.renderButton(host.current, { theme: 'outline', size: 'large', text: 'continue_with', locale: language,
         width: Math.max(200, Math.min(360, host.current.clientWidth || 240)) });
       setPhase('ready');
     } catch (err) {
-      if (isCurrent(id)) { reset(); setError(errorDetails(err).message); }
+      if (isCurrent(id)) { reset(); setError(errorDetails(err).message || t('google.genericError')); }
     } finally { if (isCurrent(id)) busy.current = false; }
   };
   const cancel = async () => {
@@ -99,22 +102,22 @@ export function GoogleSignInButton({ disabled, onActiveChange, onSuccess }: Prop
   const link = (event: FormEvent) => { event.preventDefault(); void submit(generation.current, { password }); };
   const submitting = phase === 'submitting';
 
-  return <section aria-label="Đăng nhập Google" className="space-y-3">
-    {phase === 'idle' && <Button type="button" variant="outline" className="w-full" disabled={disabled} onClick={begin}>Tiếp tục với Google</Button>}
-    {phase === 'starting' && <p role="status" className="text-sm text-center">Đang kết nối Google…</p>}
+  return <section aria-label={t('google.sectionAria')} className="space-y-3">
+    {phase === 'idle' && <Button type="button" variant="outline" className="w-full" disabled={disabled} onClick={begin}>{t('google.continueWith')}</Button>}
+    {phase === 'starting' && <p role="status" className="text-sm text-center">{t('google.connecting')}</p>}
     <div ref={host} hidden={phase !== 'ready'} className="flex justify-center" />
     {(phase === 'link' || (submitting && email)) && <form onSubmit={link} className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 space-y-3">
-      <p className="text-sm text-amber-900">Email <strong>{email}</strong> đã có tài khoản. Nhập mật khẩu Vietverse để liên kết. Đây không phải mật khẩu Google.</p>
-      <label htmlFor="google-link-password" className="block text-sm font-bold">Mật khẩu Vietverse hiện tại</label>
+      <p className="text-sm text-amber-900">{t('google.linkIntroPrefix')} <strong>{email}</strong> {t('google.linkIntroSuffix')}</p>
+      <label htmlFor="google-link-password" className="block text-sm font-bold">{t('google.passwordLabel')}</label>
       <input id="google-link-password" type="password" required autoComplete="current-password" maxLength={256} disabled={submitting}
         value={password} onChange={event => setPassword(event.target.value)} className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border bg-white" />
-      <Button type="submit" isLoading={submitting} className="w-full">Xác nhận liên kết</Button>
+      <Button type="submit" isLoading={submitting} className="w-full">{t('google.confirmLink')}</Button>
     </form>}
-    {submitting && !email && <p role="status" className="text-sm text-center">Đang xác minh tài khoản…</p>}
-    {(phase === 'ready' || phase === 'link') && <Button type="button" variant="ghost" className="w-full" onClick={cancel}>Hủy đăng nhập Google</Button>}
+    {submitting && !email && <p role="status" className="text-sm text-center">{t('google.verifying')}</p>}
+    {(phase === 'ready' || phase === 'link') && <Button type="button" variant="ghost" className="w-full" onClick={cancel}>{t('google.cancel')}</Button>}
     {phase === 'done' && <Button type="button" className="w-full" onClick={async () => {
-      setError(''); try { await onSuccess(); } catch { setError('Chưa tải được trang tiếp theo. Vui lòng thử lại.'); }
-    }}>Tiếp tục vào Vietverse</Button>}
+      setError(''); try { await onSuccess(); } catch { setError(t('google.continueLoadError')); }
+    }}>{t('google.continueToApp')}</Button>}
     {error && <p role="alert" className="rounded-xl bg-red-50 text-red-700 border border-red-200 p-3 text-sm">{error}</p>}
   </section>;
 }

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './router.js';
 import { useAuthStore } from '../store/authStore.js';
 import { initOfflineSyncWorker } from '../lib/offlineSync.js';
+import { useUiLanguage } from '../i18n/index.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +18,7 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   const { fetchMe } = useAuthStore();
+  const { language } = useUiLanguage();
 
   useEffect(() => {
     // Attempt auto-login with refresh token stored in httpOnly cookie
@@ -26,6 +28,11 @@ export const App: React.FC = () => {
       cleanupWorker?.();
     };
   }, [fetchMe]);
+
+  // Keep <html lang> in sync with the effective interface language for a11y/SEO.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   return (
     <QueryClientProvider client={queryClient}>

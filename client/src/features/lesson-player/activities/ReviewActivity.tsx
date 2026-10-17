@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CircleCheck, CircleX } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface ReviewActivityProps {
   activity: {
@@ -16,6 +17,7 @@ export const ReviewActivity: React.FC<ReviewActivityProps> = ({
   activity,
   onComplete,
 }) => {
+  const t = useT();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleSelect = (id: string) => {
@@ -57,7 +59,7 @@ export const ReviewActivity: React.FC<ReviewActivityProps> = ({
                   ) : (
                     <CircleX className="w-5 h-5 text-red-600" />
                   )}
-                  <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
+                  <span className="sr-only">{isCorrect ? t('lesson.correct') : t('lesson.incorrect')}</span>
                 </span>
               )}
               {option.text}

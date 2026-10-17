@@ -1,6 +1,7 @@
 import React from "react";
 import type { NewLearnerActivity } from "./newActivity.types.js";
 import { AudioButton } from "../../../components/ui/AudioButton.js";
+import { useT } from "../../../i18n/index.js";
 
 export function NewActivityFrame({
   activity,
@@ -9,6 +10,7 @@ export function NewActivityFrame({
   activity: NewLearnerActivity;
   children: React.ReactNode;
 }) {
+  const t = useT();
   const instructions = [
     activity.prompt,
     activity.subPrompt,
@@ -29,11 +31,11 @@ export function NewActivityFrame({
           contentKey={activity.id}
           audioUrl={activity.audioUrl}
           textToSpeak={instructions}
-          label="Nghe hướng dẫn"
+          label={t('lesson.listenInstructions')}
           size="sm"
         />
         {!activity.audioUrl && activity.type === "follow_steps" && (
-          <MissingSourceAudioNotice hint="đọc hướng dẫn bên dưới" />
+          <MissingSourceAudioNotice hint={t('lesson.hintReadBelow')} />
         )}
       </header>
       {children}
@@ -42,16 +44,18 @@ export function NewActivityFrame({
 }
 // Honest notice when content has no recorded source audio: device speech only.
 export function MissingSourceAudioNotice({ hint }: { hint: string }) {
+  const t = useT();
   return (
     <p className="text-sm text-stone-600">
-      Chưa có audio nguồn. Bé có thể dùng giọng đọc thiết bị hoặc {hint}.
+      {t('lesson.noSourceAudio', { hint })}
     </p>
   );
 }
 export function IncompleteActivity() {
+  const t = useT();
   return (
     <p role="alert" className="p-4">
-      Hoạt động chưa đủ dữ liệu. Vui lòng nhờ phụ huynh kiểm tra lại.
+      {t('lesson.incompleteActivity')}
     </p>
   );
 }

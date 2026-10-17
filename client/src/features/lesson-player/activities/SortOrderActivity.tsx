@@ -3,6 +3,7 @@ import { cn } from '../../../lib/utils.js';
 import {
   RotateCcw,
 } from '../../../components/ui/icons.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface SortOrderActivityProps {
   activity: {
@@ -18,6 +19,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
   activity,
   onComplete,
 }) => {
+  const t = useT();
   const targetOrder = activity.correctAnswer || activity.orderedItems || ['C', 'Á'];
   // Shuffle items for kid challenge
   const [availableItems, setAvailableItems] = useState<string[]>(() => {
@@ -80,7 +82,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
           className="flex items-center gap-1 text-sm font-bold text-stone-500 hover:text-stone-800 min-h-[44px] px-3"
         >
           <RotateCcw className="w-4 h-4" />
-          <span>Xếp lại</span>
+          <span>{t('lesson.reorder')}</span>
         </button>
       )}
     </div>
