@@ -23,6 +23,12 @@ import { VictoryModal } from '../../components/ui/VictoryModal.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { isNewActivityType, type NewActivityInput, type NewActivitySubmission } from './activities/newActivity.types.js';
 
+// Minimal shape of the `/stages` payload that next-lesson navigation reads (same source as the map).
+interface StageCatalogueEntry {
+  order: number;
+  lessons?: Array<{ _id: string; isUnlocked?: boolean }>;
+}
+
 export const LessonPlayerPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [searchParams] = useSearchParams();
@@ -92,6 +98,18 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
     refetchOnReconnect: false,
   });
 
+  // Stage catalogue for "next lesson" navigation. Same query key as the map so the cache is shared;
+  // only fetched once the completion modal is up so it never delays or duplicates the lesson fetch.
+  const { data: stagesData } = useQuery({
+    queryKey: ['stages', childId],
+    queryFn: async () => {
+      const res = await api.get('/stages', { params: { childId } });
+      return res.data.data;
+    },
+    enabled: !!childId && showVictory,
+    staleTime: 60_000,
+  });
+
   // Restore session from IndexedDB if available
   useEffect(() => {
     let cancelled = false;
@@ -153,6 +171,23 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
   }
 
   const activities = lesson.activities || [];
+  // Resolve the lesson that follows this one in the catalogue, if the child may open it now.
+  // A later lesson in the same stage unlocks the moment this one is passed; crossing into a new
+  // stage keeps its own gate (subscription/stage completion), so we trust the refreshed unlock flag.
+  const nextLessonId: string | null = (() => {
+    const stageList = (Array.isArray(stagesData) ? stagesData : []) as StageCatalogueEntry[];
+    const flat = [...stageList]
+      .sort((a, b) => a.order - b.order)
+      .flatMap((stage) => (stage.lessons ?? []).map((l) => ({
+        id: String(l._id), stageOrder: stage.order, isUnlocked: Boolean(l.isUnlocked),
+      })));
+    const idx = flat.findIndex((l) => l.id === lessonId);
+    if (idx < 0) return null;
+    const next = flat[idx + 1];
+    if (!next) return null;
+    const unlocked = next.stageOrder === flat[idx].stageOrder ? victoryData.passed : next.isUnlocked;
+    return unlocked ? next.id : null;
+  })();
   const currentActivity = activities[currentStep];
   const isLastStep = currentStep === activities.length - 1;
   const newActivity = currentActivity && isNewActivityType(currentActivity.type);
@@ -228,6 +263,9 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         const { stars, pointsEarned, totalPoints, passed, scorePercent } = res.data.data;
         updatePointsLocally(totalPoints);
         void queryClient.invalidateQueries({ queryKey: ['childPoints'] });
+        // Refresh the map's unlock/progress state so the next lesson is reachable right away,
+        // whether the child taps "Bài tiếp theo" or returns to the map.
+        void queryClient.invalidateQueries({ queryKey: ['stages'] });
         if (passed === true) {
           await clearSession(lesson._id, childId);
         }
@@ -411,6 +449,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
         passed={victoryData.passed}
         scorePercent={victoryData.scorePercent}
         isOfflinePending={victoryData.isOfflinePending}
+        onNextLesson={nextLessonId ? () => navigate(`/hoc/${nextLessonId}`) : undefined}
         onBackToMap={() => navigate('/kham-pha')}
         onPlayAgain={async () => {
           try {

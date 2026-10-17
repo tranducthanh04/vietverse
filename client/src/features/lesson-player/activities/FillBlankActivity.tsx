@@ -57,7 +57,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
             key={opt.id}
             onClick={() => handleSelect(opt.text, opt.id)}
             className={cn(
-              'min-w-[4.5rem] h-16 sm:h-20 px-4 bg-white border-3 border-cream-border rounded-2xl text-2xl sm:text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center',
+              'min-w-[4.5rem] max-w-full min-h-16 sm:min-h-20 px-4 py-2 bg-white border-3 border-cream-border rounded-2xl text-2xl sm:text-3xl font-display font-black text-stone-800 shadow-kid hover:border-accent hover:bg-accent-light/40 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center text-center whitespace-normal break-words',
               filledLetter === opt.text && 'border-primary bg-primary-light/30'
             )}
           >
