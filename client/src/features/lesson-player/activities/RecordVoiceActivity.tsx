@@ -13,7 +13,7 @@ import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
 import { targetTextSize } from './targetTextSize.js';
-import { VI_LOCALES } from '../../../locales/vi.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface RecordVoiceActivityProps {
   activity: {
@@ -36,6 +36,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
   contentVersion,
   onComplete,
 }) => {
+  const t = useT();
   const {
     isRecording,
     isPlaying,
@@ -94,9 +95,9 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       const timedOut = err?.code === 'ECONNABORTED' || err?.code === 'ETIMEDOUT' || err?.code === 'RECORDING_UPLOAD_TIMEOUT';
       const offline = err?.code === 'ERR_NETWORK';
       const msg = err.response?.data?.error?.message
-        || (timedOut ? 'Mạng chậm nên chưa gửi xong. Bé bấm "Thử gửi lại" hoặc thu âm lại nhé; bản thu vẫn được giữ.' : undefined)
-        || (offline ? 'Mất kết nối mạng. Bé kiểm tra mạng rồi bấm "Thử gửi lại" nhé.' : undefined)
-        || err.message || 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!';
+        || (timedOut ? t('lesson.uploadTimeout') : undefined)
+        || (offline ? t('lesson.uploadOffline') : undefined)
+        || err.message || t('lesson.uploadError');
       setUploadError(msg);
       setIntentExpired(err.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED');
     } finally {
@@ -140,7 +141,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 <button
                   onClick={stopRecording}
                   className="relative w-24 h-24 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-2xl min-h-[58px] min-w-[58px]"
-                  aria-label="Dừng ghi âm"
+                  aria-label={t('lesson.stopRecordingAria')}
                 >
                   <Square className="w-10 h-10 fill-white" />
                 </button>
@@ -148,7 +149,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
 
               <div className="flex items-center space-x-2 text-red-600 font-bold font-display text-kid-base">
                 <span className="w-3 h-3 rounded-full bg-red-600 animate-pulse"></span>
-                <span>{VI_LOCALES.lesson.recording} ({durationSec}s)</span>
+                <span>{t('lesson.recording')} ({durationSec}s)</span>
               </div>
             </div>
           ) : (
@@ -156,12 +157,12 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
               <button
                 onClick={startRecording}
                 className="w-24 h-24 bg-primary hover:bg-primary-hover text-white rounded-full flex items-center justify-center shadow-kid-primary hover:scale-105 active:scale-95 transition-transform min-h-[58px] min-w-[58px]"
-                aria-label="Bắt đầu ghi âm"
+                aria-label={t('lesson.startRecordingAria')}
               >
                 <Mic className="w-12 h-12" />
               </button>
               <span className="text-stone-600 font-bold text-kid-base">
-                {VI_LOCALES.lesson.recordPrompt}
+                {t('lesson.recordPrompt')}
               </span>
             </div>
           )
@@ -170,7 +171,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
           <div className="w-full bg-white border-2 border-cream-border rounded-3xl p-6 shadow-kid flex flex-col items-center space-y-5">
             <span className="text-emerald-700 font-bold text-base flex items-center space-x-1">
               <Check className="w-5 h-5 text-emerald-600" />
-              <span>{VI_LOCALES.lesson.recordDone} ({durationSec}s)</span>
+              <span>{t('lesson.recordDone')} ({durationSec}s)</span>
             </span>
 
             <div className="flex items-center space-x-4">
@@ -181,7 +182,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 className="flex items-center space-x-2"
               >
                 <Play className={`w-5 h-5 ${isPlaying ? 'text-primary fill-primary animate-pulse' : ''}`} />
-                <span>{VI_LOCALES.lesson.listenBack}</span>
+                <span>{t('lesson.listenBack')}</span>
               </Button>
 
               <Button
@@ -192,7 +193,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 className="flex items-center space-x-2 text-stone-600"
               >
                 <RotateCcw className="w-5 h-5" />
-                <span>{VI_LOCALES.lesson.reRecord}</span>
+                <span>{t('lesson.reRecord')}</span>
               </Button>
             </div>
 
@@ -213,12 +214,12 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 onClick={handleSubmit}
                 className="w-full max-w-xs"
               >
-                {intentExpired ? 'Gửi lại bằng lượt mới' : uploadError ? 'Thử gửi lại giọng đọc' : 'Gửi giọng đọc của bé'}
+                {intentExpired ? t('lesson.sendNewAttempt') : uploadError ? t('lesson.sendRetry') : t('lesson.sendRecording')}
               </Button>
             ) : (
               <div className="text-emerald-600 font-bold flex items-center space-x-1">
                 <Check className="w-5 h-5" />
-                <span>{VI_LOCALES.lesson.uploadSuccess}</span>
+                <span>{t('lesson.uploadSuccess')}</span>
               </div>
             )}
           </div>

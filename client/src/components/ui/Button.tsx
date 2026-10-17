@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils.js';
+import { useT } from '../../i18n/index.js';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'accent' | 'culture' | 'outline' | 'ghost' | 'danger';
@@ -16,6 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
+  const t = useT();
   const baseStyles =
     'inline-flex items-center justify-center font-bold transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50 disabled:pointer-events-none select-none min-h-[48px] min-w-[48px]';
 
@@ -53,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
           </svg>
-          <span>Đang xử lý…</span>
+          <span>{t('common.processing')}</span>
         </span>
       ) : (
         children

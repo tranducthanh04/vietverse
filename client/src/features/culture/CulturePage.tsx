@@ -8,9 +8,10 @@ import {
 import { api } from '../../lib/api.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 
 export const CulturePage: React.FC = () => {
+  const t = useT();
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const {
@@ -29,16 +30,16 @@ export const CulturePage: React.FC = () => {
   });
 
   const categories = [
-    { id: '', label: 'Tất cả chủ đề' },
-    { id: 'tet', label: 'Tết' },
-    { id: 'am_thuc', label: 'Ẩm thực Việt' },
-    { id: 'trang_phuc', label: 'Trang phục cổ truyền' },
-    { id: 'phong_tuc', label: 'Phong tục' },
-    { id: 'le_hoi', label: 'Lễ hội dân gian' },
-    { id: 'di_san', label: 'Di sản & Lịch sử' },
-    { id: 'vat_dung', label: 'Vật dụng dân gian' },
-    { id: 'thien_nhien', label: 'Thiên nhiên Việt Nam' },
-    { id: 'tro_choi_dan_gian', label: 'Trò chơi dân gian' },
+    { id: '', label: t('culture.allTopics') },
+    { id: 'tet', label: t('culture.catTet') },
+    { id: 'am_thuc', label: t('culture.catAmThuc') },
+    { id: 'trang_phuc', label: t('culture.catTrangPhuc') },
+    { id: 'phong_tuc', label: t('culture.catPhongTuc') },
+    { id: 'le_hoi', label: t('culture.catLeHoi') },
+    { id: 'di_san', label: t('culture.catDiSan') },
+    { id: 'vat_dung', label: t('culture.catVatDung') },
+    { id: 'thien_nhien', label: t('culture.catThienNhien') },
+    { id: 'tro_choi_dan_gian', label: t('culture.catTroChoi') },
   ];
 
   return (
@@ -47,13 +48,13 @@ export const CulturePage: React.FC = () => {
       <div className="text-center mb-8">
         <div className="inline-flex items-center space-x-2 bg-culture-light/40 px-3 py-1 rounded-full text-culture-dark text-sm font-bold mb-3">
           <DomainIcon.culture className="w-4 h-4 text-culture" />
-          <span>Bản sắc & Tinh hoa Việt Nam</span>
+          <span>{t('culture.heritageBadge')}</span>
         </div>
         <h1 className="text-kid-xl md:text-kid-2xl font-black font-display text-culture">
-          {VI_LOCALES.culture.title}
+          {t('culture.title')}
         </h1>
         <p className="text-stone-600 text-kid-sm mt-1 max-w-xl mx-auto">
-          {VI_LOCALES.culture.subtitle}
+          {t('culture.subtitle')}
         </p>
       </div>
 
@@ -80,12 +81,12 @@ export const CulturePage: React.FC = () => {
       ) : isLoading ? (
         <div className="text-center py-12">
           <div className="w-10 h-10 border-4 border-culture border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-bold text-stone-600">Đang mở trang văn hóa…</p>
+          <p className="font-bold text-stone-600">{t('culture.loading')}</p>
         </div>
       ) : articles.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-cream-border p-8">
           <DomainIcon.culture className="w-12 h-12 text-stone-400 mx-auto mb-3" />
-          <p className="text-stone-500 font-bold">Chưa có bài viết nào cho chủ đề này.</p>
+          <p className="text-stone-500 font-bold">{t('culture.empty')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -108,7 +109,7 @@ export const CulturePage: React.FC = () => {
                 )}
                 <div className="hidden sm:flex absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-culture items-center gap-1 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>+5 ViVi Points Đố vui</span>
+                  <span>{t('culture.quizReward')}</span>
                 </div>
               </div>
 
@@ -125,10 +126,10 @@ export const CulturePage: React.FC = () => {
                 <div className="sm:pt-3 sm:border-t border-cream-border flex items-center justify-between sm:justify-end">
                   <span className="sm:hidden text-xs font-bold text-culture inline-flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5" />
-                    +5 ViVi Points
+                    {t('culture.quizRewardShort')}
                   </span>
                   <span className="hidden sm:inline-flex items-center justify-center bg-culture text-white group-hover:bg-culture-hover shadow-kid-culture rounded-2xl px-5 min-h-[40px] text-sm font-bold">
-                    Khám phá
+                    {t('culture.explore')}
                   </span>
                 </div>
               </div>

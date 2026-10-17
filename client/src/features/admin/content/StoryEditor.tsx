@@ -1,9 +1,10 @@
 import React from "react";
-import type { StoryContent } from "./content.types.js";
+import type { StoryContent, StoryTranslations } from "./content.types.js";
 import { TextField, NumberField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
 import { QuizEditor } from "./QuizEditor.js";
 import { FieldNotes } from "./EditorialNotes.js";
+import { TranslationEditor } from "./TranslationEditor.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function StoryEditor({
   value,
@@ -176,6 +177,23 @@ export function StoryEditor({
         </button>
       </fieldset>
       <QuizEditor value={value.quiz} onChange={(quiz) => patch({ quiz })} />
+      <TranslationEditor
+        translations={value.translations ?? {}}
+        onChange={(translations) =>
+          patch({ translations: translations as StoryTranslations })
+        }
+        sections={[
+          { kind: "text", key: "title", label: "Tiêu đề" },
+          { kind: "text", key: "description", label: "Mô tả truyện", multiline: true },
+          {
+            kind: "list",
+            key: "lyrics",
+            label: "Dòng lời",
+            source: value.lyrics.map((line) => line.text),
+          },
+          { kind: "list", key: "vocab", label: "Từ vựng", source: value.vocab },
+        ]}
+      />
     </div>
   );
 }

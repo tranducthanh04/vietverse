@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from '../../components/ui/icons.js';
 import { cn } from '../../lib/utils.js';
+import { useT } from '../../i18n/index.js';
 
 type PasswordFieldProps = React.InputHTMLAttributes<HTMLInputElement>;
 
@@ -11,6 +12,7 @@ type PasswordFieldProps = React.InputHTMLAttributes<HTMLInputElement>;
  */
 export const PasswordField: React.FC<PasswordFieldProps> = ({ className, ...props }) => {
   const [visible, setVisible] = useState(false);
+  const t = useT();
 
   return (
     <div className="relative">
@@ -25,7 +27,7 @@ export const PasswordField: React.FC<PasswordFieldProps> = ({ className, ...prop
       <button
         type="button"
         onClick={() => setVisible((prev) => !prev)}
-        aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+        aria-label={visible ? t('auth.hidePassword') : t('auth.showPassword')}
         aria-pressed={visible}
         className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-stone-500 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       >

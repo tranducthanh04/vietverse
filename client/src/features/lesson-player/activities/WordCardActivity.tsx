@@ -2,6 +2,7 @@ import React from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { Lightbulb } from '../../../components/ui/icons.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
+import { useT } from '../../../i18n/index.js';
 
 export interface WordCardActivityProps {
   activity: {
@@ -19,6 +20,7 @@ export interface WordCardActivityProps {
 export const WordCardActivity: React.FC<WordCardActivityProps> = ({
   activity,
 }) => {
+  const t = useT();
   const targetText = activity.targetWord || 'A';
   const displayLength = Array.from(targetText.trim().normalize('NFC')).length;
   // Legacy lessons also store entire reading passages in targetWord.
@@ -42,7 +44,7 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
       {activity.subPrompt && (
         <div className="w-full min-w-0 mb-6 space-y-3">
           <p className="whitespace-pre-line break-words text-stone-600 text-kid-base">{activity.subPrompt}</p>
-          <AudioButton contentKey={activity.id} textToSpeak={activity.subPrompt} label="Đọc đoạn văn" size="sm" />
+          <AudioButton contentKey={activity.id} textToSpeak={activity.subPrompt} label={t('lesson.readPassage')} size="sm" />
         </div>
       )}
 
@@ -63,7 +65,7 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
             audioUrl={activity.audioUrl}
             textToSpeak={activity.targetWord}
             size="lg"
-            label="Nghe đọc"
+            label={t('lesson.listenRead')}
           />
         </div>
       </div>

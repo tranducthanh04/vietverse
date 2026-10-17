@@ -1,5 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 import { contentMetadataFields, discoverableContentFields, type ContentMetadata } from './contentMetadata.js';
+import { cultureTranslationFields, type CultureTranslations } from './contentTranslations.js';
 
 export interface ICultureQuiz {
   question: string;
@@ -19,6 +20,8 @@ export interface ICultureArticle extends Document, ContentMetadata {
   quiz: ICultureQuiz[];
   audioUrl?: string;
   tags?: string[];
+  /** Reviewed translations of child-facing text, keyed by support language. Optional for backward compatibility. */
+  translations?: CultureTranslations;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +60,7 @@ const cultureArticleSchema = new Schema<ICultureArticle>(
     ],
     audioUrl: String,
     tags: [String],
+    translations: cultureTranslationFields,
   },
   {
     timestamps: true,

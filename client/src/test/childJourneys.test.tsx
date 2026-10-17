@@ -240,6 +240,21 @@ describe('honest story audio', () => {
     expect(screen.queryByText('Audio Studio Vietverse')).not.toBeInTheDocument();
   });
 
+  it('shows the story summary only when the story has one', async () => {
+    request = () => ({ _id: 'story', title: 'A story', description: 'Tóm tắt truyện', lyrics: [{ timeSec: 0, text: 'Story text' }], durationSec: 40 });
+    const memoryRouter = createMemoryRouter([{ path: '/stories/:id', element: <StoryDetailPage /> }], { initialEntries: ['/stories/story'] });
+    render(<QueryClientProvider client={queryClient}><RouterProvider router={memoryRouter} /></QueryClientProvider>);
+    expect(await screen.findByText('Tóm tắt truyện')).toBeInTheDocument();
+  });
+
+  it('omits the summary block when the story has no description', async () => {
+    request = () => ({ _id: 'story', title: 'A story', description: '   ', lyrics: [{ timeSec: 0, text: 'Story text' }], durationSec: 40 });
+    const memoryRouter = createMemoryRouter([{ path: '/stories/:id', element: <StoryDetailPage /> }], { initialEntries: ['/stories/story'] });
+    const { container } = render(<QueryClientProvider client={queryClient}><RouterProvider router={memoryRouter} /></QueryClientProvider>);
+    await screen.findByText('A story');
+    expect(container.querySelector('.max-w-prose')).toBeNull();
+  });
+
   it('stops offering playback when the supplied audio asset fails', async () => {
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     request = () => ({ _id: 'story', title: 'A story', audioUrl: '/broken.mp3', lyrics: [{ timeSec: 0, text: 'Story text' }], durationSec: 40 });

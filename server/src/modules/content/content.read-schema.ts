@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUPPORT_LANGUAGES } from '../../models/contentTranslations.js';
 
 // Read projections whitelist fields without retroactively imposing CMS authoring limits.
 // Writes still use parseDraft/validatePublish, including the stricter media policy.
@@ -21,6 +22,9 @@ const activity = z.object({
   steps: z.array(z.object({ id: text, text })).optional(),
 });
 const quiz = z.array(z.object({ question: text, options: strings, correctAnswer: z.number(), explanation: optionalText })).default([]);
+const supportLanguage = z.enum(SUPPORT_LANGUAGES);
+const cultureTranslations = z.record(supportLanguage, z.object({ title: optionalText, intro: optionalText, funFacts: strings.optional() })).optional();
+const storyTranslations = z.record(supportLanguage, z.object({ title: optionalText, description: optionalText, lyrics: strings.optional(), vocab: strings.optional() })).optional();
 export const readSchemas = {
   lesson: z.object({ stageId: text.default(''), order: z.number(), title: text, description: text.default(''),
     vocabulary: z.array(z.object({ word: text.default(''), meaning: text.default(''), phonetic: optionalText, audioUrl: media, imageUrl: media })).default([]),
@@ -28,7 +32,7 @@ export const readSchemas = {
   }).transform(value => ({ ...value, totalActivities: value.activities.length })),
   story: z.object({ type: z.enum(['dong_dao', 'co_tich', 'tho', 'ngu_ngon']), title: text, author: text.default(''), description: text.default(''),
     coverImage: media, lyrics: z.array(z.object({ text, timeSec: z.number() })).default([]), audioUrl: media, durationSec: z.number().default(0),
-    ageGroups: z.array(text).default([]), vocab: strings.default([]), quiz,
+    ageGroups: z.array(text).default([]), vocab: strings.default([]), quiz, translations: storyTranslations,
   }),
-  culture: z.object({ category: text, title: text, intro: text.default(''), coverImage: media, audioUrl: media, funFacts: strings.default([]), tags: strings.default([]), quiz }),
+  culture: z.object({ category: text, title: text, intro: text.default(''), coverImage: media, audioUrl: media, funFacts: strings.default([]), tags: strings.default([]), quiz, translations: cultureTranslations }),
 };

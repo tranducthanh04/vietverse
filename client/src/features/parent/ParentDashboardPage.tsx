@@ -10,12 +10,13 @@ import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT, type TKey } from '../../i18n/index.js';
 import { ParentJourney, ParentRecentActivities } from './ParentJourney.js';
 import type { ParentProgress } from './parentProgress.types.js';
 
 export const ParentDashboardPage: React.FC = () => {
   const { activeChild } = useChildStore();
+  const t = useT();
 
   const {
     data: progressData,
@@ -37,8 +38,8 @@ export const ParentDashboardPage: React.FC = () => {
         <QueryErrorState
           error={error}
           onRetry={() => refetch()}
-          title="Không thể tải báo cáo tiến độ"
-          message="Hệ thống chưa thể lấy dữ liệu phân tích học tập của bé lúc này. Phụ huynh hãy bấm thử lại nhé!"
+          title={t('parentPortal.progressErrorTitle')}
+          message={t('parentPortal.progressErrorMsg')}
         />
       </div>
     );
@@ -48,12 +49,21 @@ export const ParentDashboardPage: React.FC = () => {
     return (
       <div className="py-12 text-center" role="status" aria-live="polite">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" aria-hidden="true" />
-        <p className="font-bold text-stone-600">Đang tổng hợp tiến độ của bé…</p>
+        <p className="font-bold text-stone-600">{t('parentPortal.progressLoading')}</p>
       </div>
     );
   }
 
   const { overview, competencies } = progressData;
+
+  const statusKey = (statusLabel: string) =>
+    statusLabel === 'Đã khám phá' ? 'explored' : statusLabel === 'Đang luyện tập' ? 'practicing' : statusLabel === 'Chưa bắt đầu' ? 'notStarted' : null;
+  const statusText = (statusLabel: string) => {
+    const key = statusKey(statusLabel);
+    return key ? t(`competency.status_${key}` as TKey) : statusLabel;
+  };
+  const competencyText = (key: string, field: 'name' | 'desc', fallback: string) =>
+    ['listening', 'speaking', 'reading', 'thinking'].includes(key) ? t(`competency.${key}_${field}` as TKey) : fallback;
 
   const getStatusBadge = (statusLabel: string) => {
     switch (statusLabel) {
@@ -87,29 +97,29 @@ export const ParentDashboardPage: React.FC = () => {
       {/* Overview Stat Cards */}
       <div>
         <h2 className="text-xl font-bold font-display text-stone-800 mb-4">
-          {VI_LOCALES.parentPortal.overviewTitle}
+          {t('parentPortal.overviewTitle')}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border-cream-border text-center">
-            <span className="text-xs text-stone-500 font-bold block mb-1">Bài học hoàn thành</span>
+            <span className="text-xs text-stone-500 font-bold block mb-1">{t('parentPortal.statLessons')}</span>
             <span className="text-3xl font-black font-display text-primary">
               {overview.totalLessonsCompleted}
             </span>
           </Card>
           <Card className="p-4 bg-white border-cream-border text-center">
-            <span className="text-xs text-stone-500 font-bold block mb-1">Bản thu âm</span>
+            <span className="text-xs text-stone-500 font-bold block mb-1">{t('parentPortal.statRecordings')}</span>
             <span className="text-3xl font-black font-display text-accent-dark">
               {overview.totalRecordings}
             </span>
           </Card>
           <Card className="p-4 bg-white border-cream-border text-center">
-            <span className="text-xs text-stone-500 font-bold block mb-1">Đồng dao & Truyện</span>
+            <span className="text-xs text-stone-500 font-bold block mb-1">{t('parentPortal.statStories')}</span>
             <span className="text-3xl font-black font-display text-culture">
               {overview.storiesExplored}
             </span>
           </Card>
           <Card className="p-4 bg-white border-cream-border text-center">
-            <span className="text-xs text-stone-500 font-bold block mb-1">Chủ đề văn hóa</span>
+            <span className="text-xs text-stone-500 font-bold block mb-1">{t('parentPortal.statCulture')}</span>
             <span className="text-3xl font-black font-display text-secondary">
               {overview.cultureExplored}
             </span>
@@ -123,12 +133,12 @@ export const ParentDashboardPage: React.FC = () => {
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold font-display text-stone-800">
-            {VI_LOCALES.parentPortal.competenciesTitle}
+            {t('parentPortal.competenciesTitle')}
           </h2>
           <p className="text-sm text-stone-500">
-            {VI_LOCALES.parentPortal.competenciesDesc}
+            {t('parentPortal.competenciesDesc')}
           </p>
-          <p className="text-sm text-stone-500 mt-1">Chỉ số tham khảo từ hoạt động đã ghi nhận, không phải đánh giá chuyên môn hay xếp hạng trẻ.</p>
+          <p className="text-sm text-stone-500 mt-1">{t('parentPortal.competenciesNote')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,24 +151,24 @@ export const ParentDashboardPage: React.FC = () => {
                       {getCompetencyIcon(comp.key)}
                     </div>
                     <h3 className="text-lg font-bold font-display text-stone-800">
-                      {comp.name}
+                      {competencyText(comp.key, 'name', comp.name)}
                     </h3>
                   </div>
 
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(comp.statusLabel)}`}>
-                    {comp.statusLabel}
+                    {statusText(comp.statusLabel)}
                   </span>
                 </div>
 
                 <p className="text-stone-600 text-sm mb-4 leading-relaxed">
-                  {comp.description}
+                  {competencyText(comp.key, 'desc', comp.description)}
                 </p>
               </div>
 
               {/* Progress percentage bar */}
               <div>
                 <div className="flex justify-between text-xs font-bold text-stone-500 mb-1">
-                  <span>Mức độ làm quen</span>
+                  <span>{t('parentPortal.familiarity')}</span>
                   <span>{comp.percentage}%</span>
                 </div>
                 <div
@@ -167,7 +177,7 @@ export const ParentDashboardPage: React.FC = () => {
                   aria-valuenow={comp.percentage}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`Mức độ làm quen ${comp.name}`}
+                  aria-label={t('parentPortal.familiarityAria', { name: competencyText(comp.key, 'name', comp.name) })}
                 >
                   <div
                     className="h-full w-full bg-primary rounded-full origin-left transition-transform duration-300 ease-out"

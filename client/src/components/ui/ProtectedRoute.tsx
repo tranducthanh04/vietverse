@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.js';
+import { useT } from '../../i18n/index.js';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,13 +18,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, isLoading } = useAuthStore();
   const location = useLocation();
+  const t = useT();
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream" role="status" aria-live="polite">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-          <span className="text-stone-600 font-bold font-display text-sm">Đang tải…</span>
+          <span className="text-stone-600 font-bold font-display text-sm">{t('common.loading')}</span>
         </div>
       </div>
     );

@@ -30,7 +30,13 @@ Supply approved translations using the following fields (one entry per language/
 | Audio | Approved URL/file and locale/voice; rights or permission |
 | Approval | Content owner, review date and permission to publish |
 
-Assumption pending approval: display reviewed translations beside Vietnamese, retaining Vietnamese as primary. The player accepts a locale, but the content model/API/CMS and bilingual layout are not implemented in this change. Child companion-language preferences alone do not generate translated content.
+Assumption pending approval: display reviewed translations beside Vietnamese, retaining Vietnamese as primary. Child companion-language preferences alone do not generate translated content.
+
+### Companion-language text translations — implemented locally (2026-10-17)
+
+The text side of this assumption is now built (not the audio/provider side). `Story` and `CultureArticle` carry an optional `translations` object keyed by support language (`en`, `ja`, `ko`, `zh`, `fr` — `companionLanguages` minus `other`): culture holds `title`/`intro`/`funFacts`, story holds `title`/`description`/`lyrics`/`vocab`, with arrays parallel by index to the Vietnamese source. Reads return it, the CMS story/culture editors have a collapsible per-language block that saves and previews, and the child culture/story pages render the first companion language that has a translation beneath the Vietnamese text (smaller, secondary colour, correct `lang` attribute), hiding entirely when none exists. Legacy documents without the field simply omit it from the payload, so no migration is required and existing data keeps working.
+
+Still pending the customer/content owner: the English translations added to the demo seed are **unreviewed drafts** for preview only; reviewed translations and any translated audio must still arrive through the input table above, and no provider calls, production writes or CMS publication are authorised here. The bilingual **audio** layout and locale-tagged narration beyond the existing device-speech fallback are not part of this change.
 
 ## Release acceptance still needed
 

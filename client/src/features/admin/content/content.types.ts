@@ -46,6 +46,33 @@ export type Quiz = {
   correctAnswer: number;
   explanation?: string;
 };
+/** Companion languages that can carry a reviewed translation: companionLanguages minus `other`. */
+export const supportLanguages = ["en", "ja", "ko", "zh", "fr"] as const;
+export type SupportLanguage = (typeof supportLanguages)[number];
+export const supportLanguageLabels: Record<SupportLanguage, string> = {
+  en: "Tiếng Anh",
+  ja: "Tiếng Nhật",
+  ko: "Tiếng Hàn",
+  zh: "Tiếng Trung",
+  fr: "Tiếng Pháp",
+};
+export type CultureTranslation = {
+  title?: string;
+  intro?: string;
+  funFacts?: string[];
+};
+export type StoryTranslation = {
+  title?: string;
+  description?: string;
+  lyrics?: string[];
+  vocab?: string[];
+};
+export type CultureTranslations = Partial<
+  Record<SupportLanguage, CultureTranslation>
+>;
+export type StoryTranslations = Partial<
+  Record<SupportLanguage, StoryTranslation>
+>;
 export type LessonContent = {
   title: string;
   description: string;
@@ -68,6 +95,7 @@ export type StoryContent = {
   vocab: string[];
   lyrics: { text: string; timeSec: number }[];
   quiz: Quiz[];
+  translations?: StoryTranslations;
 };
 export type CultureContent = {
   title: string;
@@ -78,6 +106,7 @@ export type CultureContent = {
   funFacts: string[];
   tags: string[];
   quiz: Quiz[];
+  translations?: CultureTranslations;
 };
 export type ContentPayloadMap = {
   lesson: LessonContent;

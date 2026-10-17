@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { X } from './icons.js';
 import { cn } from '../../lib/utils.js';
+import { useT } from '../../i18n/index.js';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const Modal: React.FC<ModalProps> = ({
   role = 'dialog',
   ariaLabel,
 }) => {
+  const t = useT();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   // Keep the latest onClose without re-running the focus effect on every parent render.
@@ -95,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-stone-500 hover:text-stone-800 bg-white rounded-full shadow-sm hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Đóng"
+            aria-label={t('common.close')}
           >
             <X className="w-6 h-6" />
           </button>

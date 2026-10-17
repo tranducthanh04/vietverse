@@ -1,3 +1,5 @@
+type LabelLanguage = 'vi' | 'en';
+
 /** Display labels for PointTransaction.reason, shared by every screen that renders the ledger. */
 export const POINT_REASON_LABELS: Record<string, string> = {
   lesson: 'Hoàn thành bài học',
@@ -10,13 +12,26 @@ export const POINT_REASON_LABELS: Record<string, string> = {
   refund: 'Hoàn điểm đổi quà',
 };
 
+const POINT_REASON_LABELS_EN: Record<string, string> = {
+  lesson: 'Finished a lesson',
+  activity: 'Finished an activity',
+  culture_quiz: 'Finished a challenge',
+  stage_complete: 'Finished a stage',
+  treasure: 'Treasure of Vietnam',
+  redeem: 'Redeemed an item',
+  use_reward: 'Used a reward',
+  refund: 'Redemption refund',
+};
+
 /** Reasons added on the server later still render, as a generic configured reward. */
 export const FALLBACK_POINT_REASON_LABEL = 'Hoạt động thưởng';
+const FALLBACK_POINT_REASON_LABEL_EN = 'Bonus activity';
 
-export function pointReasonLabel(reason: string | undefined | null): string {
-  return (reason && Object.prototype.hasOwnProperty.call(POINT_REASON_LABELS, reason)
-    ? POINT_REASON_LABELS[reason]
-    : FALLBACK_POINT_REASON_LABEL);
+export function pointReasonLabel(reason: string | undefined | null, language: LabelLanguage = 'vi'): string {
+  const labels = language === 'en' ? POINT_REASON_LABELS_EN : POINT_REASON_LABELS;
+  return (reason && Object.prototype.hasOwnProperty.call(labels, reason)
+    ? labels[reason]
+    : language === 'en' ? FALLBACK_POINT_REASON_LABEL_EN : FALLBACK_POINT_REASON_LABEL);
 }
 
 /** "+10" for credits, "−30" (U+2212 minus sign) for debits, as in the customer spec. */
@@ -36,15 +51,15 @@ function startOfLocalDay(date: Date): number {
  * "Hôm nay" / "Hôm qua" / dd/MM/yyyy in the browser's local timezone.
  * Invalid input returns an empty string instead of "Invalid Date".
  */
-export function formatPointDate(value: string | number | Date, now: Date = new Date()): string {
+export function formatPointDate(value: string | number | Date, now: Date = new Date(), language: LabelLanguage = 'vi'): string {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   const today = startOfLocalDay(now);
   const day = startOfLocalDay(date);
-  if (day === today) return 'Hôm nay';
+  if (day === today) return language === 'en' ? 'Today' : 'Hôm nay';
   // Compare calendar days (not 24h windows) so DST shifts cannot mislabel yesterday.
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
-  if (day === yesterday) return 'Hôm qua';
+  if (day === yesterday) return language === 'en' ? 'Yesterday' : 'Hôm qua';
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 

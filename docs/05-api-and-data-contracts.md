@@ -260,6 +260,14 @@ Revenue response: `{ currency: 'VND', timezone: 'Asia/Ho_Chi_Minh', from: string
 - `POST /points/shop/redeem` và `PATCH /admin/inventory/:id` có thể trả 409 khi số dư hoặc kho đang bị khóa để hoàn điểm. `Child.refundLock`, `ShopItem.refundLock` chỉ dùng vận hành, không xuất ra API; client cần tải lại và retry, không coi request 409 là thành công.
 - Chính sách seed, dữ liệu mẫu và giới hạn rollback xem [đối chiếu khách hàng](./08-customer-alignment.md).
 
+### Bản dịch nội dung theo ngôn ngữ hỗ trợ — 2026-10-17
+
+- Model `Story` và `CultureArticle` có thêm trường `translations` tùy chọn: một object khóa theo ngôn ngữ hỗ trợ (`en`, `ja`, `ko`, `zh`, `fr` — đúng tập `companionLanguages` trừ `other`). Culture mỗi ngôn ngữ chứa `{ title?, intro?, funFacts?[] }`; story chứa `{ title?, description?, lyrics?[], vocab?[] }`. Các mảng song song theo index với bản tiếng Việt; phần tử trống hoặc thiếu thì ẩn. Document legacy không có trường này thì trường vắng mặt trong payload (không phải `{}`), nên **không cần migration bắt buộc** và dữ liệu cũ vẫn chạy.
+- API đọc công khai `GET /stories/:id`, `GET /culture/:id` (và danh sách) trả kèm `translations`. Tiếng Việt vẫn là nội dung chính; bản dịch không thay đổi quiz, chấm điểm, exploration hay thưởng. Draft schema chấp nhận `translations`, giới hạn kích thước mảng như nguồn (`funFacts` ≤ 50, `lyrics` ≤ 500, `vocab` ≤ 100) và văn bản ≤ 5000 ký tự; khóa ngôn ngữ ngoài tập hỗ trợ (kể cả `other`) bị từ chối. `validatePublish` **không** bắt buộc phải có bản dịch — nội dung thiếu bản dịch vẫn xuất bản bình thường.
+- CMS `/admin/truyen` và `/admin/van-hoa` có khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn/mở rộng theo từng ngôn ngữ (`<details>`); lưu nháp và xem trước được, không khối nào chặn publish.
+- Khu bé hiển thị bản dịch ngay dưới đoạn tiếng Việt theo ngôn ngữ hỗ trợ **đầu tiên có bản dịch** trong `companionLanguages` của hồ sơ bé đang chọn (`other` bị bỏ qua), chữ nhỏ hơn, màu phụ, kèm thuộc tính `lang` đúng. Không có hồ sơ bé hoặc không ngôn ngữ nào có bản dịch thì ẩn hoàn toàn.
+- *Giả định chờ duyệt (ghi cho owner/content owner)*: bản dịch tiếng Anh trong seed demo là **bản nháp chưa duyệt**, chỉ phục vụ xem thử; content owner cần duyệt văn bản và bản quyền trước khi phát hành. Không có migration ghi bản dịch lên production trong thay đổi này.
+
 - `childId` luôn phải được kiểm tra ownership thuộc về phụ huynh đang đăng nhập.
 - Migration `child-companion-languages-v1` chỉ backfill document còn trường singular hợp lệ, lưu preimage trong `child_language_migration_preimages`, chạy cùng transaction với bootstrap catalog và có receipt để retry an toàn; không tự suy đoán document thiếu cả hai trường.
 - Preimage chỉ giữ ID bé, ngôn ngữ cũ và thời điểm, không xuất ra API. Xóa hồ sơ cũng xóa preimage trong cùng cascade transaction.

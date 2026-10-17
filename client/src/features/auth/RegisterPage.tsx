@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/authStore.js';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 import { api } from '../../lib/api.js';
 import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton.js';
 import { useGoogleDestination } from './useGoogleDestination.js';
@@ -17,6 +17,7 @@ export const RegisterPage: React.FC = () => {
   const googleDestination = useGoogleDestination();
   const [googleActive, setGoogleActive] = useState(false);
   const selectedPlan = searchParams.get('plan');
+  const t = useT();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ export const RegisterPage: React.FC = () => {
     if (googleActive) return;
     setErrorMsg('');
     if (password !== confirmPassword) {
-      setErrorMsg('Mật khẩu xác nhận chưa khớp. Vui lòng nhập lại.');
+      setErrorMsg(t('auth.passwordMismatch'));
       return;
     }
     try {
@@ -49,7 +50,7 @@ export const RegisterPage: React.FC = () => {
       // Go directly to onboarding wizard to create the child's profile
       navigate('/bat-dau');
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.error?.message || 'Không thể tạo tài khoản, vui lòng thử lại.');
+      setErrorMsg(err.response?.data?.error?.message || t('auth.registerError'));
     } finally {
       setIsLoading(false);
     }
@@ -61,10 +62,10 @@ export const RegisterPage: React.FC = () => {
         <div className="text-center mb-8">
           <Mascot mood="cheering" size="lg" className="mx-auto mb-2" />
           <h1 className="text-kid-xl font-black font-display text-primary">
-            {VI_LOCALES.auth.registerTitle}
+            {t('auth.registerTitle')}
           </h1>
           <p className="text-stone-600 text-sm mt-1">
-            {VI_LOCALES.auth.registerSubtitle}
+            {t('auth.registerSubtitle')}
           </p>
         </div>
 
@@ -78,7 +79,7 @@ export const RegisterPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="register-name" className="block text-stone-700 font-bold text-sm mb-2">
-                {VI_LOCALES.auth.displayNameLabel}
+                {t('auth.displayNameLabel')}
               </label>
               <input
                 id="register-name"
@@ -87,14 +88,14 @@ export const RegisterPage: React.FC = () => {
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder={VI_LOCALES.auth.displayNamePlaceholder}
+                placeholder={t('auth.displayNamePlaceholder')}
                 className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
 
             <div>
               <label htmlFor="register-email" className="block text-stone-700 font-bold text-sm mb-2">
-                {VI_LOCALES.auth.emailLabel}
+                {t('auth.emailLabel')}
               </label>
               <input
                 id="register-email"
@@ -104,14 +105,14 @@ export const RegisterPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={VI_LOCALES.auth.emailPlaceholder}
+                placeholder={t('auth.emailPlaceholder')}
                 className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
 
             <div>
               <label htmlFor="register-password" className="block text-stone-700 font-bold text-sm mb-2">
-                {VI_LOCALES.auth.passwordLabel}
+                {t('auth.passwordLabel')}
               </label>
               <PasswordField
                 id="register-password"
@@ -119,13 +120,13 @@ export const RegisterPage: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={VI_LOCALES.auth.passwordPlaceholder}
+                placeholder={t('auth.passwordPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="register-confirm-password" className="block text-stone-700 font-bold text-sm mb-2">
-                Xác nhận mật khẩu
+                {t('auth.confirmPasswordLabel')}
               </label>
               <PasswordField
                 id="register-confirm-password"
@@ -133,7 +134,7 @@ export const RegisterPage: React.FC = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
               />
             </div>
 
@@ -145,17 +146,17 @@ export const RegisterPage: React.FC = () => {
               disabled={googleActive}
               className="w-full font-bold text-lg mt-2"
             >
-              {VI_LOCALES.auth.registerBtn}
+              {t('auth.registerBtn')}
             </Button>
           </form>
 
-          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-500"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
+          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-500"><span className="h-px flex-1 bg-cream-border" />{t('auth.divider')}<span className="h-px flex-1 bg-cream-border" /></div>
           <GoogleSignInButton disabled={isLoading} onActiveChange={setGoogleActive} onSuccess={googleDestination} />
 
           <div className="mt-6 pt-6 border-t border-cream-border text-center text-sm text-stone-600">
-            <span>{VI_LOCALES.auth.hasAccount} </span>
+            <span>{t('auth.hasAccount')} </span>
             <Link to={selectedPlan ? `/dang-nhap?plan=${selectedPlan}` : '/dang-nhap'} className="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:underline">
-              {VI_LOCALES.auth.loginBtn}
+              {t('auth.loginBtn')}
             </Link>
           </div>
         </Card>

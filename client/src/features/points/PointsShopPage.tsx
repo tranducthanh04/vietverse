@@ -16,9 +16,8 @@ import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT, useUiLanguage, type TKey } from '../../i18n/index.js';
 import {
-  SHOP_CATEGORY_LABELS,
   apiErrorMessage,
   SHOP_FILTERS,
   formatPointDate,
@@ -26,12 +25,29 @@ import {
   matchesShopFilter,
   pointReasonLabel,
   shopItemGroup,
+  type ShopCategory,
   type ShopFilter,
   type ShopItemView,
 } from './pointLabels.js';
 import { childCollectionKey } from './useChildCollection.js';
 
 const HISTORY_PAGE_SIZE = 20;
+
+const FILTER_LABEL_KEYS: Record<ShopFilter, TKey> = {
+  all: 'shop.filterAll',
+  badge: 'shop.filterBadge',
+  avatar: 'shop.filterAvatar',
+  profile_decoration: 'shop.filterProfileDecoration',
+  collectible: 'shop.filterCollectible',
+  physical: 'shop.filterPhysical',
+};
+
+const CATEGORY_LABEL_KEYS: Record<ShopCategory, TKey> = {
+  badge: 'shop.categoryBadge',
+  avatar: 'shop.categoryAvatar',
+  profile_decoration: 'shop.categoryProfileDecoration',
+  collectible: 'shop.categoryCollectible',
+};
 
 interface PointTransactionView {
   _id: string;
@@ -54,6 +70,8 @@ const isOwnedBy = (child: ChildProfile | null, itemId: string) =>
 export const PointsShopPage: React.FC = () => {
   const { activeChild, fetchChildren } = useChildStore();
   const queryClient = useQueryClient();
+  const t = useT();
+  const { language } = useUiLanguage();
   const [filter, setFilter] = useState<ShopFilter>('all');
   const [selectedItem, setSelectedItem] = useState<ShopItemView | null>(null);
   const [shippingAddress, setShippingAddress] = useState({
@@ -114,7 +132,7 @@ export const PointsShopPage: React.FC = () => {
       city: shippingAddress.city.trim(),
     };
     if (selectedItem.type === 'physical' && Object.values(address).some((value) => !value)) {
-      setResultMsg({ type: 'error', text: 'Vui lòng nhập đầy đủ thông tin nhận quà.' });
+      setResultMsg({ type: 'error', text: t('shop.addressRequired') });
       return;
     }
     const redeemChildId = activeChild._id;
@@ -141,7 +159,7 @@ export const PointsShopPage: React.FC = () => {
           children: state.children.map((profile) => profile._id === redeemChildId ? update(profile) : profile),
         };
       });
-      setResultMsg({ type: 'success', text: VI_LOCALES.shop.redeemSuccess });
+      setResultMsg({ type: 'success', text: t('shop.redeemSuccess') });
       setTimeout(() => {
         setSelectedItem(null);
         setResultMsg(null);
@@ -153,7 +171,7 @@ export const PointsShopPage: React.FC = () => {
     } catch (err) {
       setResultMsg({
         type: 'error',
-        text: apiErrorMessage(err, 'Đổi quà không thành công, vui lòng kiểm tra lại.'),
+        text: apiErrorMessage(err, t('shop.redeemFail')),
       });
     } finally {
       setIsSubmitting(false);
@@ -172,20 +190,20 @@ export const PointsShopPage: React.FC = () => {
           <div className="md:col-span-8 flex flex-col gap-3">
             <h1 id="points-balance-title" className="font-display text-lg md:text-xl font-extrabold text-on-secondary-container flex items-center gap-2">
               <Sparkles className="w-5 h-5 shrink-0" />
-              ViVi Points của {!activeChild?.name ? 'bé' : /^bé\s/i.test(activeChild.name) ? activeChild.name : `bé ${activeChild.name}`}
+              {t('shop.balancePrefix')} {!activeChild?.name ? t('shop.childFallback') : /^bé\s/i.test(activeChild.name) ? activeChild.name : t('shop.childWithPrefix', { name: activeChild.name })}
             </h1>
             <p className="font-display text-4xl md:text-5xl text-secondary font-extrabold tracking-tight" data-testid="points-balance">
               {formatPoints(currentPoints)} ViVi Points
             </p>
             <p className="text-sm md:text-base text-on-secondary-container font-medium leading-relaxed">
-              Đây là số ViVi Points hiện có và được cập nhật sau mỗi hoạt động.
+              {t('shop.balanceDesc')}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div className="flex items-center gap-3 bg-surface/90 px-4 py-2.5 rounded-2xl shadow-sm border border-secondary-container/20">
                 <PiggyBank className="w-6 h-6 text-secondary-container shrink-0" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[11px] text-on-surface-variant font-bold">Tổng tích lũy</span>
+                  <span className="text-[11px] text-on-surface-variant font-bold">{t('shop.totalLabel')}</span>
                   <span className="text-sm font-extrabold text-on-surface" data-testid="points-total-earned">
                     {totalEarned === undefined ? '—' : `${totalEarned} ViVi Points`}
                   </span>
@@ -194,9 +212,9 @@ export const PointsShopPage: React.FC = () => {
               <div className="flex items-center gap-3 bg-surface/90 px-4 py-2.5 rounded-2xl shadow-sm border border-secondary-container/20">
                 <Gift className="w-6 h-6 text-primary shrink-0" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[11px] text-on-surface-variant font-bold">Vật phẩm có thể đổi</span>
+                  <span className="text-[11px] text-on-surface-variant font-bold">{t('shop.availableLabel')}</span>
                   <span className="text-sm font-extrabold text-primary" data-testid="points-available-items">
-                    {isLoading || error ? '—' : `Có sẵn ${availableCount} món`}
+                    {isLoading || error ? '—' : t('shop.availableValue', { count: availableCount })}
                   </span>
                 </div>
               </div>
@@ -215,16 +233,16 @@ export const PointsShopPage: React.FC = () => {
       <section aria-labelledby="points-history-title" className="flex flex-col gap-4 bg-surface-container-low p-5 md:p-6 rounded-3xl shadow-sm border border-outline-variant/30">
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-primary" aria-hidden="true" />
-          <h2 id="points-history-title" className="font-display text-xl font-bold text-on-surface">Hoạt động ViVi Points</h2>
+          <h2 id="points-history-title" className="font-display text-xl font-bold text-on-surface">{t('shop.historyTitle')}</h2>
         </div>
 
         {historyQuery.error ? (
           <QueryErrorState error={historyQuery.error} onRetry={() => historyQuery.refetch()} />
         ) : historyQuery.isLoading ? (
-          <div className="py-8 text-center text-sm font-bold text-on-surface-variant">Đang tải lịch sử điểm…</div>
+          <div className="py-8 text-center text-sm font-bold text-on-surface-variant">{t('shop.historyLoading')}</div>
         ) : history.length === 0 ? (
           <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-sm text-on-surface-variant font-medium">
-            Chưa có hoạt động ViVi Points. Bé hãy bắt đầu học Bài 1 để nhận ViVi Points đầu tiên nhé!
+            {t('shop.historyEmpty')}
           </div>
         ) : (
           <>
@@ -232,8 +250,8 @@ export const PointsShopPage: React.FC = () => {
             <table className="block md:table w-full text-left text-sm">
               <thead className="hidden md:table-header-group text-xs uppercase text-on-surface-variant">
                 <tr>
-                  <th scope="col" className="px-4 py-2 font-bold">Thời gian</th>
-                  <th scope="col" className="px-4 py-2 font-bold">Hoạt động</th>
+                  <th scope="col" className="px-4 py-2 font-bold">{t('shop.colTime')}</th>
+                  <th scope="col" className="px-4 py-2 font-bold">{t('shop.colActivity')}</th>
                   <th scope="col" className="px-4 py-2 font-bold text-right">ViVi Points</th>
                 </tr>
               </thead>
@@ -244,10 +262,10 @@ export const PointsShopPage: React.FC = () => {
                     className="grid grid-cols-[1fr_auto] gap-x-3 bg-surface-container-lowest p-3.5 rounded-2xl border border-outline-variant/20 md:table-row md:p-0 md:rounded-none md:border-0 md:border-b md:bg-transparent"
                   >
                     <td className="order-2 col-span-2 text-[11px] text-on-surface-variant md:px-4 md:py-3 md:text-sm md:order-none">
-                      {formatPointDate(tx.createdAt)}
+                      {formatPointDate(tx.createdAt, new Date(), language)}
                     </td>
                     <td className="order-1 md:px-4 md:py-3 md:order-none">
-                      <span className="block font-bold text-on-surface">{pointReasonLabel(tx.reason)}</span>
+                      <span className="block font-bold text-on-surface">{pointReasonLabel(tx.reason, language)}</span>
                       {tx.description && (
                         <span className="block text-xs text-on-surface-variant">{tx.description}</span>
                       )}
@@ -274,7 +292,7 @@ export const PointsShopPage: React.FC = () => {
                 disabled={historyQuery.isFetchingNextPage}
                 className="self-center px-5 py-2 rounded-full font-bold text-sm bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 disabled:opacity-60"
               >
-                {historyQuery.isFetchingNextPage ? 'Đang tải…' : 'Xem thêm'}
+                {historyQuery.isFetchingNextPage ? t('common.loading') : t('shop.loadMore')}
               </button>
             )}
           </>
@@ -286,9 +304,9 @@ export const PointsShopPage: React.FC = () => {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <ShoppingBag className="w-6 h-6 text-primary" aria-hidden="true" />
-            <h2 id="points-items-title" className="font-display text-2xl font-extrabold text-on-surface tracking-wide">VẬT PHẨM ĐỔI THƯỞNG</h2>
+            <h2 id="points-items-title" className="font-display text-2xl font-extrabold text-on-surface tracking-wide">{t('shop.itemsTitle')}</h2>
           </div>
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc theo loại vật phẩm">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('shop.filterGroupAria')}>
             {SHOP_FILTERS.map((tab) => (
               <button
                 key={tab.value}
@@ -301,7 +319,7 @@ export const PointsShopPage: React.FC = () => {
                     : 'bg-surface-container-low hover:bg-surface-container text-on-surface-variant border border-outline-variant/30'
                 }`}
               >
-                {tab.label}
+                {t(FILTER_LABEL_KEYS[tab.value])}
               </button>
             ))}
           </div>
@@ -312,11 +330,11 @@ export const PointsShopPage: React.FC = () => {
         ) : isLoading ? (
           <div className="text-center py-16">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="font-bold text-on-surface-variant">Đang mở tủ quà tặng…</p>
+            <p className="font-bold text-on-surface-variant">{t('shop.itemsLoading')}</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <p className="bg-surface-container-lowest p-6 rounded-2xl text-center text-sm text-on-surface-variant font-medium">
-            Chưa có vật phẩm trong mục này.
+            {t('shop.itemsEmpty')}
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -349,13 +367,13 @@ export const PointsShopPage: React.FC = () => {
                       )}
                       <span className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-surface/90 backdrop-blur-md text-xs font-extrabold text-on-surface shadow-sm inline-flex items-center gap-1">
                         {group === 'physical' && <Package className="w-3.5 h-3.5" />}
-                        {group === 'physical' ? 'Quà gửi tận nhà' : SHOP_CATEGORY_LABELS[group]}
+                        {group === 'physical' ? t('shop.filterPhysical') : t(CATEGORY_LABEL_KEYS[group])}
                       </span>
                     </div>
 
                     <h3 className="font-display text-base font-bold text-on-surface mb-1">{item.name}</h3>
                     <p className="text-xs text-on-surface-variant mb-2">
-                      {item.description || 'Món quà ý nghĩa khích lệ tinh thần học tập tiếng Việt của bé.'}
+                      {item.description || t('shop.itemDescFallback')}
                     </p>
 
                     {item.type === 'physical' && (
@@ -363,12 +381,12 @@ export const PointsShopPage: React.FC = () => {
                         {item.stock !== undefined && item.stock > 0 ? (
                           <span className={`inline-flex items-center gap-1 ${item.stock <= 5 ? 'text-amber-700' : 'text-stone-600'}`}>
                             <Package className="w-3.5 h-3.5" />
-                            Còn lại: {item.stock} món
+                            {t('shop.stockLeft', { count: item.stock })}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-red-700">
                             <TriangleAlert className="w-3.5 h-3.5" />
-                            Tạm thời hết hàng
+                            {t('shop.outOfStockLabel')}
                           </span>
                         )}
                       </div>
@@ -383,7 +401,7 @@ export const PointsShopPage: React.FC = () => {
 
                     {owned ? (
                       <span className="px-3 py-1.5 rounded-full font-bold text-xs bg-emerald-100 text-emerald-700 border border-emerald-300 flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" aria-hidden="true" /> Đã sở hữu
+                        <Check className="w-3.5 h-3.5" aria-hidden="true" /> {t('shop.owned')}
                       </span>
                     ) : outOfStock ? (
                       <button
@@ -391,7 +409,7 @@ export const PointsShopPage: React.FC = () => {
                         disabled
                         className="px-4 py-2 rounded-full font-bold text-xs bg-stone-200 text-stone-500 border border-stone-300 cursor-not-allowed"
                       >
-                        Hết hàng
+                        {t('shop.outOfStockBtn')}
                       </button>
                     ) : (
                       <button
@@ -404,7 +422,7 @@ export const PointsShopPage: React.FC = () => {
                             : 'bg-surface-container text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30'
                         }`}
                       >
-                        {canAfford ? 'Đổi thưởng →' : 'Chưa đủ điểm'}
+                        {canAfford ? t('shop.redeemBtn') : t('shop.notEnough')}
                       </button>
                     )}
                   </div>
@@ -420,12 +438,12 @@ export const PointsShopPage: React.FC = () => {
         <Modal
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
-          title={`Xác Nhận Đổi: ${selectedItem.name}`}
+          title={t('shop.modalTitle', { name: selectedItem.name })}
           className="max-w-lg p-6 bg-surface-container-lowest rounded-3xl"
         >
           <div className="space-y-4">
             <div className="bg-secondary-fixed/40 p-4 rounded-2xl flex items-center justify-between border border-secondary-container/30">
-              <span className="text-sm font-bold text-on-surface">Điểm cần dùng:</span>
+              <span className="text-sm font-bold text-on-surface">{t('shop.pointsNeeded')}</span>
               <span className="font-display font-black text-xl text-secondary">
                 <Sparkles className="inline w-4 h-4 mr-1" aria-hidden="true" />
                 {selectedItem.costPoints} ViVi Points
@@ -435,46 +453,46 @@ export const PointsShopPage: React.FC = () => {
             {selectedItem.type === 'physical' && (
               <div className="space-y-3">
                 <span className="text-xs font-bold text-on-surface uppercase tracking-wider block">
-                  Địa Chỉ Nhận Quà (Miễn Phí Vận Chuyển):
+                  {t('shop.addressTitle')}
                 </span>
-                <label className="block text-sm font-bold" htmlFor="shipping-recipient">Tên người nhận</label>
+                <label className="block text-sm font-bold" htmlFor="shipping-recipient">{t('shop.recipientLabel')}</label>
                 <input
                   id="shipping-recipient"
                   type="text"
                   autoComplete="name"
-                  placeholder="Tên người nhận (Phụ huynh)"
+                  placeholder={t('shop.recipientPlaceholder')}
                   value={shippingAddress.recipientName}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, recipientName: e.target.value })
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
-                <label className="block text-sm font-bold" htmlFor="shipping-phone">Số điện thoại</label>
+                <label className="block text-sm font-bold" htmlFor="shipping-phone">{t('shop.phoneLabel')}</label>
                 <input
                   id="shipping-phone"
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  placeholder="Số điện thoại nhận hàng"
+                  placeholder={t('shop.phonePlaceholder')}
                   value={shippingAddress.phone}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, phone: e.target.value })
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
-                <label className="block text-sm font-bold" htmlFor="shipping-street">Địa chỉ</label>
+                <label className="block text-sm font-bold" htmlFor="shipping-street">{t('shop.streetLabel')}</label>
                 <input
                   id="shipping-street"
                   type="text"
                   autoComplete="street-address"
-                  placeholder="Địa chỉ số nhà, tên đường, phường/xã"
+                  placeholder={t('shop.streetPlaceholder')}
                   value={shippingAddress.street}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, street: e.target.value })
                   }
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm"
                 />
-                <label className="block text-sm font-bold" htmlFor="shipping-city">Tỉnh / Thành phố</label>
+                <label className="block text-sm font-bold" htmlFor="shipping-city">{t('shop.cityLabel')}</label>
                 <input id="shipping-city" type="text" value={shippingAddress.city}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-sm" />
@@ -500,7 +518,7 @@ export const PointsShopPage: React.FC = () => {
                 onClick={() => setSelectedItem(null)}
                 className="flex-1 py-3 rounded-full border border-outline-variant/60 font-bold text-sm text-on-surface-variant hover:bg-surface-container"
               >
-                Hủy bỏ
+                {t('shop.cancelBtn')}
               </button>
               <button
                 type="button"
@@ -508,7 +526,7 @@ export const PointsShopPage: React.FC = () => {
                 disabled={isSubmitting}
                 className="btn-3d-primary flex-1 py-3 rounded-full font-bold text-sm select-none"
               >
-                {isSubmitting ? 'Đang đổi quà…' : 'Xác Nhận Đổi Quà'}
+                {isSubmitting ? t('shop.redeeming') : t('shop.confirmBtn')}
               </button>
             </div>
           </div>

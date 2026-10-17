@@ -3,6 +3,7 @@ import {
   Star,
 } from './icons.js';
 import { cn } from '../../lib/utils.js';
+import { useT } from '../../i18n/index.js';
 
 export interface ProgressBarProps {
   currentStep: number;
@@ -15,6 +16,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   totalSteps,
   className,
 }) => {
+  const t = useT();
   const percentage = Math.min(100, Math.round(((currentStep + 1) / totalSteps) * 100));
 
   return (
@@ -24,7 +26,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         aria-valuemin={0}
         aria-valuemax={totalSteps}
         aria-valuenow={currentStep + 1}
-        aria-label={`Tiến độ bài học: bước ${currentStep + 1} trên ${totalSteps}`}
+        aria-label={t('lesson.progressAria', { current: currentStep + 1, total: totalSteps })}
         className="flex-1 h-5 bg-stone-200 rounded-full overflow-hidden p-1 shadow-inner relative"
       >
         {/* Animate the fill with transform: scaleX (GPU-friendly) instead of width to avoid layout reflow. */}

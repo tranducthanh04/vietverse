@@ -19,12 +19,14 @@ import { Card } from "../../components/ui/Card.js";
 import { Button } from "../../components/ui/Button.js";
 import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
-import { VI_LOCALES } from "../../locales/vi.js";
+import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { useNarration } from "../../hooks/useNarration.js";
+import { useT } from "../../i18n/index.js";
 
 export const StoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const t = useT();
   const { activeChild } = useChildStore();
 
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(
@@ -67,8 +69,8 @@ export const StoryDetailPage: React.FC = () => {
         <QueryErrorState
           error={error}
           onRetry={() => refetch()}
-          title="Không thể tải truyện"
-          message="Bài đồng dao hoặc truyện này hiện chưa sẵn sàng. Bé và ba mẹ vui lòng thử lại nhé!"
+          title={t("storyDetail.loadErrorTitle")}
+          message={t("storyDetail.loadErrorMessage")}
         />
         <div className="text-center mt-4">
           <Button
@@ -76,7 +78,7 @@ export const StoryDetailPage: React.FC = () => {
             size="md"
             onClick={() => navigate("/kho-truyen")}
           >
-            Quay lại kho truyện
+            {t("storyDetail.back")}
           </Button>
         </div>
       </div>
@@ -88,7 +90,7 @@ export const StoryDetailPage: React.FC = () => {
       <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-stone-600 font-bold text-sm">
-          Đang mở trang truyện cho bé…
+          {t("storyDetail.loading")}
         </span>
       </div>
     );
@@ -122,7 +124,7 @@ export const StoryDetailPage: React.FC = () => {
         className="inline-flex items-center gap-2 text-stone-600 hover:text-primary font-bold mb-4 min-h-[44px] transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>Quay lại kho truyện</span>
+        <span>{t("storyDetail.back")}</span>
       </button>
 
       <div className="flex flex-col gap-6">
@@ -147,11 +149,11 @@ export const StoryDetailPage: React.FC = () => {
               {/* Audio Mode Badge */}
               {audioUnavailable ? (
                 <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
-                  Chế độ đọc: chưa có âm thanh khả dụng
+                  {t("storyDetail.readOnlyMode")}
                 </span>
               ) : narration.mode === "tts" ? (
                 <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
-                  Giọng đọc thiết bị
+                  {t("storyDetail.deviceVoice")}
                 </span>
               ) : (
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full inline-flex items-center gap-1">
@@ -163,9 +165,27 @@ export const StoryDetailPage: React.FC = () => {
               <h1 className="mt-3 text-kid-xl sm:text-kid-2xl font-black font-display text-stone-800 text-balance">
                 {story.title}
               </h1>
+              <SupportTranslation
+                translations={story.translations}
+                select={(t: { title?: string }) => t.title}
+                className="mt-1 block text-sm sm:text-base font-semibold text-stone-500"
+              />
               <span className="mt-1 text-sm text-stone-500 font-semibold">
-                Tác giả: {story.author || "Dân gian Việt Nam"}
+                {t("storyDetail.author", { author: story.author || t("storyDetail.folkAuthor") })}
               </span>
+
+              {story.description?.trim() && (
+                <div className="mt-3 max-w-prose">
+                  <p className="text-kid-base text-stone-700 leading-relaxed text-pretty">
+                    {story.description}
+                  </p>
+                  <SupportTranslation
+                    translations={story.translations}
+                    select={(t: { description?: string }) => t.description}
+                    className="mt-1 block text-sm sm:text-base text-stone-500 leading-relaxed"
+                  />
+                </div>
+              )}
 
               {/* Karaoke Play / Pause Controls */}
               <div className="mt-5 w-full flex items-center gap-3 sm:gap-4 bg-cream-muted/70 border border-cream-border rounded-kid p-3 sm:p-4">
@@ -176,9 +196,9 @@ export const StoryDetailPage: React.FC = () => {
                   aria-label={
                     narration.isPlaying
                       ? narration.mode === "tts"
-                        ? "Dừng đọc"
-                        : "Tạm dừng"
-                      : "Bắt đầu nghe"
+                        ? t("storyDetail.stopReading")
+                        : t("storyDetail.pause")
+                      : t("storyDetail.play")
                   }
                 >
                   {narration.isPlaying ? (
@@ -202,7 +222,7 @@ export const StoryDetailPage: React.FC = () => {
                     value={narration.currentTime}
                     onChange={(event) => narration.seek(Number(event.target.value))}
                     className="w-full accent-primary h-2 bg-stone-200 rounded-lg cursor-pointer disabled:cursor-default"
-                    aria-label="Tua thời gian bài đồng dao"
+                    aria-label={t("storyDetail.seek")}
                   />
                   {narration.mode === "asset" && narration.duration > 0 ? (
                     <div className="flex justify-between text-xs font-mono font-bold text-stone-600">
@@ -212,8 +232,8 @@ export const StoryDetailPage: React.FC = () => {
                   ) : (
                     <p className="text-xs text-stone-600">
                       {narration.mode === "tts"
-                        ? "Đọc từng dòng; dừng rồi bấm nghe để đọc lại từ đầu."
-                        : "Đang chờ thời lượng bản audio."}
+                        ? t("storyDetail.ttsHint")
+                        : t("storyDetail.waitingDuration")}
                     </p>
                   )}
                 </div>
@@ -222,7 +242,7 @@ export const StoryDetailPage: React.FC = () => {
                   onClick={narration.reset}
                   disabled={audioUnavailable}
                   className="shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-full hover:bg-white transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
-                  aria-label="Nghe lại từ đầu"
+                  aria-label={t("storyDetail.restart")}
                 >
                   <RotateCcw className="w-5 h-5" />
                 </button>
@@ -242,13 +262,13 @@ export const StoryDetailPage: React.FC = () => {
           <div className="flex items-center justify-between gap-3 mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-accent-dark">
               {audioUnavailable || narration.mode === "tts"
-                ? "Cùng đọc truyện"
-                : VI_LOCALES.stories.karaokeMode}
+                ? t("storyDetail.readTogether")
+                : t("stories.karaokeMode")}
             </span>
             {narration.isPlaying && narration.mode === "asset" && (
               <span className="flex items-center gap-1 text-xs font-bold text-primary animate-pulse">
                 <span className="w-2 h-2 rounded-full bg-primary" />
-                <span>Đang phát lời theo nhạc</span>
+                <span>{t("storyDetail.playingLyrics")}</span>
               </span>
             )}
           </div>
@@ -258,16 +278,22 @@ export const StoryDetailPage: React.FC = () => {
               const isActive = idx === currentLineIndex;
 
               return (
-                <p
-                  key={idx}
-                  className={`px-4 py-3 rounded-2xl border-l-4 transition-colors duration-300 text-kid-base sm:text-kid-lg ${
-                    isActive
-                      ? "bg-amber-100/90 text-primary border-primary font-black"
-                      : "border-transparent text-stone-700 font-bold"
-                  }`}
-                >
-                  {line.text}
-                </p>
+                <div key={idx}>
+                  <p
+                    className={`px-4 py-3 rounded-2xl border-l-4 transition-colors duration-300 text-kid-base sm:text-kid-lg ${
+                      isActive
+                        ? "bg-amber-100/90 text-primary border-primary font-black"
+                        : "border-transparent text-stone-700 font-bold"
+                    }`}
+                  >
+                    {line.text}
+                  </p>
+                  <SupportTranslation
+                    translations={story.translations}
+                    select={(t: { lyrics?: string[] }) => t.lyrics?.[idx]}
+                    className="block px-4 pb-1 text-sm text-stone-500"
+                  />
+                </div>
               );
             })}
           </div>
@@ -276,15 +302,20 @@ export const StoryDetailPage: React.FC = () => {
           {story.vocab && story.vocab.length > 0 && (
             <div className="mt-6 pt-5 border-t border-cream-border">
               <span className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-2">
-                Từ vựng nổi bật
+                {t("storyDetail.vocab")}
               </span>
               <div className="flex flex-wrap gap-2">
                 {story.vocab.map((v: string, i: number) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-sm font-bold"
+                    className="inline-flex flex-col items-start px-3 py-1.5 bg-amber-50 text-stone-800 border border-amber-200 rounded-xl text-sm font-bold"
                   >
-                    {v}
+                    <span>{v}</span>
+                    <SupportTranslation
+                      translations={story.translations}
+                      select={(t: { vocab?: string[] }) => t.vocab?.[i]}
+                      className="text-xs font-normal text-stone-500"
+                    />
                   </span>
                 ))}
               </div>
@@ -301,7 +332,7 @@ export const StoryDetailPage: React.FC = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2 text-primary font-bold text-base">
                 <CircleHelp className="w-5 h-5" />
-                <span>{VI_LOCALES.stories.quizTitle}</span>
+                <span>{t("stories.quizTitle")}</span>
               </div>
 
               {!activeChild && (
@@ -310,7 +341,7 @@ export const StoryDetailPage: React.FC = () => {
                   className="text-xs font-bold text-primary hover:underline flex items-center space-x-1"
                 >
                   <LogIn className="w-3.5 h-3.5" />
-                  <span>Đăng nhập để nhận điểm</span>
+                  <span>{t("storyDetail.loginForPoints")}</span>
                 </Link>
               )}
             </div>
@@ -354,7 +385,7 @@ export const StoryDetailPage: React.FC = () => {
                       <CircleX className="w-5 h-5 shrink-0 text-red-600" />
                     )}
                     {(isCorrect || isWrong) && (
-                      <span className="sr-only">{isCorrect ? 'Đúng' : 'Chưa đúng'}</span>
+                      <span className="sr-only">{isCorrect ? t("storyDetail.correct") : t("storyDetail.incorrect")}</span>
                     )}
                   </button>
                 );

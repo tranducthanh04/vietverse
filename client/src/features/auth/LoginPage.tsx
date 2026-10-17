@@ -6,7 +6,7 @@ import { useChildStore } from '../../store/childStore.js';
 import { Button } from '../../components/ui/Button.js';
 import { Card } from '../../components/ui/Card.js';
 import { Mascot } from '../../components/ui/Mascot.js';
-import { VI_LOCALES } from '../../locales/vi.js';
+import { useT } from '../../i18n/index.js';
 import { api } from '../../lib/api.js';
 import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton.js';
 import { useGoogleDestination } from './useGoogleDestination.js';
@@ -19,6 +19,7 @@ export const LoginPage: React.FC = () => {
   const googleDestination = useGoogleDestination();
   const [googleActive, setGoogleActive] = useState(false);
   const { fetchChildren } = useChildStore();
+  const t = useT();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,7 +39,7 @@ export const LoginPage: React.FC = () => {
           const response = await api.post('/payments/create-checkout', { planType: selectedPlan });
           window.location.assign(response.data.data.checkoutUrl);
         } catch (err: any) {
-          setErrorMsg(err.response?.data?.error?.message || 'Đăng nhập thành công nhưng chưa thể tạo giao dịch. Hãy thử lại ở bảng giá.');
+          setErrorMsg(err.response?.data?.error?.message || t('auth.checkoutError'));
         }
         return;
       }
@@ -57,7 +58,7 @@ export const LoginPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.error?.message || 'Email hoặc mật khẩu không chính xác.');
+      setErrorMsg(err.response?.data?.error?.message || t('auth.loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -69,10 +70,10 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-8">
           <Mascot mood="happy" size="lg" className="mx-auto mb-2" />
           <h1 className="text-kid-xl font-black font-display text-primary">
-            {VI_LOCALES.auth.loginTitle}
+            {t('auth.loginTitle')}
           </h1>
           <p className="text-stone-600 text-sm mt-1">
-            {VI_LOCALES.auth.loginSubtitle}
+            {t('auth.loginSubtitle')}
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="login-email" className="block text-stone-700 font-bold text-sm mb-2">
-                {VI_LOCALES.auth.emailLabel}
+                {t('auth.emailLabel')}
               </label>
               <input
                 id="login-email"
@@ -96,14 +97,14 @@ export const LoginPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={VI_LOCALES.auth.emailPlaceholder}
+                placeholder={t('auth.emailPlaceholder')}
                 className="w-full px-4 py-3 rounded-2xl border-2 border-cream-border focus:border-primary focus:outline-none bg-cream/50 min-h-[48px]"
               />
             </div>
 
             <div>
               <label htmlFor="login-password" className="block text-stone-700 font-bold text-sm mb-2">
-                {VI_LOCALES.auth.passwordLabel}
+                {t('auth.passwordLabel')}
               </label>
               <PasswordField
                 id="login-password"
@@ -111,7 +112,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={VI_LOCALES.auth.passwordPlaceholder}
+                placeholder={t('auth.passwordPlaceholder')}
               />
             </div>
 
@@ -123,18 +124,18 @@ export const LoginPage: React.FC = () => {
               disabled={googleActive}
               className="w-full font-bold text-lg mt-2"
             >
-              {VI_LOCALES.auth.loginBtn}
+              {t('auth.loginBtn')}
             </Button>
           </form>
 
-          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-500"><span className="h-px flex-1 bg-cream-border" />HOẶC<span className="h-px flex-1 bg-cream-border" /></div>
+          <div className="my-6 flex items-center gap-3 text-xs font-bold text-stone-500"><span className="h-px flex-1 bg-cream-border" />{t('auth.divider')}<span className="h-px flex-1 bg-cream-border" /></div>
           <GoogleSignInButton disabled={isLoading} onActiveChange={setGoogleActive} onSuccess={googleDestination} />
 
           {/* Quick Demo Accounts for Development / Testing Only */}
           {import.meta.env.DEV && (
             <div className="mt-6 pt-5 border-t-2 border-cream-border">
               <p className="text-xs text-stone-500 font-bold text-center mb-3">
-                Tài khoản mẫu (Chỉ hiển thị ở chế độ Phát triển):
+                {t('auth.demoTitle')}
               </p>
               <div className="grid grid-cols-2 gap-2.5">
                 <button
@@ -145,8 +146,8 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="p-2.5 min-h-[44px] text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
                 >
-                  <span className="inline-flex items-center gap-1"><UserRound className="w-3.5 h-3.5" />Phụ huynh Bé An</span>
-                  <span className="text-[10px] text-amber-700 font-normal">Chặng 1 • 45 ViVi Pts</span>
+                  <span className="inline-flex items-center gap-1"><UserRound className="w-3.5 h-3.5" />{t('auth.demoParent')}</span>
+                  <span className="text-[10px] text-amber-700 font-normal">{t('auth.demoParentNote')}</span>
                 </button>
                 <button
                   type="button"
@@ -156,17 +157,17 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="p-2.5 min-h-[44px] text-xs bg-red-50 hover:bg-red-100 text-primary border border-red-200 rounded-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center text-center"
                 >
-                  <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" />Quản trị Admin</span>
-                  <span className="text-[10px] text-red-700 font-normal">Quản lý bài học & đơn quà</span>
+                  <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" />{t('auth.demoAdmin')}</span>
+                  <span className="text-[10px] text-red-700 font-normal">{t('auth.demoAdminNote')}</span>
                 </button>
               </div>
             </div>
           )}
 
           <div className="mt-6 pt-4 border-t border-cream-border text-center text-sm text-stone-600">
-            <span>{VI_LOCALES.auth.noAccount} </span>
+            <span>{t('auth.noAccount')} </span>
             <Link to={searchParams.get('plan') ? `/dang-ky?plan=${searchParams.get('plan')}` : '/dang-ky'} className="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:underline">
-              {VI_LOCALES.auth.registerBtn}
+              {t('auth.registerBtn')}
             </Link>
           </div>
         </Card>

@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChildStore } from '../store/childStore.js';
 import { ScreenTimeLimitModal } from '../features/parent/ScreenTimeLimitModal.js';
+import { useT } from '../i18n/index.js';
 
 export const ScreenTimeGuard: React.FC<React.PropsWithChildren> = ({ children }) => {
   const navigate = useNavigate();
   const { activeChild } = useChildStore();
+  const t = useT();
   const [isExceeded, setIsExceeded] = useState(() => {
     const limit = activeChild?.screenTimeLimit ?? 20;
     const start = Number(sessionStorage.getItem(`vietverse_session_start_${activeChild?._id}`));
@@ -49,7 +51,7 @@ export const ScreenTimeGuard: React.FC<React.PropsWithChildren> = ({ children })
       {!isExceeded && children}
       <ScreenTimeLimitModal
         isOpen={isExceeded}
-        childName={activeChild?.name || 'Bé'}
+        childName={activeChild?.name || t('screenTime.childFallback')}
         limitMinutes={activeChild?.screenTimeLimit ?? 20}
         onExtendSession={extend}
         onRest={() => navigate('/kham-pha')}

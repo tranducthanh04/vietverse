@@ -20,8 +20,9 @@ import { Card } from "../../components/ui/Card.js";
 import { Button } from "../../components/ui/Button.js";
 import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
-import { VI_LOCALES } from "../../locales/vi.js";
+import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { useNarration } from "../../hooks/useNarration.js";
+import { useT } from "../../i18n/index.js";
 
 export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +33,7 @@ export const CultureDetailPage: React.FC = () => {
 
 const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> = ({ id, childId, userId }) => {
   const navigate = useNavigate();
+  const t = useT();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
   const [viewId] = useState(() => crypto.randomUUID());
@@ -81,8 +83,8 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
         <QueryErrorState
           error={error}
           onRetry={() => refetch()}
-          title="Không thể tải bài văn hóa"
-          message="Bài viết văn hóa này hiện chưa sẵn sàng. Bạn vui lòng thử lại nhé!"
+          title={t("cultureDetail.loadErrorTitle")}
+          message={t("cultureDetail.loadErrorMessage")}
         />
         <div className="text-center mt-4">
           <Button
@@ -90,7 +92,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
             size="md"
             onClick={() => navigate("/van-hoa")}
           >
-            Quay lại Góc Văn Hóa
+            {t("cultureDetail.back")}
           </Button>
         </div>
       </div>
@@ -102,7 +104,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
       <div className="min-h-dvh bg-cream flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-culture border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-stone-600 font-bold text-sm">
-          Đang mở trang văn hóa…
+          {t("culture.loading")}
         </span>
       </div>
     );
@@ -148,7 +150,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
       if (!isCurrentView()) return;
       const msg =
         err.response?.data?.error?.message ||
-        "Có lỗi kết nối khi gửi câu trả lời. Bé hãy thử bấm gửi lại nhé!";
+        t("cultureDetail.submitError");
       setSubmitError(msg);
     } finally {
       if (isCurrentView()) setIsSubmitting(false);
@@ -175,14 +177,14 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           className="inline-flex items-center space-x-2 text-stone-600 hover:text-culture font-bold text-sm bg-white px-4 py-2.5 rounded-xl shadow-sm border border-cream-border transition-colors min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại Góc Văn Hóa</span>
+          <span>{t("cultureDetail.back")}</span>
         </button>
 
         {/* Audio Narration Button */}
         <div className="flex items-center space-x-2">
           {narration.mode === "tts" && narration.canPlay && (
             <span className="text-[11px] font-bold text-stone-600">
-              (Giọng đọc thiết bị)
+              ({t("storyDetail.deviceVoice")})
             </span>
           )}
           <button
@@ -198,19 +200,19 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
               <>
                 <Pause className="w-4 h-4 fill-white" />
                 <span>
-                  {narration.mode === "tts" ? "Dừng đọc" : "Dừng đọc chuyện"}
+                  {narration.mode === "tts" ? t("storyDetail.stopReading") : t("cultureDetail.stopStory")}
                 </span>
               </>
             ) : (
               <>
                 <Headphones className="w-4 h-4" />
-                <span>Sao Lí Lắc kể chuyện</span>
+                <span>{t("cultureDetail.narrate")}</span>
               </>
             )}
           </button>
           {!narration.canPlay && (
             <span className="text-xs text-stone-600">
-              Chưa có âm thanh khả dụng trên thiết bị này.
+              {t("cultureDetail.noAudio")}
             </span>
           )}
           {narration.error && (
@@ -240,21 +242,26 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <div className="flex items-center space-x-2 mb-2">
             <span className="bg-accent text-stone-900 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">
               {article.category === "am_thuc"
-                ? "Ẩm thực truyền thống"
+                ? t("cultureDetail.badgeFood")
                 : article.category === "le_hoi"
-                  ? "Lễ hội dân gian"
-                  : "Di sản văn hóa"}
+                  ? t("culture.catLeHoi")
+                  : t("cultureDetail.badgeHeritage")}
             </span>
             {pointsResult !== null && (
               <span className="bg-emerald-500 text-white px-3 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1">
                 <CircleCheck className="w-3.5 h-3.5" />
-                <span>Đã khám phá</span>
+                <span>{t("cultureDetail.explored")}</span>
               </span>
             )}
           </div>
           <h1 className="text-2xl md:text-3xl font-black font-display drop-shadow-md">
             {article.title}
           </h1>
+          <SupportTranslation
+            translations={article.translations}
+            select={(t: { title?: string }) => t.title}
+            className="mt-1 block text-sm md:text-base font-semibold text-white/80 drop-shadow"
+          />
         </div>
       </div>
 
@@ -262,11 +269,16 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
       <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-cream-border mb-8 shadow-sm">
         <div className="flex items-center space-x-2 text-culture font-bold text-sm mb-3 uppercase tracking-wider">
           <BookOpen className="w-4 h-4" />
-          <span>Giới thiệu sự tích</span>
+          <span>{t("cultureDetail.intro")}</span>
         </div>
         <p className="text-stone-700 leading-relaxed text-base md:text-lg font-medium">
           {article.intro}
         </p>
+        <SupportTranslation
+          translations={article.translations}
+          select={(t: { intro?: string }) => t.intro}
+          className="mt-3 block text-sm md:text-base leading-relaxed text-stone-500"
+        />
       </div>
 
       {/* Fun Facts Section */}
@@ -274,7 +286,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
         <div className="mb-10">
           <h2 className="text-xl font-bold font-display text-stone-800 mb-4 flex items-center space-x-2">
             <Lightbulb className="w-6 h-6 text-amber-500" />
-            <span>Có thể bé chưa biết?</span>
+            <span>{t("cultureDetail.funFacts")}</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {article.funFacts.map((fact: string, idx: number) => (
@@ -285,7 +297,14 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                 <div className="w-7 h-7 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   {idx + 1}
                 </div>
-                <p className="text-stone-700 text-sm leading-relaxed">{fact}</p>
+                <div className="min-w-0">
+                  <p className="text-stone-700 text-sm leading-relaxed">{fact}</p>
+                  <SupportTranslation
+                    translations={article.translations}
+                    select={(t: { funFacts?: string[] }) => t.funFacts?.[idx]}
+                    className="mt-1 block text-xs leading-relaxed text-stone-500"
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -299,17 +318,16 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
             <div className="flex items-center space-x-2">
               <Sparkles className="w-6 h-6 text-culture" />
               <h2 className="text-xl font-black font-display text-stone-800">
-                Thử Tài Khám Phá Văn Hóa
+                {t("cultureDetail.quizTitle")}
               </h2>
             </div>
             <span className="text-xs font-bold bg-culture-light/50 text-culture-dark px-3 py-1 rounded-full">
-              Thưởng +5 ViVi Points
+              {t("cultureDetail.quizReward")}
             </span>
           </div>
 
           <p className="text-stone-600 text-sm mb-6">
-            Cùng trả lời các câu đố vui để kiểm tra sự am hiểu và rinh thêm điểm
-            thưởng nhé!
+            {t("cultureDetail.quizIntro")}
           </p>
 
           <div className="space-y-6">
@@ -319,7 +337,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                 className="bg-white rounded-2xl p-5 border border-cream-border"
               >
                 <h3 className="font-bold text-stone-800 mb-3 text-base">
-                  Câu {qIdx + 1}: {q.question}
+                  {t("cultureDetail.question", { n: qIdx + 1 })} {q.question}
                 </h3>
                 <div className="space-y-2">
                   {q.options.map((opt: string, optIdx: number) => {
@@ -356,7 +374,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
 
           {incorrectResult && (
             <p role="status" className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-900 font-semibold">
-              Bé đúng {incorrectResult.correct}/{incorrectResult.total} câu. Hãy chọn lại đáp án rồi thử thêm lần nữa nhé!
+              {t("cultureDetail.partialResult", { correct: incorrectResult.correct, total: incorrectResult.total })}
             </p>
           )}
 
@@ -366,8 +384,8 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
               <>
                 <span className="text-xs text-stone-500">
                   {activeChild
-                    ? `Bé đang trả lời: ${Object.keys(selectedAnswers).length}/${article.quiz.length} câu`
-                    : "Đăng nhập tài khoản để nhận điểm thưởng vào kho báu"}
+                    ? t("cultureDetail.answering", { done: Object.keys(selectedAnswers).length, total: article.quiz.length })
+                    : t("cultureDetail.loginHint")}
                 </span>
 
                 {activeChild ? (
@@ -381,7 +399,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                     }
                     isLoading={isSubmitting}
                   >
-                    <span>Gửi đáp án & Nhận điểm</span>
+                    <span>{t("cultureDetail.submit")}</span>
                   </Button>
                 ) : (
                   <Button
@@ -393,7 +411,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                     className="flex items-center space-x-2"
                   >
                     <LogIn className="w-4 h-4" />
-                    <span>Đăng nhập để nhận điểm</span>
+                    <span>{t("storyDetail.loginForPoints")}</span>
                   </Button>
                 )}
               </>
@@ -403,12 +421,12 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                   <PartyPopper className="w-8 h-8 text-emerald-600" />
                   <div>
                     <h3 className="font-bold text-emerald-800 text-base">
-                      Tuyệt vời! Bé đã hoàn thành phần khám phá
+                      {t("cultureDetail.doneTitle")}
                     </h3>
                     <p className="text-xs text-emerald-600">
                       {pointsResult && pointsResult > 0
-                        ? `Bé nhận được +${pointsResult} ViVi Points!`
-                        : "Bé đã trả lời đúng. Lượt này không có điểm thưởng mới."}
+                        ? t("cultureDetail.pointsEarned", { points: pointsResult })
+                        : t("cultureDetail.noNewPoints")}
                     </p>
                   </div>
                 </div>
@@ -417,7 +435,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                   size="sm"
                   onClick={() => navigate("/van-hoa")}
                 >
-                  Khám phá thêm
+                  {t("cultureDetail.exploreMore")}
                 </Button>
               </div>
             )}

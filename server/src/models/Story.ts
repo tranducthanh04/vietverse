@@ -1,5 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 import { contentMetadataFields, discoverableContentFields, type ContentMetadata } from './contentMetadata.js';
+import { storyTranslationFields, type StoryTranslations } from './contentTranslations.js';
 
 export type StoryType = 'dong_dao' | 'co_tich' | 'tho' | 'ngu_ngon';
 
@@ -30,6 +31,8 @@ export interface IStory extends Document, ContentMetadata {
   ageGroups: string[];
   vocab: string[];
   quiz: IQuizQuestion[];
+  /** Reviewed translations of child-facing text, keyed by support language. Optional for backward compatibility. */
+  translations?: StoryTranslations;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,6 +85,7 @@ const storySchema = new Schema<IStory>(
         explanation: String,
       },
     ],
+    translations: storyTranslationFields,
   },
   {
     timestamps: true,
