@@ -71,12 +71,19 @@
 - Toàn bộ finding Critical/High/Medium của lần chấm đầu: **đã sửa** (người chấm lại xác minh theo `file:line`). Không phát hiện hồi quy nặng.
 - Finding mới khi chấm lại: 1 Medium (admin thiếu skip-link) và các Low. Đã sửa tiếp trong commit `f3a042f`: `SkipLink` dùng chung cho cả 4 layout; lỗi gửi quiz văn hoá có `role="alert"`; chữ thời gian trình phát audio `stone-600`; placeholder onboarding `stone-500`.
 
+### Low đã sửa (2026-10-17, nhánh `chore/a11y-nav-polish`)
+- **Chuyển focus về `<main>` khi đổi route:** hook dùng chung `useFocusMainOnRouteChange` (ở `client/src/app/`) được gọi trong cả 4 layout (public, khu bé, phụ huynh, admin). Bỏ qua lần tải đầu, bỏ qua đổi query/hash cùng trang, và không cướp focus khi có modal (`[aria-modal="true"]`) đang mở. Test: `focusMainOnRouteChange.test.tsx`.
+- **Footer link cao 32px → 44px:** 4 link mục "Khám phá" trong `PublicLayout` đổi `min-h-[32px]` → `min-h-[44px]`.
+- **Mũi tên "→"/"▼" trang trí → icon SVG `aria-hidden`:** `PublicLayout` (mũi tên menu mobile) dùng `ArrowRight`; `KidsLayout` (dấu mở menu chọn bé) dùng `ChevronDown` (icon mới thêm vào `icons.tsx`); nút "Đổi thưởng" ở `PointsShopPage` tách mũi tên khỏi chuỗi i18n sang icon `ArrowRight`.
+- **Hover zoom ảnh hero 700ms → 300ms + `motion-reduce`:** `LandingPage` đổi `duration-700` → `duration-300` và thêm `motion-reduce:transition-none motion-reduce:hover:scale-100`.
+- **Vài mô tả 12–14px trên mobile → tối thiểu 14px:** 5 thẻ chặng ở `LandingPage`, mô tả vật phẩm ở `PointsShopPage`, mô tả huy hiệu ở `TreasureRoomPage` (`text-xs` → `text-sm`); mô tả độ tuổi ở onboarding (`text-xs sm:text-sm` → `text-sm sm:text-base`). Giữ nguyên bản xem trước thẻ truyện/văn hoá (14px, line-clamp) và các nhãn/badge ngắn ở 12px.
+- **`autoFocus` ô tên onboarding:** bỏ `autoFocus` (gây nhảy bàn phím trên mobile); thay bằng quản lý focus: khi đổi bước thì focus vào khung bước (`tabIndex={-1}`, không focus input), không chạy ở lần render đầu.
+- **Số ViVi Points qua `formatPoints`:** các chỗ còn hiển thị số điểm thô (`KidsLayout` menu chọn bé, `VictoryModal`, `PointsShopPage`, `ParentJourney`, `CultureDetailPage`) nay đều qua `formatPoints`. Hàm thêm tham số `language` (vi → `vi-VN`, en → `en-US`), mặc định `vi`; mọi chỗ hiển thị truyền ngôn ngữ giao diện hiện hành. Test: `utils.test.ts`.
+
 ### Low còn lại (chưa sửa, có chủ đích hoặc ngoài phạm vi)
 - ~~`transition-all` còn rải rác ở nhiều component~~ **Đã sửa (2026-10-17, nhánh `chore/transition-props`):** thay toàn bộ 47 chỗ `transition-all` trong `client/src/**` bằng utility hẹp (`transition-colors`/`transition-shadow`/`transition-[...]`) liệt kê đúng thuộc tính đổi theo class trạng thái; thêm `motion-reduce:transition-none` cho các chỗ transform/scale. Ngoại lệ ghi nhận: thanh tiến trình onboarding (`OnboardingWizard.tsx:108`) vẫn animate `width` (chuyển sang `transition-[width]`), không đổi sang `transform` để giữ nguyên hành vi.
 - Bảng doanh thu chưa sắp xếp được; bộ lọc ngày trang Doanh thu chưa lên URL; tóm tắt lỗi CMS chưa có link neo tới trường.
-- Chưa tự chuyển focus về `<main>` khi đổi route (đã có skip-link).
-- Popup hết giờ dùng màu indigo "ban đêm" ngoài token — giữ, chờ chủ sản phẩm quyết.
-- Footer link cao 32px; mũi tên "→"/"▼" dạng ký tự trang trí; hover zoom ảnh hero 700ms; vài mô tả 12–14px trên mobile; `autoFocus` ô tên ở onboarding; vài số điểm chưa qua `formatPoints`.
+- ~~Popup hết giờ dùng màu indigo "ban đêm" ngoài token~~ **Đã sửa (2026-10-16, commit `6cbdf42`):** đưa về token thương hiệu.
 
 ## Review lượt cuối toàn nhánh (so với `main`)
 

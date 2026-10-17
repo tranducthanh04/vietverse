@@ -14,6 +14,7 @@ import {
   Headphones,
 } from '../../components/ui/icons.js';
 import { api } from "../../lib/api.js";
+import { formatPoints } from "../../lib/utils.js";
 import { useChildStore } from "../../store/childStore.js";
 import { useAuthStore } from "../../store/authStore.js";
 import { Card } from "../../components/ui/Card.js";
@@ -22,7 +23,7 @@ import { QueryErrorState } from "../../components/ui/QueryErrorState.js";
 import { CoverPlaceholder } from "../../components/ui/CoverPlaceholder.js";
 import { SupportTranslation } from "../../components/ui/SupportTranslation.js";
 import { useNarration } from "../../hooks/useNarration.js";
-import { useT } from "../../i18n/index.js";
+import { useT, useUiLanguage } from "../../i18n/index.js";
 
 export const CultureDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export const CultureDetailPage: React.FC = () => {
 const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> = ({ id, childId, userId }) => {
   const navigate = useNavigate();
   const t = useT();
+  const { language } = useUiLanguage();
   const { activeChild, updatePointsLocally } = useChildStore();
   const queryClient = useQueryClient();
   const [viewId] = useState(() => crypto.randomUUID());
@@ -425,7 +427,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                     </h3>
                     <p className="text-xs text-emerald-600">
                       {pointsResult && pointsResult > 0
-                        ? t("cultureDetail.pointsEarned", { points: pointsResult })
+                        ? t("cultureDetail.pointsEarned", { points: formatPoints(pointsResult, language) })
                         : t("cultureDetail.noNewPoints")}
                     </p>
                   </div>

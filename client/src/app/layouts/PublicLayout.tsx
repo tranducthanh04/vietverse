@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
+  ArrowRight,
   Clock,
   Flower2,
   Heart,
@@ -15,6 +16,7 @@ import { useAuthStore } from '../../store/authStore.js';
 import { useT } from '../../i18n/index.js';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +24,8 @@ export const PublicLayout: React.FC = () => {
   const { user } = useAuthStore();
   const t = useT();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useFocusMainOnRouteChange();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -135,7 +139,7 @@ export const PublicLayout: React.FC = () => {
                   }
                 >
                   <span>{link.label}</span>
-                  <span className="text-xs text-stone-400">→</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" aria-hidden="true" />
                 </NavLink>
               ))}
             </nav>
@@ -204,16 +208,16 @@ export const PublicLayout: React.FC = () => {
               <h4 className="text-base font-bold text-on-surface">{t('footer.exploreTitle')}</h4>
               <ul className="space-y-1 text-sm">
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/" className="inline-flex items-center min-h-[32px]">{t('footer.exploreWhat')}</Link>
+                  <Link to="/" className="inline-flex items-center min-h-[44px]">{t('footer.exploreWhat')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/kham-pha" className="inline-flex items-center min-h-[32px]">{t('footer.exploreMap')}</Link>
+                  <Link to="/kham-pha" className="inline-flex items-center min-h-[44px]">{t('footer.exploreMap')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/kho-truyen" className="inline-flex items-center min-h-[32px]">{t('footer.exploreStories')}</Link>
+                  <Link to="/kho-truyen" className="inline-flex items-center min-h-[44px]">{t('footer.exploreStories')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
-                  <Link to="/van-hoa" className="inline-flex items-center min-h-[32px]">{t('footer.exploreCulture')}</Link>
+                  <Link to="/van-hoa" className="inline-flex items-center min-h-[44px]">{t('footer.exploreCulture')}</Link>
                 </li>
               </ul>
             </div>

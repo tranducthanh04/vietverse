@@ -8,10 +8,13 @@ import {
 import { useAuthStore } from '../../store/authStore.js';
 import { VI_LOCALES } from '../../locales/vi.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  useFocusMainOnRouteChange();
 
   useEffect(() => {
     if (user && user.role !== 'admin') {

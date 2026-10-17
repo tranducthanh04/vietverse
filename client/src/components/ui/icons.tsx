@@ -21,6 +21,7 @@ import {
   Calendar as LCalendar,
   ChartColumn as LChartColumn,
   Check as LCheck,
+  ChevronDown as LChevronDown,
   CircleAlert as LCircleAlert,
   CircleCheck as LCircleCheck,
   CircleHelp as LCircleHelp,
@@ -134,6 +135,7 @@ export const Cake = withDefaults(LCake, 'Cake');
 export const Calendar = withDefaults(LCalendar, 'Calendar');
 export const ChartColumn = withDefaults(LChartColumn, 'ChartColumn');
 export const Check = withDefaults(LCheck, 'Check');
+export const ChevronDown = withDefaults(LChevronDown, 'ChevronDown');
 export const CircleAlert = withDefaults(LCircleAlert, 'CircleAlert');
 export const CircleCheck = withDefaults(LCircleCheck, 'CircleCheck');
 export const CircleHelp = withDefaults(LCircleHelp, 'CircleHelp');

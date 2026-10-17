@@ -1,5 +1,17 @@
 # 06 — Kết quả review senior BA/code
 
+## Dọn các lỗi a11y/giao diện mức Low — 2026-10-17, sửa local (nhánh `chore/a11y-nav-polish`)
+
+Xử lý nhóm Low còn lại từ bảng điểm UI (`plans/reports/ui-grade-261016-0956-ui-ux-pro-max-scorecard.md`). Chỉ sửa giao diện/khả năng truy cập phía client, **không đổi nghiệp vụ, điểm, quyền hay API**.
+
+- **Chuyển focus khi đổi route:** thêm hook dùng chung `useFocusMainOnRouteChange` (`client/src/app/`) gọi trong 4 layout (public, khu bé, phụ huynh, admin). Sau mỗi điều hướng client-side, focus về `<main id="main-content">` (đã có sẵn `tabIndex={-1}` + `focus:outline-none`). Bỏ qua lần tải trang đầu, bỏ qua đổi query/hash trong cùng trang, và không cướp focus khi đang mở modal. Có test (`client/src/test/focusMainOnRouteChange.test.tsx`).
+- **Vùng chạm & icon:** footer link mục "Khám phá" nâng từ 32px lên 44px; mũi tên trang trí "→"/"▼" đổi sang icon SVG `aria-hidden` (`ArrowRight`/`ChevronDown` từ `components/ui/icons.tsx`), gồm cả nút "Đổi thưởng" (tách mũi tên khỏi chuỗi i18n).
+- **Animation:** hover zoom ảnh hero ở Landing giảm 700ms → 300ms và tắt khi `prefers-reduced-motion`.
+- **Cỡ chữ mobile:** một số đoạn mô tả nội dung đang 12px (thẻ chặng Landing, mô tả vật phẩm Phòng điểm thưởng, mô tả huy hiệu Phòng báu vật, mô tả độ tuổi onboarding) nâng tối thiểu lên 14px. Giữ bản xem trước thẻ truyện/văn hoá (14px, line-clamp) và các nhãn/badge ngắn ở 12px.
+- **Onboarding:** bỏ `autoFocus` ô tên bé (gây bật bàn phím khi tải trang trên mobile); thay bằng việc focus khung bước khi đổi bước, không focus thẳng vào input.
+- **Hiển thị điểm:** mọi số ViVi Points hiển thị đều qua `formatPoints` (`client/src/lib/utils.ts`). **[Giả định trình bày]** Hàm thêm tham số `language` (`vi` → nhóm hàng nghìn kiểu `vi-VN`, `en` → `en-US`), mặc định `vi`; các màn truyền ngôn ngữ giao diện hiện hành. Không đổi cách tính điểm. Có test (`client/src/test/utils.test.ts`).
+- **Kiểm chứng:** `npm run typecheck` sạch (server + client); client 268/268 test qua; `npm run lint -w client` 0 lỗi (còn cảnh báo `any`/`act()` có sẵn). Không sửa server. Chưa nghiệm thu trên thiết bị thật.
+
 ## Bài "Xếp để đọc" và chuyển bài tiếp theo — 2026-10-17, sửa local
 
 - **Mục 2 (không qua được bài tiếp theo) — nguyên nhân gốc đã sửa, phía client:** màn hình hoàn thành (`VictoryModal`) vốn đã có sẵn nút "Bài tiếp theo" nhưng `LessonPlayerPage` chưa bao giờ truyền `onNextLesson`, nên làm xong bài chỉ còn "Về bản đồ"/"Chơi lại". Ngoài ra, nộp bài chỉ invalidate `['childPoints']` chứ không invalidate `['stages']`; với `staleTime` 60s của bản đồ, bài kế vẫn hiển thị khóa khi quay lại. Đã: (1) tính bài kế từ chính danh mục `/stages` (dùng chung cache với bản đồ, chỉ tải khi modal hiện), (2) truyền `onNextLesson` điều hướng `/hoc/:id`, (3) invalidate `['stages']` sau khi nộp để bản đồ mở khóa ngay. Không đổi API, quyền hay cách chấm điểm; không sửa server.

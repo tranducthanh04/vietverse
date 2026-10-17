@@ -10,12 +10,15 @@ import { useChildStore } from '../../store/childStore.js';
 import { useT } from '../../i18n/index.js';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher.js';
 import { SkipLink } from '../../components/ui/SkipLink.js';
+import { useFocusMainOnRouteChange } from '../useFocusMainOnRouteChange.js';
 
 export const ParentLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { activeChild } = useChildStore();
   const t = useT();
+
+  useFocusMainOnRouteChange();
 
   // Guard: Ensure parent gate unlock token and timestamp are valid
   useEffect(() => {
