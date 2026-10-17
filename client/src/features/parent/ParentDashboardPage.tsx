@@ -10,7 +10,7 @@ import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
-import { useT } from '../../i18n/index.js';
+import { useT, type TKey } from '../../i18n/index.js';
 import { ParentJourney, ParentRecentActivities } from './ParentJourney.js';
 import type { ParentProgress } from './parentProgress.types.js';
 
@@ -55,6 +55,15 @@ export const ParentDashboardPage: React.FC = () => {
   }
 
   const { overview, competencies } = progressData;
+
+  const statusKey = (statusLabel: string) =>
+    statusLabel === 'Đã khám phá' ? 'explored' : statusLabel === 'Đang luyện tập' ? 'practicing' : statusLabel === 'Chưa bắt đầu' ? 'notStarted' : null;
+  const statusText = (statusLabel: string) => {
+    const key = statusKey(statusLabel);
+    return key ? t(`competency.status_${key}` as TKey) : statusLabel;
+  };
+  const competencyText = (key: string, field: 'name' | 'desc', fallback: string) =>
+    ['listening', 'speaking', 'reading', 'thinking'].includes(key) ? t(`competency.${key}_${field}` as TKey) : fallback;
 
   const getStatusBadge = (statusLabel: string) => {
     switch (statusLabel) {
@@ -142,17 +151,17 @@ export const ParentDashboardPage: React.FC = () => {
                       {getCompetencyIcon(comp.key)}
                     </div>
                     <h3 className="text-lg font-bold font-display text-stone-800">
-                      {comp.name}
+                      {competencyText(comp.key, 'name', comp.name)}
                     </h3>
                   </div>
 
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(comp.statusLabel)}`}>
-                    {comp.statusLabel}
+                    {statusText(comp.statusLabel)}
                   </span>
                 </div>
 
                 <p className="text-stone-600 text-sm mb-4 leading-relaxed">
-                  {comp.description}
+                  {competencyText(comp.key, 'desc', comp.description)}
                 </p>
               </div>
 
@@ -168,7 +177,7 @@ export const ParentDashboardPage: React.FC = () => {
                   aria-valuenow={comp.percentage}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={t('parentPortal.familiarityAria', { name: comp.name })}
+                  aria-label={t('parentPortal.familiarityAria', { name: competencyText(comp.key, 'name', comp.name) })}
                 >
                   <div
                     className="h-full w-full bg-primary rounded-full origin-left transition-transform duration-300 ease-out"

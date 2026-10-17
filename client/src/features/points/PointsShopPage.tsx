@@ -16,7 +16,7 @@ import { useChildStore, type ChildProfile } from '../../store/childStore.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { Mascot } from '../../components/ui/Mascot.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
-import { useT, type TKey } from '../../i18n/index.js';
+import { useT, useUiLanguage, type TKey } from '../../i18n/index.js';
 import {
   apiErrorMessage,
   SHOP_FILTERS,
@@ -71,6 +71,7 @@ export const PointsShopPage: React.FC = () => {
   const { activeChild, fetchChildren } = useChildStore();
   const queryClient = useQueryClient();
   const t = useT();
+  const { language } = useUiLanguage();
   const [filter, setFilter] = useState<ShopFilter>('all');
   const [selectedItem, setSelectedItem] = useState<ShopItemView | null>(null);
   const [shippingAddress, setShippingAddress] = useState({
@@ -261,10 +262,10 @@ export const PointsShopPage: React.FC = () => {
                     className="grid grid-cols-[1fr_auto] gap-x-3 bg-surface-container-lowest p-3.5 rounded-2xl border border-outline-variant/20 md:table-row md:p-0 md:rounded-none md:border-0 md:border-b md:bg-transparent"
                   >
                     <td className="order-2 col-span-2 text-[11px] text-on-surface-variant md:px-4 md:py-3 md:text-sm md:order-none">
-                      {formatPointDate(tx.createdAt)}
+                      {formatPointDate(tx.createdAt, new Date(), language)}
                     </td>
                     <td className="order-1 md:px-4 md:py-3 md:order-none">
-                      <span className="block font-bold text-on-surface">{pointReasonLabel(tx.reason)}</span>
+                      <span className="block font-bold text-on-surface">{pointReasonLabel(tx.reason, language)}</span>
                       {tx.description && (
                         <span className="block text-xs text-on-surface-variant">{tx.description}</span>
                       )}

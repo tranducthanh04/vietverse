@@ -73,6 +73,16 @@ describe('point labels and dates', () => {
     expect(formatPointDate('not a date', now)).toBe('');
   });
 
+  it('renders ledger reasons and relative dates in English when asked', () => {
+    const now = new Date(2026, 9, 9, 0, 30);
+    expect(pointReasonLabel('lesson', 'en')).toBe('Finished a lesson');
+    expect(pointReasonLabel('weekend_bonus', 'en')).toBe('Bonus activity');
+    expect(pointReasonLabel('toString', 'en')).toBe('Bonus activity');
+    expect(formatPointDate(new Date(2026, 9, 9, 0, 0), now, 'en')).toBe('Today');
+    expect(formatPointDate(new Date(2026, 9, 8, 12, 0), now, 'en')).toBe('Yesterday');
+    expect(formatPointDate(new Date(2026, 9, 7, 12, 0), now, 'en')).toBe('07/10/2026');
+  });
+
   it('signs deltas with a real minus sign', () => {
     expect(formatPointDelta(10)).toBe('+10');
     expect(formatPointDelta(-30)).toBe('−30');
