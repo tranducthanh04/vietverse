@@ -169,6 +169,13 @@ Xóa DNS record nếu không dùng nữa, rồi so lại trạng thái các dự
 
 Vercel FE/BE và Atlas giữ nguyên ít nhất 14 ngày sau cutover. Rollback ≤ 5 phút: gỡ redirect trên Vercel (deploy lại commit trước) hoặc trỏ người dùng về `vietverse-nine.vercel.app`; nếu đã có dữ liệu ghi trên máy mới thì `backup-now.sh` rồi `mongorestore` ngược về Atlas theo [vercel-deployment.md](./vercel-deployment.md). Chưa thực hiện bước nào ở mục này.
 
+## Cloudinary trên self-host — 2026-10-17
+
+- Triệu chứng trước đó: bé thu âm xong báo "Lưu trữ thu âm chưa sẵn sàng" (503 `UPLOAD_STORAGE_UNAVAILABLE`) vì cả 5 biến `CLOUDINARY_*` trong `~/vietverse/.env` để trống.
+- Đã nạp bằng `~/vietverse/set-env.sh` (sao lưu `.env` trước: `~/vietverse/.env.bak-20261017-122350`): `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_RECORDING_UPLOAD_PRESET=vietverse_recordings_signed`, `CLOUDINARY_IMAGE_UPLOAD_PRESET=vietverse_content_images_signed`. Hai preset signed đã có sẵn trên account từ đợt Vercel. Giá trị secret không ghi vào repo.
+- Kiểm chứng: từ trong container `vietverse-api`, upload thử 1 giây WAV qua preset thu âm thành công rồi xoá ngay. Chưa chạy luồng thu âm thật của phụ huynh/bé trên production.
+- Việc nên làm: API secret đã được dán vào hội thoại với trợ lý, nên rotate trong Cloudinary rồi chạy lại `set-env.sh` với secret mới.
+
 ## Giới hạn / chưa kiểm chứng
 
 - Pha 1 chỉ kiểm chứng local trên Windows không có Docker: typecheck, unit test, `bash -n` + shellcheck, `compose.yml` hợp lệ theo compose-spec JSON schema, `npm ci -w <workspace>` cài đúng phạm vi, script index compile chạy được, và luồng `init-replica.js` + mongodump/mongorestore bằng file `--config` đã chạy thử trên mongod 8.2 local (tạo root → khởi động lại với `--replSet --keyFile` → initiate → user → chạy lại idempotent → transaction bằng user app → dump bằng user backup → restore đổi tên DB).

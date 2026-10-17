@@ -237,11 +237,11 @@ export const PublicLayout: React.FC = () => {
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
-                  <span>hotro@vietverse.edu.vn</span>
+                  <a className="hover:underline break-all" href="mailto:vietverseallsatar@gmail.com">vietverseallsatar@gmail.com</a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
-                  <span>1900 6868 (Tư vấn giáo dục)</span>
+                  <a className="hover:underline" href="tel:+84868261075">0868 261 075 (Tư vấn giáo dục)</a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
