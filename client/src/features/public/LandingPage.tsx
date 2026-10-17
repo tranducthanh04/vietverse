@@ -434,12 +434,12 @@ export const LandingPage: React.FC = () => {
                   <Headphones className="w-4 h-4 text-secondary-fixed" />
                   Hãy liên hệ với VietVerse:
                 </span>
-                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="mailto:hotro@vietverse.edu.vn">
-                  hotro@vietverse.edu.vn
+                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="mailto:vietverseallsatar@gmail.com">
+                  vietverseallsatar@gmail.com
                 </a>
                 <span className="hidden sm:inline opacity-40">•</span>
-                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="tel:19006868">
-                  1900 6868
+                <a className="hover:underline flex items-center gap-1.5 min-h-[44px] hover:text-secondary-fixed transition-colors" href="tel:+84868261075">
+                  0868 261 075
                 </a>
               </div>
             </div>
