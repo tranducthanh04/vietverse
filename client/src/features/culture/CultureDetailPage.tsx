@@ -190,7 +190,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
           <button
             onClick={narration.toggle}
             disabled={!narration.canPlay}
-            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all min-h-[44px] ${
+            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-[box-shadow,filter] min-h-[44px] ${
               narration.isPlaying
                 ? "bg-amber-500 text-white animate-pulse shadow-amber-300"
                 : "bg-gradient-to-r from-culture-dark to-culture text-white hover:brightness-105"
@@ -347,7 +347,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
                         key={optIdx}
                         onClick={() => handleSelectOption(qIdx, optIdx)}
                         disabled={quizSubmitted || isSubmitting}
-                        className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
+                        className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-semibold transition-colors flex items-center justify-between min-h-[44px] ${
                           isSelected
                             ? "bg-culture/10 border-culture text-culture-dark font-bold"
                             : "bg-white border-cream-border hover:border-culture/60 hover:bg-emerald-50/40 text-stone-700"

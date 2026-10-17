@@ -78,7 +78,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 onClick={() => handleSelectLeft(p.left)}
                 disabled={isMatched}
                 className={cn(
-                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-all border-3 shadow-sm select-none',
+                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-[color,background-color,border-color,box-shadow,opacity] border-3 shadow-sm select-none',
                   isMatched
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-80'
                     : isSelected
@@ -106,7 +106,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
                 onClick={() => handleSelectRight(p.right)}
                 disabled={isMatched}
                 className={cn(
-                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-all border-3 shadow-sm select-none',
+                  'min-h-[4rem] h-full px-3 sm:px-4 py-2 rounded-2xl font-display font-bold flex items-center justify-between gap-2 text-left leading-snug transition-[color,background-color,border-color,opacity] border-3 shadow-sm select-none',
                   isMatched
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-80'
                     : isWrong

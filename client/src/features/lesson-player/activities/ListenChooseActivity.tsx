@@ -71,7 +71,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
               key={option.id}
               onClick={() => handleSelect(option.id)}
               className={cn(
-                'group relative bg-white border-4 rounded-3xl transition-all shadow-kid active:scale-95',
+                'group relative bg-white border-4 rounded-3xl transition-[background-color,border-color,transform] motion-reduce:transition-none shadow-kid active:scale-95',
                 hasImages
                   ? 'p-4 flex flex-col items-center justify-center min-h-[160px]'
                   : 'px-4 py-3 flex items-center gap-4 text-left min-h-[72px]',

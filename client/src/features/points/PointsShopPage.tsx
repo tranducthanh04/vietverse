@@ -313,7 +313,7 @@ export const PointsShopPage: React.FC = () => {
                 type="button"
                 aria-pressed={filter === tab.value}
                 onClick={() => setFilter(tab.value)}
-                className={`px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-full font-bold text-xs transition-[color,background-color,border-color,box-shadow] cursor-pointer ${
                   filter === tab.value
                     ? 'btn-3d-primary'
                     : 'bg-surface-container-low hover:bg-surface-container text-on-surface-variant border border-outline-variant/30'
@@ -347,7 +347,7 @@ export const PointsShopPage: React.FC = () => {
               return (
                 <article
                   key={item._id}
-                  className="bg-surface-container-lowest rounded-3xl p-5 border-2 border-outline-variant/30 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between"
+                  className="bg-surface-container-lowest rounded-3xl p-5 border-2 border-outline-variant/30 shadow-sm hover:shadow-lg transition-shadow flex flex-col justify-between"
                 >
                   <div>
                     <div className="relative aspect-square w-full rounded-2xl bg-secondary-fixed/20 flex items-center justify-center overflow-hidden mb-4 border border-outline-variant/20">

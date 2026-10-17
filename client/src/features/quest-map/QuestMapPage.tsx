@@ -97,7 +97,7 @@ export const QuestMapPage: React.FC = () => {
               key={stage._id}
               onClick={() => { if (!isLocked) setSelectedStageOrder(stage.order); }}
               aria-disabled={isLocked || undefined}
-              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-all flex items-center space-x-2.5 ${
+              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-[color,background-color,border-color,box-shadow,transform] motion-reduce:transition-none flex items-center space-x-2.5 ${
                 isSelected
                   ? 'btn-3d-primary ring-2 ring-primary/40 scale-105 cursor-pointer'
                   : isLocked
@@ -164,7 +164,7 @@ export const QuestMapPage: React.FC = () => {
             return (
               <div
                 key={lesson._id}
-                className={`rounded-3xl p-6 transition-all flex flex-col justify-between border-2 ${
+                className={`rounded-3xl p-6 transition-[background-color,border-color,box-shadow,transform,opacity] motion-reduce:transition-none flex flex-col justify-between border-2 ${
                   isUnlocked
                     ? 'bg-surface-container-lowest border-outline-variant/40 shadow-md hover:shadow-xl hover:-translate-y-1'
                     : 'bg-surface-container-low/70 border-outline-variant/20 opacity-60'

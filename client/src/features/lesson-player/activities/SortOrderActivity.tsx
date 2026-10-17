@@ -69,7 +69,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
             key={idx}
             type="button"
             onClick={() => handleSelectItem(item, idx)}
-            className="min-w-[4.5rem] max-w-full min-h-14 sm:min-h-16 px-4 py-2 inline-flex items-center justify-center text-center whitespace-normal break-words bg-white border-3 border-cream-border rounded-2xl text-xl sm:text-2xl font-display font-black text-stone-800 shadow-kid hover:border-accent active:translate-y-1 active:shadow-none transition-all"
+            className="min-w-[4.5rem] max-w-full min-h-14 sm:min-h-16 px-4 py-2 inline-flex items-center justify-center text-center whitespace-normal break-words bg-white border-3 border-cream-border rounded-2xl text-xl sm:text-2xl font-display font-black text-stone-800 shadow-kid hover:border-accent active:translate-y-1 active:shadow-none transition-[border-color,box-shadow,transform] motion-reduce:transition-none"
           >
             {item}
           </button>

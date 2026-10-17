@@ -89,7 +89,7 @@ export const ParentLayout: React.FC = () => {
               key={tab.to}
               to={tab.to}
               className={({ isActive }) =>
-                `flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 min-h-[44px] whitespace-nowrap ${
+                `flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-[color,background-color,border-color,box-shadow] border-2 min-h-[44px] whitespace-nowrap ${
                   isActive
                     ? 'bg-primary text-white border-primary shadow-sm'
                     : 'bg-white text-stone-600 border-cream-border hover:border-accent'
