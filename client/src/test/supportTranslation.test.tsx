@@ -126,6 +126,14 @@ describe("TranslationEditor (CMS)", () => {
       "Sự thật một",
     );
   });
+
+  it("drops cleared fields and empty languages instead of saving blank strings", () => {
+    render(<Form />);
+    const intro = screen.getByLabelText("Tiếng Anh · Mở đầu");
+    fireEvent.change(intro, { target: { value: "English intro" } });
+    fireEvent.change(intro, { target: { value: "" } });
+    expect(JSON.parse(screen.getByRole("status").textContent!)).toEqual({});
+  });
 });
 
 describe("TranslationPreview (CMS)", () => {

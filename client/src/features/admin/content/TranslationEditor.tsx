@@ -23,8 +23,21 @@ export function TranslationEditor({
   onChange: (next: Translations) => void;
   sections: TranslationSection[];
 }) {
-  const setEntry = (lang: SupportLanguage, entry: TranslationEntry) =>
-    onChange({ ...translations, [lang]: entry });
+  // Drop cleared fields and languages left with no fields, so an edited-then-emptied translation
+  // saves the same payload as one never typed (absent, not `{ en: { title: "" } }`).
+  const setEntry = (lang: SupportLanguage, entry: TranslationEntry) => {
+    const cleaned: TranslationEntry = {};
+    for (const [key, value] of Object.entries(entry)) {
+      const filled = Array.isArray(value)
+        ? value.some((item) => item.trim() !== "")
+        : (value ?? "").trim() !== "";
+      if (filled) cleaned[key] = value;
+    }
+    const next = { ...translations };
+    if (Object.keys(cleaned).length > 0) next[lang] = cleaned;
+    else delete next[lang];
+    onChange(next);
+  };
   const setText = (lang: SupportLanguage, key: string, text: string) =>
     setEntry(lang, { ...translations[lang], [key]: text });
   const setListItem = (

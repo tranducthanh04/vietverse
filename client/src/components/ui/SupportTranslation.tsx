@@ -2,8 +2,12 @@ import React from "react";
 import { useChildStore } from "../../store/childStore.js";
 
 export interface SupportTranslationProps<T> {
-  /** The content's translations map keyed by language code (`en`, `ja`, …), as returned by the API. */
-  translations?: Partial<Record<string, T>> | null;
+  /**
+   * The content's translations map keyed by language code (`en`, `ja`, …), as returned by the API.
+   * Entries are typed loosely on purpose: `T` is inferred from `select` alone, so one map holding
+   * different fields per language (e.g. `en` has fun facts, `ja` only an intro) still type-checks.
+   */
+  translations?: Partial<Record<string, object>> | null;
   /** Pulls the translated string for one language entry (e.g. the intro, or one fun fact by index). */
   select: (entry: T) => string | null | undefined;
   /** Layout/typography classes for the rendered line; a secondary-text default applies when omitted. */
@@ -31,7 +35,7 @@ export function SupportTranslation<T>({
   for (const lang of preferred) {
     if (lang === "other") continue;
     const entry = translations[lang];
-    const text = entry ? select(entry)?.trim() : undefined;
+    const text = entry ? select(entry as T)?.trim() : undefined;
     if (text) {
       return (
         <span

@@ -173,6 +173,19 @@ export const StoryDetailPage: React.FC = () => {
                 Tác giả: {story.author || "Dân gian Việt Nam"}
               </span>
 
+              {story.description?.trim() && (
+                <div className="mt-3 max-w-prose">
+                  <p className="text-kid-base text-stone-700 leading-relaxed text-pretty">
+                    {story.description}
+                  </p>
+                  <SupportTranslation
+                    translations={story.translations}
+                    select={(t: { description?: string }) => t.description}
+                    className="mt-1 block text-sm sm:text-base text-stone-500 leading-relaxed"
+                  />
+                </div>
+              )}
+
               {/* Karaoke Play / Pause Controls */}
               <div className="mt-5 w-full flex items-center gap-3 sm:gap-4 bg-cream-muted/70 border border-cream-border rounded-kid p-3 sm:p-4">
                 <button
