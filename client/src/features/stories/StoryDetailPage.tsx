@@ -192,7 +192,7 @@ export const StoryDetailPage: React.FC = () => {
                 <button
                   onClick={narration.toggle}
                   disabled={audioUnavailable}
-                  className="shrink-0 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:bg-primary-hover active:translate-y-1 active:shadow-none transition-[background-color,box-shadow,transform] motion-reduce:transition-none disabled:opacity-50 disabled:pointer-events-none"
+                  className="shrink-0 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-kid-primary hover:bg-primary-hover active:translate-y-1 active:shadow-none transition-[background-color,box-shadow,transform,opacity] motion-reduce:transition-none disabled:opacity-50 disabled:pointer-events-none"
                   aria-label={
                     narration.isPlaying
                       ? narration.mode === "tts"
