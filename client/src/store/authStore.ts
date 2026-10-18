@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, authPost, clearSessionHint, getApiAccessToken, hasSessionHint, refreshSession, setApiAccessToken } from '../lib/api.js';
+import { api, authPost, clearSessionHint, getApiAccessToken, hasProbedLegacySession, hasSessionHint, markLegacySessionProbed, refreshSession, setApiAccessToken } from '../lib/api.js';
 
 export interface User {
   id: string;
@@ -83,12 +83,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const token = getApiAccessToken();
       // A guest who has never signed in has no session hint: skip the refresh call so the browser
       // does not log a 401 on every public page. The httpOnly cookie is unreadable, so the hint is
-      // the only signal that a session may exist.
+      // the only signal that a session may exist — except for sessions issued before the hint
+      // existed, which get one probe per browser so returning users are not signed out.
       if (!token && !hasSessionHint()) {
-        clearParentGate();
-        setApiAccessToken(null);
-        set({ user: null, subscription: null, accessToken: null });
-        return;
+        if (hasProbedLegacySession()) {
+          clearParentGate();
+          setApiAccessToken(null);
+          set({ user: null, subscription: null, accessToken: null });
+          return;
+        }
+        markLegacySessionProbed();
       }
       // Reload has no in-memory token: one refresh call restores token, user and subscription.
       // With a token in memory (in-app re-check), /auth/me is enough.

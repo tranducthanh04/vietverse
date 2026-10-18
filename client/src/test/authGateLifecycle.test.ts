@@ -78,8 +78,27 @@ describe('parent gate authentication lifecycle', () => {
     expect(getApiAccessToken()).toBe('existing-access');
   });
 
+  it('restores a session issued before the hint existed with one probe, then stays quiet for guests', async () => {
+    clearSessionHintCookie();
+    localStorage.removeItem('vv_session_probe_v1');
+    const urls: string[] = [];
+    api.defaults.adapter = async (config) => {
+      urls.push(config.url ?? '');
+      return { data: { data: { user: parent, accessToken: 'access', subscription: { plan: 'free', maxChildren: 1 } } }, status: 200, statusText: 'OK', headers: {}, config };
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual(['/auth/refresh']);
+    expect(useAuthStore.getState().user).toMatchObject({ id: parent.id });
+
+    setApiAccessToken(null);
+    useAuthStore.setState({ user: null, subscription: null, accessToken: null });
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual(['/auth/refresh']);
+  });
+
   it('makes no request on a cold load for a guest who has no session hint', async () => {
     clearSessionHintCookie();
+    localStorage.setItem('vv_session_probe_v1', '1');
     const urls: string[] = [];
     api.defaults.adapter = async (config) => {
       urls.push(config.url ?? '');

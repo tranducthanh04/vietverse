@@ -35,6 +35,22 @@ export function hasSessionHint(): boolean {
   return document.cookie.split(';').some((entry) => entry.trim().startsWith(`${SESSION_HINT_COOKIE}=`));
 }
 
+/**
+ * Sessions issued before the hint cookie existed carry only the httpOnly refresh token. Each browser
+ * therefore gets one bootstrap refresh without a hint: a returning user is restored (and receives the
+ * hint), a guest sees a single 401 and is quiet afterwards.
+ */
+const LEGACY_SESSION_PROBE_KEY = 'vv_session_probe_v1';
+
+export function hasProbedLegacySession(): boolean {
+  // Without storage, keep the pre-hint behaviour (always try) rather than signing a user out.
+  try { return localStorage.getItem(LEGACY_SESSION_PROBE_KEY) === '1'; } catch { return false; }
+}
+
+export function markLegacySessionProbed(): void {
+  try { localStorage.setItem(LEGACY_SESSION_PROBE_KEY, '1'); } catch { /* storage unavailable: probe again next load */ }
+}
+
 /** Best-effort local clear so a stale hint self-heals even when the logout request cannot reach the server. */
 export function clearSessionHint(): void {
   if (typeof document === 'undefined') return;
