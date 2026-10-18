@@ -1,5 +1,10 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Header công khai VI/EN — 2026-10-18, local
+
+- Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.
+- Quyết định kỹ thuật, không đổi nghiệp vụ/API/quyền/điểm. Quy tắc trình bày, test trình duyệt và giới hạn tại [public-header-responsive.md](./public-header-responsive.md).
+
 ## Chuyển bài tiếp theo sau khi hoàn thành — 2026-10-17, local
 
 - Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.
