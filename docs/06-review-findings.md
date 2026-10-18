@@ -8,6 +8,11 @@
 - **Kết quả tích hợp `44d6d7e`/base `2c055f28`:** focused 70/8 file, full FE 430/45 file, root typecheck/build server+client, lint 0 lỗi/100 cảnh báo đều exit0. Picker 32+4, stage 48+6, greeting 30 ca/6 switchback/30 PATCH qua; main đối chiếu JSON head/hash không có violation và xem ảnh mới. Review cuối không có finding cần sửa. Branding 32+8 giữ bằng chứng cùng đầu vào, không chạy lại sau merge. Audio act warning còn nguyên; không chạy backend/F04 local.
 - **Ba hồ sơ hợp lệ:** CSS hash `54f0da74a5d30e845e55986a68676911fd6f55772972633b7a6edbf15332f041`; menu bottom=483, mục cuối/nút thêm thấy được/hit-test đúng qua 4 ca VI/EN 320×844/900, chuột/Tab-Enter tới đúng PATCH/`/bat-dau`. Không kiểm form onboarding thật. Fixture greeting 5 hồ sơ/tên 120 ký tự chỉ stress, không đổi quota/max30. CI PR còn chờ; chưa nhận merge/deploy/production.
 
+## COVER-FALLBACK-SAFE — 2026-10-19, sửa local
+
+- Lookup icon story/culture từng đọc thuộc tính kế thừa của object; category `constructor`, `toString`, `__proto__`, `hasOwnProperty` không có ảnh làm React ném `Element type is invalid`. Model category là string, nên dữ liệu legacy có thể đi tới cả list/detail.
+- Chỉ nhận khóa sở hữu trực tiếp, còn lại dùng fallback đúng loại. Không đổi category/enum/API, ảnh thật, quyền, điểm hoặc audio; không đóng F04/F13 hay taxonomy truyện. 10 ca lỗi RED trước sửa, 30 test hồi quy GREEN sau sửa. Contract và kiểm chứng tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
+
 ## Header khu bé thiếu brand/tagline — 2026-10-18, sửa local
 
 - **KIDS-HEADER-BRANDING:** tab cấu trúc Docs khách yêu cầu `VIETVERSE` và tagline đầy đủ bên trái header cố định sau đăng nhập; `KidsLayout` chưa hiển thị hai thành phần này. Bổ sung link về `/` dùng `app.name` cùng `publicNav.subtagline` hiện có, không sửa dictionary hoặc thêm hình logo.
