@@ -75,13 +75,23 @@ export function createDirectRecordingUpload(blob: Blob, context: RecordingContex
     try {
       const response = await fetch(intent.upload.url,{ method:'POST',body:form,credentials:'omit',redirect:'error',signal:timeout.signal });
       assertCurrent(isCurrent);
-      if (!response.ok) throw new Error('Provider rejected upload');
+      if (!response.ok) {
+        // The asset was not stored (bad signature, disallowed format, preset or provider
+        // outage). Surface the provider status to the console for diagnosis without
+        // exposing the request (which carries the signature) to the child.
+        let detail = '';
+        try { detail = (await response.text()).slice(0, 500); } catch { /* body already consumed or unreadable */ }
+        console.warn('[recording] Cloudinary rejected the direct upload', response.status, detail);
+        throw Object.assign(new Error('Kho lưu trữ chưa nhận được bản thu. Bé thử thu lại; nếu vẫn chưa được, nhờ bố mẹ kiểm tra giúp nhé.'),
+          { code: 'RECORDING_PROVIDER_REJECTED', providerStatus: response.status });
+      }
       uploaded = true;
     } catch (error) {
       assertCurrent(isCurrent);
+      if ((error as { code?: string } | null)?.code === 'RECORDING_PROVIDER_REJECTED') throw error;
       const name = (error as { name?: string } | null)?.name;
       if (name === 'TimeoutError' || name === 'AbortError') throw Object.assign(new Error('Mạng chậm nên chưa gửi xong bản thu. Bé bấm gửi lại nhé; bản thu vẫn được giữ.'), { code: 'RECORDING_UPLOAD_TIMEOUT' });
-      throw new Error('Không gửi được bản thu âm. Vui lòng thử lại; bản thu vẫn được giữ.');
+      throw Object.assign(new Error('Không gửi được bản thu âm. Vui lòng thử lại; bản thu vẫn được giữ.'), { code: 'RECORDING_UPLOAD_NETWORK' });
     } finally {
       timeout.clear();
     }

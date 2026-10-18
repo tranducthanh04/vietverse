@@ -154,6 +154,21 @@ describe('atomic recording finalize', () => {
     await RecordingUploadIntent.updateOne({ _id: intentId }, { status: 'finalizing', claimToken: 'crashed', claimedAt: new Date(Date.now() - 60_000) });
     expect((await finalize()).status).toBe(201);
   });
+  it('returns the committed receipt when a finalize sees completion before its receipt read settles', async () => {
+    // The receipt and the `completed` status commit together; a concurrent finalize can
+    // read the intent as completed while its earlier receipt read raced that same commit.
+    expect((await finalize()).status).toBe(201);
+    const realFindOne = Recording.findOne.bind(Recording);
+    let raced = false;
+    vi.spyOn(Recording, 'findOne').mockImplementation(((...args: Parameters<typeof realFindOne>) => {
+      if (!raced) { raced = true; return { session: () => Promise.resolve(null) } as never; }
+      return realFindOne(...args);
+    }) as never);
+    const result = await finalize();
+    expect(raced).toBe(true);
+    expect(result.status).toBe(201);
+    expect(await Recording.countDocuments()).toBe(1);
+  });
   it('accepts Chrome WebM whose provider metadata has no duration', async () => {
     vi.mocked(cloudinary.api.resource).mockResolvedValue({ ...resource(), duration: undefined } as never);
     const result = await finalize();

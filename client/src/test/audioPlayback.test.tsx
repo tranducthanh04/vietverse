@@ -35,6 +35,14 @@ describe('parent recordings playback', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Phát bản ghi âm' })).toBeInTheDocument());
   });
+  it('tells the parent when a recording cannot be decoded in this browser', async () => {
+    play.mockRejectedValueOnce(Object.assign(new Error('format'), { name: 'NotSupportedError' }));
+    showRecordings();
+    fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
+    await screen.findByRole('alert');
+    expect(screen.getByText(/Không phát được bản thu trên trình duyệt này/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Phát bản ghi âm' })).toBeInTheDocument();
+  });
   it('stops audio on unmount and when another reader claims playback', async () => {
     const view = showRecordings();
     fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
