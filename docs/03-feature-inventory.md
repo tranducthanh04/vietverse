@@ -1,5 +1,10 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Điều hướng footer công khai — 2026-10-18, local
+
+- FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
+- **Giả định trình bày:** lộ trình là phần năm chặng hiện có trên Landing, không tạo trang/học liệu mới. Khách xem được không cần đăng nhập; không đổi quyền học, API hoặc điểm. Chi tiết và giới hạn tại [footer-navigation.md](./footer-navigation.md).
+
 ## Điều hướng Khóa học khu bé — 2026-10-18, local
 
 - KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.

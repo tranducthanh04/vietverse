@@ -71,6 +71,8 @@ export const en: Dictionary = {
     exploreTitle: 'Explore Learning',
     exploreWhat: 'What is Vietverse',
     exploreMap: 'The 5-stage adventure path',
+    exploreRoadmap: 'Learning roadmap',
+    exploreCourses: 'Courses',
     exploreStories: 'Interactive folk story library',
     exploreCulture: 'Explore traditional culture',
     policyTitle: 'Terms & Privacy',
