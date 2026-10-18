@@ -16,6 +16,24 @@ Word cards read `subPrompt` separately, without reusing the short target-word au
 
 ## Pending customer decisions and inputs
 
+### Existing Explore text source captured on 2026-10-18
+
+F13 source capture now preserves the supplied Explore tab in
+[`customer-source/2026-10-18/`](./customer-source/2026-10-18/coverage.md), separate
+from the immutable 09 October snapshot. It contains 415 clear VI-to-labelled-locale
+pairs for prompts and hints across EN/KO/JA/FR/ZH. Five prompt blocks lack exact
+Vietnamese; unlabelled gloss lists remain unresolved. Do not request translations
+already present in this snapshot again. The input table below is for genuinely
+missing or stale material and publication approval, not a claim that all Explore
+translations are absent. No translated passage/subPrompt was found in this tab.
+
+Technical decision: opt-in source catalog/report only. Default importer,
+bootstrap, models, APIs, learner rendering, grading and hint timing are unchanged.
+Runtime target mapping must use verified identity/version/exact VI, never source
+array positions. Capturing text about listening is not audio implementation; no
+audio/provider/voice assets or production data are changed. Remaining gaps and
+the proposed additive model/render contract are in the linked coverage report.
+
 The customer named “Evernote”; the provider is not confirmed. Ask for the service name/link, chosen voice and permitted usage. Do not ask for passwords in chat. If it is a paid synthesis service, agree on server-side secret setup, cost and asset publication separately. The current change makes no provider calls.
 
 Supply approved translations using the following fields (one entry per language/content section):
