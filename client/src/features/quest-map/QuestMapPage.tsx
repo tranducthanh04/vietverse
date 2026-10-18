@@ -143,22 +143,22 @@ export const QuestMapPage: React.FC = () => {
               key={stage._id}
               onClick={() => selectStage(stage._id)}
               aria-pressed={isSelected}
-              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-[color,background-color,border-color,box-shadow,transform] motion-reduce:transition-none flex items-center space-x-2.5 ${
+              className={`flex-shrink-0 max-w-full px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-[color,background-color,border-color,box-shadow] motion-reduce:transition-none flex items-center space-x-2.5 ${
                 isSelected
-                  ? 'btn-3d-primary ring-2 ring-primary/40 scale-105 cursor-pointer'
+                  ? 'btn-3d-primary ring-2 ring-primary/40 cursor-pointer'
                   : isLocked
                   ? 'bg-surface-container-high text-on-surface-variant/60 border border-outline-variant/30 cursor-pointer'
                   : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border border-outline-variant/40 shadow-sm cursor-pointer'
               }`}
             >
               {isLocked ? (
-                <Lock className="w-4 h-4 opacity-70" />
+                <Lock className="w-4 h-4 shrink-0 opacity-70" />
               ) : stage.isCompleted ? (
-                <CircleCheck className="w-4 h-4 text-tertiary-fixed-dim" />
+                <CircleCheck className="w-4 h-4 shrink-0 text-tertiary-fixed-dim" />
               ) : (
-                <Compass className="w-4 h-4 text-secondary-container" />
+                <Compass className="w-4 h-4 shrink-0 text-secondary-container" />
               )}
-              <span>{t('map.stagePrefix')} {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
+              <span className="min-w-0 whitespace-normal break-words">{t('map.stagePrefix')} {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
             </button>
           );
         })}

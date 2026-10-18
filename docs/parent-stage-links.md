@@ -38,6 +38,9 @@ lesson entitlement or a new parent-only learning page.
   late data for the previous child cannot populate the new child view. A bound
   link shows a mismatch until the correct profile or a new map is chosen.
 - Load failures show the common error/retry UI, not an empty or missing stage.
+- **Presentation assumption:** stage selectors retain horizontal scrolling but
+  each label wraps within the available width; selected tabs do not enlarge.
+  This prevents long stage names from being clipped on narrow screens.
 
 No API/model/store changes, new parameters to backend endpoints, dependency,
 score/unlock/replay policy, auth, Parent Gate or screen-time changes. Existing
@@ -51,12 +54,17 @@ failed before implementation; all pass after the scoped change. Existing parent,
 child-journey and next-lesson tests remain part of the focused verification.
 
 Browser runner: `node plans/261018-parent-stage-links/browser-smoke.mjs`.
-Uses actual components, BrowserRouter, ProtectedRoute, ChildSessionGuard and CSS
+Uses actual components, BrowserRouter, ProtectedRoute, ChildSessionGuard, KidsLayout and CSS
 with a fictional parent/profile and local HTTP fixtures. Checks VI/EN at
 320/640/1366px, click/Tab/Enter, unlocked/completed/locked/empty stages, real
 reload/history, invalid IDs and child mismatch. Real font loading is required;
 only local requests and public Google Font hosts are allowed. Runtime paths can
 be overridden through `PLAYWRIGHT_MODULE` and `CHROME_PATH`.
+The server chooses a free local port. Map checks include all six actual navigation
+links, each map control's bounds/hit testing after scrolling, and clearance for
+the last map control above the fixed bottom bar. Earlier runs without KidsLayout
+did not establish that integration coverage. The parent dashboard still uses a
+plain main wrapper rather than ParentLayout.
 
 This is not production authentication/Parent Gate, real student data, real
 lesson completion or physical-device acceptance. Full results and integration

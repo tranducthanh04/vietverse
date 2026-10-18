@@ -5,6 +5,10 @@
 - KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.
 - **Giả định trình bày:** thanh dưới chia 3 cột/2 hàng dưới 400px, 6 cột từ 400px; giữ nhãn đầy đủ và khoảng đệm cuối trang tương ứng. Yêu cầu, bằng chứng và giới hạn tại [kids-courses-navigation.md](./kids-courses-navigation.md).
 
+## Tích hợp liên kết chặng — 2026-10-18, local
+
+- Tích hợp PARENT-STAGE-LINKS với thanh điều hướng khu bé: tab chặng dài giới hạn chiều rộng và xuống dòng, không phóng to tab active; giữ nguyên lựa chọn URL và quyền học. Giả định trình bày và kiểm tra layout thật tại [parent-stage-links.md](./parent-stage-links.md).
+
 ## Header công khai VI/EN — 2026-10-18, local
 
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.

@@ -27,6 +27,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ParentDashboardPage } from '/src/features/parent/ParentDashboardPage.tsx';
 import { QuestMapPage } from '/src/features/quest-map/QuestMapPage.tsx';
+import { KidsLayout } from '/src/app/layouts/KidsLayout.tsx';
 import { ProtectedRoute } from '/src/components/ui/ProtectedRoute.tsx';
 import { ChildSessionGuard } from '/src/components/ChildSessionGuard.tsx';
 import { useAuthStore } from '/src/store/authStore.ts';
@@ -38,14 +39,15 @@ const h = React.createElement;
 createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) },
   h(BrowserRouter, null, h(Routes, null,
     h(Route, { path: '/phu-huynh/tien-do', element: h('main', { className: 'max-w-6xl mx-auto p-4' }, h(ParentDashboardPage)) }),
-    h(Route, { path: '/kham-pha', element: h(ProtectedRoute, null, h(ChildSessionGuard, null, h(QuestMapPage))) }),
+    h(Route, { element: h(ProtectedRoute, null, h(ChildSessionGuard, null, h(KidsLayout))) },
+      h(Route, { path: '/kham-pha', element: h(QuestMapPage) })),
     h(Route, { path: '/hoc/:id', element: h('h1', null, 'Lesson destination') })
 ))));
 `;
 process.chdir(root);
 const server = await createServer({
   root, envFile: false,
-  server: { host: '127.0.0.1', port: 5197, strictPort: true, hmr: false, watch: null },
+  server: { host: '127.0.0.1', port: 0, strictPort: true, hmr: false, watch: null },
   plugins: [{
     name: 'parent-stage-regression',
     resolveId(id) { if (id === fixtureId) return id; },
@@ -61,8 +63,42 @@ const server = await createServer({
   }],
 });
 let browser;
+async function assertMapLayout(page) {
+  const nav = page.getByRole('navigation');
+  await nav.waitFor();
+  assert.deepEqual(await nav.locator('a').evaluateAll(links => links.map(link => link.getAttribute('href'))),
+    ['/kham-pha', '/gia', '/kho-truyen', '/van-hoa', '/diem-thuong', '/phong-bau-vat']);
+  const navGeometry = await nav.evaluate(el => {
+    const boxes = [...el.querySelectorAll('a')].map(link => link.getBoundingClientRect());
+    return {
+      invalid: boxes.some(r => r.width < 44 || r.height < 44 || r.left < 0 || r.right > innerWidth || r.bottom > innerHeight),
+      overlap: boxes.some((a, i) => boxes.slice(i + 1).some(b => Math.min(a.right, b.right) > Math.max(a.left, b.left) && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top))),
+    };
+  });
+  assert.deepEqual(navGeometry, { invalid: false, overlap: false });
+  const controls = page.locator('main button:visible, main a:visible');
+  assert(await controls.count() > 0);
+  for (const control of await controls.all()) {
+    await control.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    const geometry = await control.evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const header = document.querySelector('header').getBoundingClientRect();
+      const nav = document.querySelector('nav').getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { box: r.toJSON(), width: innerWidth, headerBottom: header.bottom, navTop: nav.top,
+        hit: el.contains(hit), exposed: r.width > 0 && r.height > 0 && r.left >= 0 && r.right <= innerWidth + 1 &&
+          r.top >= header.bottom - 1 && r.bottom <= nav.top + 1 && el.contains(hit) };
+    });
+    assert(geometry.exposed, `Map control is exposed: ${await control.textContent()}: ${JSON.stringify(geometry)}`);
+  }
+  // At maximum scroll, the actual last map control must clear the fixed bar.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  assert(await controls.last().evaluate(el => el.getBoundingClientRect().bottom <= document.querySelector('nav').getBoundingClientRect().top + 1));
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+}
 try {
   await server.listen();
+  const baseUrl = `http://127.0.0.1:${server.httpServer.address().port}`;
   browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
   for (const language of ['vi', 'en']) {
     const context = await browser.newContext({ reducedMotion: 'reduce' });
@@ -72,7 +108,7 @@ try {
     await context.route('**/*', route => {
       const url = new URL(route.request().url());
       if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname)) return route.continue();
-      if (url.origin !== 'http://127.0.0.1:5197') { unexpectedRequests.push(url.href); return route.abort(); }
+      if (url.origin !== baseUrl) { unexpectedRequests.push(url.href); return route.abort(); }
       if (!url.pathname.startsWith('/api/')) return route.continue();
       assert.equal(route.request().method(), 'GET');
       let data;
@@ -88,7 +124,7 @@ try {
       await page.setViewportSize({ width, height: 900 });
       for (const [index, stage] of stages.entries()) {
         for (const method of ['click', 'keyboard']) {
-          await page.goto('http://127.0.0.1:5197/phu-huynh/tien-do');
+          await page.goto(`${baseUrl}/phu-huynh/tien-do`);
           const label = index === 1 ? (language === 'vi' ? 'Tiếp tục chặng' : 'Continue stage') : (language === 'vi' ? 'Xem chi tiết' : 'View details');
           const link = page.getByRole('link', { name: `${label}: ${stage.title}`, exact: true });
           await link.waitFor();
@@ -110,11 +146,13 @@ try {
           const action = page.getByRole('button', { name: /^(Vào học ngay|Luyện tập lại|Start now|Practice again)$/ });
           assert.equal(await action.count(), index < 2 ? 1 : 0);
           if (index === 3) await page.getByText('0 / 0', { exact: true }).waitFor();
+          await assertMapLayout(page);
+          if (index === 1 && method === 'keyboard') await page.screenshot({ path: resolve(shots, `${language}-${width}-map-layout.png`), fullPage: true });
           if (index === 2 && method === 'keyboard' && width === 320) await page.screenshot({ path: resolve(shots, `${language}-${width}-locked.png`), fullPage: true });
         }
       }
       // Real URL/history, not just a memory router fixture.
-      await page.goto('http://127.0.0.1:5197/kham-pha?stage=s2&childId=child-a');
+      await page.goto(`${baseUrl}/kham-pha?stage=s2&childId=child-a`);
       await page.getByRole('heading', { level: 2, name: stages[1].title, exact: true }).waitFor();
       await page.reload();
       await page.getByRole('heading', { level: 2, name: stages[1].title, exact: true }).waitFor();
@@ -124,13 +162,15 @@ try {
       await page.getByRole('heading', { level: 2, name: stages[1].title, exact: true }).waitFor();
       await page.goForward();
       await page.getByRole('heading', { level: 2, name: stages[2].title, exact: true }).waitFor();
-      await page.goto('http://127.0.0.1:5197/kham-pha?stage=unknown');
+      await page.goto(`${baseUrl}/kham-pha?stage=unknown`);
       await page.getByRole('alert').waitFor();
       assert.equal(await page.getByRole('heading', { level: 2 }).count(), 0);
-      await page.goto('http://127.0.0.1:5197/kham-pha?stage=s2&childId=unknown');
+      await assertMapLayout(page);
+      await page.goto(`${baseUrl}/kham-pha?stage=s2&childId=unknown`);
       await page.getByRole('alert').waitFor();
       assert.equal(await page.getByRole('heading', { level: 2 }).count(), 0);
-      console.log(`PASS ${language} ${width}px: 8 parent links; locked/empty; direct/reload/history/invalid/child mismatch; no overflow`);
+      await assertMapLayout(page);
+      console.log(`PASS ${language} ${width}px: 8 parent links; locked/empty; direct/reload/history/invalid/child mismatch; real KidsLayout six-link nav and map-control clearance; no overflow`);
     }
     assert.deepEqual(errors, []);
     assert.deepEqual(unexpectedRequests, []);
