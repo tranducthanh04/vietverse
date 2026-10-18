@@ -96,6 +96,20 @@ describe('parent gate authentication lifecycle', () => {
     expect(urls).toEqual(['/auth/refresh']);
   });
 
+  it('keeps the legacy-session probe available after a network failure so the next load retries', async () => {
+    clearSessionHintCookie();
+    localStorage.removeItem('vv_session_probe_v1');
+    api.defaults.adapter = async () => { throw new Error('Network down'); };
+    await useAuthStore.getState().fetchMe();
+    expect(localStorage.getItem('vv_session_probe_v1')).toBeNull();
+
+    api.defaults.adapter = async (config) => {
+      throw Object.assign(new Error('Unauthorized'), { config, response: { status: 401, data: {}, headers: {}, config } });
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(localStorage.getItem('vv_session_probe_v1')).toBe('1');
+  });
+
   it('makes no request on a cold load for a guest who has no session hint', async () => {
     clearSessionHintCookie();
     localStorage.setItem('vv_session_probe_v1', '1');

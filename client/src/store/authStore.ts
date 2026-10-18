@@ -85,14 +85,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // does not log a 401 on every public page. The httpOnly cookie is unreadable, so the hint is
       // the only signal that a session may exist — except for sessions issued before the hint
       // existed, which get one probe per browser so returning users are not signed out.
-      if (!token && !hasSessionHint()) {
-        if (hasProbedLegacySession()) {
-          clearParentGate();
-          setApiAccessToken(null);
-          set({ user: null, subscription: null, accessToken: null });
-          return;
-        }
-        markLegacySessionProbed();
+      // The probe is only spent on a definitive answer (below), so a network blip retries next load.
+      if (!token && !hasSessionHint() && hasProbedLegacySession()) {
+        clearParentGate();
+        setApiAccessToken(null);
+        set({ user: null, subscription: null, accessToken: null });
+        return;
       }
       // Reload has no in-memory token: one refresh call restores token, user and subscription.
       // With a token in memory (in-app re-check), /auth/me is enough.
@@ -103,6 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // A bootstrap restore is not a new login; keep the tab's signed gate on reload.
       const previousUser = get().user;
       if (previousUser && previousUser.id !== session.user.id) clearParentGate();
+      markLegacySessionProbed();
       set({
         user: session.user,
         subscription: session.subscription,
@@ -113,7 +112,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // load stays quiet. A transient/network error keeps the hint so a logged-in user still recovers
       // on the next reload once connectivity returns.
       const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 401 || status === 403) clearSessionHint();
+      if (status === 401 || status === 403) {
+        clearSessionHint();
+        markLegacySessionProbed();
+      }
       clearParentGate();
       setApiAccessToken(null);
       set({ user: null, subscription: null, accessToken: null });
