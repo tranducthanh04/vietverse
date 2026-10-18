@@ -97,6 +97,15 @@ describe('direct recording workflow', () => {
     expect(provider).toHaveLength(1);
     expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
   });
+  it('codes a first-attempt provider network failure so the child sees the offline message', async () => {
+    // RECORDING_UPLOAD_NETWORK is what RecordVoiceActivity maps to lesson.uploadOffline;
+    // the first attempt must carry it (no finalize is tried before any upload succeeded).
+    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); throw new TypeError('Failed to fetch'); }));
+    const task = make();
+    await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_NETWORK' });
+    expect(provider).toHaveLength(1);
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
+  });
   it('times out a stalled provider upload and checks finalize first on the next submit', async () => {
     vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => {
       provider.push(config);
