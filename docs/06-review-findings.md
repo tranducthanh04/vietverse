@@ -1,5 +1,11 @@
 # 06 — Kết quả review senior BA/code
 
+## Tên bé hợp lệ tràn option trong picker — 2026-10-19, sửa local
+
+- **KIDS-PICKER-NAME-WRAP:** Chrome/CSS/font thật ở 320px/VI với tên liền 30 ký tự: tên vượt mép phải button 53,53125px, điểm vượt 73,140625px; `pageOverflow=false`, nên chỉ kiểm chiều rộng trang sẽ bỏ sót. Lỗi phát hiện trong QA MAP-CHILD-GREETING, thuộc UI/header audit 5.2, không phải thay nghiệp vụ hồ sơ.
+- Sửa riêng ba dòng class option trong `KidsLayout`: `gap-2`, tên `min-w-0 flex-1 whitespace-normal break-words`, điểm `shrink-0`. Giữ nguyên API max30, trigger/handler, chọn bé, focus/dismissal, branding/nav/điểm. Không đổi audio/F04/auth/Parent Gate/menu avatar hoặc grading.
+- Bằng chứng: browser RED exit1 trước sửa; năm component test đã qua trước sửa, chỉ bảo vệ hành vi (không đo layout jsdom). Browser 32 ca và regression branding/map/full checks sau sửa đang chờ; chưa ghi GREEN hoặc nghiệm thu production. Chi tiết và giới hạn tại [kids-picker-name-wrap.md](./kids-picker-name-wrap.md), `plans/journals/2026-10-19-kids-picker-name-wrap.md`.
+
 ## Header khu bé thiếu brand/tagline — 2026-10-18, sửa local
 
 - **KIDS-HEADER-BRANDING:** tab cấu trúc Docs khách yêu cầu `VIETVERSE` và tagline đầy đủ bên trái header cố định sau đăng nhập; `KidsLayout` chưa hiển thị hai thành phần này. Bổ sung link về `/` dùng `app.name` cùng `publicNav.subtagline` hiện có, không sửa dictionary hoặc thêm hình logo.
