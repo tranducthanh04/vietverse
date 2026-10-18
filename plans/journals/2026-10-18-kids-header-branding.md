@@ -117,3 +117,18 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-header-branding/codeDuAN`.
   newly integrated head. New-head CI is still pending at this journal update;
   PR merge remains a separate coordinator gate. This docs-only handoff does
   not commit, push, merge, deploy or change source/other documentation.
+
+## PR22 source-capture integration (2026-10-19)
+
+- Previous head `958186125085fbdb667953315b679d949a17023f` passed exact-head CI
+  `39149297888` and both previews. After PR22 merged, normal merge
+  `dcc5c378a1faba8f0ea51426aa7df7e03218ca7f` integrates main
+  `bf8651572678ff0f37acc02bca4e57efd940759e` without conflicts.
+- All client files, root package/lock and branding browser harness are identical
+  to the tested/reviewed prior head. Its frontend and browser evidence remains
+  applicable to those unchanged inputs; no new local rerun is claimed. The
+  added main files are source-capture tools/tests/docs, not runtime changes.
+- Independent incremental review: no actionable findings, same seven-file
+  branding scope and 13 product lines; PR22 and earlier docs preserved, no
+  preflight-report or audio implementation delta. New exact-head CI is pending;
+  its outcome is recorded in the PR body, not inferred from the previous run.
