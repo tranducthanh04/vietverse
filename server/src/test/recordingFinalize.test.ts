@@ -9,6 +9,7 @@ import { ChildrenService } from '../modules/children/children.service.js';
 import { storageService } from '../services/storage.service.js';
 import mongoose from 'mongoose';
 import { AudioCleanupTask } from '../models/AudioCleanupTask.js';
+import { DirectRecordingsService } from '../modules/recordings/recordings.directUpload.js';
 
 const original = { ...env };
 let destroyed: Array<[string, string]> = [];
@@ -32,6 +33,30 @@ afterEach(() => { Object.assign(env, original); vi.restoreAllMocks(); });
 const finalize = (auth = token, body: unknown = { intentId }) => request(app).post('/api/v1/recordings/finalize').set('Authorization', `Bearer ${auth}`).send(body);
 
 describe('atomic recording finalize', () => {
+  it.each([false, true])('recovers a receipt committed between reads, including intent removal: %s', async removeIntent => {
+    const findIntent = RecordingUploadIntent.findOne.bind(RecordingUploadIntent);
+    let committedId: string | undefined;
+    // The outer receipt read is empty; another real finalize commits before its intent read.
+    vi.spyOn(RecordingUploadIntent, 'findOne').mockImplementationOnce(((...args: Parameters<typeof findIntent>) => ({
+      lean: async () => {
+        committedId = (await DirectRecordingsService.finalize(parentId, intentId)).id;
+        if (removeIntent) await RecordingUploadIntent.deleteOne({ _id: intentId });
+        return findIntent(...args).lean();
+      },
+    })) as typeof RecordingUploadIntent.findOne);
+    const result = await finalize();
+    expect(result.status).toBe(201);
+    expect(result.body.data.id).toBe(committedId);
+    expect(await Recording.countDocuments()).toBe(1);
+    expect(await PointTransaction.countDocuments()).toBe(0);
+  });
+
+  it('does not invent a receipt for a completed intent whose recording is absent', async () => {
+    await RecordingUploadIntent.updateOne({ _id: intentId }, { status: 'completed' });
+    expect((await finalize()).status).toBe(404);
+    expect(await Recording.countDocuments()).toBe(0);
+  });
+
   it('keeps a legacy asset and recovers its receipt when commit succeeds but its ACK is lost', async () => {
     const transaction = mongoose.connection.transaction.bind(mongoose.connection);
     vi.spyOn(mongoose.connection, 'transaction').mockImplementationOnce(async (...args: Parameters<typeof transaction>) => {

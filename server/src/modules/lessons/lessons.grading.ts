@@ -9,7 +9,7 @@ export interface ActivitySubmission {
 
 /**
  * Server-side grading of child's activity submission against the lesson activity definition.
- * Does NOT trust client score or isCorrect when canonical answers are present.
+ * Missing canonical answers fail closed; client correctness never grants credit.
  */
 export function gradeActivity(activity: IActivity, submission?: ActivitySubmission): boolean {
   if (!submission) return false;
@@ -52,10 +52,6 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
         }
         return false;
       }
-      // If activity has no correctAnswer defined in DB, fallback to isCorrect
-      if (!activity.correctAnswer && submission.isCorrect !== undefined) {
-        return Boolean(submission.isCorrect);
-      }
       return false;
     }
 
@@ -94,9 +90,6 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
         }
         return false;
       }
-      if (!activity.correctAnswer && (!activity.blanks || activity.blanks.length === 0) && submission.isCorrect !== undefined) {
-        return Boolean(submission.isCorrect);
-      }
       return false;
     }
 
@@ -104,7 +97,7 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
       const expected = Array.isArray(activity.correctAnswer)
         ? activity.correctAnswer
         : activity.orderedItems;
-      if (!expected || !Array.isArray(expected)) return true;
+      if (!Array.isArray(expected) || expected.length === 0) return false;
 
       if (Array.isArray(submission.userAnswer)) {
         if (submission.userAnswer.length !== expected.length) return false;
@@ -128,7 +121,7 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
           );
         });
       }
-      if (Array.isArray(activity.correctAnswer) && Array.isArray(submission.userAnswer)) {
+      if (Array.isArray(activity.correctAnswer) && activity.correctAnswer.length > 0 && Array.isArray(submission.userAnswer)) {
         if (activity.correctAnswer.length !== submission.userAnswer.length) return false;
         return activity.correctAnswer.every(
           (item, i) =>
@@ -136,13 +129,10 @@ export function gradeActivity(activity: IActivity, submission?: ActivitySubmissi
             String(submission.userAnswer[i]).trim().toLowerCase()
         );
       }
-      if (!activity.pairs && !activity.correctAnswer && submission.isCorrect !== undefined) {
-        return Boolean(submission.isCorrect);
-      }
       return false;
     }
 
     default:
-      return Boolean(submission.isCorrect);
+      return false;
   }
 }

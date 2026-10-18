@@ -247,6 +247,7 @@ export class PointsService {
         _id: child._id,
         refundLock: { $exists: false },
         viviPoints: { $gte: item.costPoints },
+        ...(item.type === 'virtual' ? { ownedItemIds: { $ne: item._id } } : {}),
       },
       {
         $inc: { viviPoints: -item.costPoints },
@@ -262,6 +263,9 @@ export class PointsService {
       }
       if (await Child.exists({ _id: child._id, refundLock: { $exists: true } })) {
         throw { statusCode: 409, message: 'Điểm của bé đang được đối soát. Vui lòng thử lại.' };
+      }
+      if (item.type === 'virtual' && await Child.exists({ _id: child._id, ownedItemIds: item._id })) {
+        throw { statusCode: 400, message: 'Bé đã sở hữu vật phẩm ảo này rồi.' };
       }
       throw {
         statusCode: 400,
