@@ -22,6 +22,10 @@
 
 ## Delivery and limits
 
+- Before packaging, main advanced to `142209912c4711f1d50eeb44ae2dbfb316217eba` (Landing CTA PR17). Committed the scoped change as `87477cd`, then ordinary merge `ec0db56ed71b803ca0d248b1eeca7cccba786ca0`, without conflicts. PR diff remains the same nine files; no Landing changes belong to this PR.
+- Combined-base verification: frontend 369/369 tests (40 files), client TypeScript/Vite build and all 12 navigation browser combinations passed. Latest screenshots: OS temporary directory `vietverse-kids-courses-VEjSqi`. Backend tree and root package/lockfile are unchanged from the successful 497-test run; that result is reused, not reported as a second run. Points/header source and its inputs are unchanged, so the 16-case result remains applicable.
+- Reviewer rechecked the merged diff and journal at `ec0db56e`: no new findings; previous approval still applies.
+
 - Separate PR to main; coordinator owns review/merge. No auto-merge, main push, manual deployment, production writes, purchase or real payment testing.
 - Browser uses production shared components and local API responses, with synthetic tall destination bodies. Not whole-page, production, iOS/Android or screen-reader acceptance. Existing pricing/payment behavior is unchanged and was not re-audited.
 - No user action needed for local implementation; coordinator must accept the exact PR head before merge. Real-device acceptance remains separate.
