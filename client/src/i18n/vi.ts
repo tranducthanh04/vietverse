@@ -397,6 +397,7 @@ export const vi = {
     practiceAgain: 'Luyện tập lại',
   },
   kidsLayout: {
+    pointsLinkAria: 'Mở Điểm thưởng: {points} điểm ViVi',
     pickChildAria: 'Chọn hồ sơ bé',
     pickChildLabel: 'Chọn hồ sơ bé:',
     childFallback: 'Bé yêu',
