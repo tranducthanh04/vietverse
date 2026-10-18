@@ -47,8 +47,9 @@ export const CoverPlaceholder: React.FC<{ kind: 'story' | 'culture'; variant?: s
   variant,
   className = '',
 }) => {
+  const variants = kind === 'story' ? storyVariants : cultureVariants;
   const { icon: Icon, gradient, iconColor } =
-    (variant && (kind === 'story' ? storyVariants : cultureVariants)[variant]) || fallback[kind];
+    variant && Object.prototype.hasOwnProperty.call(variants, variant) ? variants[variant] : fallback[kind];
   return (
     <div
       aria-hidden="true"

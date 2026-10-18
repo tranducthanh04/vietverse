@@ -1,5 +1,10 @@
 # 06 — Kết quả review senior BA/code
 
+## COVER-FALLBACK-SAFE — 2026-10-19, sửa local
+
+- Lookup icon story/culture từng đọc thuộc tính kế thừa của object; category `constructor`, `toString`, `__proto__`, `hasOwnProperty` không có ảnh làm React ném `Element type is invalid`. Model category là string, nên dữ liệu legacy có thể đi tới cả list/detail.
+- Chỉ nhận khóa sở hữu trực tiếp, còn lại dùng fallback đúng loại. Không đổi category/enum/API, ảnh thật, quyền, điểm hoặc audio; không đóng F04/F13 hay taxonomy truyện. 10 ca lỗi RED trước sửa, 30 test hồi quy GREEN sau sửa. Contract và kiểm chứng tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
+
 ## Header công khai tràn khi đổi VI/EN — 2026-10-18, sửa local
 
 - Đã tái hiện bằng font/CSS thật: ở 1536px, hàng tiếng Việt rộng 1457px vượt khung 1280px và đẩy nút đăng ký ra ngoài màn hình. Header fixed không nhất thiết làm tăng document.scrollWidth, nên test cũ chỉ đo trang bỏ sót lỗi.

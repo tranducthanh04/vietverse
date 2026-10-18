@@ -1,5 +1,10 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Ảnh bìa dự phòng an toàn — 2026-10-19, local
+
+- `CoverPlaceholder` chỉ chọn icon theo khóa khai báo trực tiếp; category lạ như `constructor` không còn làm sập màn truyện/văn hóa. Giữ icon/màu hiện có, `className`, `aria-hidden` và ảnh thật nếu có.
+- Sửa kỹ thuật, không đổi taxonomy/API/dữ liệu/quyền/điểm/audio. Contract và giới hạn tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
+
 ## Điều hướng Khóa học khu bé — 2026-10-18, local
 
 - KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.
