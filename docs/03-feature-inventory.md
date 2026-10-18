@@ -1,5 +1,12 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Map child greeting - 2026-10-19, local
+
+- MAP-CHILD-GREETING adds the selected child's name using existing VI/EN UI copy,
+  plain text and full-name wrapping. No extra request or change to map navigation,
+  guards, permissions, points or audio. Decisions, presentation assumption and
+  verification limits: [map-child-greeting.md](./map-child-greeting.md).
+
 ## Refresh/logout nguyên tử — 2026-10-18, local
 
 - Rotation, thu hồi family khi reuse và logout các phiên hiện có dùng transaction với cùng khóa ghi `User.__v` theo tài khoản. Tiêu thụ token cũ, tạo token mới và đọc profile trả về trong cùng transaction; lỗi trước commit không để token bị tiêu thụ một nửa.
