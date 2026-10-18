@@ -7,6 +7,11 @@
 - Lỗi DB tạm thời trả 503 `DATABASE_UNAVAILABLE`, JWT sai/hết hạn trả 401, lỗi lập trình không bị đổi thành lỗi đăng nhập. Không set/clear refresh cookie khi thao tác thất bại. Mất ACK commit có thể trả 503 dù DB đã commit; không bảo đảm mọi 503 cho phép dùng lại token cũ.
 - Cần MongoDB replica set, không migration/schema mới. Chi tiết timeout, giới hạn và kiểm chứng tại [auth-session-rotation.md](./auth-session-rotation.md). Đây là scope auth riêng, không gồm audio/F04/PIN/email policy hoặc PR #18; chưa thu hồi phiên production/deploy.
 
+## Điều hướng Khóa học khu bé — 2026-10-18, local
+
+- KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.
+- **Giả định trình bày:** thanh dưới chia 3 cột/2 hàng dưới 400px, 6 cột từ 400px; giữ nhãn đầy đủ và khoảng đệm cuối trang tương ứng. Yêu cầu, bằng chứng và giới hạn tại [kids-courses-navigation.md](./kids-courses-navigation.md).
+
 ## Header công khai VI/EN — 2026-10-18, local
 
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.

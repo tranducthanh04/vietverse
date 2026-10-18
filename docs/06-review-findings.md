@@ -412,6 +412,8 @@ Phần này ghi nhận các việc phát hiện khi review lại `client/src` tr
 
 ### P1-FE.5 — Responsive navigation và bảng admin chưa đủ dùng trên mobile [ĐÃ HOÀN TẤT - 2026-10-01]
 
+- Follow-up KIDS-COURSES-NAV (2026-10-18, local): audit 5.2 phát hiện thiếu lối Khóa học ở khu bé. Bổ sung link VI/EN tới `/gia`, không bỏ mục cũ; chuyển lưới responsive và bỏ phóng to item active để tránh chồng nhau. Khoảng đệm cuối trang giữ cả trên desktop vì navigation vẫn fixed. Không thay giá/gói/guard/API; chưa coi toàn bộ yêu cầu header đã hoàn tất. Xem [contract và giới hạn](./kids-courses-navigation.md).
+
 - Follow-up NAV-POINTS-LINK (2026-10-18, local): số dư header khu bé trước đây chỉ là `div`, không mở Điểm thưởng như yêu cầu. Đã đổi thành liên kết semantic tới route hiện có, nhãn VI/EN chứa số dư, focus và vùng chạm 44px; không thay guard/điểm/API. 5 test RED -> GREEN, 16 ca browser VI/EN x 320/390/640/1366px x số 0/số dài qua; không suy ra toàn bộ yêu cầu header đã hoàn tất. Xem [journal](../plans/journals/2026-10-18-kids-points-link.md).
 
 - Tình trạng: **Đã hoàn thiện toàn bộ**:

@@ -409,6 +409,7 @@ export const vi = {
     admin: 'Admin',
     adminAria: 'Quản trị hệ thống',
     navMap: 'Bản đồ',
+    navCourses: 'Khóa học',
     navStories: 'Kho truyện',
     navCulture: 'Văn hóa',
     navRewards: 'Đổi quà',
