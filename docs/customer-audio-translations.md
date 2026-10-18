@@ -38,6 +38,10 @@ The text side of this assumption is now built (not the audio/provider side). `St
 
 Still pending the customer/content owner: the English translations added to the demo seed are **unreviewed drafts** for preview only; reviewed translations and any translated audio must still arrive through the input table above, and no provider calls, production writes or CMS publication are authorised here. The bilingual **audio** layout and locale-tagged narration beyond the existing device-speech fallback are not part of this change.
 
+### Translation row alignment follow-up (2026-10-18, local)
+
+Technical repair, not a new business rule: CMS now remaps translated lyrics, vocabulary and fun facts with the source row on deletion/reordering in every language, including duplicate source strings and partially translated lists. Appending a row leaves its translation blank; orphaned entries beyond the source length are not reused. Text-only edits preserve translations for manual editorial review. This prevents new index drift; it does not infer corrections for previously misaligned saved content, generate translations, publish content or integrate a voice provider.
+
 ## Release acceptance still needed
 
 Listen to representative words, long passages and rhymes on target desktop/mobile browsers. Confirm accent, tone marks, pacing, missing voices, failed assets, stopping/navigation and text layout. Device TTS quality varies and may use the browser/OS speech service; do not promise offline or studio-quality narration. Obtain source audio for consistent results. No push/deploy occurs as part of this local feedback pass.
