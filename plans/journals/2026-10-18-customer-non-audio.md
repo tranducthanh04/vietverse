@@ -85,3 +85,29 @@ are not part of this subset.
   Documentation-only evidence updates follow this run; no product/test change.
 - The known external finalize CI failure and F04 hold remain as recorded above.
   New-head GitHub checks are still a separate gate; no self-merge or auto-merge.
+
+## PR14/PR17 baseline integration for coordinating review
+
+- Normal merge `a480b8534360ed9f35a49ee48daedba1bc365bb9` incorporates main
+  `142209912c4711f1d50eeb44ae2dbfb316217eba`, including parent settings and guest
+  Landing CTA fixes. No conflicts, no rewriting history.
+- Independent incremental review: exactly 15 non-audio files against that main;
+  all nine implementation/test files unchanged from `e924877`. Main's settings
+  and CTA docs retained. No auth/audio/F04/i18n or receipt-validation delta.
+- Fresh focused checks: 52 server cases across virtual redemption, legacy
+  grading/policy and admin suites; 19 client admin-detail/sort-reset cases pass.
+  Typecheck/build/lint exit 0; lint zero errors and 103 existing warnings.
+- Full `npm test` at `a480b8534360ed9f35a49ee48daedba1bc365bb9` FAILED:
+  516/517 server tests pass, 52/53 files pass, duration 179.14s, exit 1.
+  `server/src/test/recordingFinalize.test.ts:148:50`, test
+  "returns one receipt to many overlapping finalize calls without a 503",
+  expected `[201,201,201,201]`, received `[201,201,201,404]`.
+  Full client suite did not run because the root command short-circuited.
+- This reproduces held baseline F04. Recording source/tests and lockfile remain
+  unchanged; no retry-for-green, skipped/weakened test or audio repair.
+  Merge gate is HOLD. Coordinator explicitly requested preserving and pushing
+  this normal merge plus failure evidence, with PR #18 converted to draft.
+  Any automatically triggered CI result does not erase this local failure.
+- Earlier CI `39143231119` remains historical evidence for `e924877`, not a pass
+  for this integrated revision. No self-merge/auto-merge. The unresolved F04 gate,
+  audio hold and other scope boundaries remain regardless of a later green run.
