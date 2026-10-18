@@ -108,6 +108,7 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - [x] Screen time: `ChildSessionGuard` và `ScreenTimeGuard` dùng chung cho bản đồ, lesson trực tiếp và khám phá đã đăng nhập. Hết giờ thì unmount nội dung; gia hạn sau Parent Gate cập nhật timer đang chạy. Parent portal vẫn truy cập được khi hết giờ học.
 - [x] Responsive navigation & Touch targets: Menu hamburger di động cho PublicLayout, thanh tab chuyển phân hệ di động cho AdminLayout, chuẩn hóa toàn bộ nút header đạt tối thiểu 44px và giữ nhãn chữ Góc Phụ Huynh trên mọi kích cỡ màn hình (P1-FE.5, P2-FE.1).
 - [x] Loại bỏ demo credentials khỏi production: Gated bằng `import.meta.env.DEV` tại LoginPage (P1-FE.6).
+- [x] Lưu screen time có error/retry VI/EN và bỏ qua phản hồi cũ khi đổi bé/tài khoản hoặc rời trang (local 2026-10-18). Không đổi mức giới hạn/Parent Gate/API; xem [parent-settings-save.md](./parent-settings-save.md).
 
 ## Làm mới dữ liệu sau đồng bộ offline — 2026-10-18, local
 
