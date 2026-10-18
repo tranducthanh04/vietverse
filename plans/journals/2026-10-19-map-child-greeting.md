@@ -68,3 +68,21 @@ Coordinator requested normal merge of newly merged header PR23 at
 6cf4ce52724867be75b733c741c5cb72a0b823b5 before handoff. Existing browser evidence
 above is for the old header and is not integration proof for the new header.
 Focused/full frontend/typecheck/build and both browser matrices must be rerun.
+
+Integration commit ce72d9aa5cb9f4c47364abd71030202d0220a1a4 preserves feature commit
+f260a11f50a069c8d93c731bef666f7ae24c592b and normal-merges pinned main6cf4ce5.
+Only docs/03-feature-inventory.md conflicted; both sections preserved exactly.
+Post-merge checks passed:75 focused tests, all403 frontend tests (43 files), root
+typecheck/build, lint0 errors/100 warnings. Backend/package/lock inputs unchanged
+from bf865 (verified empty diff), so525 passing backend evidence is reused rather
+than represented as a new backend run. Main CI39150404209 for6cf4 is SUCCESS.
+
+Fresh integrated browser runs passed30 greeting cases/six switch-backs/30 PATCHs
+and48 parent-link activations/six URL-history matrices. Actual new wordmark/tagline
+and taller sticky header inspected in screenshots; checks measure current header
+geometry. Main also inspected VI320 unbroken screenshot. No runner/product fix
+or retry needed in these integrated runs. Separate picker overflow persists.
+
+Local implementation, verification, review and docs are complete. Await scoped
+PR creation, remote CI and coordinator review/merge; no self-merge. Plan/index
+status cannot be updated by unavailable ak CLI; no closed-index claim.

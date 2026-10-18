@@ -106,3 +106,46 @@ the API30-character write limit and represent defensive rendering, not newly
 allowed profile data. No backend/model/API rule was loosened. Auth account
 switch/rename/null assertions are coordinator unit coverage, not browser flows
 claimed here. F04/audio and other unrelated findings remain open.
+
+## Integrated PR23 header verification
+
+After the normal pinned-main merge, both unchanged browser runners were executed
+fresh on HEAD `ce72d9aa5cb9f4c47364abd71030202d0220a1a4`, base
+`6cf4ce52724867be75b733c741c5cb72a0b823b5`. The starting worktree was clean.
+Runs started approximately00:39:30 Asia/Saigon on2026-10-19. This section is new
+integration evidence, not reuse of the old-header screenshots above.
+
+- Greeting runner exit0:30 greeting cases, six switch-backs and30 real local
+  picker PATCH selections, VI/EN at320/640/1366px. All exact-text, literal-markup,
+  stale-name, wrapping/clipping, six44px navigation target, horizontal-overflow
+  and map-control/header/bottom-clearance assertions passed. No console errors,
+  page errors or unexpected requests. No runner edits or retries were needed.
+- Existing parent-stage runner exit0:48 parent-link activations and six complete
+  URL/history matrices on the new KidsLayout. All locked/empty/direct/reload/
+  Back/Forward/invalid-ID/child-mismatch and layout assertions passed.
+- Greeting screenshots (30 full-page plus two picker):
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-map-child-greeting-1cAaIS`.
+- Stage-link screenshots:
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-parent-stage-links-X0FkSP`.
+- Visually inspected VI320 unbroken, EN640 max-valid and EN1366 spaced greeting
+  captures. Each shows the actual VIETVERSE wordmark and translated tagline,
+  alongside the real child picker, language controls, points and parent control.
+  The taller header occupies approximately206px,134px and90px respectively in
+  these screenshots (visual pixel estimates, not logged DOM metrics). At320px
+  the branding, child picker and secondary controls occupy separate rows; at
+  640px the branding is above the control row; at1366px they share one row.
+- Crucially, both runners measure the actual header bounding rectangle during
+  geometry assertions, rather than assuming an old fixed height. Greeting text
+  stays below its bottom; every main control remains reachable and hit-testable
+  between that header and the fixed bottom navigation after scrolling. Full-page
+  composites are not used to infer control exposure.
+- The separate baseline picker finding remains:30-character name exceeds its
+  button by53.53px. New desktop branding shifts absolute right edges to718.53px
+  (text) and665px (button);320/640px values are unchanged. It is still outside
+  the button but within the viewport. No picker or other production edits made.
+
+These checks use the same synthetic auth/local API/font-only boundary and retain
+all limitations listed above. They establish the integrated header/map fixture,
+not production auth, physical-device, screen-reader, audio or deployment
+acceptance. Both owned browser/server processes closed normally. Only this
+report was edited after the integration runs; the runner source is unchanged.
