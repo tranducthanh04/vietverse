@@ -34,6 +34,8 @@ two API-backed culture routes); after repair all thirty pass.
 
 Browser and full-suite evidence/limits are recorded in
 [the task journal](../plans/journals/2026-10-19-cover-placeholder-safe.md).
+Fresh header23/footer24 integration coverage for both guest and kids layouts is
+in [the browser report](../plans/261019-cover-placeholder-safe/browser-evidence.md).
 Local fixtures are not production or real-device acceptance. This fix does not
 resolve F04 recording-finalize, F13 runtime translations, story taxonomy or
 content/asset licensing decisions.

@@ -110,3 +110,60 @@ and nested client node_modules through local junctions, no package/lock changes.
 Scoped PR CI and coordinator review. Real-device/production
 acceptance is not implied by local fixture testing. No new owner policy choice
 or credentials are needed for this fix; publishing/merging stays with coordinator.
+
+## Integration of source22, header23 and footer24 - 2026-10-19
+
+Coordinator requested a separate PR25 gate after footer24 merged. Normal merge
+9aeb349145e77bc8524f89bce7c172a542536212 incorporates pinned main
+05872f40b2f8c4c6b90ad18263dd8c8ee11d1d33 into the cover branch. Conflicts were
+only at the top of docs/03 and docs/06; all cover/header/footer/source/auth notes
+are preserved. Shared checkout untouched; no greeting28 or audio work mixed in.
+Main CI39151137720 on05872 completed SUCCESS.
+
+Production CoverPlaceholder and all30 regression tests are byte-identical to
+prior head852349f2dadc5e80f65f9dc2ee3bc2a6c0090be6. Against new main, production
+delta remains only the own-key lookup. Source22 is inherited unchanged and is
+capture/parser/report only, not runtime translation/importer/publication work.
+Header23 and footer24 change browser inputs, so old screenshots cannot establish
+new layout coverage. They remain historical artifacts, not overwritten evidence.
+
+Fresh local verification on9aeb349:
+
+- Focused cover/presentation/translations/header/footer:98/98 tests passed.
+- Full frontend:446/446 tests across44 files passed, exit0. Existing act warning
+  from audioPlayback remains; no skipped/weakened tests or reruns for green.
+- Root typecheck and build passed; lint passed with0 errors/100 existing warnings.
+  Fresh browser results are recorded separately after execution.
+- Backend/package/lock inputs match bf8651572678ff0f37acc02bca4e57efd940759e
+  exactly (empty git diff). Main agent's same-session full root run in the
+  greeting worktree at that baseline passed525 backend tests across53 files.
+  That unchanged-input evidence is reused; this is not a new backend execution
+  in the cover worktree. No F04 fix/closure is inferred.
+
+Browser delegate owns only the expanded local runner and browser evidence.
+It checks both guest public/footer and authenticated KidsLayout/header via real
+AdaptiveContentLayout/ChildSessionGuard, using synthetic state and intercepted
+HTTP only. Existing auto-explored story POSTs in the authenticated view must be
+fulfilled locally with exact synthetic IDs, never forwarded to a backend. No
+production account/data/point mutation is performed or accepted by this test.
+
+### Final integration evidence
+
+- Expanded browser runner completed exit0:96 activations (48 guest,48 kids),
+  24 reloads, VI/EN320/640/1366; known/legacy/image paths, click/Tab/Enter/back,
+  actual branding/footer and header/fixed-nav clearance all pass. No overflow,
+  console/page errors or unexpected requests.30 synthetic story-explored POSTs
+  fulfilled in memory, zero forwarded writes. Actual kids header heights206/134/90px.
+- New66 screenshots in local temp vietverse-cover-fallback-yq12Hg; historical
+  tracked images retained unchanged. Main read full final runner/report and
+  inspected kids-VI320 culture detail. Details in the browser evidence report.
+- Initial expanded browser run failed before any activation: CSS home-link
+  selector matched wordmark and hidden Home nav. DOM strict-mode evidence
+  identified both; using unique accessible brand name fixed the harness, not
+  the product. Corrected complete run passed without assertion weakening.
+- Independent reviewer verified scoped production/tests and incoming base
+  preservation, ran30 cover tests and script syntax check successfully.
+  Conditional simplifier reviewed the >200-line runner: no worthwhile changes.
+- No further production edits since9aeb349; integration evidence/runner/docs
+  additions only. Scope remains separate from greeting28 and picker wrapping.
+  Await exact-head remote CI and coordinator review/merge; no self-merge.
