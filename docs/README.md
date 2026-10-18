@@ -39,6 +39,7 @@ Thư mục này là nguồn chuẩn cho nghiệp vụ, phạm vi tính năng, qu
 | `self-host-deployment.md` | Tự host FE + API + MongoDB bằng Docker Compose trên máy chủ riêng (`vietverse.io.vn`): init, cập nhật, backup/restore, cô lập, gỡ bỏ, bước sudo của chủ máy |
 | `content-image-credits.md` | Ghi công/giấy phép ảnh bìa demo story/culture và script gán ảnh |
 | `customer-audio-translations.md` | Feedback giá/narration 2026-10-12, giới hạn giọng thiết bị và đầu vào bản dịch/audio đang chờ khách |
+| `public-header-responsive.md` | Sửa header công khai bị tràn khi đổi VI/EN, breakpoint và kiểm chứng trình duyệt local |
 | `superpowers/plans/2026-10-09-customer-data-deployment.md` | Bàn giao deploy: staging → backup/restore → dry-run → import → đối soát → production |
 | `superpowers/plans/2026-10-09-customer-activity-types.md` | Kế hoạch đã duyệt bốn loại hoạt động mới: server, màn bé, session/offline, CMS và catalog; trạng thái QA local ở `08-customer-alignment.md`, không import DB thật |
 | `superpowers/specs/2026-10-09-customer-activity-types-design.md` | Contract đã duyệt, self-report/điểm/quyền, rollout tương thích và giới hạn nguồn |

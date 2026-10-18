@@ -45,17 +45,17 @@ export const PublicLayout: React.FC = () => {
       <SkipLink />
       {/* Stitch Folk Play Header */}
       <header className="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(180,83,9,0.08)] border-b border-outline-variant/30">
-        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 xl:px-8 flex items-center justify-between gap-4">
+        <div className="h-20 max-w-screen-2xl mx-auto px-3 sm:px-6 xl:px-8 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-display text-2xl lg:text-3xl text-primary tracking-tight font-extrabold select-none">
+                <span className="font-display text-xl sm:text-2xl lg:text-3xl text-primary tracking-tight font-extrabold select-none">
                   VIETVERSE
                 </span>
-                <Star className="w-[22px] h-[22px] text-secondary-container select-none" aria-hidden="true" />
+                <Star className="hidden min-[360px]:block w-[22px] h-[22px] text-secondary-container select-none" aria-hidden="true" />
               </div>
-              <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden sm:inline xl:hidden 2xl:inline">
+              <span className="text-[11px] text-secondary tracking-wide uppercase select-none font-semibold hidden lg:inline xl:hidden 2xl:inline">
                 {t('publicNav.subtagline')}
               </span>
             </div>
@@ -69,7 +69,7 @@ export const PublicLayout: React.FC = () => {
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `relative min-h-[44px] px-3 py-2 inline-flex items-center whitespace-nowrap text-sm font-bold transition-[color,background-color,border-color,box-shadow] duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+                  `relative min-h-[44px] px-2 2xl:px-3 py-2 inline-flex items-center whitespace-nowrap text-sm font-bold transition-[color,background-color,border-color,box-shadow] duration-200 border-b-2 rounded-t-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
                     isActive
                       ? 'text-primary border-primary bg-primary/5 font-black'
                       : 'text-on-surface-variant hover:text-primary border-transparent hover:bg-surface-container/60'
@@ -87,12 +87,12 @@ export const PublicLayout: React.FC = () => {
             {user ? (
               <button
                 onClick={() => navigate('/kham-pha')}
-                className="btn-3d-primary inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                className="btn-3d-primary hidden sm:inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-5 sm:px-6 py-2.5 rounded-full font-bold text-sm select-none shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
               >
                 {t('nav.enterLearning')}
               </button>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={() => navigate('/dang-nhap')}
                   className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] px-4 py-2 rounded-full font-bold text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
