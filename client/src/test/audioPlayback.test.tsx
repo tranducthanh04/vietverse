@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { api } from '../lib/api.js';
 import { claimPlayback } from '../hooks/useNarration.js';
@@ -19,28 +19,40 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); upload.mockReset(); });
 
-function showRecordings() {
+function showRecordings(failFirst = false) {
   useChildStore.setState({ activeChild: { _id: 'child-1' } as never });
-  vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [
+  const get = vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [
     { _id: 'rec-1', url: 'https://res.cloudinary.com/x/video/upload/one.webm', createdAt: '2026-10-13T00:00:00.000Z', wordOrPrompt: 'A' },
   ] } });
+  if (failFirst) get.mockRejectedValueOnce(new Error('Network unavailable'));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   return render(<QueryClientProvider client={client}><ParentRecordingsPage /></QueryClientProvider>);
 }
 
 describe('parent recordings playback', () => {
+  it('shows a load error instead of an empty archive and supports retry', async () => {
+    showRecordings(true);
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.queryByText(/Bé chưa có bản thu âm nào/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Thử lại ngay' }));
+    expect(await screen.findByRole('button', { name: 'Phát bản ghi âm' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
   it('resets the play state when the browser rejects play()', async () => {
     play.mockRejectedValueOnce(new Error('NotAllowedError'));
     showRecordings();
     fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Phát bản ghi âm' })).toBeInTheDocument());
+    expect(screen.getByRole('alert')).toHaveTextContent(/Không phát được/);
+    fireEvent.click(screen.getByRole('button', { name: 'Phát bản ghi âm' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
   it('stops audio on unmount and when another reader claims playback', async () => {
     const view = showRecordings();
     fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
     expect(screen.getByRole('button', { name: 'Dừng' })).toBeInTheDocument();
     pause.mockClear();
-    claimPlayback(() => {}); // e.g. narration starts elsewhere
+    act(() => claimPlayback(() => {})); // e.g. narration starts elsewhere
     await waitFor(() => expect(screen.getByRole('button', { name: 'Phát bản ghi âm' })).toBeInTheDocument());
     expect(pause).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Phát bản ghi âm' }));

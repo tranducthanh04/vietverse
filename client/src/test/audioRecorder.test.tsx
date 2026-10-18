@@ -30,6 +30,32 @@ async function record(hook: { result: { current: ReturnType<typeof useAudioRecor
   act(() => hook.result.current.stopRecording());
 }
 describe('recorder lifecycle', () => {
+  it('ignores a stale replay rejection while a newer replay is still playing', async () => {
+    let rejectFirst!: (reason: Error) => void;
+    const players: Replay[] = [];
+    class Replay {
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor() { players.push(this); }
+      pause() {}
+      play() {
+        return players.length === 1 ? new Promise<void>((_resolve, reject) => { rejectFirst = reject; }) : Promise.resolve();
+      }
+    }
+    vi.stubGlobal('Audio', Replay);
+    const hook = renderHook(useAudioRecorder);
+    await record(hook);
+    act(() => hook.result.current.playRecording());
+    act(() => hook.result.current.playRecording());
+    await act(async () => rejectFirst(new Error('old playback cancelled')));
+    expect(hook.result.current.isPlaying).toBe(true);
+    act(() => players[0].onended?.());
+    expect(hook.result.current.isPlaying).toBe(true);
+    act(() => players[1].onended?.());
+    expect(hook.result.current.isPlaying).toBe(false);
+    expect(hook.result.current.audioBlob).toBeInstanceOf(Blob);
+  });
+
   it('retains the same Blob for explicit expired-intent resend through the real hook', async () => {
     vi.stubEnv('VITE_DIRECT_RECORDING_UPLOAD','true');
     const previousAdapter = api.defaults.adapter;
