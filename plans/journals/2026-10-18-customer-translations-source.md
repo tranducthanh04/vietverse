@@ -109,3 +109,33 @@ Do not request already supplied clear translations again. No audio/provider work
   `integration-typecheck.log`, `integration-build.log`, and `integration-lint.log`.
   PR22 is still source-only. Exact-head CI and coordinator code review remain
   separate gates; the prior head's green checks are not claimed for this update.
+
+## PR20 auth integration verification - 2026-10-19
+
+- The pre-push fetch found main had advanced to PR20. Publication stopped and
+  the coordinator explicitly approved a second pinned integration. Saved the
+  PR21 evidence checkpoint as `748bcb8`, then read the new auth contract and
+  normally merged `53a447a369fed0d69b455749a053b694a159a753` without conflicts.
+  Tested code head: `6f74643855552d286d700a44485b0d9327789d0b`. Final packaging
+  changes this journal only; its exact head is recorded in the PR body.
+- Focused source/catalog 19/19 in two files passed, exit 0, started 00:10:10.
+  Full root `npm test` passed once: 525/525 backend in 53 files and 389/389
+  frontend in 41 files, exit 0. Started 00:10:23 Asia/Saigon; backend 180.29
+  seconds, frontend 24.00 seconds. No test failure or rerun-for-green occurred.
+- Root typecheck, build and lint each passed once, exit 0. Lint remains 0 errors
+  and 100 inherited warnings. The audioPlayback act warning remains. All 14
+  inherited auth-atomicity tests and 23 recording-finalize cases passed; this
+  is integration evidence, not a claim of resolving intermittent F04.
+- Source/parser/report/tests remain identical to `7269402`; auth modules/tests,
+  client and PR21 dedicated docs/assets remain identical to pinned main. Shared
+  docs retain auth, stage and F13 notes. The PR diff remains the 12 owned files.
+  Committed Explore bytes still total 46,637 with SHA-256
+  `173d0c2bf181ec9209b857267063c8454223ef176457339f8f9c8be5d8156d49`.
+  October 9 source/default importer/bootstrap remain unchanged; no new pairing,
+  API/model/runtime/audio or data mutation is introduced by this integration.
+- Pinned-main CI run `39148207625` completed SUCCESS at head `53a447a`, observed
+  before publication: https://github.com/tranducthanh04/vietverse/actions/runs/39148207625.
+  Its Node-action deprecation/runner-upgrade notices are not local failures.
+  Local logs use the `auth-integration-` prefix in the worktree parent, outside
+  the repository. PR22 exact-head CI and coordinator review remain gates; no
+  self-merge, force-push, amend, browser/linguistic approval or production claim.
