@@ -79,3 +79,33 @@ snapshots, grading, answers and hint exposure. Do not silently import this sourc
 Owner/content editor still must resolve missing VI/gloss labels, B11 slot/answer,
 B15 story/choices, B19 supplementary content, B20 rules and retry-vs-final-grading.
 Do not request already supplied clear translations again. No audio/provider work.
+
+## PR21 integration verification - 2026-10-19
+
+- Fetched and verified pinned main `5baf9172029c9f1276697e918e2a345c4723ea07`.
+  Normally merged it into this branch without conflicts or history rewriting.
+  Tested integration code head: `28b72cbbf39faa23361da5009e785173b0ae521e`.
+  The subsequent packaging commit changes this journal only; the exact final
+  head is recorded in the PR body. No self-merge or production mutation.
+- Source/parser/report/tests are byte-identical to reviewed source head
+  `7269402a55f79cb2a7680ee54905d223ba9c841f`. All inherited client code and PR21
+  dedicated docs/screenshots are identical to pinned main. Shared inventory
+  and findings docs retain PR21 sections; only the existing F13 additions differ.
+- Focused source/catalog: 19/19 tests in two files, exit 0, started 00:02:56
+  Asia/Saigon. Full root `npm test`: 511/511 backend in 52 files and 389/389
+  frontend in 41 files, exit 0. Full run started 00:03:23; backend 194.06 seconds,
+  client 20.05 seconds. Each command ran once; no failures or reruns-for-green.
+  Tests used the local MongoDB 7.0.24 binary and disposable test replica sets.
+- Root `npm run typecheck`, `npm run build` and `npm run lint` each passed,
+  exit 0. Lint reports 0 errors and 100 inherited warnings after PR21. The
+  existing audioPlayback React act warning remains. recordingFinalize passed
+  all 23 cases in this run; that does not close intermittent F04 or change audio.
+- Both committed source bytes and SHA-256 remain exact: 46,637 bytes,
+  `173d0c2bf181ec9209b857267063c8454223ef176457339f8f9c8be5d8156d49`.
+  October 9 source/default importer/bootstrap are identical to pinned main.
+  Coverage remains 415 pairs (83 per locale); no translation or runtime change.
+- Local logs are outside the repository in the worktree parent as
+  `integration-focused.log`, `integration-full-test.log`,
+  `integration-typecheck.log`, `integration-build.log`, and `integration-lint.log`.
+  PR22 is still source-only. Exact-head CI and coordinator code review remain
+  separate gates; the prior head's green checks are not claimed for this update.
