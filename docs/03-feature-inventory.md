@@ -1,5 +1,11 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Nhận diện thương hiệu header khu bé — 2026-10-18, local
+
+- KIDS-HEADER-BRANDING: bổ sung wordmark `app.name` và đầy đủ `publicNav.subtagline` VI/EN vào `KidsLayout`, dùng link semantic tới trang chủ `/` hiện có. Nguồn khách: tab cấu trúc, mục `HEADER CHUNG` → `Bên trái`; không tạo logo asset, copy hoặc route mới.
+- **Giả định trình bày:** brand chiếm hàng riêng dưới breakpoint `lg`, tối đa 18rem từ `lg`, tagline 12px cho phép xuống dòng; header và nhóm control wrap khi thiếu chỗ. Giữ sticky header, vùng chạm 44px, sáu mục điều hướng PR #19, link điểm PR #16, chọn bé, Parent Gate, VI/EN và nút admin.
+- Không đổi API/store/điểm/auth/checkout/audio hoặc menu avatar. Chỉ hoàn thiện phần brand/tagline, không tuyên bố toàn bộ header đã khớp Docs. Kiểm chứng: 374 test client, typecheck/build/lint qua; 32 ca browser và 8 ca sát breakpoint qua, review độc lập không có finding cần sửa. Nguồn, test và giới hạn tại [kids-header-branding.md](./kids-header-branding.md); chưa xác nhận merge/deploy.
+
 ## Refresh/logout nguyên tử — 2026-10-18, local
 
 - Rotation, thu hồi family khi reuse và logout các phiên hiện có dùng transaction với cùng khóa ghi `User.__v` theo tài khoản. Tiêu thụ token cũ, tạo token mới và đọc profile trả về trong cùng transaction; lỗi trước commit không để token bị tiêu thụ một nửa.
