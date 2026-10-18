@@ -41,6 +41,10 @@ Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã
 - Lượt tích hợp 2026-10-17 dịch thêm chữ giao diện của trang chi tiết truyện và văn hoá (`storyDetail`, `cultureDetail`); nội dung bài và bản dịch nội dung vẫn theo quy tắc riêng.
 - Kiểm chứng local: typecheck qua; frontend 243/243 test qua (thêm `i18n.test.tsx`: bắt khoá thiếu, chuyển ngôn ngữ đổi chữ header, bé `en` vào khu bé thấy tiếng Anh, nhớ lựa chọn thủ công); lint 0 lỗi. Chưa deploy/nghiệm thu thiết bị thật.
 
+## Nguồn bản dịch Khám phá — 2026-10-18, local
+
+F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-source/2026-10-18/coverage.md) đã được lưu riêng kèm checksum, catalog chỉ đọc và coverage B1-B20. Chưa áp dụng vào player/importer/model; không coi đây là đã hoàn tất song ngữ hoặc audio.
+
 ## Lesson word card — bố cục đoạn đọc 2026-10-15, local
 
 - Thẻ tự tăng chiều cao theo nội dung; đoạn văn dài trong `targetWord` hiển thị chữ nhỏ hơn, căn trái và xuống dòng, không tràn lên hướng dẫn/mascot. Chữ và từ ngắn vẫn nổi bật. Áp dụng chung cho lesson player và CMS preview.
