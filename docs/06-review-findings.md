@@ -1,5 +1,11 @@
 # 06 — Kết quả review senior BA/code
 
+## Header khu bé thiếu brand/tagline — 2026-10-18, sửa local
+
+- **KIDS-HEADER-BRANDING:** tab cấu trúc Docs khách yêu cầu `VIETVERSE` và tagline đầy đủ bên trái header cố định sau đăng nhập; `KidsLayout` chưa hiển thị hai thành phần này. Bổ sung link về `/` dùng `app.name` cùng `publicNav.subtagline` hiện có, không sửa dictionary hoặc thêm hình logo.
+- **Quyết định kỹ thuật/giả định:** dùng sticky hiện hữu; brand full-row dưới `lg`, max 18rem từ `lg`, tagline 12px xuống dòng thay vì cắt; cho control wrap. Giữ sáu navigation item, số dư/link điểm, picker, Parent Gate, VI/EN, admin và hit-area 44px; không sửa API/store/auth/điểm/checkout/audio/menu avatar.
+- 5 test mới RED do thiếu brand/tagline trước sửa, GREEN sau sửa; bộ focused brand/points/courses 13/13 qua. Full client 374/374, typecheck/build qua, lint 0 lỗi/103 cảnh báo có sẵn. Browser 32 ca và 8 ca sát breakpoint qua; các ca số dư lớn có Tab/Enter và đo focus thật. Review độc lập source/test/docs và script không có finding cần sửa. Không suy ra nghiệm thu production/thiết bị thật hoặc toàn bộ header. Nguồn và giới hạn: [kids-header-branding.md](./kids-header-branding.md), `plans/journals/2026-10-18-kids-header-branding.md`.
+
 ## P1.1 follow-up: cạnh tranh refresh/logout — 2026-10-18, sửa local
 
 - Các ghi nhận rotation/revocation cũ chưa bao phủ tính nguyên tử: hai caller cùng đọc token sống có thể cùng cấp token con; lỗi tạo token/profile sau khi consume có thể làm mất phiên; reuse/logout có thể bỏ sót token con đang được tạo.
