@@ -5,6 +5,10 @@
 - KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.
 - **Giả định trình bày:** thanh dưới chia 3 cột/2 hàng dưới 400px, 6 cột từ 400px; giữ nhãn đầy đủ và khoảng đệm cuối trang tương ứng. Yêu cầu, bằng chứng và giới hạn tại [kids-courses-navigation.md](./kids-courses-navigation.md).
 
+## Tích hợp liên kết chặng — 2026-10-18, local
+
+- Tích hợp PARENT-STAGE-LINKS với thanh điều hướng khu bé: tab chặng dài giới hạn chiều rộng và xuống dòng, không phóng to tab active; giữ nguyên lựa chọn URL và quyền học. Giả định trình bày và kiểm tra layout thật tại [parent-stage-links.md](./parent-stage-links.md).
+
 ## Header công khai VI/EN — 2026-10-18, local
 
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.
@@ -67,6 +71,7 @@ Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã
 | Onboarding | Tạo hồ sơ bé | Wizard 4 bước, chọn nhiều ngôn ngữ | `POST /children` giữ tương thích trường singular | Child | Đã deploy FE/BE 2026-10-11; local tests qua, chưa tạo hồ sơ production để nghiệm thu |
 | Child | Chuyển/Xóa hồ sơ | Có dropdown & nút xóa | `PATCH /children/:id/select`, `DELETE /children/:id` | Child, Progress, Recording | Hoàn thiện (P1.6 cascade delete) |
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |
+| Parent/Map | Liên kết từng chặng | Xem chi tiết/Tiếp tục theo bé đang xem; chọn chặng qua URL, giữ history, báo ID sai/đổi bé/khóa/rỗng | API hiện có, không cấp quyền từ query | Không đổi dữ liệu | Sửa local 2026-10-18; xem [parent-stage-links.md](./parent-stage-links.md), chờ review/merge |
 | Lesson | Lesson player | 7 loại cũ + multi_select/group_sort/fill_blanks/follow_steps | `GET /lessons/:id?activityContract=2`, `POST /lessons/:id/complete` | Lesson, LessonProgress | Triển khai local 2026-10-09; loại mới ghi nhận trung tính, chấm server; chưa xác nhận deploy/content production |
 | Lesson | Tim/gợi ý/offline session | Có | IndexedDB + Offline Sync Queue localStorage | lesson session, queue | Hoàn thiện (P1.5) |
 | Recording | Thu âm | MediaRecorder elapsed auto-stop179s margin1s/background, upload trực tiếp production, guard phiên/retry finalize/explicit expired resend | Multipart legacy; `/recordings/upload-intent`, `/recordings/finalize` | Recording, RecordingUploadIntent, Cloudinary | Triển khai local, review2026-10-10; server strict180s, metadata/preset thật và rollout production chưa nghiệm thu |
