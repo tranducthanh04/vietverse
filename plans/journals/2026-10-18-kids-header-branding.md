@@ -69,3 +69,25 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-header-branding/codeDuAN`.
   production writes, audio edits or whole-plan completion/status edit.
 - AgentKit CLI remains unavailable; local Markdown records evidence. AgentWiki
   publish skipped.
+
+## PR21 integration (2026-10-19 local time)
+
+- PR #23 was created at `7012fc3c2be01a342c5cda5b906ccc3f5ee7f92f` while main
+  advanced to PR21 merge `5baf9172029c9f1276697e918e2a345c4723ea07`.
+  Normal merge `4b45c237a345f1b64e0688ed0eff80e67661d82f` has no conflicts.
+- Independent incremental review confirms all PR21 content retained, the same
+  seven owned files / 13 product lines versus main, unchanged branding source,
+  tests and harness, and no server/audio/package/lockfile delta.
+- Fresh integrated full client: 394/394 tests in 42 files; project typecheck
+  and build pass (1832 modules). Prior lint evidence remains for unchanged
+  branding source. No fresh local full-server suite claimed.
+- Fresh hardened branding browser matrix: 32/32, exit 0; screenshots
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-kids-brand-zFD92r`.
+- Existing PR21 browser script ran unchanged: 48 parent-stage link activations
+  and six URL/history matrices pass, exit 0. Real QuestMap controls clear the
+  taller header and fixed navigation. Synthetic API only; screenshots
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-parent-stage-links-Nwh8tZ`.
+- Integrated breakpoint matrix: 8/8, exit 0; screenshots
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-kids-brand-SpnbxD`.
+  Exact-new-head CI remains pending; old-head CI `39147352186` succeeded but
+  does not replace verification of this integration head.
