@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { env } from '../../config/env.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import { GoogleAuthService } from './google.service.js';
-import { sessionCookieOptions } from './auth.cookies.js';
+import { sessionCookieOptions, setSessionCookies } from './auth.cookies.js';
 
 const cookieName = env.NODE_ENV === 'production' ? '__Host-vietverse_google' : 'vietverse_google';
 const cookieOptions = sessionCookieOptions;
@@ -52,7 +52,7 @@ export class GoogleAuthController {
 
   private static finish(res: Response, result: { user: unknown; accessToken: string; refreshToken: string }) {
     res.clearCookie(cookieName, cookieOptions);
-    res.cookie('refreshToken', result.refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60_000 });
+    setSessionCookies(res, result.refreshToken);
     return sendSuccess(res, { user: result.user, accessToken: result.accessToken });
   }
 }

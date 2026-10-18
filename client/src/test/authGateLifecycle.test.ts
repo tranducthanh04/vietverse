@@ -16,9 +16,19 @@ function expectGateCleared() {
   expect(sessionStorage.getItem('vietverse_parent_gate_unlocked')).toBeNull();
 }
 
+function setSessionHint() {
+  document.cookie = 'vv_has_session=1; path=/';
+}
+
+function clearSessionHintCookie() {
+  document.cookie = 'vv_has_session=; Max-Age=0; path=/';
+}
+
 beforeEach(() => {
   useAuthStore.setState({ user: null, subscription: null, accessToken: null, isLoading: true });
   sessionStorage.clear();
+  // Every reload scenario below represents a returning user, who carries the readable session hint.
+  setSessionHint();
   api.defaults.adapter = async (config) => ({
     data: { data: { user: parent, accessToken: 'access', subscription: { plan: 'free', maxChildren: 1 } } },
     status: 200, statusText: 'OK', headers: {}, config,
@@ -29,6 +39,7 @@ afterEach(() => {
   api.defaults.adapter = originalAdapter;
   setApiAccessToken(null);
   sessionStorage.clear();
+  clearSessionHintCookie();
 });
 
 describe('parent gate authentication lifecycle', () => {
@@ -65,6 +76,35 @@ describe('parent gate authentication lifecycle', () => {
     await useAuthStore.getState().fetchMe();
     expect(urls).toEqual(['/auth/me']);
     expect(getApiAccessToken()).toBe('existing-access');
+  });
+
+  it('makes no request on a cold load for a guest who has no session hint', async () => {
+    clearSessionHintCookie();
+    const urls: string[] = [];
+    api.defaults.adapter = async (config) => {
+      urls.push(config.url ?? '');
+      return { data: { data: { user: parent, accessToken: 'access', subscription: { plan: 'free', maxChildren: 1 } } }, status: 200, statusText: 'OK', headers: {}, config };
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(urls).toEqual([]);
+    expect(useAuthStore.getState()).toMatchObject({ user: null, accessToken: null, isLoading: false });
+  });
+
+  it('clears a stale session hint when the bootstrap refresh is rejected', async () => {
+    setSessionHint();
+    api.defaults.adapter = async (config) => {
+      throw Object.assign(new Error('Unauthorized'), { config, response: { status: 401, data: {}, headers: {}, config } });
+    };
+    await useAuthStore.getState().fetchMe();
+    expect(document.cookie.includes('vv_has_session=1')).toBe(false);
+  });
+
+  it('keeps the session hint after a transient network failure so a reload can recover', async () => {
+    setSessionHint();
+    api.defaults.adapter = async () => { throw new Error('Network down'); };
+    await useAuthStore.getState().fetchMe();
+    expect(document.cookie.includes('vv_has_session=1')).toBe(true);
+    expect(useAuthStore.getState().user).toBeNull();
   });
 
   it('signs out locally when the bootstrap refresh is rejected', async () => {
