@@ -5,6 +5,17 @@
 - `CoverPlaceholder` chỉ chọn icon theo khóa khai báo trực tiếp; category lạ như `constructor` không còn làm sập màn truyện/văn hóa. Giữ icon/màu hiện có, `className`, `aria-hidden` và ảnh thật nếu có.
 - Sửa kỹ thuật, không đổi taxonomy/API/dữ liệu/quyền/điểm/audio. Contract và giới hạn tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
 
+## Điều hướng footer công khai — 2026-10-18, local
+
+- FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
+- **Giả định trình bày:** lộ trình là phần năm chặng hiện có trên Landing, không tạo trang/học liệu mới. Khách xem được không cần đăng nhập; không đổi quyền học, API hoặc điểm. Chi tiết và giới hạn tại [footer-navigation.md](./footer-navigation.md).
+
+## Nhận diện thương hiệu header khu bé — 2026-10-18, local
+
+- KIDS-HEADER-BRANDING: bổ sung wordmark `app.name` và đầy đủ `publicNav.subtagline` VI/EN vào `KidsLayout`, dùng link semantic tới trang chủ `/` hiện có. Nguồn khách: tab cấu trúc, mục `HEADER CHUNG` → `Bên trái`; không tạo logo asset, copy hoặc route mới.
+- **Giả định trình bày:** brand chiếm hàng riêng dưới breakpoint `lg`, tối đa 18rem từ `lg`, tagline 12px cho phép xuống dòng; header và nhóm control wrap khi thiếu chỗ. Giữ sticky header, vùng chạm 44px, sáu mục điều hướng PR #19, link điểm PR #16, chọn bé, Parent Gate, VI/EN và nút admin.
+- Không đổi API/store/điểm/auth/checkout/audio hoặc menu avatar. Chỉ hoàn thiện phần brand/tagline, không tuyên bố toàn bộ header đã khớp Docs. Kiểm chứng: 374 test client, typecheck/build/lint qua; 32 ca browser và 8 ca sát breakpoint qua, review độc lập không có finding cần sửa. Nguồn, test và giới hạn tại [kids-header-branding.md](./kids-header-branding.md); chưa xác nhận merge/deploy.
+
 ## Refresh/logout nguyên tử — 2026-10-18, local
 
 - Rotation, thu hồi family khi reuse và logout các phiên hiện có dùng transaction với cùng khóa ghi `User.__v` theo tài khoản. Tiêu thụ token cũ, tạo token mới và đọc profile trả về trong cùng transaction; lỗi trước commit không để token bị tiêu thụ một nửa.
@@ -45,6 +56,10 @@ Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã
 - **Giữ tiếng Việt (có chủ đích)**: nội dung học (bài, truyện, văn hoá, câu hỏi, từ vựng, TTS đọc nội dung); Admin/CMS. Lượt tích hợp 2026-10-17 (owner yêu cầu "làm luôn") đã dịch thêm: lý do cộng/trừ điểm và "Hôm nay/Hôm qua" trong sổ điểm (`pointLabels.ts` nhận tham số ngôn ngữ, mặc định `vi`), khung bài chờ đồng bộ offline, và tên/mô tả/trạng thái 4 năng lực trong báo cáo phụ huynh. Năng lực được dịch ở client theo `key` cố định và 3 trạng thái cố định; server vẫn trả tiếng Việt và client dùng nguyên chuỗi server làm dự phòng nếu xuất hiện khoá mới.
 - Lượt tích hợp 2026-10-17 dịch thêm chữ giao diện của trang chi tiết truyện và văn hoá (`storyDetail`, `cultureDetail`); nội dung bài và bản dịch nội dung vẫn theo quy tắc riêng.
 - Kiểm chứng local: typecheck qua; frontend 243/243 test qua (thêm `i18n.test.tsx`: bắt khoá thiếu, chuyển ngôn ngữ đổi chữ header, bé `en` vào khu bé thấy tiếng Anh, nhớ lựa chọn thủ công); lint 0 lỗi. Chưa deploy/nghiệm thu thiết bị thật.
+
+## Nguồn bản dịch Khám phá — 2026-10-18, local
+
+F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-source/2026-10-18/coverage.md) đã được lưu riêng kèm checksum, catalog chỉ đọc và coverage B1-B20. Chưa áp dụng vào player/importer/model; không coi đây là đã hoàn tất song ngữ hoặc audio.
 
 ## Lesson word card — bố cục đoạn đọc 2026-10-15, local
 

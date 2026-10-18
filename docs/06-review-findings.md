@@ -5,6 +5,12 @@
 - Lookup icon story/culture từng đọc thuộc tính kế thừa của object; category `constructor`, `toString`, `__proto__`, `hasOwnProperty` không có ảnh làm React ném `Element type is invalid`. Model category là string, nên dữ liệu legacy có thể đi tới cả list/detail.
 - Chỉ nhận khóa sở hữu trực tiếp, còn lại dùng fallback đúng loại. Không đổi category/enum/API, ảnh thật, quyền, điểm hoặc audio; không đóng F04/F13 hay taxonomy truyện. 10 ca lỗi RED trước sửa, 30 test hồi quy GREEN sau sửa. Contract và kiểm chứng tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
 
+## Header khu bé thiếu brand/tagline — 2026-10-18, sửa local
+
+- **KIDS-HEADER-BRANDING:** tab cấu trúc Docs khách yêu cầu `VIETVERSE` và tagline đầy đủ bên trái header cố định sau đăng nhập; `KidsLayout` chưa hiển thị hai thành phần này. Bổ sung link về `/` dùng `app.name` cùng `publicNav.subtagline` hiện có, không sửa dictionary hoặc thêm hình logo.
+- **Quyết định kỹ thuật/giả định:** dùng sticky hiện hữu; brand full-row dưới `lg`, max 18rem từ `lg`, tagline 12px xuống dòng thay vì cắt; cho control wrap. Giữ sáu navigation item, số dư/link điểm, picker, Parent Gate, VI/EN, admin và hit-area 44px; không sửa API/store/auth/điểm/checkout/audio/menu avatar.
+- 5 test mới RED do thiếu brand/tagline trước sửa, GREEN sau sửa; bộ focused brand/points/courses 13/13 qua. Full client 374/374, typecheck/build qua, lint 0 lỗi/103 cảnh báo có sẵn. Browser 32 ca và 8 ca sát breakpoint qua; các ca số dư lớn có Tab/Enter và đo focus thật. Review độc lập source/test/docs và script không có finding cần sửa. Không suy ra nghiệm thu production/thiết bị thật hoặc toàn bộ header. Nguồn và giới hạn: [kids-header-branding.md](./kids-header-branding.md), `plans/journals/2026-10-18-kids-header-branding.md`.
+
 ## P1.1 follow-up: cạnh tranh refresh/logout — 2026-10-18, sửa local
 
 - Các ghi nhận rotation/revocation cũ chưa bao phủ tính nguyên tử: hai caller cùng đọc token sống có thể cùng cấp token con; lỗi tạo token/profile sau khi consume có thể làm mất phiên; reuse/logout có thể bỏ sót token con đang được tạo.
@@ -145,6 +151,10 @@ Nguồn: mục 3 của `plans/reports/review-261013-0835-post-vercel-audit.md`. 
 - Đã đóng gate cấu hình Google OAuth production ngày 2026-10-12: Client ID ở backend Vercel, FE/BE deploy từ commit `ef1c300`, challenge start/cancel và popup Google tài khoản mới đã smoke pass, chuyển tới `/bat-dau`. Chưa tạo hồ sơ bé hoặc dữ liệu học/thanh toán; liên kết email hiện có bằng mật khẩu Vietverse mới được kiểm thử local. Các gate khác (nguồn audio/bản dịch/provider được duyệt; audit riêng tư Atlas và dữ liệu lịch sử; dependency advisories; nghiệm thu mobile/giáo án) vẫn mở. Kết quả kiểm thử cuối và phạm vi ở [journal](../plans/journals/2026-10-12-review-remediation.md).
 - Đã bổ sung Helmet cho lớp DB guard của entrypoint Vercel; response `503 DATABASE_UNAVAILABLE` trước đây bỏ qua security headers nay vẫn có `X-Content-Type-Options: nosniff`, có regression test serverless.
 - Đã nâng `bcrypt` lên `6.0.0`, loại bỏ chuỗi native `node-pre-gyp/tar`; `npm audit --omit=dev` hiện không còn advisory production. React Router nâng lên `7.18.2` để nhận bản vá runtime, `concurrently` nâng patch lên `9.2.5` (`shell-quote` 1.12.0); audit toolchain dev còn Vitest/Tailwind advisory và chưa dùng `npm audit fix --force`.
+
+## F13 nguồn bản dịch Khám phá — 2026-10-18, local
+
+- F13 prerequisite (2026-10-18): đã lưu nguồn Khám phá mới theo checksum, không sửa snapshot 09/10 hoặc importer mặc định. Catalog chỉ đọc có 415 cặp Việt–ngoại ngữ rõ nguồn; 5 khối thiếu câu Việt và các gloss chưa gắn nhãn locale được giữ riêng, không tự dịch. Chỉ hoàn tất bước giữ nguồn/coverage, chưa đóng F13/player. Quyết định kỹ thuật và blockers B11/B15/B19/B20, retry-vs-final-grading ở [coverage 18/10](./customer-source/2026-10-18/coverage.md). Không thay audio, dữ liệu thật, điểm hoặc quyền.
 
 ## Feedback giá và narration — 2026-10-12, local
 
