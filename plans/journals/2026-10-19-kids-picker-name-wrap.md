@@ -5,6 +5,11 @@ Task: KIDS-PICKER-NAME-WRAP.
 Base: `6cf4ce52724867be75b733c741c5cb72a0b823b5`.
 Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 
+Current status: final local integrated checks pass at `44d6d7e`; PR CI remains
+pending. Earlier pending entries below describe historical checkpoints and are
+superseded for local verification by the final integration section. No merge or
+deployment is claimed.
+
 ## Context and finding
 
 - Read AGENTS, docs README, child business/API rules, review findings, shared
@@ -127,3 +132,85 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 - This records tester evidence, not additional runs by this writer.
   Remaining fresh normal-matrix/full/regression gates are still in progress;
   do not combine historical pass counts into a claim that all checks are done.
+
+## Refined CSS checkpoint before main integration
+
+- Tester completed the refined-CSS checks on `4c7f4d9` plus its working CSS
+  diff, hash `54f0da74a5d30e845e55986a68676911fd6f55772972633b7a6edbf15332f041`.
+  That checkpoint was subsequently committed as `a8f258a`.
+- Fresh checkpoint checks pass: focused 61 tests/7 files, full frontend
+  421 tests/44 files, root typecheck/build for server and client, and lint
+  zero errors/100 warnings. These are refined-CSS results, distinct from the
+  earlier column-only checks with the same suite counts.
+- Browser checkpoint results pass: picker normal matrix 32; three-profile mode
+  four; branding 32; branding breakpoint eight; parent-stage map 48 link cases
+  plus six URL/history matrices. Evidence directories under
+  `C:/Users/Asus/AppData/Local/Temp/`:
+  `vietverse-picker-name-Bnqezc`, `vietverse-picker-name-j77YED`,
+  `vietverse-kids-brand-B1lBHC`, `vietverse-kids-brand-Ft7O3R`,
+  `vietverse-parent-stage-links-WwY7wb`.
+- Coordinator then normally merged pinned main (including PR #28), base
+  `2c055f28da748ad18dccd0e5256ebd8bcc397a4b`, producing integration HEAD
+  `44d6d7ef634b9bf60dc842d92ef4d05bace65fda`. The additive docs/03 conflict
+  retains both picker and map-child-greeting entries. Picker CSS hash is
+  unchanged; this is not a claim that all integration checks are finished.
+- Fresh final integration tests, including the new greeting, are underway.
+  Current pending sections remain pending until that tester handoff arrives;
+  no final integrated pass, CI, merge-to-main or deployment claim is made here.
+
+## Final integration verification (2026-10-19)
+
+- Tested HEAD: `44d6d7ef634b9bf60dc842d92ef4d05bace65fda`;
+  base: `2c055f28da748ad18dccd0e5256ebd8bcc397a4b`. This identifies the tested
+  integration, not the final documentation-only commit that may follow.
+- Tester reports all fresh commands exit 0: focused 70 tests/8 files, full
+  frontend 430/45 files, root npm typecheck/build for server and client, lint
+  zero errors/100 warnings. Existing nonfatal audioPlayback.test.tsx act warning
+  remains unchanged; no local full backend/F04 suite is claimed.
+- Fresh picker normal 32 and three-profile four pass, with artifacts in
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-F7Dg01` and
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-UwZnux`.
+  Main independently checked both JSON reports: exact tested head, CSS hash
+  `54f0da74a5d30e845e55986a68676911fd6f55772972633b7a6edbf15332f041`,
+  zero violations; main also viewed the fresh UwZnux screenshot.
+- Fresh parent-stage regression: 48 activations plus six history matrices,
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-parent-stage-links-bliQGX`.
+  Fresh greeting regression: 30 cases, six switchbacks and 30 PATCH calls,
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-map-child-greeting-Y7mQWO`.
+- Header branding 32 in `vietverse-kids-brand-B1lBHC` and breakpoint eight in
+  `vietverse-kids-brand-Ft7O3R` are reused from the checkpoint with identical
+  inputs/CSS hash, not rerun after integration. Those directories are under
+  `C:/Users/Asus/AppData/Local/Temp/`.
+- Incoming greeting's five-profile/120-character fixtures are stress coverage,
+  not new profile quota or name-limit policy. Valid max30/three-profile picker
+  acceptance passes its four cases; Add Child validates the destination fixture,
+  not the real onboarding form.
+- Final integration reviewer reports no actionable findings. All results in this
+  entry are tester/main/reviewer handoff, not extra runs by the journal writer.
+  Ordinary PR CI is pending. No merge-to-main, deployment, production mutation,
+  shared-plan closure or audio/F04 change is claimed.
+
+### Reproducible commands
+
+From `client/`, focused then full frontend (run separately and inspect exit codes):
+
+```powershell
+node ../node_modules/vitest/vitest.mjs run --maxWorkers=1 src/test/kidsPickerNameWrap.test.tsx src/test/childStore.test.ts src/test/childJourneys.test.tsx src/test/kidsHeaderBranding.test.tsx src/test/kidsPointsNavigation.test.tsx src/test/kidsCoursesNavigation.test.tsx src/test/parentStageLinks.test.tsx src/test/mapChildGreeting.test.tsx
+node ../node_modules/vitest/vitest.mjs run --maxWorkers=1
+```
+
+From repository root, run each independently and inspect its exit status:
+
+```powershell
+npm run typecheck
+npm run build
+npm run lint
+node plans/261019-kids-picker-name-wrap/browser-smoke.mjs
+node plans/261018-parent-stage-links/browser-smoke.mjs
+node plans/261019-map-child-greeting/browser-smoke.mjs
+```
+
+Normal picker mode requires SMOKE_THREE_PROFILES unset. Run its additional mode
+with SMOKE_THREE_PROFILES=1 using the exit-code-preserving PowerShell block in
+`docs/kids-picker-name-wrap.md`; capture Node LASTEXITCODE before cleanup and
+propagate nonzero, so cleanup cannot turn a failing assertion into apparent pass.

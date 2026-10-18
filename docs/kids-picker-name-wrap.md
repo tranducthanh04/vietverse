@@ -1,7 +1,8 @@
 # Long child names in the profile picker
 
-Date: 2026-10-19. Task: KIDS-PICKER-NAME-WRAP. Status: CSS refinement passes
-four three-profile browser cases; remaining fresh full/regression gates pending.
+Date: 2026-10-19. Task: KIDS-PICKER-NAME-WRAP. Status: local integrated checks
+pass at `44d6d7ef634b9bf60dc842d92ef4d05bace65fda`, base
+`2c055f28da748ad18dccd0e5256ebd8bcc397a4b`. PR CI is pending; no merge/deploy claim.
 
 ## Finding and source trace
 
@@ -64,10 +65,23 @@ four three-profile browser cases; remaining fresh full/regression gates pending.
   y=706/762, with true hit tests. Mouse and Tab/Enter select the third profile
   through its PATCH and reach `/bat-dau` for Add Child. This uses a destination
   fixture and does not exercise the actual onboarding form. Main agent viewed
-  screenshots in `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-j77YED`.
-- Remaining fresh full/regression gates are pending. Results belong in the
-  [journal](../plans/journals/2026-10-19-kids-picker-name-wrap.md); normal wrapping
-  and multi-profile occlusion are distinct harness modes, both required.
+  the fresh integrated screenshot in
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-UwZnux`.
+- Fresh integrated checks all exit 0: focused 70 tests/8 files, full frontend
+  430/45 files, root typecheck/build (server and client), lint 0 errors/100
+  warnings. Picker passes 32 normal cases plus four three-profile cases;
+  parent-stage passes 48 activations/six history matrices; greeting passes
+  30 cases/six switchbacks/30 PATCH calls. Main independently checked the picker
+  32+4 JSON heads/hashes with zero violations. Final integration review found
+  no actionable findings. No local backend/F04 suite was run; the existing
+  nonfatal audioPlayback act warning remains unchanged.
+- Branding 32 and breakpoint eight reuse pre-integration evidence for identical
+  inputs/CSS hash; these are not fresh post-merge runs. Greeting's five-profile,
+  120-character stress fixtures are not current business acceptance: this fix's
+  valid max30/three-profile acceptance is the four-case picker mode.
+- Evidence directories and commands are in the
+  [journal](../plans/journals/2026-10-19-kids-picker-name-wrap.md). CI remains a
+  separate pending gate; no final documentation-commit hash is asserted here.
 - Browser fixtures use synthetic profiles/network data; real devices and
   production are separate acceptance gates. No merge/deployment is claimed.
 - Rollback is a scoped three-class-line revert with no schema/data migration.
@@ -97,5 +111,5 @@ if ($pickerExitCode -ne 0) {
 }
 ```
 
-The commands describe how to verify; they are not a claim both modes have been
-rerun on the latest CSS. Runtime paths follow the harness configuration.
+Both modes passed on the tested integration HEAD recorded above. Runtime paths
+follow the harness configuration; a later commit/head needs its own CI status.
