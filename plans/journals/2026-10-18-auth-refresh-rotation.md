@@ -62,3 +62,19 @@ Branch: `codex/auth-refresh-rotation`, isolated worktree.
 - No stage/commit/push/merge performed by this docs handoff. AgentKit CLI is
   unavailable; preserve evidence as Markdown without hand-editing plan status or
   claiming whole-plan completion. AgentWiki publish skipped.
+
+## PR19 integration and conflict resolution
+
+- Coordinator requested normal merge of main
+  `01cfa0591feb9bf0015821f19e9f256259544732`. Merge `5c0113f6ad942746cabd8aeb4d9cc1251e27a661`
+  resolved one overlapping insertion in `docs/03-feature-inventory.md` by keeping
+  both complete auth and Kids Courses sections. All menu19 source/docs remain.
+- Independent incremental review: nine auth-only diff files; no branding/audio
+  changes, no remaining conflict markers, and no actionable findings.
+- Compared with `1205603`, server/root package/lockfile are byte-for-byte unchanged.
+  Reuse the earlier 511-server full-suite result; do not claim a fresh full-server
+  run. A fresh focused auth/Google/security run passes 50/50 tests in six files
+  (73.21s). Full client passes 369/369 in 40 files (40.29s).
+- Fresh project typecheck/build pass; 1,832 modules. Existing act warning remains.
+  New-head CI must be checked separately; historical run `39145165919` does not
+  prove this merge revision. No self-merge, auto-merge or audio/F04 changes.
