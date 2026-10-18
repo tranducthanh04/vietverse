@@ -18,3 +18,4 @@
 - Fresh full client 338/338 test, 37 file; build TypeScript/Vite qua; lint 0 lỗi/1 warning thanh toán có sẵn, warning act() audio có sẵn không sửa. Browser chạy lại 4/4 qua; ảnh local `vietverse-settings-save-XPq00N`.
 - Reviewer độc lập xác nhận không finding, tự chạy lại 34/34 và diff-check. Không coi adapter test là chứng minh production ordering/cancellation.
 - Ship mode: PR riêng chờ điều phối review/CI rồi merge; không auto-merge. Nguồn là audit F12, không có GitHub issue riêng được xác nhận.
+- Điều phối merge NAV PR #16 trong lúc CI F12 chạy và yêu cầu đồng bộ lần cuối `main@a8014ee`. Merge thường thành `b19903b`, không conflict, giữ 9 file F12 diff; NAV chỉ thuộc baseline. Fresh frontend 343/343 (38 file), TypeScript/Vite và browser 4/4 qua; ảnh `vietverse-settings-save-Vhr1Uf`. CI trung gian `c893c15d` / run `39142601025` đã xanh tự nhiên, không cancel/rerun. CI trên head bàn giao cuối vẫn phải hoàn tất trước merge.
