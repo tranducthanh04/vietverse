@@ -41,7 +41,17 @@
 - Prior timeout history and limits above are unchanged. This run does not prove interrupted-navigation, real-device or production acceptance.
 - Backend tests were not rerun locally for this integration; old497 result is historical, not evidence for the changed auth baseline. Fresh CI on the final pushed head must validate the combined backend. No claim that F04 is fixed.
 
-## Delivery constraints
+## PR23 integration - 2026-10-19 Asia/Saigon
+
+- Coordinator explicitly requested a new gate after PR23 merged, superseding the temporary hold on head76af8a3. PR27/report remains separate and unchanged; no avatar-menu task was implemented.
+- Git-manager normal-merged pinned main `6cf4ce52724867be75b733c741c5cb72a0b823b5` as `c762dea77abed78290a9b8cd4d152a0161ca1dd4`. Sole conflict: `docs/03-feature-inventory.md`; preserved footer plus branding/source/auth sections. Worktree clean before tests; exactly nine footer files differ from main.
+- Footer PublicLayout/Landing, dictionaries, footer tests/browser and behavior documentation are unchanged versus76af8a3. Upstream adds KidsLayout branding and its tests, plus PR22 source-capture utilities/tests/docs. Server/package/lockfile diff against6cf4 is empty; PR24 introduces no backend change.
+- Fresh focused run passed98 tests in8files: footer22, Landing CTA23, route focus6, pricing1, i18n10, child journeys22, auth gate9, branding5. Fresh full frontend passed416tests/43files. No test failure, rerun-to-green, skip or assertion change in this integration. Existing audioPlayback act warning remains.
+- Fresh root typecheck and build passed for server and client. Client lint:0errors/100existingwarnings. Whitespace and scope checks passed.
+- Unmodified browser fixture passed all6 VI/EN320/640/1366 combinations,36 click/Tab+Enter navigations,8 expanded-menu cases, same/cross-page/direct/reload/repeated hashes, Back/Forward, unknown fragments and delayed Landing mount. Focus/header clearance, full link geometry and no unexpected requests/browser errors passed. Screenshots at `C:/Users/Asus/AppData/Local/Temp/vietverse-footer-yaBwxK`; inspected VI320footer and EN1366roadmap. Script closes its own browser/server in finally.
+- Historical timeout investigation and limits above remain unchanged. These are local Chromium fixture checks, not production/physical-device or interrupted-navigation acceptance. No local backend suite was run; combined backend validation must come from the new pushed-head CI, not an old baseline result. Audio/F04 remains out of scope.
+
+## Final delivery constraints
 
 - Separate PR base main; coordinator owns review/merge. Audio/F04 remains out of scope even if baseline CI fails.
 - `ak` CLI unavailable: journal saved directly; shared completion plan/index not changed. AgentWiki publish skipped.
