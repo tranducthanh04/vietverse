@@ -68,3 +68,20 @@ are not part of this subset.
   production-data write. Coordinator owns the PR and final merge gates.
 - AgentKit CLI is unavailable; evidence is local Markdown, not a manually edited
   plan/index status. Whole-plan completion is not claimed. AgentWiki publish skipped.
+
+## Latest-main integration before PR creation
+
+- Main advanced to `a8014eec01182ea85dd999253b9ced3b91165bd3` (PR16) during
+  verification. Normal merge `f7108863b2f88328c23d1bfc564c0b9fcaee8b4a` retained
+  both sets of docs without conflicts. PR diff remains the same 15 non-audio
+  files; all nine code/test files are unchanged. New main's header/points/i18n
+  changes are baseline, not changes introduced by this PR.
+- One fresh run after the base change: 517/517 server tests (53 files) and
+  335/335 client tests (38 files) passed, including five new main navigation
+  tests. Typecheck/build/lint exited 0; lint 0 errors, 103 warnings. This is
+  verification of a changed base, not a rerun of a failed suite.
+- Reviewer rechecked the combined tree: no actionable findings, excluded audio
+  paths and lesson receipt validation still match main, whitespace check passes.
+  Documentation-only evidence updates follow this run; no product/test change.
+- The known external finalize CI failure and F04 hold remain as recorded above.
+  New-head GitHub checks are still a separate gate; no self-merge or auto-merge.

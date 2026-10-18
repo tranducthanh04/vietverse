@@ -7,7 +7,7 @@
 - F08 và phần admin của F12: giữ đúng 0 điểm/0 sao/status/giới hạn phiên; phân biệt thiếu dữ liệu, tải lỗi có retry và không tìm thấy hồ sơ. Xem [admin-learner-progress.md](./admin-learner-progress.md).
 - F01 một phần: nút "Xếp lại" còn hiện sau lượt đủ thẻ nhưng sai, giữ đủ thẻ trùng chữ; reset không chấm lại/cấp điểm/hoàn tim. Phần bắt buộc retry/gợi ý và F13 song ngữ vẫn mở.
 - **Phạm vi owner chốt:** một PR thay thế không âm thanh, gồm cả admin; không tạo PR admin song song cho cùng phần merge. Audio mới vẫn giữ ở PR #12, chưa merge/phát hành; không rollback audio baseline, không sửa auth, không thay header/offline đã có trên main.
-- Kiểm chứng fresh một lượt: server 517/517, client 330/330; typecheck/build qua, lint 0 lỗi/103 cảnh báo. Journal phạm vi này: `plans/journals/2026-10-18-customer-non-audio.md`. CI của PR mới là gate riêng; lỗi finalize baseline đã được ghi nhận ở PR khác vẫn chưa được sửa. Chưa merge/deploy, toàn bộ yêu cầu khách hàng chưa hoàn tất.
+- Kiểm chứng fresh sau khi gộp main có PR #16: server 517/517, client 335/335; typecheck/build qua, lint 0 lỗi/103 cảnh báo. Journal phạm vi này: `plans/journals/2026-10-18-customer-non-audio.md`. CI của PR mới là gate riêng; lỗi finalize baseline đã được ghi nhận ở PR khác vẫn chưa được sửa. Chưa merge/deploy, toàn bộ yêu cầu khách hàng chưa hoàn tất.
 
 ## Header công khai VI/EN — 2026-10-18, local
 

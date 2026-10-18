@@ -27,7 +27,7 @@ not a merged or deployed release.
 `client/src/test/adminLearnerDetail.test.tsx` covers zero/missing values, progress
 statuses, screen-time settings, request failure/retry and missing profiles.
 Fresh testing of this isolated branch passed: 19 focused client cases (14 admin,
-5 sort reset), and the full 330-client/517-server suite. Results and remaining
+5 sort reset), and the full 335-client/517-server suite after merging main/PR16. Results and remaining
 baseline/CI gates are in `plans/journals/2026-10-18-customer-non-audio.md`.
 Browser/device/production acceptance remains separate.
 
