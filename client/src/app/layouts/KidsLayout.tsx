@@ -81,7 +81,7 @@ export const KidsLayout: React.FC = () => {
       <SkipLink />
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
           {/* Active Child Profile & Switcher */}
           <div className="relative" ref={pickerRef}>
             <button
@@ -139,8 +139,8 @@ export const KidsLayout: React.FC = () => {
           </div>
 
           {/* Points Pill & Parent Gate Link */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <LanguageSwitcher className="hidden sm:inline-flex" />
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 max-w-full ml-auto">
+            <LanguageSwitcher />
             <div className="flex items-center gap-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
               <span className="sr-only">ViVi Points:</span>
