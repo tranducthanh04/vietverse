@@ -10,10 +10,11 @@ import type { ClientSession, Types } from 'mongoose';
  */
 export function isSubscriptionPaid(subscription: any): boolean {
   if (!subscription) return false;
-  if (subscription.active === false) return false;
+  if (subscription.active !== true) return false;
   if (subscription.plan !== 'monthly' && subscription.plan !== 'yearly') return false;
-  if (subscription.expiresAt && new Date(subscription.expiresAt) <= new Date()) return false;
-  return true;
+  if (!subscription.expiresAt) return false;
+  const expiry = new Date(subscription.expiresAt).getTime();
+  return Number.isFinite(expiry) && expiry > Date.now();
 }
 
 type Deferred<T> = () => Promise<T>;

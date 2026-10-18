@@ -2,6 +2,15 @@
 
 Base URL: `/api/v1`.
 
+## Audit không âm thanh — 2026-10-18, local
+
+- Không thêm endpoint, field, schema hoặc quyền. `POST /lessons/:id/complete` giữ payload/response, ngưỡng/sao/thưởng và transaction hiện có; grading legacy không fallback sang `isCorrect` của client. Sort/matching thiếu/rỗng canonical và type lạ không đạt. `record_voice` vẫn qua lookup receipt tại service baseline; không thay recording API/finalize trong PR này.
+- Kiểm tra paid yêu cầu `active === true`, plan monthly/yearly và expiry hữu hạn trong tương lai; giữ mã lỗi/quyền mở khóa hiện có. Legacy thiếu active/expiry không được hiểu là gói vô hạn và không tự sửa record.
+- `POST /points/shop/redeem`: filter của atomic debit quà ảo thêm điều kiện chưa có `item._id` trong `ownedItemIds`; yêu cầu thua khi item đã được sở hữu trả 400 với thông báo hiện có "Bé đã sở hữu vật phẩm ảo này rồi." Không thêm mã lỗi mới, không thay luồng quà vật lý hoặc compensation.
+- Admin detail tiếp tục đọc API hiện có; UI giữ giá trị zero, status và phân biệt load-error/retry với hồ sơ thiếu. Không biến lỗi request thành thành công hoặc đổi dữ liệu server; chi tiết tại [admin-learner-progress.md](./admin-learner-progress.md).
+- Reset `sort_order` chỉ thay lựa chọn local, không gọi `onComplete`; lần chọn đủ tiếp theo vẫn theo callback cũ. Chưa có API chấm từng câu mới, F01 retry/F13 còn chờ quyết định; contract trung tính/chấm cuối bài bên dưới giữ nguyên.
+- Audio mới của PR #12 đang giữ lại, chưa merge/phát hành theo owner; bản không âm thanh không rollback baseline main và không sửa auth. Không import/migrate dữ liệu production.
+
 ## Hoạt động bổ sung — contract triển khai local 2026-10-09
 
 Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`, không đổi bảy loại cũ hoặc công thức điểm. Canonical/model, draft/publish, grader, màn bé/session và CMS/editor/preview đã triển khai local; bằng chứng và giới hạn ở [QA](./08-customer-alignment.md). Chưa xác nhận deploy/import/publish production.
