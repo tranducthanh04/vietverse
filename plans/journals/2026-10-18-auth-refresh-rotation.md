@@ -78,3 +78,24 @@ Branch: `codex/auth-refresh-rotation`, isolated worktree.
 - Fresh project typecheck/build pass; 1,832 modules. Existing act warning remains.
   New-head CI must be checked separately; historical run `39145165919` does not
   prove this merge revision. No self-merge, auto-merge or audio/F04 changes.
+
+## PR21 integration (2026-10-19 local time)
+
+- PR19-integration head `48470a5566a04e7f3c3f7746ef5166616c674b5e` passed CI
+  `39146520056` and both frontend/backend previews before main advanced.
+- Coordinator requested normal merge of main
+  `5baf9172029c9f1276697e918e2a345c4723ea07`. Merge
+  `7139c42b280feff89c9c0c2542d67bde60c986c2` completed without conflicts.
+  All PR19/PR21 docs and source are preserved; no branding or audio delta.
+- Independent incremental review confirms nine auth source/test/docs files,
+  no client delta, no conflict markers and no actionable findings. Server,
+  root package and lockfile are unchanged from `48470a5`.
+- Fresh focused auth/Google/security: 50/50 tests in six files, exit 0 (43.27s),
+  including all 14 real-replica-set atomicity/concurrency/rollback cases.
+  Fresh full client: 389/389 in 41 files, exit 0 (31.28s).
+  Project typecheck/build pass (1832 modules). Existing act warning remains.
+- Full server was not rerun locally for this unchanged server input; retain
+  the prior 511-test evidence and separately require exact-new-head CI.
+  Do not use historical CI as the new gate. No F04 failure was encountered in
+  these focused runs; the known held race remains unfixed.
+- No force-push, self/auto-merge, production mutation or manual deployment.
