@@ -84,6 +84,19 @@ export const KidsLayout: React.FC = () => {
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to="/"
+            aria-label={t('app.name')}
+            className="basis-full min-w-0 lg:basis-auto lg:max-w-[18rem] flex flex-col gap-1 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+          >
+            <span className="font-display text-2xl text-primary tracking-tight font-extrabold">
+              {t('app.name')}
+            </span>
+            <span className="text-xs leading-4 text-secondary font-semibold whitespace-normal break-words">
+              {t('publicNav.subtagline')}
+            </span>
+          </Link>
+
           {/* Active Child Profile & Switcher */}
           <div className="relative" ref={pickerRef}>
             <button
