@@ -506,3 +506,10 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - Đơn được lưu ở collection `PaymentTestOrder`, riêng với đơn mua gói. Webhook vẫn phải qua PayOS SDK verify chữ ký và kiểm tra đúng số tiền; xử lý đơn test không gọi `Subscription`.
 - Trang ghi rõ đây là khoản production bằng tiền thật; trạng thái thành công chỉ xuất hiện sau webhook hợp lệ, không dựa trên `returnUrl`.
 - Chưa nghiệm thu chuyển khoản thực tế: cần deploy code, cấu hình PayOS credentials và webhook production, sau đó phụ huynh chủ động chuyển 10.000đ. PayOS không cung cấp sandbox.
+
+## Cache sau offline sync — 2026-10-18, local
+
+- **Đã sửa phần cache** của finding ViVi Points ngày 09/10: worker trước đây chỉ xóa hàng đợi/phát event, không có consumer làm mới QueryClient hoặc hồ sơ header. Cache vẫn giữ số dư/tiến độ cũ dù server đã lưu.
+- Event bổ sung account/child IDs đã xác nhận; worker làm mới đúng prefix điểm (gồm history), stages, parentProgress và đọc lại hồ sơ. Không ghi điểm hoặc trạng thái hoàn thành từ suy đoán client.
+- Bằng chứng RED: 5/7 ca mới fail do cache không đổi và không tải lại hồ sơ; sau sửa và bổ sung ranh giới, 23/23 test offline qua. Bao phủ batch một phần, bài chưa đạt, lỗi mạng, tài khoản/hồ sơ đổi và cleanup/restart.
+- **Giả định/giới hạn:** lỗi đọc lại hồ sơ giữ dữ liệu xác nhận cũ tới lượt refresh/điều hướng thành công sau; lỗi đọc không được làm mất ACK hoặc gửi lại bài. Chưa nghiệm thu browser/thiết bị/production. Chi tiết ở [offline-sync-refresh.md](./offline-sync-refresh.md); các debt offline khác không tự được đóng.

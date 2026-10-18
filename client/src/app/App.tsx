@@ -23,7 +23,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     // Attempt auto-login with refresh token stored in httpOnly cookie
     fetchMe();
-    const cleanupWorker = initOfflineSyncWorker();
+    const cleanupWorker = initOfflineSyncWorker(queryClient);
     return () => {
       cleanupWorker?.();
     };
