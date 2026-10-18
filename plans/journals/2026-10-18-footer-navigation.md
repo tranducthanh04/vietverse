@@ -30,7 +30,18 @@
 - Combined-base full client suite passed411tests/42files; typecheck/build and browser also passed. Browser again passed six combinations,36click/keyboard+8mobile cases and all named lifecycle checks, no unexpected requests/errors. Lint now0errors/100existingwarnings after PR21. Backend and dependency/package files verified identical to the497-test run, so reused that result; no unnecessary backend rerun. Main CI39147316014 for base5baf917 also verified success.
 - Lint: 0 errors, 103 pre-existing warnings.
 
-## Handoff constraints
+## PR20 integration - 2026-10-19 Asia/Saigon
+
+- Coordinator requested priority integration before the separate remainder report. Verified the human authorization in coordinator chat; no new feature scope was inferred from the delegation alone.
+- Git-manager normal-merged pinned main `53a447a369fed0d69b455749a053b694a159a753` into this branch as `f9de3d56b3b4dccaf1511e4b6cc4a577ed1475b0`. The sole conflict was `docs/03-feature-inventory.md`; both auth20 and footer sections remain. No force push or shared-checkout changes.
+- `git diff 04678e0 f9de3d5 -- client plans/261018-footer-navigation docs/footer-navigation.md` is empty. Nine footer deliverables still differ from main; report work is separate.
+- Fresh full frontend: 411 tests in 42 files passed. Fresh focused footer/CTA/focus/pricing/i18n: 62 tests in five files passed. The first focused invocation used two incorrect file filters and ran only38 tests; corrected to the actual existing filenames, then ran all62. No test was skipped or weakened.
+- Fresh root typecheck and build passed for server and client. Client lint: 0 errors, 100 existing warnings. Existing audioPlayback act warning remains.
+- Unmodified browser script passed VI/EN at320/640/1366: six combinations,36 click/Tab+Enter navigations and8 expanded-menu cases, plus direct/reload/repeat/history/unknown/delayed checks. No browser errors or unexpected requests. Screenshots: `C:/Users/Asus/AppData/Local/Temp/vietverse-footer-I9UZ7y`; inspected Vietnamese320 roadmap screenshot. Owned browser/server closed by script finally.
+- Prior timeout history and limits above are unchanged. This run does not prove interrupted-navigation, real-device or production acceptance.
+- Backend tests were not rerun locally for this integration; old497 result is historical, not evidence for the changed auth baseline. Fresh CI on the final pushed head must validate the combined backend. No claim that F04 is fixed.
+
+## Delivery constraints
 
 - Separate PR base main; coordinator owns review/merge. Audio/F04 remains out of scope even if baseline CI fails.
 - `ak` CLI unavailable: journal saved directly; shared completion plan/index not changed. AgentWiki publish skipped.
