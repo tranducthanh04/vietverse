@@ -8,5 +8,13 @@
 - Browser: 4 ca VI/EN x 390/1280px, lỗi 503 rồi retry bằng Enter, đúng alert/status/giá trị 0, không lỗi runtime. Ảnh nằm trong thư mục tạm local `vietverse-settings-save-KJRzwk`, không được upload công khai.
 - Delegation: một reviewer đọc độc lập, không có finding chặn; không sửa file. Git-manager chỉ đóng gói commit/PR sau kiểm chứng, không triển khai nghiệp vụ.
 - Sai khác với yêu cầu: không có mở rộng nghiệp vụ; lỗi refresh sau PATCH cũng được bắt để không có unhandled rejection và không xác nhận giả. Không sửa shared store, backend, thanh toán hoặc offline worker.
-- Giới hạn: chưa nghiệm thu thiết bị thật/screen reader/production; không hủy hoặc rollback mutation server đã nhận. Còn ca timer và sau-refresh-account/unmount chưa có test tách riêng; đã ghi trong tài liệu.
+- Giới hạn: chưa nghiệm thu thiết bị thật/screen reader/production; không hủy hoặc rollback mutation server đã nhận. Các khoảng trống timer và sau-refresh-account/unmount ở lần review đầu được bổ sung trong follow-up dưới đây.
 - Tài liệu quyết định/giả định: `docs/parent-settings-save.md`. PR riêng phải chờ chat điều phối review, không tự merge hoặc auto-merge.
+
+## Follow-up review PR #14 trên main có offline refresh
+
+- Điều phối yêu cầu merge `origin/main@c7519c0`; đã merge thường thành `3abd0d0`, không conflict, giữ nguyên production source F12 và đúng 9 file scope. Không gộp NAV PR #16 hoặc sửa shared store/offline/audio.
+- Thêm 8 ca: offline completion -> worker -> fetchChildren thật trong lúc lưu; cùng bé giữ input/loading; đổi bé lúc PATCH/select và offline response chồng nhau không reselect cũ; tài khoản đổi/unmount-remount khi refresh đã bắt đầu (cả resolve/reject); timer hết hạn đúng 3 giây và được dọn khi unmount. Tổng 24 test F12, focused cùng offline 34/34 qua.
+- Fresh full client 338/338 test, 37 file; build TypeScript/Vite qua; lint 0 lỗi/1 warning thanh toán có sẵn, warning act() audio có sẵn không sửa. Browser chạy lại 4/4 qua; ảnh local `vietverse-settings-save-XPq00N`.
+- Reviewer độc lập xác nhận không finding, tự chạy lại 34/34 và diff-check. Không coi adapter test là chứng minh production ordering/cancellation.
+- Ship mode: PR riêng chờ điều phối review/CI rồi merge; không auto-merge. Nguồn là audit F12, không có GitHub issue riêng được xác nhận.

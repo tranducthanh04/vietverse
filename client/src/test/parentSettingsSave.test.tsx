@@ -1,5 +1,6 @@
 import React from 'react';
-import { afterEach, beforeEach, expect, it } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { QueryClient } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AxiosError, type InternalAxiosRequestConfig } from 'axios';
@@ -8,6 +9,7 @@ import { api } from '../lib/api.js';
 import { useAuthStore } from '../store/authStore.js';
 import { useChildStore, type ChildProfile } from '../store/childStore.js';
 import { useUiLanguageStore } from '../i18n/index.js';
+import { enqueueOfflineCompletion, initOfflineSyncWorker } from '../lib/offlineSync.js';
 
 const child: ChildProfile = {
   _id: 'a', parentId: 'parent', name: 'An', ageGroup: '5-6',
@@ -18,9 +20,11 @@ const otherChild: ChildProfile = { ...child, _id: 'b', name: 'Binh', screenTimeL
 const adapter = api.defaults.adapter;
 let requests: Array<{ url: string; body: unknown; gate: unknown }>;
 let respond: (config: InternalAxiosRequestConfig) => unknown | Promise<unknown>;
+let stopWorker: (() => void) | undefined;
+let queryClient: QueryClient | undefined;
 
 beforeEach(() => {
-  useAuthStore.setState({ user: { id: 'parent', email: 'parent@example.test', displayName: 'Parent', role: 'parent' } });
+  useAuthStore.setState({ user: { id: 'parent', email: 'parent@example.test', displayName: 'Parent', role: 'parent' }, isLoading: false });
   useChildStore.setState({ activeChild: child, children: [child, otherChild] });
   useUiLanguageStore.setState({ manualLanguage: 'en' });
   sessionStorage.setItem('vietverse_parent_gate_token', 'test-gate');
@@ -33,9 +37,125 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  stopWorker?.();
+  stopWorker = undefined;
+  queryClient?.clear();
+  queryClient = undefined;
+  vi.useRealTimers();
   api.defaults.adapter = adapter;
+  localStorage.clear();
   sessionStorage.clear();
   useUiLanguageStore.setState({ manualLanguage: 'vi' });
+});
+
+async function startOfflineRefresh() {
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  enqueueOfflineCompletion({ id: 'settings-offline', userId: 'parent', childId: 'a', lessonId: 'lesson', answers: [], savedAt: 1 });
+  await act(async () => { stopWorker = initOfflineSyncWorker(queryClient!); });
+  await waitFor(() => expect(requests.some(request => request.url === '/children')).toBe(true));
+}
+
+it('keeps the selected limit and loading through an offline profile refresh during save', async () => {
+  const patch = deferred();
+  respond = config => {
+    if (config.url === '/parent/screen-time') return patch.promise;
+    if (config.url === '/children') return [{ ...child, viviPoints: 10 }, otherChild];
+    if (config.url === '/children/a/select') return { ...child, viviPoints: 10, screenTimeLimit: 0 };
+    if (config.url === '/lessons/lesson/complete') return { passed: true };
+    throw new Error(`Unexpected request: ${config.url}`);
+  };
+  show(); chooseUnlimited(); save();
+  await startOfflineRefresh();
+  await waitFor(() => expect(useChildStore.getState().activeChild?.viviPoints).toBe(10));
+  expect(screen.getByRole('radio', { name: /^Unlimited/ })).toHaveAttribute('aria-checked', 'true');
+  expect(screen.getByRole('button', { name: /Processing/i })).toBeDisabled();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  await act(async () => patch.resolve({ ...child, screenTimeLimit: 0 }));
+  expect(await screen.findByRole('status')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save settings' })).toBeEnabled();
+  expect(useChildStore.getState().activeChild?.screenTimeLimit).toBe(0);
+});
+
+it.each(['patch', 'selection'] as const)('keeps the new child when offline refresh overlaps an old %s response', async phase => {
+  const patch = deferred(), selection = deferred(), offline = deferred();
+  respond = config => {
+    if (config.url === '/parent/screen-time') return JSON.parse(config.data).childId === 'a' ? patch.promise : otherChild;
+    if (config.url === '/children') return offline.promise;
+    if (config.url === '/children/a/select') return selection.promise;
+    if (config.url === '/children/b/select') return otherChild;
+    if (config.url === '/lessons/lesson/complete') return { passed: true };
+    throw new Error(`Unexpected request: ${config.url}`);
+  };
+  show(); chooseUnlimited(); save();
+  await startOfflineRefresh();
+  if (phase === 'selection') {
+    await act(async () => patch.resolve({ ...child, screenTimeLimit: 0 }));
+    await waitFor(() => expect(requests.some(request => request.url === '/children/a/select')).toBe(true));
+  }
+  act(() => useChildStore.getState().setActiveChild(otherChild));
+  await act(async () => {
+    offline.resolve([{ ...child, viviPoints: 10 }, otherChild]);
+    if (phase === 'patch') patch.resolve({ ...child, screenTimeLimit: 0 });
+    else selection.resolve({ ...child, screenTimeLimit: 0 });
+  });
+  expect(useChildStore.getState().activeChild?._id).toBe('b');
+  expect(screen.getByRole('radio', { name: /^30 minutes/ })).toHaveAttribute('aria-checked', 'true');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save settings' })).toBeEnabled();
+  expect(requests.filter(request => request.url === '/children/a/select')).toHaveLength(phase === 'selection' ? 1 : 0);
+  save();
+  expect(await screen.findByRole('status')).toBeInTheDocument();
+  expect(useChildStore.getState().activeChild?._id).toBe('b');
+});
+
+it.each(['success', 'failure'] as const)('ignores refresh %s after account change', async outcome => {
+  const refresh = deferred();
+  respond = config => config.url?.endsWith('/select') ? refresh.promise : child;
+  show(); save();
+  await waitFor(() => expect(requests).toHaveLength(2));
+  act(() => useAuthStore.setState({ user: { id: 'other-parent', email: 'other@example.test', displayName: 'Other', role: 'parent' } }));
+  await act(async () => {
+    if (outcome === 'success') refresh.resolve(child);
+    else refresh.reject(new Error('old refresh failed'));
+  });
+  expect(useChildStore.getState().activeChild).toBeNull();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save settings' })).toBeDisabled();
+});
+
+it.each(['success', 'failure'] as const)('does not notify a remounted screen about the old refresh %s', async outcome => {
+  const refresh = deferred();
+  respond = config => config.url?.endsWith('/select') ? refresh.promise : child;
+  const view = show(); save();
+  await waitFor(() => expect(requests).toHaveLength(2));
+  view.unmount();
+  show();
+  await act(async () => {
+    if (outcome === 'success') refresh.resolve(child);
+    else refresh.reject(new Error('old refresh failed'));
+  });
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save settings' })).toBeEnabled();
+  expect(requests).toHaveLength(2);
+});
+
+it('expires confirmation after three seconds and clears its timer when unmounted', async () => {
+  vi.useFakeTimers();
+  const view = show();
+  await act(async () => save());
+  expect(screen.getByRole('status')).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(2999));
+  expect(screen.getByRole('status')).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(1));
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  await act(async () => save());
+  expect(screen.getByRole('status')).toBeInTheDocument();
+  expect(vi.getTimerCount()).toBeGreaterThan(0);
+  view.unmount();
+  expect(vi.getTimerCount()).toBe(0);
 });
 const show = () => render(<MemoryRouter><ParentSettingsPage /></MemoryRouter>);
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
