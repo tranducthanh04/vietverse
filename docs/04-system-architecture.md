@@ -33,6 +33,8 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Auth và authorization
 
+- **Siết tính nguyên tử 2026-10-18, local:** refresh, reuse-family revocation và logout dùng transaction cùng ghi tăng `User.__v` (`timestamps: false`) trước các thao tác token để tuần tự hóa theo tài khoản; logout nhiều owner lấy khóa theo thứ tự ổn định. Không thêm field/index/migration; cần replica set. Transaction dùng `timeoutMS: 15000`, `maxCommitTimeMS: 5000`, không phải cam kết toàn request luôn kết thúc trong 15 giây vì còn lookup ngoài transaction.
+- Chỉ các thao tác phiên nêu trên đi qua khóa; `generateTokens` từ login/register/Google tạo family mới ngoài khóa. Không coi logout là hàng rào ngăn mọi đăng nhập mới đồng thời. Access JWT đã cấp vẫn có thời hạn 15 phút, không được thu hồi tức thì bởi transaction refresh. Chính sách reuse không grace và caveat commit mất ACK tại [auth-session-rotation.md](./auth-session-rotation.md).
 - Access token JWT hết hạn 15 phút.
 - Refresh token JWT 7 ngày trong cookie httpOnly.
 - API đọc Bearer token hoặc cookie access token nếu có.
