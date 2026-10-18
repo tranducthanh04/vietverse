@@ -90,11 +90,16 @@ export const QuestMapPage: React.FC = () => {
         <div className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full bg-secondary/20 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
+          <div className="min-w-0">
             <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full w-fit mb-3 text-xs uppercase font-extrabold tracking-wider">
               <Sparkles className="w-4 h-4 text-secondary-fixed" />
               <span>{t('map.bannerBadge')}</span>
             </div>
+            {activeChild && (
+              <p className="mb-2 text-base md:text-lg font-bold [overflow-wrap:anywhere]">
+                {t('onboarding.readyTitle', { name: activeChild.name })}
+              </p>
+            )}
             <h1 className="text-3xl md:text-4xl font-display font-extrabold tracking-tight">
               {t('map.title')}
             </h1>

@@ -5,6 +5,13 @@
 - `CoverPlaceholder` chỉ chọn icon theo khóa khai báo trực tiếp; category lạ như `constructor` không còn làm sập màn truyện/văn hóa. Giữ icon/màu hiện có, `className`, `aria-hidden` và ảnh thật nếu có.
 - Sửa kỹ thuật, không đổi taxonomy/API/dữ liệu/quyền/điểm/audio. Contract và giới hạn tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
 
+## Map child greeting - 2026-10-19, local
+
+- MAP-CHILD-GREETING adds the selected child's name using existing VI/EN UI copy,
+  plain text and full-name wrapping. No extra request or change to map navigation,
+  guards, permissions, points or audio. Decisions, presentation assumption and
+  verification limits: [map-child-greeting.md](./map-child-greeting.md).
+
 ## Điều hướng footer công khai — 2026-10-18, local
 
 - FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
