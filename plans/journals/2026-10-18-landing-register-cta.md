@@ -43,6 +43,22 @@ independently reran all 23 focused tests. Final screenshots use the merged base.
 No self-merge, production writes, deployment or audio work. Coordinator owns
 review/merge; CI must be checked at the exact head SHA before acceptance.
 
+## PR #17 integration gate - main 8ac98f9
+
+Normally merged main `8ac98f9c2c7fe288630f6f688042599d8fdaa589`
+(parent-settings PR #14) into this branch as `be983988` without conflicts.
+Both task additions in feature inventory and review findings are preserved.
+Landing implementation, its tests/browser script, server code and lockfile
+are unchanged by this merge.
+
+Fresh checks on the integrated tree all exited 0: client 366/366 tests in
+39 files, root server/client typecheck and build, lint with 0 errors and
+103 existing warnings, and all 72 CTA browser navigations. The existing
+audioPlayback act warning remains. Browser screenshots were generated in
+the local temporary directory; the committed screenshot inputs are unchanged.
+No backend test or CI rerun was used to mask the unrelated F04 race, and no
+audio implementation was changed. Final remote CI remains a coordinator gate.
+
 AgentKit CLI unavailable: local Markdown journal fallback; no plan index/status
 claim. AgentWiki publish skipped. Durable behavior belongs to
 `docs/landing-register-cta.md`, not this journal.
