@@ -436,7 +436,7 @@ describe("device speech robustness", () => {
     });
     expect(cancel).toHaveBeenCalled();
     expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("status")).toHaveTextContent(/cùng đọc trên màn hình/i);
+    expect(screen.getByRole("status")).toHaveTextContent(/bấm nghe lại/i);
   });
 
   it("unlocks iOS speech synchronously inside the tap before reading", () => {
