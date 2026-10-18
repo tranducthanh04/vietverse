@@ -394,6 +394,8 @@ Phần này ghi nhận các việc phát hiện khi review lại `client/src` tr
 
 ### P1-FE.4 — Thiếu trạng thái lỗi và retry cho data screens [CẦN XỬ LÝ]
 
+- Bổ sung local 2026-10-18, phần lưu cài đặt: đã bắt lỗi PATCH screen-time và refresh hồ sơ, giữ lựa chọn để thử lại; callback cũ không hiển thị nhầm sau đổi bé/tài khoản/unmount. Không đóng toàn bộ F12/data screens. Bằng chứng và giới hạn tại [parent-settings-save.md](./parent-settings-save.md).
+
 - Bằng chứng: nhiều `useQuery` chỉ xử lý `isLoading`; detail page có thể spinner vô hạn khi request lỗi, list page dễ bị hiểu là "không có dữ liệu".
 - Phạm vi: stories, culture, points shop, parent portal và admin portal.
 - Việc cần làm: tạo `QueryErrorState`, nút Thử lại, thông báo phân biệt lỗi mạng/lỗi quyền/lỗi nghiệp vụ và empty state riêng.
