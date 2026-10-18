@@ -8,7 +8,8 @@ export type StorageFailure = { statusCode: number; code: string; message: string
 
 export const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
 const MAX_AUDIO_SECONDS = 180;
-const AUDIO_FORMATS = ['webm', 'mp4', 'm4a', 'ogg', 'mp3', 'wav'];
+// The Admin API reports Chrome's audio-only WebM as Matroska audio (`mka`).
+const AUDIO_FORMATS = ['webm', 'mka', 'mp4', 'm4a', 'ogg', 'mp3', 'wav'];
 // Cloudinary rejects a signed upload whose timestamp is older than one hour
 // ("Stale request"). Back-dating the signed timestamp shortens the effective
 // provider permission to ~15 minutes: the 10-minute intent plus upload slack.
@@ -40,19 +41,43 @@ const positive = (value: unknown) => typeof value === 'number' && Number.isFinit
 
 type ProviderResource = Record<string, unknown> & {
   video?: unknown; audio?: { codec?: unknown }; width?: unknown; height?: unknown; is_audio?: unknown;
+  audio_codec?: unknown; has_video?: unknown; video_metadata?: unknown;
 };
-// Empty video metadata is how audio-only containers are represented. iOS audio/mp4
-// may additionally carry a placeholder video stream; accept it only when Cloudinary
-// itself flags the asset as audio and the stream has no dimensions or frames.
-function hasRealVideo(resource: ProviderResource): boolean {
-  const video = resource.video;
-  if (video == null) return false;
+type MediaShape = { audioCodec: unknown; video: unknown; isAudio: unknown; hasVideo: unknown; width: unknown; height: unknown };
+
+const record = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+
+// The upload response puts stream details at the top level (`audio`, `video`, `is_audio`),
+// but `api.resource(..., { media_metadata: true })` — what finalize calls — flattens a few
+// (`audio_codec`, `has_audio`) and nests the rest under `video_metadata`. Read both shapes.
+function mediaShape(resource: ProviderResource): MediaShape {
+  const meta = record(resource.video_metadata);
+  const audio = resource.audio ?? meta.audio;
+  return {
+    audioCodec: record(audio).codec ?? resource.audio_codec,
+    video: resource.video ?? meta.video,
+    isAudio: resource.is_audio ?? meta.is_audio,
+    hasVideo: resource.has_video ?? meta.has_video,
+    width: resource.width ?? meta.width,
+    height: resource.height ?? meta.height,
+  };
+}
+
+// Audio-only containers carry no video stream, or one with no codec (Chrome's audio/mp4
+// only reports container `metadata`). iOS audio/mp4 may carry a placeholder stream with a
+// codec; accept it only when Cloudinary flags the asset as audio and it has no dimensions
+// or frames.
+function hasRealVideo(shape: MediaShape): boolean {
+  const { video } = shape;
+  if (video == null) return shape.hasVideo === true;
   if (typeof video !== 'object') return true;
   const stream = video as Record<string, unknown>;
-  if (Object.keys(stream).length === 0) return false;
-  const dimensions = [resource.width, resource.height, stream.width, stream.height].some(positive);
+  const dimensions = [shape.width, shape.height, stream.width, stream.height].some(positive);
   const frames = positive(Number(stream.nb_frames));
-  return !(resource.is_audio === true && !dimensions && !frames);
+  const codec = typeof stream.codec === 'string' && stream.codec.length > 0;
+  if (!codec && !dimensions && !frames && shape.hasVideo !== true) return false;
+  return !(shape.isAudio === true && !dimensions && !frames);
 }
 
 export const directAudioStorage = {
@@ -87,8 +112,9 @@ export const directAudioStorage = {
     }
     let url: URL;
     try { url = new URL(String(resource.secure_url)); } catch { throw invalid(); }
-    const hasAudio = typeof resource.audio?.codec === 'string' && resource.audio.codec.length > 0;
-    const hasVideo = hasRealVideo(resource);
+    const shape = mediaShape(resource);
+    const hasAudio = typeof shape.audioCodec === 'string' && shape.audioCodec.length > 0;
+    const hasVideo = hasRealVideo(shape);
     const format = String(resource.format);
     const bytes = resource.bytes as number;
     const duration = resource.duration;
