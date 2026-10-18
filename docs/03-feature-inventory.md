@@ -1,5 +1,10 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Ảnh bìa dự phòng an toàn — 2026-10-19, local
+
+- `CoverPlaceholder` chỉ chọn icon theo khóa khai báo trực tiếp; category lạ như `constructor` không còn làm sập màn truyện/văn hóa. Giữ icon/màu hiện có, `className`, `aria-hidden` và ảnh thật nếu có.
+- Sửa kỹ thuật, không đổi taxonomy/API/dữ liệu/quyền/điểm/audio. Contract và giới hạn tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
+
 ## Map child greeting - 2026-10-19, local
 
 - MAP-CHILD-GREETING adds the selected child's name using existing VI/EN UI copy,

@@ -1,5 +1,10 @@
 # 06 — Kết quả review senior BA/code
 
+## COVER-FALLBACK-SAFE — 2026-10-19, sửa local
+
+- Lookup icon story/culture từng đọc thuộc tính kế thừa của object; category `constructor`, `toString`, `__proto__`, `hasOwnProperty` không có ảnh làm React ném `Element type is invalid`. Model category là string, nên dữ liệu legacy có thể đi tới cả list/detail.
+- Chỉ nhận khóa sở hữu trực tiếp, còn lại dùng fallback đúng loại. Không đổi category/enum/API, ảnh thật, quyền, điểm hoặc audio; không đóng F04/F13 hay taxonomy truyện. 10 ca lỗi RED trước sửa, 30 test hồi quy GREEN sau sửa. Contract và kiểm chứng tại [cover-placeholder-safe.md](./cover-placeholder-safe.md).
+
 ## Header khu bé thiếu brand/tagline — 2026-10-18, sửa local
 
 - **KIDS-HEADER-BRANDING:** tab cấu trúc Docs khách yêu cầu `VIETVERSE` và tagline đầy đủ bên trái header cố định sau đăng nhập; `KidsLayout` chưa hiển thị hai thành phần này. Bổ sung link về `/` dùng `app.name` cùng `publicNav.subtagline` hiện có, không sửa dictionary hoặc thêm hình logo.
