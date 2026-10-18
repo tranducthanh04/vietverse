@@ -6,6 +6,7 @@ import {
 } from '../../components/ui/icons.js';
 import { Card } from '../../components/ui/Card.js';
 import { formatPoints } from '../../lib/utils.js';
+import { useChildStore } from '../../store/childStore.js';
 import { useT, useUiLanguage, type Translate } from '../../i18n/index.js';
 import type { ParentProgress, ParentRecentActivity, ParentStageProgress } from './parentProgress.types.js';
 
@@ -22,6 +23,7 @@ function stageDescription(stage: ParentStageProgress, t: Translate) {
 export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey' | 'child'>) {
   const t = useT();
   const { language } = useUiLanguage();
+  const activeChildId = useChildStore(state => state.activeChild?._id);
   const current = journey?.stages.find(stage => stage.id === journey.currentStageId);
   return (
     <section aria-labelledby="parent-journey-title" className="space-y-4">
@@ -61,6 +63,15 @@ export function ParentJourney({ journey, child }: Pick<ParentProgress, 'journey'
                   {stage.isCompleted ? <CircleCheck className="w-4 h-4 shrink-0 text-emerald-600" /> : stage.lockReason ? <LockKeyhole className="w-4 h-4 shrink-0" /> : <Clock className="w-4 h-4 shrink-0" />}
                   {stageDescription(stage, t)}
                 </p>
+                {child?.id === activeChildId && (
+                  <Link
+                    to={`/kham-pha?${new URLSearchParams({ stage: stage.id, childId: child.id })}`}
+                    aria-label={`${t(stage.isUnlocked && !stage.isCompleted && stage.totalLessons > 0 ? 'parentPortal.continueStage' : 'parentPortal.viewStage')}: ${stage.title}`}
+                    className="inline-flex items-center min-h-[44px] mt-2 text-sm font-bold text-primary underline underline-offset-4 rounded focus-visible:outline focus-visible:outline-2"
+                  >
+                    {t(stage.isUnlocked && !stage.isCompleted && stage.totalLessons > 0 ? 'parentPortal.continueStage' : 'parentPortal.viewStage')}
+                  </Link>
+                )}
               </Card>
             </li>
           ))}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Lock,
@@ -15,15 +15,42 @@ import { formatPoints } from '../../lib/utils.js';
 import { useChildStore } from '../../store/childStore.js';
 import { useT, useUiLanguage } from '../../i18n/index.js';
 import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
+
+interface MapStage {
+  _id: string;
+  order: number;
+  title: string;
+  goal: string;
+  isUnlocked: boolean;
+  isCompleted: boolean;
+  requiresSubscription: boolean;
+  totalLessons: number;
+  completedCount: number;
+  lessons: {
+    _id: string;
+    order: number;
+    title: string;
+    description?: string;
+    isUnlocked: boolean;
+    status: string;
+    stars: number;
+  }[];
+}
 
 export const QuestMapPage: React.FC = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildStore();
   const t = useT();
   const { language } = useUiLanguage();
-  const [selectedStageOrder, setSelectedStageOrder] = useState<number>(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedStages = searchParams.getAll('stage');
+  const requestedChildren = searchParams.getAll('childId');
+  // A link may bind to the displayed child, but can never select a profile.
+  const childMismatch = requestedChildren.length > 0 &&
+    (requestedChildren.length !== 1 || requestedChildren[0] !== activeChild?._id);
 
-  const { data: stages = [], isLoading } = useQuery({
+  const { data: stages = [], isLoading, error, refetch } = useQuery<MapStage[]>({
     queryKey: ['stages', activeChild?._id],
     queryFn: async () => {
       const res = await api.get('/stages', {
@@ -31,10 +58,28 @@ export const QuestMapPage: React.FC = () => {
       });
       return res.data.data;
     },
-    enabled: !!activeChild?._id,
+    enabled: !!activeChild?._id && !childMismatch,
   });
 
-  const activeStage = stages.find((s: any) => s.order === selectedStageOrder) || stages[0];
+  const activeStage = requestedStages.length === 0
+    ? stages.find(stage => stage.order === 1) ?? stages[0]
+    : requestedStages.length === 1 ? stages.find(stage => stage._id === requestedStages[0]) : undefined;
+  const selectStage = (stageId: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('stage', stageId);
+    if (activeChild) next.set('childId', activeChild._id);
+    setSearchParams(next);
+  };
+
+  if (childMismatch) {
+    return (
+      <div className="p-6 space-y-4">
+        <p role="alert">{t('map.childMismatch')}</p>
+        <Link to="/kham-pha" className="inline-flex items-center min-h-[44px] font-bold text-primary underline rounded">{t('map.openCurrentChild')}</Link>
+      </div>
+    );
+  }
+  if (error) return <QueryErrorState error={error} onRetry={() => refetch()} title={t('map.loadError')} />;
 
   return (
     <div className="py-6 px-4 max-w-6xl mx-auto space-y-8">
@@ -89,35 +134,41 @@ export const QuestMapPage: React.FC = () => {
 
       {/* Stage Selector Tabs (5 Chặng Nổi Bật) */}
       <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-none">
-        {stages.map((stage: any) => {
-          const isSelected = stage.order === selectedStageOrder;
+        {stages.map(stage => {
+          const isSelected = stage._id === activeStage?._id;
           const isLocked = !stage.isUnlocked;
 
           return (
             <button
               key={stage._id}
-              onClick={() => { if (!isLocked) setSelectedStageOrder(stage.order); }}
-              aria-disabled={isLocked || undefined}
-              className={`flex-shrink-0 px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-[color,background-color,border-color,box-shadow,transform] motion-reduce:transition-none flex items-center space-x-2.5 ${
+              onClick={() => selectStage(stage._id)}
+              aria-pressed={isSelected}
+              className={`flex-shrink-0 max-w-full px-6 py-3.5 rounded-2xl font-display font-bold text-sm sm:text-base transition-[color,background-color,border-color,box-shadow] motion-reduce:transition-none flex items-center space-x-2.5 ${
                 isSelected
-                  ? 'btn-3d-primary ring-2 ring-primary/40 scale-105 cursor-pointer'
+                  ? 'btn-3d-primary ring-2 ring-primary/40 cursor-pointer'
                   : isLocked
-                  ? 'bg-surface-container-high text-on-surface-variant/60 border border-outline-variant/30 cursor-not-allowed'
+                  ? 'bg-surface-container-high text-on-surface-variant/60 border border-outline-variant/30 cursor-pointer'
                   : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border border-outline-variant/40 shadow-sm cursor-pointer'
               }`}
             >
               {isLocked ? (
-                <Lock className="w-4 h-4 opacity-70" />
+                <Lock className="w-4 h-4 shrink-0 opacity-70" />
               ) : stage.isCompleted ? (
-                <CircleCheck className="w-4 h-4 text-tertiary-fixed-dim" />
+                <CircleCheck className="w-4 h-4 shrink-0 text-tertiary-fixed-dim" />
               ) : (
-                <Compass className="w-4 h-4 text-secondary-container" />
+                <Compass className="w-4 h-4 shrink-0 text-secondary-container" />
               )}
-              <span>{t('map.stagePrefix')} {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
+              <span className="min-w-0 whitespace-normal break-words">{t('map.stagePrefix')} {stage.order}: {stage.title.replace(/^Chặng\s+\d+\s*:\s*/i, '')}</span>
             </button>
           );
         })}
       </div>
+
+      {!isLoading && !activeStage && (
+        <p role={requestedStages.length ? 'alert' : 'status'}>
+          {t(requestedStages.length ? 'map.stageNotFound' : 'parentPortal.journeyNoData')}
+        </p>
+      )}
 
       {/* Active Stage Overview Card */}
       {activeStage && (
@@ -134,6 +185,11 @@ export const QuestMapPage: React.FC = () => {
               <p className="text-on-surface-variant text-sm sm:text-base mt-2 max-w-2xl font-medium leading-relaxed">
                 {activeStage.goal}
               </p>
+              <p className="text-sm text-on-surface-variant mt-2">
+                {t(activeStage.totalLessons === 0 ? 'parentPortal.stageNoLessons'
+                  : !activeStage.isUnlocked ? (activeStage.requiresSubscription ? 'parentPortal.stageSubscription' : 'parentPortal.stagePreviousStage')
+                  : activeStage.isCompleted ? 'parentPortal.stageDone' : 'parentPortal.stageOpen')}
+              </p>
             </div>
 
             <div className="flex items-center gap-4 bg-surface-container rounded-2xl px-6 py-4 border border-outline-variant/30 shrink-0">
@@ -142,7 +198,7 @@ export const QuestMapPage: React.FC = () => {
                   {t('map.lessonProgress')}
                 </span>
                 <span className="text-2xl font-black font-display text-primary">
-                  {formatPoints(activeStage.completedCount || 0)} / {formatPoints(activeStage.totalLessons || 4)}
+                  {formatPoints(activeStage.completedCount ?? 0)} / {formatPoints(activeStage.totalLessons ?? 0)}
                 </span>
               </div>
             </div>
@@ -158,7 +214,7 @@ export const QuestMapPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {activeStage?.lessons?.map((lesson: any) => {
+          {activeStage?.lessons?.map(lesson => {
             const isUnlocked = lesson.isUnlocked;
             const isCompleted = lesson.status === 'completed';
 
