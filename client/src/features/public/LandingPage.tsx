@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   Key,
@@ -25,11 +25,20 @@ import { useAuthStore } from '../../store/authStore.js';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const roadmapRef = useRef<HTMLHeadingElement>(null);
   const t = useT();
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
   // Wait for session restoration before treating a returning visitor as a guest.
   const isRestoringSession = isLoading && !user;
+
+  useEffect(() => {
+    if (location.hash !== '#lo-trinh-hoc-tap') return;
+    // Run after this page mounts, including delayed navigation and history entry.
+    roadmapRef.current?.focus({ preventScroll: true });
+    roadmapRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+  }, [location.hash, location.key]);
 
   return (
     <div className="flex flex-col w-full">
@@ -321,7 +330,7 @@ export const LandingPage: React.FC = () => {
             <span className="text-xs uppercase font-bold tracking-wide">{t('landing.mapBadge')}</span>
           </div>
 
-          <h2 className="font-display text-3xl lg:text-4xl text-primary text-center font-extrabold mb-3">
+          <h2 id="lo-trinh-hoc-tap" ref={roadmapRef} tabIndex={-1} className="scroll-mt-24 font-display text-3xl lg:text-4xl text-primary text-center font-extrabold mb-3">
             {t('landing.mapTitle')}
           </h2>
 
