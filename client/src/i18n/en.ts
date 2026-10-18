@@ -281,6 +281,8 @@ export const en: Dictionary = {
     listenRead: 'Listen',
     reorder: 'Reorder',
     progressAria: 'Lesson progress: step {current} of {total}',
+    wrongHintGeneric: 'Not quite yet — listen again carefully!',
+    listenAgain: 'Listen again',
   },
   map: {
     title: 'The 5-Stage Discovery Journey',

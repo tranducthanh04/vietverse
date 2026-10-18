@@ -282,6 +282,8 @@ export const vi = {
     listenRead: 'Nghe đọc',
     reorder: 'Xếp lại',
     progressAria: 'Tiến độ bài học: bước {current} trên {total}',
+    wrongHintGeneric: 'Chưa đúng rồi, bé nghe lại thật kỹ nhé!',
+    listenAgain: 'Nghe lại',
   },
   map: {
     title: VI_LOCALES.map.title,

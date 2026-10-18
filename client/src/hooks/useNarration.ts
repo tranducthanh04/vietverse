@@ -202,14 +202,10 @@ export function useNarration({
     if (running.current) speak(session.current);
     else setError(t("audio.assetFailed"));
   };
-  const toggle = () => {
-    if (running.current) {
-      stop();
-      return;
-    }
+  // Begin playback from the current position. Must run synchronously inside a user gesture so that
+  // later speak() calls (voice discovery, asset fallback) are allowed by iOS Safari.
+  const start = () => {
     claimPlayback(stop);
-    // Must run synchronously inside the click: later speak() calls (voice
-    // discovery, asset fallback) are then allowed by iOS Safari.
     if (!speechUnlocked && speechAvailable && hasText && isIOS()) {
       speechUnlocked = true;
       try {
@@ -239,6 +235,20 @@ export function useNarration({
       speak(token);
     }
   };
+  const toggle = () => {
+    if (running.current) {
+      stop();
+      return;
+    }
+    start();
+  };
+  // Restart the question audio from the beginning, cancelling any in-flight playback first.
+  // Used to replay the source audio once after a wrong answer; each call plays exactly once.
+  const replay = () => {
+    stop();
+    if (audioRef.current) audioRef.current.currentTime = 0;
+    start();
+  };
   const reset = () => {
     stop();
     if (audioRef.current) audioRef.current.currentTime = 0;
@@ -260,6 +270,7 @@ export function useNarration({
     duration,
     canPlay: (mode === "asset" && !!audioUrl) || (speechAvailable && hasText),
     toggle,
+    replay,
     stop,
     reset,
     seek,

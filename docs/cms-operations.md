@@ -94,6 +94,15 @@ Thông báo lỗi vẫn do server quyết định; phần này chỉ thêm đi�
 - Sửa chữ hoặc mốc thời gian trong một dòng không thay đổi định danh dòng và giữ bản dịch hiện có. Content owner vẫn phải soát lại ý nghĩa bản dịch sau khi sửa chữ; không có tự dịch hay tự duyệt. Bản dịch đã lệch trong nháp/live từ trước cần đối soát thủ công, bản sửa không đoán lại nguồn hoặc migrate DB.
 - **Giả định chờ duyệt**: bản dịch tiếng Anh trong seed demo là bản nháp chưa duyệt, chỉ để xem thử; content owner cần duyệt văn bản và bản quyền trước production. Không có migration ghi bản dịch lên production trong thay đổi này.
 
+## Gợi ý khi trả lời sai (2026-10-19)
+
+Form hoạt động (`ActivityEditor`) có thêm khối **"Gợi ý khi trả lời sai"** cho bốn dạng chấm ngay: `listen_choose`, `review`, `fill_blank`, `sort_order`. Khối gồm ô "Gợi ý khi sai N" (tiếng Việt) và khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn theo từng ngôn ngữ (`en`, `ja`, `ko`, `zh`, `fr`) — dùng lại đúng cơ chế bản dịch của story/văn hóa. Lưu bằng **Lưu nháp**, kiểm tra bằng **Xem trước** (bấm đáp án sai để thấy gợi ý + audio phát lại).
+
+- Trường là **tùy chọn**, tương thích ngược và **không** là điều kiện publish. Để trống thì khu bé dùng câu động viên chung theo i18n. Đổi loại hoạt động vẫn giữ `wrongHint` và bản dịch (cùng nhóm "gợi ý/media").
+- Chỉ là phản hồi hiển thị cho bé; **không** đổi đáp án, chấm điểm, sao, tim hay số lần thử. Ngôn ngữ ngoài tập hỗ trợ (kể cả `other`) bị schema từ chối.
+- Với hoạt động có audio nguồn (`listen_choose`, hoặc hoạt động khác có `audioUrl`), khi bé sai audio tự phát lại một lần; dạng không có `audioUrl` chỉ hiện gợi ý. Muốn phát lại cho `review`/`fill_blank`/`sort_order` thì nội dung phải bổ sung `audioUrl`.
+- **Giả định chờ duyệt**: `wrongHint` và bản dịch trong seed demo ("cá = fish…", "mèo = cat…") là bản nháp minh hoạ, content owner cần duyệt văn bản/bản quyền trước production.
+
 ## Rollback
 
 Tắt `CMS_PUBLISH_ENABLED` để ngừng publish/visibility. Giữ backend reader phiên bản và client/session/outbox hiểu version. Không hạ về grader chỉ đọc live sau khi đã xuất bản revisions. Không xóa revisions, drafts, progress, recording hay ledger. Khôi phục nội dung cũ bằng lần xuất bản mới có kiểm tra từ snapshot; chưa có nút khôi phục một chạm.
