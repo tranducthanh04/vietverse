@@ -91,3 +91,29 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-header-branding/codeDuAN`.
   `C:/Users/Asus/AppData/Local/Temp/vietverse-kids-brand-SpnbxD`.
   Exact-new-head CI remains pending; old-head CI `39147352186` succeeded but
   does not replace verification of this integration head.
+
+## Main 53a integration for PR23 (2026-10-19 local time)
+
+- Tested integration HEAD: `17246b9936331df2c82a388727dc7dced22b8254`;
+  updated main base: `53a447a369fed0d69b455749a053b694a159a753`.
+  Additive conflicts in docs/03-feature-inventory.md and
+  docs/06-review-findings.md retain the complete auth and branding sections.
+- Independent reviewer handoff reports incremental review found no actionable
+  findings. Branding source, tests and browser harness remain identical to
+  `fe0a3e6`; scope remains seven owned files and 13 product-code lines.
+- Fresh tester handoff: focused brand/points/courses 13/13; full frontend
+  394/394 in 42 files; project typecheck and build pass (1832 modules).
+  The existing audioPlayback act warning remains. No new backend or F04 test
+  run is claimed by this integration entry.
+- Fresh branding browser matrix passes 32/32 plus 8/8 breakpoint cases.
+  Screenshots: `C:/Users/Asus/AppData/Local/Temp/vietverse-kids-brand-H4uZuY`
+  and `C:/Users/Asus/AppData/Local/Temp/vietverse-kids-brand-4RT9px`.
+- Parent-stage regression passes 48 link activations plus six URL/history
+  matrices. Screenshots:
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-parent-stage-links-VPxbeG`.
+  These local browser fixtures do not establish production or real-device
+  acceptance; the existing scope and synthetic-data limits remain unchanged.
+- Remote CI run `39147729339` is historical evidence, not verification of this
+  newly integrated head. New-head CI is still pending at this journal update;
+  PR merge remains a separate coordinator gate. This docs-only handoff does
+  not commit, push, merge, deploy or change source/other documentation.
