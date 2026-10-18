@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "../i18n/index.js";
 
 let activeStop: (() => void) | undefined;
 // Media players outside this hook (e.g. parent recordings) share the single-reader rule.
@@ -11,8 +12,6 @@ export function releasePlayback(stop: () => void) {
 }
 // iOS blocks TTS that is not started inside a user gesture and then never fires onstart.
 export const SPEECH_START_TIMEOUT_MS = 2500;
-const SPEECH_BLOCKED =
-  "Thiết bị chưa phát được giọng đọc. Hãy bấm nghe lại hoặc đọc nội dung trên màn hình.";
 // Android reports "vi_VN"; BCP 47 uses "vi-VN".
 export const normalizeVoiceLang = (value: string) =>
   value.replace(/_/g, "-").toLowerCase();
@@ -33,6 +32,7 @@ export function useNarration({
   lang?: string;
   contentKey?: string;
 }) {
+  const t = useT();
   const textKey = JSON.stringify(text);
   const audioRef = useRef<HTMLAudioElement>(null);
   const session = useRef(0);
@@ -101,9 +101,7 @@ export function useNarration({
       setError(message);
     };
     if (!speechAvailable || !hasText) {
-      fail(
-        "Chưa có âm thanh khả dụng. Thiết bị không hỗ trợ đọc nội dung này.",
-      );
+      fail(t("audio.cantRead"));
       return;
     }
     const synth = window.speechSynthesis;
@@ -141,19 +139,19 @@ export function useNarration({
         };
         utterance.onerror = () => {
           settle();
-          fail("Không phát được giọng đọc thiết bị. Hãy thử lại.");
+          fail(t("audio.tryAgain"));
         };
         try {
           synth.speak(utterance);
         } catch {
-          fail("Không phát được giọng đọc thiết bị.");
+          fail(t("audio.tryAgain"));
           return;
         }
         // Watchdog: a blocked engine never starts; release the "Dừng đọc" state.
         if (!started) {
           clearTimeout(speechWatchdog.current);
           speechWatchdog.current = setTimeout(() => {
-            if (!started && token === session.current) fail(SPEECH_BLOCKED);
+            if (!started && token === session.current) fail(t("audio.tryAgain"));
           }, SPEECH_START_TIMEOUT_MS);
         }
       };
@@ -192,9 +190,7 @@ export function useNarration({
     };
     const timer = setTimeout(() => {
       cleanup();
-      fail(
-        `Thiết bị chưa có giọng đọc ${lang}. Hãy cài giọng đọc phù hợp hoặc dùng bản audio.`,
-      );
+      fail(t("audio.cantRead"));
     }, 1500);
     cancelVoiceWait.current = cleanup;
     synth.addEventListener("voiceschanged", onVoices);
@@ -204,10 +200,7 @@ export function useNarration({
     failedAsset.current = true;
     setMode("tts");
     if (running.current) speak(session.current);
-    else
-      setError(
-        "Chưa phát được audio. Bé có thể dùng giọng đọc thiết bị nếu có hoặc đọc nội dung trên màn hình.",
-      );
+    else setError(t("audio.assetFailed"));
   };
   const toggle = () => {
     if (running.current) {

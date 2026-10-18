@@ -84,11 +84,11 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         )}
         {label && <span className="font-bold font-display px-1">{label}</span>}
       </button>
-      {narration.mode === "tts" && narration.canPlay && (
-        <span className="text-xs text-stone-600">{t('audio.deviceVoice')}</span>
+      {narration.isPlaying && narration.mode === "tts" && (
+        <span className="text-xs text-stone-500">{t('audio.deviceVoice')}</span>
       )}
       {narration.error && (
-        <span role="status" className="text-xs text-amber-800">
+        <span role="status" className="text-xs text-stone-600 max-w-[16rem] text-center">
           {narration.error}
         </span>
       )}

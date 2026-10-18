@@ -30,6 +30,9 @@ export const en: Dictionary = {
     playDefault: 'Play audio',
     deviceVoice: 'Device voice',
     unavailable: 'No audio available.',
+    cantRead: "This device can't read the text aloud yet. Read along on the screen together!",
+    tryAgain: "That didn't play. Tap listen to try again.",
+    assetFailed: "Couldn't open the audio. Use the device voice or read along on the screen.",
   },
   childGuard: {
     loading: "Loading your child's profile…",
