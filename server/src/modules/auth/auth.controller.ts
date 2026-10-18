@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthService } from './auth.service.js';
 import { registerSchema, loginSchema } from './auth.validation.js';
 import { sendSuccess, sendError } from '../../utils/apiResponse.js';
-import { refreshCookieMaxAgeMs, sessionCookieOptions } from './auth.cookies.js';
+import { clearSessionCookies, setSessionCookies } from './auth.cookies.js';
 
 function setRefreshCookie(res: Response, refreshToken: string) {
-  res.cookie('refreshToken', refreshToken, { ...sessionCookieOptions, maxAge: refreshCookieMaxAgeMs });
+  setSessionCookies(res, refreshToken);
 }
 
 export class AuthController {
@@ -67,7 +67,7 @@ export class AuthController {
       const userId = req.user?.id;
       await AuthService.logout(refreshToken, userId);
 
-      res.clearCookie('refreshToken', sessionCookieOptions);
+      clearSessionCookies(res);
       return sendSuccess(res, { message: 'Đăng xuất thành công' });
     } catch (error) {
       next(error);
