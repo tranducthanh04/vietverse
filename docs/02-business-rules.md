@@ -1,5 +1,15 @@
 # 02 — Quy tắc nghiệp vụ
 
+## Siết thực thi sau rà soát khách hàng — 2026-10-18, local
+
+- **Quyết định kỹ thuật, giữ nghiệp vụ hiện có:** không dùng `isCorrect` client làm đáp án dự phòng cho activity legacy. Bài chọn/điền/ghép thiếu đáp án chuẩn, xếp thứ tự thiếu hoặc rỗng và loại không hỗ trợ đều không được tính đúng. `word_card` vẫn là hoạt động giới thiệu; `record_voice` vẫn phải có receipt đúng ownership/version ở service. Không đổi ngưỡng đỗ 50%, sao, mức điểm hoặc tiến độ đã lưu.
+- **Tương thích dữ liệu:** nội dung legacy thiếu đáp án phải được admin sửa và duyệt qua CMS; không tự bịa đáp án, backfill hoặc sửa snapshot đang học. Những hoạt động thiếu đáp án có thể không đạt sau bản sửa; cần rà catalog trước rollout.
+- **Quà ảo:** điều kiện chưa sở hữu được kiểm tra ngay trong cùng atomic update trừ điểm/thêm quyền sở hữu, không chỉ đọc trước. Hai lượt đồng thời đổi cùng vật phẩm chỉ một lượt được trừ điểm; lượt còn lại báo đã sở hữu. Cơ chế compensation hiện có giữ nguyên, không tuyên bố đã chuyển toàn bộ đổi thưởng sang transaction.
+- **Gói học:** thực thi đúng điều kiện đã chốt `active === true`, plan monthly/yearly và ngày hết hạn hợp lệ trong tương lai. Record thiếu/sai ngày không mở quyền trả phí; không tự gia hạn dữ liệu cũ. Replay bài đã hoàn thành và quyền chặng 1 không đổi.
+- **Thu âm:** nếu finalize khác commit giữa hai lần đọc receipt/intent, đọc lại receipt có kiểm tra ownership trước khi kết luận 404. Không tạo bản thu mới, không cấp điểm chỉ vì intent đã completed; receipt thật vẫn bắt buộc.
+
+Nguồn và giới hạn nghiệm thu: `plans/reports/2026-10-18-customer-docs-full-audit.md`; chưa deploy hoặc thay dữ liệu production.
+
 ## 1. Tài khoản và subscription
 
 - Email tài khoản là duy nhất và được chuẩn hóa lowercase.
