@@ -33,9 +33,32 @@ stages show 0/0, not the old fabricated 0/4. Existing route guards stay intact.
   CSS/font and map guards; synthetic session/data, no production requests.
   Six screenshots retained. No page overflow in the checked cases.
 
+## Integration and independent review
+
+- Integrated main 8ac98f9c2c7fe288630f6f688042599d8fdaa589 without conflicts:
+  363 client tests, client typecheck/build, lint (0 errors/100 warnings),
+  48 browser link activations and six URL/history matrices passed.
+- Integrated main 142209912c4711f1d50eeb44ae2dbfb316217eba after Landing PR #17
+  merged. One docs/06-review-findings.md conflict: retained both independent
+  follow-up entries. No stage implementation changes during integration.
+- Final integration run: all 386 client tests (40 files), root typecheck/build,
+  lint (0 errors/100 existing warnings) and the same 48 browser activations +
+  six matrices passed. Refreshed the six screenshots from that browser run.
+- Server and root package-lock.json are byte-identical to the earlier 497-test
+  backend run; backend tests were not repeated for this frontend-only merge.
+  Existing audioPlayback act warning remains; F04 is still not fixed.
+- Independent reviewer inspected implementation, tests, runner/docs and three
+  representative screenshots; independently ran 51 focused tests, all passed.
+  No actionable findings or worthwhile simplifier changes. Reviewer did not
+  independently rerun the full suite/browser matrix.
+- Landing PR #17 updated head affc1f34a4590bd2ced819026185b15153a0b989 was
+  independently verified with green CI/previews and merged by the coordinator
+  as 142209912c4711f1d50eeb44ae2dbfb316217eba. Not self-merged here.
+
 ## Remaining gates
 
-Integrate latest main safely, rerun affected checks, independent review and
-scoped PR handoff to coordinator. No self-merge/deploy/data migration.
+Scoped PR CI and coordinator review/merge. Production authentication, Parent
+Gate expiry and real-device acceptance remain outside local fixture evidence.
+No self-merge/deploy/data migration.
 CLI ak unavailable: local journal fallback; plan index/status not claimed
 updated. AgentWiki publish skipped.
