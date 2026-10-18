@@ -86,3 +86,45 @@ or retry needed in these integrated runs. Separate picker overflow persists.
 Local implementation, verification, review and docs are complete. Await scoped
 PR creation, remote CI and coordinator review/merge; no self-merge. Plan/index
 status cannot be updated by unavailable ak CLI; no closed-index claim.
+
+## PR28 footer-base integration - 2026-10-19
+
+Documentation commit07265f60a0fdb00f168b8698417b8b14f308ab43 was pushed and draft
+PR28 created. The pre-push fetch still showed pinned main6cf4, but the immediate
+post-create live check showed main05872f40b2f8c4c6b90ad18263dd8c8ee11d1d33 and
+CONFLICTING. Work stopped without chasing main. Coordinator then explicitly
+authorized this pinned normal merge, keeping greeting separate from cover PR25.
+
+One targeted fetch made05872 available; no additional fetch or shared-ref retry.
+Merge3fcbe569954b77e913e5efdf0a6f0c0dfd253563 changed no greeting production code.
+Only docs/03-feature-inventory.md conflicted. Resolution keeps greeting and
+footer sections, with exact incoming inventory content otherwise unchanged.
+
+Fresh checks on3fcbe56, all first-pass exit0:
+
+- Focused command: `npm test -w client -- --maxWorkers=1` followed by the eight
+  explicit files mapChildGreeting, parentStageLinks, kidsHeaderBranding, i18n,
+  childStore, childJourneys, parentDashboard and nextLessonNavigation under
+  client/src/test (their existing .test.ts/.test.tsx names). Result76/76:
+  previous75 plus childStore1. The npm output did not forward maxWorkers to
+  this focused invocation; no single-worker execution claim is made.
+- Full command: `npm exec --workspace client -- vitest run --maxWorkers=1`:
+  425 tests across44 files passed, including all22 inherited footer cases.
+- `npm run typecheck`, `npm run build`, `npm run lint`: all passed. Lint0 errors,
+  100 inherited warnings. Existing ParentRecordingsPage act warning remains;
+  no failing test, retry, skipped test, timeout change or production fix here.
+- Backend/server/package/lock inputs still match bf865, so525 backend results
+  remain reused preintegration evidence, not a new backend run.
+
+Browser evidence is deliberately reused from ce72d9a, not rerun: the complete
+client diff contains only unmounted PublicLayout/LandingPage, footer tests and
+two new unused footer keys per dictionary. Remaining client files, both runners,
+package/lock and all pre-existing translations are unchanged. This includes
+map/parent dashboard, KidsLayout/picker/guards/stores, index.css/index.html and
+Tailwind/Vite config. New landing scroll-mt-24 is scoped to its absent heading;
+no claim that compiled CSS bytes are identical. Detailed equivalence reasoning
+and retained limitations are in browser-evidence.md. No new screenshot claim.
+
+Only the browser evidence, PR body and this journal change after verification.
+PR28 stays draft for exact-head CI/coordinator review. No self-merge, force-push,
+main push, other-worktree edit, audio change or manual deployment.

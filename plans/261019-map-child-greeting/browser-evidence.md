@@ -149,3 +149,28 @@ all limitations listed above. They establish the integrated header/map fixture,
 not production auth, physical-device, screen-reader, audio or deployment
 acceptance. Both owned browser/server processes closed normally. Only this
 report was edited after the integration runs; the runner source is unchanged.
+
+## Footer-base integration: evidence reuse, not a new browser run
+
+Coordinator authorized normal merge of main
+`05872f40b2f8c4c6b90ad18263dd8c8ee11d1d33` after PR28 creation raced with that
+main update. Merge revision: `3fcbe569954b77e913e5efdf0a6f0c0dfd253563`.
+Only the inventory heading conflicted; both feature sections were preserved.
+
+Compared with browser-tested `ce72d9aa5cb9f4c47364abd71030202d0220a1a4`, the
+only client changes are PublicLayout, LandingPage, the footer regression test
+and two new footer keys in each VI/EN dictionary (`exploreRoadmap`,
+`exploreCourses`). Neither browser fixture mounts PublicLayout or LandingPage.
+All pre-existing dictionary values, including `onboarding.readyTitle`, map,
+parent and header copy, are unchanged. The public landing heading adds a scoped
+`scroll-mt-24` utility; neither fixture uses that changed heading.
+
+An empty remaining-client diff confirms QuestMapPage, ParentDashboardPage,
+KidsLayout, ChildPicker, ProtectedRoute, ChildSessionGuard, stores/hooks,
+index.css, index.html and Tailwind/Vite configuration are identical. Both
+browser runners and package/lock inputs are also identical. Therefore the
+30 greeting cases/six switch-backs/30 PATCHs and 48 parent-stage activations/six
+history matrices recorded above are reused evidence, not fresh runs or new
+screenshots on this merge. This is a scoped technical equivalence judgment;
+it does not claim all compiled CSS bytes are identical or extend acceptance
+to the public footer. Existing fixture/production/device limitations remain.
