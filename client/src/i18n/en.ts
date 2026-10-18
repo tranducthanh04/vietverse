@@ -432,6 +432,7 @@ export const en: Dictionary = {
     unlimited: 'Unlimited',
     btnSaveSettings: 'Save settings',
     saveSuccess: 'Settings updated successfully!',
+    saveSettingsError: 'Could not confirm the saved settings. Your selection has been kept; please try saving again.',
     tabPaymentTest: 'Test payment',
     backToKids: "Back to kids' screen",
     backToKidsAria: "Back to your child's learning screen",
