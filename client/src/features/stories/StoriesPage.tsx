@@ -13,8 +13,15 @@ import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { CoverPlaceholder } from '../../components/ui/CoverPlaceholder.js';
 import { useT, type Translate } from '../../i18n/index.js';
 
-const storyTypeLabel = (type: string, t: Translate) =>
-  type === 'dong_dao' ? t('stories.badgeDongDao') : type === 'co_tich' ? t('stories.badgeCoTich') : t('stories.badgeTho');
+const storyTypeLabel = (type: string, t: Translate) => {
+  switch (type) {
+    case 'dong_dao': return t('stories.badgeDongDao');
+    case 'co_tich': return t('stories.badgeCoTich');
+    case 'tho': return t('stories.badgeTho');
+    case 'ngu_ngon': return t('stories.typeNguNgon');
+    default: return null;
+  }
+};
 
 export const StoriesPage: React.FC = () => {
   const t = useT();
@@ -124,15 +131,15 @@ export const StoriesPage: React.FC = () => {
                 ) : (
                   <CoverPlaceholder kind="story" variant={story.type} className="w-full h-full" />
                 )}
-                <div className="hidden sm:flex absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary items-center gap-1 shadow-sm">
+                {storyTypeLabel(story.type, t) && <div className="hidden sm:flex absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary items-center gap-1 shadow-sm">
                   <Music className="w-3.5 h-3.5" />
                   <span>{storyTypeLabel(story.type, t)}</span>
-                </div>
+                </div>}
               </div>
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
-                  <span className="sm:hidden text-xs font-bold text-primary">{storyTypeLabel(story.type, t)}</span>
+                  {storyTypeLabel(story.type, t) && <span className="sm:hidden text-xs font-bold text-primary">{storyTypeLabel(story.type, t)}</span>}
                   <h2 className="text-kid-sm sm:text-kid-base font-bold font-display text-stone-800 group-hover:text-primary transition-colors mb-1 line-clamp-2 sm:line-clamp-1">
                     {story.title}
                   </h2>

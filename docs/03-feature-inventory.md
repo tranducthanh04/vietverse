@@ -86,6 +86,7 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - Seed insert-only tạo 5 chặng × 4 bài, 6 hoạt động/bài thông thường và 5 hoạt động ở bài 20.
 - Stories seed 21 bài đọc biên tập có thể thiếu audio; không khẳng định là lời nguyên tác hoặc đã có quyền sử dụng.
 - QA 2026-10-12: card truyện hiện `Bản đọc` khi không có audio, `Có bản thu` khi có audio nhưng thiếu duration hợp lệ; chỉ hiện số giây khi duration dương hữu hạn.
+- QA nhãn 2026-10-18 (local): thẻ truyện map đúng 4 type hiện có ở VI/EN và mobile/desktop; ngụ ngôn không còn mang nhãn thơ, type lạ không bị gán thể loại. Không đổi taxonomy/dữ liệu; bằng chứng và giới hạn ở [story-type-labels.md](./story-type-labels.md).
 - Culture seed 8 nhóm chủ đề, mỗi nhóm có dữ liệu minh họa và quiz mẫu.
 - Shop seed 5 item; item physical mới mặc định inactive/stock 0 để không phát hành tồn kho giả.
 - Database hiện có được giữ nguyên lesson, tài khoản, tiến độ, ledger, redemption và stock; migration nội dung là công việc riêng.
