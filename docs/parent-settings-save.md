@@ -16,7 +16,7 @@ Sửa phần Error state của audit khách hàng (F12, mục 6): `ParentSetting
 
 ## Kiểm chứng local
 
-- Nhánh độc lập từ `main@35c51ca`, không chứa header của PR #11 hoặc thay đổi của các chat khác.
+- Nhánh độc lập bắt đầu từ `main@35c51ca`; đã đồng bộ `main@0b8dd3c` sau khi PR #11 được điều phối merge. Diff của PR này chỉ chứa phần lưu cài đặt, không sửa lại header hoặc phần việc của các chat khác.
 - Test mới `client/src/test/parentSettingsSave.test.tsx`: trước sửa 11/12 ca thất bại và 5 unhandled rejections; sau sửa 12/12 qua, bổ sung 4 ca giữ nguyên các mức phút và request hai bé chồng nhau, tổng 16/16 qua.
 - Test dùng component/router/store/API interceptors thật, thay adapter mạng bằng response có kiểm soát. Bao phủ VI/EN, lỗi mạng, Parent Gate hết hạn, refresh lỗi, retry, giá trị 0, loading, đổi bé/tài khoản, unmount và phản hồi muộn. Không gọi API production.
 - Toàn bộ frontend 320/320 test qua; build gồm TypeScript qua. Lint các file thay đổi không có lỗi; còn warning thiếu dependency `t` trong effect thanh toán có sẵn, ngoài phạm vi này. Test audioPlayback còn warning `act()` có sẵn.
