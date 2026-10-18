@@ -408,6 +408,7 @@ export const en: Dictionary = {
     admin: 'Admin',
     adminAria: 'System administration',
     navMap: 'Map',
+    navCourses: 'Courses',
     navStories: 'Stories',
     navCulture: 'Culture',
     navRewards: 'Rewards',
