@@ -1,6 +1,13 @@
 import { api } from './api.js';
 import { useAuthStore } from '../store/authStore.js';
 import { useChildStore } from '../store/childStore.js';
+import type { QueryClient } from '@tanstack/react-query';
+
+interface OfflineSyncedDetail {
+  count: number;
+  userId: string;
+  childIds: string[];
+}
 
 export interface OfflineCompletionItem {
   id?: string;
@@ -58,6 +65,7 @@ export async function syncOfflineCompletions(): Promise<{ syncedCount: number; e
   isSyncing = true;
   let syncedCount = 0;
   let errorCount = 0;
+  const syncedChildIds = new Set<string>();
   try {
     const stored = readOfflineCompletions();
     const queue = stored.map(item => ({ ...item, id: item.id ?? crypto.randomUUID() }));
@@ -72,6 +80,7 @@ export async function syncOfflineCompletions(): Promise<{ syncedCount: number; e
         // Acknowledge only this ID against fresh storage, preserving concurrent enqueues.
         saveQueue(readOfflineCompletions().filter(entry => entry.id !== item.id));
         syncedCount++;
+        syncedChildIds.add(item.childId);
       } catch (err: unknown) {
         errorCount++;
         const response = (err as { response?: { status: number; data?: { error?: { code?: string } } } }).response;
@@ -89,8 +98,8 @@ export async function syncOfflineCompletions(): Promise<{ syncedCount: number; e
 
   if (syncedCount > 0) {
     window.dispatchEvent(
-      new CustomEvent('vietverse_offline_synced', {
-        detail: { count: syncedCount },
+      new CustomEvent<OfflineSyncedDetail>('vietverse_offline_synced', {
+        detail: { count: syncedCount, userId: user.id, childIds: [...syncedChildIds] },
       })
     );
   }
@@ -98,8 +107,25 @@ export async function syncOfflineCompletions(): Promise<{ syncedCount: number; e
   return { syncedCount, errors: errorCount };
 }
 
-export function initOfflineSyncWorker(): () => void {
+export function initOfflineSyncWorker(queryClient: QueryClient): () => void {
   if (typeof window === 'undefined') return () => {};
+
+  const handleSynced = (event: Event) => {
+    const { userId, childIds } = (event as CustomEvent<OfflineSyncedDetail>).detail;
+    const auth = useAuthStore.getState();
+    if (auth.isLoading || auth.user?.id !== userId) return;
+
+    // Refresh server-owned views, never add rewards or assume a saved attempt passed.
+    const refreshes = childIds.flatMap(childId =>
+      ['childPoints', 'stages', 'parentProgress'].map(key =>
+        queryClient.invalidateQueries({ queryKey: [key, childId] }),
+      ),
+    );
+    // The store already guards late responses after account/profile changes.
+    // A failed read must not turn an acknowledged submission into a retry.
+    void Promise.allSettled([...refreshes, useChildStore.getState().fetchChildren()]);
+  };
+  window.addEventListener('vietverse_offline_synced', handleSynced);
 
   // Run on startup
   syncOfflineCompletions();
@@ -121,6 +147,7 @@ export function initOfflineSyncWorker(): () => void {
   }, 60000);
 
   return () => {
+    window.removeEventListener('vietverse_offline_synced', handleSynced);
     window.removeEventListener('online', handleOnline);
     unsubscribe();
     clearInterval(interval);

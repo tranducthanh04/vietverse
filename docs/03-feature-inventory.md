@@ -106,5 +106,11 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - [x] Responsive navigation & Touch targets: Menu hamburger di động cho PublicLayout, thanh tab chuyển phân hệ di động cho AdminLayout, chuẩn hóa toàn bộ nút header đạt tối thiểu 44px và giữ nhãn chữ Góc Phụ Huynh trên mọi kích cỡ màn hình (P1-FE.5, P2-FE.1).
 - [x] Loại bỏ demo credentials khỏi production: Gated bằng `import.meta.env.DEV` tại LoginPage (P1-FE.6).
 
+## Làm mới dữ liệu sau đồng bộ offline — 2026-10-18, local
+
+- Worker nhận QueryClient của ứng dụng, làm mới điểm/lịch sử, bản đồ và tiến độ phụ huynh cho các bé có lượt nộp được server xác nhận; tải lại danh sách hồ sơ một lần mỗi batch để cập nhật số dư trên header.
+- Không suy ra đỗ bài từ HTTP thành công, không cộng điểm local; lỗi tải lại không gửi lại bài đã xác nhận. Có guard tài khoản và giữ lựa chọn bé khi phản hồi chậm.
+- Chưa deploy/nghiệm thu mạng offline trên thiết bị thật. Quyết định, giả định và tiêu chí tại [offline-sync-refresh.md](./offline-sync-refresh.md).
+
 
 
