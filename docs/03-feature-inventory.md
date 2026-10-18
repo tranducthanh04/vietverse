@@ -5,6 +5,13 @@
 - KIDS-PICKER-NAME-WRAP: tên hợp lệ 30 ký tự không có khoảng trắng tràn khỏi nút trong dropdown dù trang không cuộn ngang. Bản co cột tên đầu tiên hết tràn ngang nhưng ba hồ sơ làm menu quá cao, che mục cuối/nút thêm bé sau thanh nav. Tinh chỉnh vẫn chỉ ba dòng class: option cho wrap và gap ngang/dọc, tên có basis 6rem và xuống dòng, điểm không co/căn phải và có thể xuống hàng; không đổi trigger hoặc handler chọn bé.
 - **Giả định trình bày:** hiển thị đầy đủ tên bằng wrap thay vì cắt hoặc đổi tên; giữ giới hạn API 30 ký tự, Escape trả focus về trigger, click ngoài giữ focus nơi vừa click, branding/navigation/điểm và Parent Gate hiện hữu. Browser đã tái hiện cả tràn ngang lẫn che control; năm component test là characterization, không phải unit RED. CSS mới qua 4 ca ba hồ sơ VI/EN 320×844/900: mục ba/nút thêm thấy được và bấm được bằng chuột/Tab-Enter. Các full/regression gates còn chờ; xem [kids-picker-name-wrap.md](./kids-picker-name-wrap.md).
 
+## Map child greeting - 2026-10-19, local
+
+- MAP-CHILD-GREETING adds the selected child's name using existing VI/EN UI copy,
+  plain text and full-name wrapping. No extra request or change to map navigation,
+  guards, permissions, points or audio. Decisions, presentation assumption and
+  verification limits: [map-child-greeting.md](./map-child-greeting.md).
+
 ## Điều hướng footer công khai — 2026-10-18, local
 
 - FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
