@@ -42,6 +42,12 @@ Still pending the customer/content owner: the English translations added to the 
 
 Technical repair, not a new business rule: CMS now remaps translated lyrics, vocabulary and fun facts with the source row on deletion/reordering in every language, including duplicate source strings and partially translated lists. Appending a row leaves its translation blank; orphaned entries beyond the source length are not reused. Text-only edits preserve translations for manual editorial review. This prevents new index drift; it does not infer corrections for previously misaligned saved content, generate translations, publish content or integrate a voice provider.
 
+### Device-speech messaging pass — implemented locally (2026-10-18)
+
+Audit sau phản hồi khách về badge "Giọng đọc thiết bị" và cảnh báo "Thiết bị chưa có giọng đọc vi-VN…" trên trang truyện/văn hoá. Xác nhận lại ràng buộc nghiệp vụ: production hiện **không có file audio** cho bất kỳ truyện/văn hoá nào (21 + 8 mục đều `audioUrl: null`), nên giọng đọc thiết bị vẫn là phương án dự phòng duy nhất cho tới khi có nguồn audio được duyệt.
+
+Thay đổi chỉ ở lớp thông báo/UX, **không** đổi nghiệp vụ, điểm, quyền hay API: (1) chuỗi lỗi narration nay đi qua i18n (`audio.cantRead/tryAgain/assetFailed` ở `vi.ts` + `en.ts`) nên giao diện EN không còn hiện tiếng Việt; (2) thông báo thiếu giọng đọc bỏ mã `vi-VN` và lời khuyên "cài giọng đọc", đổi sang câu trấn an hướng người dùng cùng đọc trên màn hình; (3) nhãn giọng đọc thiết bị chỉ hiện khi đang đọc, màu trung tính thay vì vàng‑cảnh‑báo. Vẫn giữ nguyên tắc **không hứa chất lượng studio** và không giả vờ phát được. Việc tích hợp provider audio để thay thế giọng thiết bị vẫn là hạng mục chờ khách xác nhận ở các mục trên.
+
 ## Release acceptance still needed
 
 Listen to representative words, long passages and rhymes on target desktop/mobile browsers. Confirm accent, tone marks, pacing, missing voices, failed assets, stopping/navigation and text layout. Device TTS quality varies and may use the browser/OS speech service; do not promise offline or studio-quality narration. Obtain source audio for consistent results. No push/deploy occurs as part of this local feedback pass.

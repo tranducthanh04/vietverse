@@ -31,6 +31,9 @@ export const vi = {
     playDefault: 'Phát âm thanh',
     deviceVoice: 'Giọng đọc thiết bị',
     unavailable: 'Chưa có âm thanh khả dụng.',
+    cantRead: 'Thiết bị này chưa đọc được nội dung. Bé và ba mẹ cùng đọc trên màn hình nhé!',
+    tryAgain: 'Chưa đọc được. Bé bấm nghe lại giúp nhé!',
+    assetFailed: 'Chưa mở được bản thu âm. Bé có thể dùng giọng đọc thiết bị hoặc đọc trên màn hình nhé!',
   },
   childGuard: {
     loading: 'Đang tải hồ sơ của bé…',

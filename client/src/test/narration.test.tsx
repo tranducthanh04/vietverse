@@ -15,6 +15,7 @@ import { StoryDetailPage } from "../features/stories/StoryDetailPage.js";
 import { CultureDetailPage } from "../features/culture/CultureDetailPage.js";
 import { WordCardActivity } from "../features/lesson-player/activities/WordCardActivity.js";
 import { FollowStepsActivity } from "../features/lesson-player/activities/FollowStepsActivity.js";
+import { useUiLanguageStore } from "../i18n/index.js";
 
 let spoken: SpeechSynthesisUtterance[];
 let speechEvents: EventTarget;
@@ -66,6 +67,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
+  useUiLanguageStore.setState({ manualLanguage: null });
 });
 
 describe("read aloud controls", () => {
@@ -232,8 +234,10 @@ describe("read aloud controls", () => {
       vi.advanceTimersByTime(1500);
     });
     expect(screen.getByRole("status")).toHaveTextContent(
-      /chưa có giọng đọc vi-VN/i,
+      /cùng đọc trên màn hình/i,
     );
+    // The friendly fallback must not expose a raw BCP 47 locale code to families.
+    expect(screen.getByRole("status")).not.toHaveTextContent(/vi-VN/i);
     expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -432,7 +436,7 @@ describe("device speech robustness", () => {
     });
     expect(cancel).toHaveBeenCalled();
     expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("status")).toHaveTextContent(/chưa phát được giọng đọc/i);
+    expect(screen.getByRole("status")).toHaveTextContent(/cùng đọc trên màn hình/i);
   });
 
   it("unlocks iOS speech synchronously inside the tap before reading", () => {
@@ -442,5 +446,31 @@ describe("device speech robustness", () => {
     render(<AudioButton textToSpeak="Xin chao" />);
     fireEvent.click(screen.getByRole("button"));
     expect(spoken.map((item) => item.text)).toEqual(["", "Xin chao"]);
+  });
+
+  it("hides the device-voice label until the reader actually starts", () => {
+    render(<AudioButton textToSpeak="Xin chao" />);
+    // A freshly loaded page must not greet families with a fallback warning.
+    expect(screen.queryByText(/giọng đọc thiết bị/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button"));
+    expect(screen.getByText(/giọng đọc thiết bị/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button"));
+    expect(screen.queryByText(/giọng đọc thiết bị/i)).not.toBeInTheDocument();
+  });
+
+  it("speaks the missing-voice notice in the active interface language", () => {
+    useUiLanguageStore.setState({ manualLanguage: "en" });
+    vi.useFakeTimers();
+    voices = [];
+    render(<AudioButton textToSpeak="Xin chao" />);
+    fireEvent.click(screen.getByRole("button"));
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(/read along on the screen/i);
+    // No Vietnamese copy and no raw locale code should leak into the English UI.
+    expect(status).not.toHaveTextContent(/màn hình/);
+    expect(status).not.toHaveTextContent(/vi-VN/i);
   });
 });

@@ -146,21 +146,22 @@ export const StoryDetailPage: React.FC = () => {
             )}
 
             <div className="flex flex-col items-start min-w-0">
-              {/* Audio Mode Badge */}
+              {/* Audio Mode Badge: label the source only when it is actually in use,
+                  so a freshly loaded page does not greet readers with a warning. */}
               {audioUnavailable ? (
-                <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-bold rounded-full">
                   {t("storyDetail.readOnlyMode")}
                 </span>
-              ) : narration.mode === "tts" ? (
-                <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
-                  {t("storyDetail.deviceVoice")}
-                </span>
-              ) : (
+              ) : narration.mode === "asset" ? (
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full inline-flex items-center gap-1">
                   <Volume2 className="w-3.5 h-3.5" />
                   <span>Audio Studio Vietverse</span>
                 </span>
-              )}
+              ) : narration.isPlaying ? (
+                <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-bold rounded-full">
+                  {t("storyDetail.deviceVoice")}
+                </span>
+              ) : null}
 
               <h1 className="mt-3 text-kid-xl sm:text-kid-2xl font-black font-display text-stone-800 text-balance">
                 {story.title}
@@ -249,7 +250,7 @@ export const StoryDetailPage: React.FC = () => {
               </div>
 
               {narration.error && (
-                <p role="status" className="mt-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                <p role="status" className="mt-3 text-sm text-stone-700 bg-cream-muted border border-cream-border rounded-xl px-3 py-2">
                   {narration.error}
                 </p>
               )}
