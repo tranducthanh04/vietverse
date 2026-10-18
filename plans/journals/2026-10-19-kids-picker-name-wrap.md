@@ -24,9 +24,12 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 
 ## Scoped repair and unchanged behavior
 
-- Only three KidsLayout class lines change: option gap-2, a shrinking/wrapping
-  name span (`min-w-0 flex-1 whitespace-normal break-words`) and nonshrinking
-  points (`shrink-0`). Full names wrap rather than being hidden or rewritten.
+- Current refinement still changes only three KidsLayout class lines: option
+  `flex-wrap gap-x-2 gap-y-1`, name
+  `min-w-0 flex-[1_1_6rem] whitespace-normal break-words` and points
+  `shrink-0 ml-auto`. Points can move below/right-aligned rather than force a
+  very narrow name column. The initial column-only fix and its follow-up RED
+  are preserved as historical evidence below.
 - Wrapping and spacing are presentation assumptions. API maximum 30 is
   unchanged; spaced and unbroken acceptance names are both exactly 30.
   Existing 31-character branding data is a legacy/stress fixture above API max,
@@ -80,3 +83,47 @@ Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 - All remaining checks and a new picker browser run use the repaired complete
   environment. Full CI still uses its ordinary project checks; F04 failures
   must remain HOLD without retry-for-green or audio repair.
+
+## Three-profile occlusion RED and refined layout
+
+- Historical checks at `4c7f4d9`, before the latest CSS refinement: focused
+  61 tests in 7 files; full frontend 421 in 44 files; typecheck/build pass;
+  lint zero errors and 100 warnings. The initial column fix passed 32 browser
+  cases, but these results do not establish the refined layout is correct.
+- Additional three-profile RED in VI/EN at width 320: menu y=142..783;
+  fixed nav top=706 at height 844 and 762 at height 900. The third option was
+  partly covered and Add Child hidden; actual hit testing still failed after
+  scrollIntoView. Main agent viewed the RED evidence in
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-ejQrPD`.
+- That original three-profile run raised a Node assertion failure, but its
+  PowerShell cleanup wrapper masked the process failure with exit 0. The
+  assertion/geometry establish RED; the wrapper exit is not a passing test.
+  The documented command now captures LASTEXITCODE immediately after Node,
+  cleans up in finally, then throws on a nonzero captured exit code.
+- Root refined the same three class lines to permit flex wrapping and use a
+  6rem name basis with right-aligned nonshrinking points. Full names remain
+  intact; points may use the next row. No trigger, handler, API/name-limit,
+  selection, points, Parent Gate, audio/F04 or production behavior changes.
+- Fresh tests and browser coverage for this refinement are in progress. No
+  final GREEN claim is made yet, and historical pass counts are not reused as
+  proof that the third option and Add Child are now visible/hittable.
+
+## Refined three-profile browser GREEN (remaining gates pending)
+
+- Final CSS hash for this handoff:
+  `54f0da74a5d30e845e55986a68676911fd6f55772972633b7a6edbf15332f041`.
+  The four VI/EN 320x844/900 cases pass: menu height=341/bottom=483 against
+  fixed-nav top=706/762; third option y=336..416 and Add Child y=429..473 are
+  exposed and actual hit tests return true.
+- Real mouse and Tab/Enter validate the third-profile PATCH for child c and
+  Add Child's `/bat-dau` destination. This is a destination fixture, not actual
+  onboarding-form acceptance. Main agent inspected the GREEN screenshot.
+  Evidence: `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-j77YED`.
+- Two separate harness modes are required from repository root:
+  `node plans/261019-kids-picker-name-wrap/browser-smoke.mjs` for the normal
+  32-case matrix with SMOKE_THREE_PROFILES unset; set SMOKE_THREE_PROFILES=1
+  for the four-case three-profile mode, then unset it. Exact PowerShell commands
+  are recorded in `docs/kids-picker-name-wrap.md`.
+- This records tester evidence, not additional runs by this writer.
+  Remaining fresh normal-matrix/full/regression gates are still in progress;
+  do not combine historical pass counts into a claim that all checks are done.

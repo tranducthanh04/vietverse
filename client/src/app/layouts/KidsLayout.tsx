@@ -130,12 +130,12 @@ export const KidsLayout: React.FC = () => {
                       selectChild(c._id);
                       setShowChildPicker(false);
                     }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between gap-2 min-h-[44px] ${
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex flex-wrap items-center justify-between gap-x-2 gap-y-1 min-h-[44px] ${
                       activeChild?._id === c._id ? 'bg-primary text-white shadow-sm' : 'hover:bg-cream'
                     }`}
                   >
-                    <span className="min-w-0 flex-1 whitespace-normal break-words">{c.name}</span>
-                    <span className="shrink-0 text-xs opacity-75">{formatPoints(c.viviPoints, language)} {t('kidsLayout.pointsUnit')}</span>
+                    <span className="min-w-0 flex-[1_1_6rem] whitespace-normal break-words">{c.name}</span>
+                    <span className="shrink-0 ml-auto text-xs opacity-75">{formatPoints(c.viviPoints, language)} {t('kidsLayout.pointsUnit')}</span>
                   </button>
                 ))}
                 <div className="pt-2 mt-1 border-t border-cream-border">

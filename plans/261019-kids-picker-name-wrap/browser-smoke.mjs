@@ -15,6 +15,7 @@ const output = await mkdtemp(resolve(tmpdir(), 'vietverse-picker-name-'));
 const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const componentHash = createHash('sha256').update(await readFile(resolve(root, 'src/app/layouts/KidsLayout.tsx'))).digest('hex');
 const port = 5198;
+const threeProfileDiagnostic = process.env.SMOKE_THREE_PROFILES === '1';
 const names = {
   unbroken: 'abcdefghij'.repeat(3),
   spaced: 'Nguy\u1ec5n Ho\u00e0ng Thi\u00ean An Minh Anh',
@@ -47,7 +48,8 @@ const content=React.createElement('section',null,
 createRoot(document.getElementById('root')).render(React.createElement(QueryClientProvider,{client:new QueryClient({defaultOptions:{queries:{retry:false}}})},
  React.createElement(BrowserRouter,null,React.createElement(Routes,null,
   React.createElement(Route,{element:React.createElement(ProtectedRoute,null,React.createElement(ChildSessionGuard,null,React.createElement(KidsLayout)))},
-   React.createElement(Route,{path:'/kham-pha',element:content}))))));
+   React.createElement(Route,{path:'/kham-pha',element:content})),
+  React.createElement(Route,{path:'/bat-dau',element:React.createElement('h1',null,'Add child destination')})))));
 `;
 process.chdir(root);
 const server = await createServer({ root, envFile: false,
@@ -131,7 +133,7 @@ try {
     const path = new URL(route.request().url()).pathname, method = route.request().method();
     let data;
     if (method === 'GET' && path === '/api/v1/children') data = profiles;
-    if (method === 'PATCH' && /^\/api\/v1\/children\/[ab]\/select$/.test(path)) {
+    if (method === 'PATCH' && /^\/api\/v1\/children\/[abc]\/select$/.test(path)) {
       const id = path.split('/')[4];
       selections.push(id);
       data = profiles.find(profile => profile._id === id);
@@ -139,7 +141,74 @@ try {
     if (data === undefined) { unexpected.push(method + ' ' + path); return route.abort(); }
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data }) });
   });
-  for (const width of [320, 390, 640, 1366]) for (const language of ['vi', 'en']) for (const balance of [0, 1234567890]) for (const [kind, name] of Object.entries(names)) {
+  if (threeProfileDiagnostic) {
+    for (const height of [844, 900]) for (const language of ['vi', 'en']) {
+      profiles = ['a', 'b', 'c'].map(_id => ({ ...child, _id, name: names.spaced, viviPoints: 1234567890 }));
+      await page.setViewportSize({ width: 320, height });
+      await page.goto(`http://127.0.0.1:${port}/kham-pha?lang=${language}`, { waitUntil: 'domcontentloaded' });
+      const trigger = page.locator('header button[aria-haspopup]');
+      await trigger.waitFor();
+      assert(await page.evaluate(async () => {
+        await document.fonts.ready;
+        const faces = await document.fonts.load('700 14px "Be Vietnam Pro"', 'Nguy\u1ec5n abcdefghij');
+        return faces.length > 0 && faces.every(face => face.status === 'loaded');
+      }), 'Real application font must load');
+      await trigger.click();
+      const menu = page.locator('#child-picker-menu');
+      await menu.waitFor();
+      await settle(page);
+      const label = `three-${language}-320x${height}`;
+      const screenshot = resolve(output, label + '.png');
+      await page.screenshot({ path: screenshot });
+      const bounds = await menu.evaluate(menu => {
+        const nav = document.querySelector('nav').getBoundingClientRect();
+        return { menu: menu.getBoundingClientRect().toJSON(), nav: nav.toJSON(), viewportHeight: innerHeight,
+          controls: [...menu.querySelectorAll('button')].map(button => ({ text: button.textContent, box: button.getBoundingClientRect().toJSON() })) };
+      });
+      const reachability = [];
+      for (const index of [2, 3]) {
+        const control = menu.getByRole('button').nth(index);
+        await control.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+        await settle(page);
+        reachability.push(await control.evaluate(el => {
+          const box = el.getBoundingClientRect(), nav = document.querySelector('nav').getBoundingClientRect();
+          const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+          return { text: el.textContent, box: box.toJSON(), navTop: nav.top, hit: el.contains(hit),
+            exposed: box.top >= 0 && box.bottom <= nav.top && box.left >= 0 && box.right <= innerWidth && el.contains(hit) };
+        }));
+      }
+      records.push({ label, head, componentHash, screenshot, bounds, reachability });
+      await writeFile(resolve(output, 'geometry.json'), JSON.stringify(records, null, 2));
+      console.log(JSON.stringify(records.at(-1)));
+      if (reachability.every(control => control.exposed)) {
+        const selectionStart = selections.length;
+        for (const keyboard of [false, true]) {
+          if (keyboard) {
+            await page.goto(`http://127.0.0.1:${port}/kham-pha?lang=${language}`, { waitUntil: 'domcontentloaded' });
+            await trigger.waitFor();
+            await trigger.click();
+            await menu.waitFor();
+            await settle(page);
+          }
+          const third = menu.getByRole('button').nth(2);
+          if (keyboard) await tabEnter(page, third); else await third.click();
+          await page.waitForFunction(() => window.readPickerFixture().active?._id === 'c');
+          assert.deepEqual((await page.evaluate(() => window.readPickerFixture())).active, profiles[2]);
+          await trigger.click();
+          const add = menu.getByRole('button').nth(3);
+          if (keyboard) await tabEnter(page, add); else await add.click();
+          await page.waitForURL('**/bat-dau');
+          await page.getByRole('heading', { name: 'Add child destination', exact: true }).waitFor();
+          assert.deepEqual((await page.evaluate(() => window.readPickerFixture())).active, profiles[2], 'Add child navigation does not replace selected profile');
+        }
+        assert.deepEqual(selections.slice(selectionStart), ['c', 'c']);
+      }
+    }
+    assert.deepEqual(errors, []);
+    assert.deepEqual(unexpected, []);
+    assert(records.every(record => record.reachability.every(control => control.exposed)), 'Three-profile last option/add child must remain exposed after scrolling; see geometry.json');
+    console.log(`PASS 4 three-profile visibility diagnostics; artifacts=${output}`);
+  } else for (const width of [320, 390, 640, 1366]) for (const language of ['vi', 'en']) for (const balance of [0, 1234567890]) for (const [kind, name] of Object.entries(names)) {
     const label = `${language}-${width}-${balance}-${kind}`;
     profiles = [{ ...child }, { ...child, _id: 'b', name, viviPoints: balance }];
     const selectionStart = selections.length;
@@ -203,8 +272,10 @@ try {
     assert.deepEqual(unexpected, []);
     console.log('PASS ' + label);
   }
-  assert.equal(records.length, 32);
-  console.log(`PASS 32 geometry/interaction cases; head=${head}; artifacts=${output}`);
+  if (!threeProfileDiagnostic) {
+    assert.equal(records.length, 32);
+    console.log(`PASS 32 geometry/interaction cases; head=${head}; artifacts=${output}`);
+  }
 } finally {
   console.log(`Evidence: ${output}`);
   await browser?.close();
