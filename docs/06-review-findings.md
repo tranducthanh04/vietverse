@@ -1,5 +1,12 @@
 # 06 — Kết quả review senior BA/code
 
+## P1.1 follow-up: cạnh tranh refresh/logout — 2026-10-18, sửa local
+
+- Các ghi nhận rotation/revocation cũ chưa bao phủ tính nguyên tử: hai caller cùng đọc token sống có thể cùng cấp token con; lỗi tạo token/profile sau khi consume có thể làm mất phiên; reuse/logout có thể bỏ sót token con đang được tạo.
+- Sửa bằng transaction cùng ghi `User.__v` theo tài khoản, authoritative reread trong session và profile trong transaction. Reuse trả kết quả để commit thu hồi family rồi mới trả 401; logout các phiên hiện có dùng cùng boundary. Không đổi strict reuse/no-grace, TTL JWT, schema hoặc policy email/PIN.
+- Bằng chứng local: 6 ca race/failure xác định RED trước sửa, GREEN sau sửa; sau bổ sung 14 test mới + 36 test auth hiện có = 50 qua. Lượt đầy đủ trên base `8ac98f9`: 511 server/343 client test qua, typecheck/build qua, lint 0 lỗi/103 cảnh báo có sẵn; review độc lập không có finding code cần sửa. Không suy ra production/browser đã đạt. Chi tiết tại [auth-session-rotation.md](./auth-session-rotation.md) và `plans/journals/2026-10-18-auth-refresh-rotation.md`.
+- **Giới hạn còn lại:** commit mất ACK có thể trả 503 sau khi đã rotate, token cũ không được bảo đảm dùng lại; login/Google tạo family mới ngoài khóa, account logout không chặn mọi đăng nhập mới đồng thời. Access JWT 15 phút không được revoke tức thì. Cần replica set; chưa thu hồi phiên thật/deploy, không bao gồm audio/F04 hoặc PR #18.
+
 ## Header công khai tràn khi đổi VI/EN — 2026-10-18, sửa local
 
 - Đã tái hiện bằng font/CSS thật: ở 1536px, hàng tiếng Việt rộng 1457px vượt khung 1280px và đẩy nút đăng ký ra ngoài màn hình. Header fixed không nhất thiết làm tăng document.scrollWidth, nên test cũ chỉ đo trang bỏ sót lỗi.
@@ -260,7 +267,7 @@ Ngày review: 2026-10-01. Phạm vi: toàn bộ `client/src`, `server/src`, seed
 ### P1.1 — Refresh token không rotation/revocation [ĐÃ XỬ LÝ - 2026-10-01]
 
 - Bằng chứng cũ: `server/src/modules/auth/auth.service.ts`, `auth.controller.ts`.
-- Tình trạng: **Đã khắc phục hoàn toàn**. Đã xây dựng model `RefreshToken` lưu trữ băm SHA-256 (`tokenHash`), định danh họ token (`family`), cờ thu hồi `isRevoked` và thời gian hết hạn TTL (MongoDB tự động xóa sau 7 ngày). Khi gọi `POST /auth/refresh`:
+- Tình trạng lịch sử: rotation/revocation đã có từ 2026-10-01, nhưng chưa bảo đảm atomicity/concurrency; xem follow-up 2026-10-18 ở đầu tài liệu. Model `RefreshToken` lưu băm SHA-256 (`tokenHash`), định danh họ token (`family`), cờ thu hồi `isRevoked` và thời gian hết hạn TTL (MongoDB dọn bất đồng bộ sau `expiresAt`, không bảo đảm xóa đúng giây hết hạn). Khi gọi `POST /auth/refresh`:
   1. Token cũ được đánh dấu `isRevoked = true`.
   2. Cấp token mới với `jti` duy nhất và xoay vòng (rotation) trong cùng `family`.
   3. Cơ chế phát hiện tấn công tái sử dụng (Reuse Detection): nếu phát hiện client tái sử dụng một token đã từng bị thu hồi, hệ thống lập tức thu hồi toàn bộ token thuộc họ (`family`) đó, từ chối mọi yêu cầu tiếp theo (`401 Unauthorized`).

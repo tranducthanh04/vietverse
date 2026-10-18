@@ -1,0 +1,101 @@
+# Auth refresh rotation: atomic session boundary
+
+Date: 2026-10-18. Initial tested base: `8ac98f9`; integrated base: `1422099`.
+Branch: `codex/auth-refresh-rotation`, isolated worktree.
+
+## Root causes and implementation
+
+- Separate token consume/create/profile reads were not atomic; concurrent live
+  reads could mint twice and a failure after consume could lose a valid session.
+- Family revocation/logout could finish before an in-flight descendant insert,
+  leaving that descendant live. A transaction on token documents alone is not
+  enough to serialize this cross-document race.
+- Refresh, ancestor reuse and logout of existing sessions now share a real
+  transactional User.__v write. Refresh rereads the token and reads the response
+  profile in-session; logout uses stable account ordering when needed.
+- Reuse revocation returns from the callback so the revoke commits before 401.
+  Throwing inside the callback would roll back that security action.
+
+## Unchanged decisions and explicit limits
+
+- Strict reuse/no grace; access JWT 15 minutes; refresh JWT seven days. No schema
+  migration; replica set required. Transaction budget 15 seconds, commit budget
+  five seconds; locator work is outside that bound.
+- Transient DB errors map to 503, invalid JWT to 401, programming errors retain
+  their central error path (normally 500). Failure does not set/clear cookies.
+- Unknown commit ACK can return 503 after commit. Do not promise every 503 leaves
+  the original token usable; a retry may trigger strict family revocation.
+- Login/register/Google family issuance remains outside this lock. Account logout
+  is not a barrier excluding all concurrent new sign-ins; existing access JWTs
+  keep their TTL.
+- Audio/F04, PIN and email policies are unchanged. PR #18 remains separate. No
+  production session revocation, credentials/config changes or deployment.
+
+## Verification evidence and pending release gates
+
+- Coordinator reported six deterministic RED failures before the source fix and
+  six GREEN after it. Expanded suite: 14 new plus 36 existing auth tests pass,
+  50 total; server TypeScript check passes.
+- This writer inspected auth.service.ts, authRefreshAtomic.test.ts, controller
+  cookie sequencing and existing transaction error mapping; the counts above are
+  coordinator evidence, not additional test runs by this documentation agent.
+- Independent final tester, one full run on base `8ac98f9`: server 511/511 in
+  52 files (271.99s), client 343/343 in 38 files (20.12s), `npm test` exit 0.
+  New atomic auth tests 14/14. Typecheck, build and lint each exit 0; build 1,832
+  modules, lint zero errors and 103 existing warnings. Existing audioPlayback
+  act warning remains. Finalize passed in this run but its known race is not
+  repaired; no retry-for-green, skipped tests or audio edits.
+- Independent two-pass code/security review found no actionable source/test
+  findings. Scoped simplifier ran clean. Review's documentation caveat about
+  unknown commit acknowledgement was incorporated into the plan and docs.
+- PR CI, coordinator merge and post-merge verification remain pending; local
+  passing tests are not a production/browser acceptance claim.
+- Integration verification at `37c87b41ff370a7bfa13cf17652b7d20d7948c27` after
+  normal merge of main `1422099`: client 366/366 in 39 files, typecheck/build/lint
+  exit 0, same 103 warnings. Server/root package/lockfile diff from tested auth
+  commit `1449694` is empty, so 511 server results are reused, not rerun.
+  Incremental independent review confirms the nine-file auth-only delta and
+  preserved main Settings/CTA documentation, no actionable findings.
+- Owning docs: docs/03-feature-inventory.md, docs/04-system-architecture.md,
+  docs/05-api-and-data-contracts.md, docs/06-review-findings.md and
+  docs/auth-session-rotation.md. Baseline sections remain intact.
+- No stage/commit/push/merge performed by this docs handoff. AgentKit CLI is
+  unavailable; preserve evidence as Markdown without hand-editing plan status or
+  claiming whole-plan completion. AgentWiki publish skipped.
+
+## PR19 integration and conflict resolution
+
+- Coordinator requested normal merge of main
+  `01cfa0591feb9bf0015821f19e9f256259544732`. Merge `5c0113f6ad942746cabd8aeb4d9cc1251e27a661`
+  resolved one overlapping insertion in `docs/03-feature-inventory.md` by keeping
+  both complete auth and Kids Courses sections. All menu19 source/docs remain.
+- Independent incremental review: nine auth-only diff files; no branding/audio
+  changes, no remaining conflict markers, and no actionable findings.
+- Compared with `1205603`, server/root package/lockfile are byte-for-byte unchanged.
+  Reuse the earlier 511-server full-suite result; do not claim a fresh full-server
+  run. A fresh focused auth/Google/security run passes 50/50 tests in six files
+  (73.21s). Full client passes 369/369 in 40 files (40.29s).
+- Fresh project typecheck/build pass; 1,832 modules. Existing act warning remains.
+  New-head CI must be checked separately; historical run `39145165919` does not
+  prove this merge revision. No self-merge, auto-merge or audio/F04 changes.
+
+## PR21 integration (2026-10-19 local time)
+
+- PR19-integration head `48470a5566a04e7f3c3f7746ef5166616c674b5e` passed CI
+  `39146520056` and both frontend/backend previews before main advanced.
+- Coordinator requested normal merge of main
+  `5baf9172029c9f1276697e918e2a345c4723ea07`. Merge
+  `7139c42b280feff89c9c0c2542d67bde60c986c2` completed without conflicts.
+  All PR19/PR21 docs and source are preserved; no branding or audio delta.
+- Independent incremental review confirms nine auth source/test/docs files,
+  no client delta, no conflict markers and no actionable findings. Server,
+  root package and lockfile are unchanged from `48470a5`.
+- Fresh focused auth/Google/security: 50/50 tests in six files, exit 0 (43.27s),
+  including all 14 real-replica-set atomicity/concurrency/rollback cases.
+  Fresh full client: 389/389 in 41 files, exit 0 (31.28s).
+  Project typecheck/build pass (1832 modules). Existing act warning remains.
+- Full server was not rerun locally for this unchanged server input; retain
+  the prior 511-test evidence and separately require exact-new-head CI.
+  Do not use historical CI as the new gate. No F04 failure was encountered in
+  these focused runs; the known held race remains unfixed.
+- No force-push, self/auto-merge, production mutation or manual deployment.
