@@ -8,6 +8,9 @@
 
 ## Follow-up feedback — 2026-10-18, sửa local
 
+- **PARENT-STAGE-LINKS (F10, audit 5.8) — sửa local:** card tiến độ có link tới đúng chặng/bé, bản đồ đọc lựa chọn từ URL và history; query không chọn hồ sơ hoặc cấp quyền. Hiển thị rõ chặng khóa/rỗng/link sai, không dùng mặc định 4 bài khi tổng là 0. Chỉ đóng phần link chặng của F10, không đóng công thức năng lực/điểm học tập/từ vựng. Chi tiết và giới hạn ở [parent-stage-links.md](./parent-stage-links.md); chờ review/merge.
+- **Kiểm tra tích hợp PR #19/#21:** fixture bản đồ nay dùng KidsLayout thật. Tab tên chặng dài từng vượt màn 320px (cạnh phải 327px); giới hạn chiều rộng, cho nhãn xuống dòng và bỏ phóng to tab active. Đây là giả định trình bày, không đổi chọn chặng/quyền/API. Kiểm tra cả vùng bấm và khoảng cách với thanh dưới fixed; bằng chứng RED/GREEN trong journal stage-links.
+
 - **LANDING-REGISTER-CTA (audit 5.1):** ba nút CTA từng đưa khách qua route protected tới đăng nhập. Đã sửa local để tới đăng ký trực tiếp, giữ đích cũ khi đã đăng nhập và chờ bootstrap khi chưa rõ phiên. Không đổi auth store/guard. Test và giới hạn tại [landing-register-cta.md](./landing-register-cta.md); chưa xác nhận phát hành.
 
 - **P2 — nút VI/EN biến mất trên mobile [ĐÃ SỬA LOCAL]:** `KidsLayout` và `ParentLayout` dùng `hidden sm:inline-flex`, không có nút thay thế dưới 640px. Bỏ điều kiện ẩn, cho header/nhóm nút khu bé xuống hàng khi thiếu chỗ; giữ control thật, vùng chạm 44px, nhãn truy cập và lựa chọn lưu trong localStorage. Không thay Parent Gate, quyền hoặc chính sách ngôn ngữ.
