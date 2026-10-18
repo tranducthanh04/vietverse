@@ -74,8 +74,11 @@ try {
     const header = page.getByRole('banner');
     const pill = header.getByRole('link', { name: language === 'vi' ? /Điểm thưởng/ : /Rewards/ });
     await pill.waitFor();
-    await page.evaluate(() => document.fonts.ready);
-    assert(await page.evaluate(() => document.fonts.check('800 16px "Be Vietnam Pro"')), 'Real application font loaded');
+    assert(await page.evaluate(async () => {
+      await document.fonts.ready;
+      const faces = await document.fonts.load('800 16px "Be Vietnam Pro"', 'Điểm thưởng ViVi 1234567890');
+      return faces.length > 0 && faces.every(face => face.status === 'loaded');
+    }), 'Real application font loaded, not a fallback');
     const geometry = await header.evaluate(el => {
       const controls = [...el.querySelectorAll('a,button')].map(node => ({ text: node.getAttribute('aria-label'), rect: node.getBoundingClientRect() }));
       const invalid = controls.filter(({ rect: r }) => r.width < 44 || r.height < 44 || r.left < 0 || r.right > innerWidth || r.bottom > el.getBoundingClientRect().bottom);
