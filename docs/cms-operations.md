@@ -90,7 +90,8 @@ Thông báo lỗi vẫn do server quyết định; phần này chỉ thêm đi�
 Đây là **quyết định triển khai** cho story/đồng dao và văn hóa: form nháp có khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn theo từng ngôn ngữ (`en`, `ja`, `ko`, `zh`, `fr`). Admin nhập bản dịch cho tiêu đề, phần giới thiệu/mô tả, từng thẻ "Có thể bé chưa biết?"/từng dòng đọc và từ vựng; mỗi ô dịch hiện nội dung tiếng Việt gốc làm gợi ý (placeholder) để đối chiếu. Lưu bằng **Lưu nháp** và kiểm tra bằng **Xem trước** như các trường khác; bản dịch là tùy chọn và **không** là điều kiện publish.
 
 - Bản dịch chỉ bổ sung hiển thị cho bé (dưới đoạn tiếng Việt), không đổi quiz, chấm điểm, exploration hay ViVi Points. Ngôn ngữ ngoài tập hỗ trợ (kể cả `other`) bị schema từ chối.
-- Mảng bản dịch (facts/lyrics/vocab) song song theo index với bản tiếng Việt; sửa thứ tự hoặc xóa dòng nguồn thì cần soát lại bản dịch tương ứng.
+- Mảng bản dịch (facts/lyrics/vocab) song song theo index với bản tiếng Việt. **Quyết định kỹ thuật 2026-10-18:** CMS di chuyển/xóa bản dịch cùng dòng nguồn ở mọi ngôn ngữ khi đổi thứ tự/xóa dòng; dòng mới có bản dịch trống, không lấy lại phần dịch thừa ngoài số dòng nguồn. Ánh xạ theo vị trí dòng trước thao tác, không so khớp chữ nên vẫn đúng khi hai dòng nguồn trùng nhau. Trường bản dịch không có nội dung sau thao tác được bỏ khỏi nháp; không tự tạo bản dịch cho nội dung legacy.
+- Sửa chữ hoặc mốc thời gian trong một dòng không thay đổi định danh dòng và giữ bản dịch hiện có. Content owner vẫn phải soát lại ý nghĩa bản dịch sau khi sửa chữ; không có tự dịch hay tự duyệt. Bản dịch đã lệch trong nháp/live từ trước cần đối soát thủ công, bản sửa không đoán lại nguồn hoặc migrate DB.
 - **Giả định chờ duyệt**: bản dịch tiếng Anh trong seed demo là bản nháp chưa duyệt, chỉ để xem thử; content owner cần duyệt văn bản và bản quyền trước production. Không có migration ghi bản dịch lên production trong thay đổi này.
 
 ## Rollback

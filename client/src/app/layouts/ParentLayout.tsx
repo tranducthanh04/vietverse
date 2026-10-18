@@ -41,7 +41,7 @@ export const ParentLayout: React.FC = () => {
       <SkipLink />
       {/* Top Header */}
       <header className="bg-white border-b-2 border-cream-border px-4 sm:px-6 py-3 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => navigate('/kham-pha')}
@@ -63,8 +63,8 @@ export const ParentLayout: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <LanguageSwitcher className="hidden sm:inline-flex" />
+          <div className="flex items-center space-x-2 sm:space-x-3 ml-auto">
+            <LanguageSwitcher />
             <span className="text-xs font-bold text-stone-600 hidden md:inline">
               {user?.displayName}
             </span>

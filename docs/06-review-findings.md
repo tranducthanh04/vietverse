@@ -1,5 +1,15 @@
 # 06 — Kết quả review senior BA/code
 
+## Follow-up feedback — 2026-10-18, sửa local
+
+- **P2 — nút VI/EN biến mất trên mobile [ĐÃ SỬA LOCAL]:** `KidsLayout` và `ParentLayout` dùng `hidden sm:inline-flex`, không có nút thay thế dưới 640px. Bỏ điều kiện ẩn, cho header/nhóm nút khu bé xuống hàng khi thiếu chỗ; giữ control thật, vùng chạm 44px, nhãn truy cập và lựa chọn lưu trong localStorage. Không thay Parent Gate, quyền hoặc chính sách ngôn ngữ.
+- **P2 — bản dịch lệch dòng sau biên tập CMS [ĐÃ SỬA LOCAL]:** thao tác trên `lyrics`, `vocab`, `funFacts` trước đây chỉ đổi mảng nguồn. `StringRows` nay gửi thêm ánh xạ vị trí dòng (tùy chọn, caller cũ không đổi); hai editor dùng chung `remapTranslationRows` để cập nhật nguồn và bản dịch trong một lần thay đổi form. Giữ đúng cả nguồn trùng chữ, bản dịch thiếu dòng và ngôn ngữ chỉ dịch tiêu đề. Dòng mới không tái dùng bản dịch thừa; xóa phần dịch cuối thì bỏ trường/ngôn ngữ rỗng.
+- **Quyết định kỹ thuật, không đổi nghiệp vụ/API:** không thêm field vào payload, không tự dịch/duyệt, không publish hay migrate DB. Sửa chữ/mốc giây giữ bản dịch cùng dòng để content owner rà ý nghĩa. Nháp/live đã lệch từ trước cần đối soát thủ công, không suy đoán để tự sửa dữ liệu.
+- **Bằng chứng hồi quy:** 15 assertion về ánh xạ bản dịch và 2 ca nút đổi ngôn ngữ với CSS Tailwind thật thất bại trước sửa, qua sau sửa; thêm cả ca bảo toàn nội dung legacy và sửa chữ không đổi vị trí. Bộ test liên quan 41/41 qua. Trình duyệt chạy component/CSS thật, dữ liệu QA local: hai layout ở 320/390/640/1366px đều có VI/EN 44px, không tràn ngang; bấm/Enter đổi chữ giao diện. Không phải kiểm thử route có đăng nhập/DB production hay thiết bị thật.
+- **Kiểm chứng cuối:** toàn bộ `npm test` qua: backend 497/497, frontend 304/304; typecheck/build server + client qua, lint 0 lỗi (103 cảnh báo có sẵn). Test audioPlayback còn warning `act()` có sẵn. Hai ca upload legacy ban đầu lỗi do credential Cloudinary giả chọn nhầm adapter khi chạy test; chạy lại với cấu hình storage local đúng thì qua, không sửa sản phẩm để né test. Chi tiết ở `plans/journals/2026-10-18-feedback-mobile-translations.md`.
+- **Ngoài phạm vi:** AI đọc trả phí cần xác nhận provider/audio; luồng thu âm production còn cần nghiệm thu thực tế; feedback "không đặt được câu hỏi" cần bước tái hiện. Không coi bản sửa này là đóng các mục đó.
+- **Rủi ro baseline phát hiện khi chuẩn bị PR:** một lần chạy mới lỗi test `recordingFinalize.test.ts:148` (một trong bốn yêu cầu đồng thời trả 404 thay vì 201); năm lần chạy riêng tiếp theo đều qua. Backend không đổi so với `main`. Giả thuyết từ code: receipt chưa tồn tại ở lần đọc đầu nhưng intent đã `completed` ở lần đọc sau, dẫn tới 404 trước khi đọc lại receipt. Chưa có tái hiện xác định hay bản sửa cho lỗi này; không coi các lần chạy lại thành công là đã xử lý rủi ro. Chi tiết trong journal nêu trên.
+
 ## Dọn các lỗi a11y/giao diện mức Low — 2026-10-17, sửa local (nhánh `chore/a11y-nav-polish`)
 
 Xử lý nhóm Low còn lại từ bảng điểm UI (`plans/reports/ui-grade-261016-0956-ui-ux-pro-max-scorecard.md`). Chỉ sửa giao diện/khả năng truy cập phía client, **không đổi nghiệp vụ, điểm, quyền hay API**.

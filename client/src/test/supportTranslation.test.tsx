@@ -4,6 +4,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { SupportTranslation } from "../components/ui/SupportTranslation.js";
 import { TranslationEditor, TranslationPreview, type Translations } from "../features/admin/content/TranslationEditor.js";
 import { useChildStore } from "../store/childStore.js";
+import { StoryEditor } from "../features/admin/content/StoryEditor.js";
+import { CultureEditor } from "../features/admin/content/CultureEditor.js";
+import type { StoryContent, CultureContent } from "../features/admin/content/content.types.js";
 
 afterEach(() => {
   cleanup();
@@ -158,5 +161,100 @@ describe("TranslationPreview (CMS)", () => {
       <TranslationPreview translations={{}} sections={[{ key: "intro", label: "Mở đầu" }]} />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+function SourceForm({ field, translations }: {
+  field: "lyrics" | "vocab" | "funFacts";
+  translations?: Translations;
+}) {
+  const [story, setStory] = useState<StoryContent>({
+    title: "Source title", type: "tho", author: "", description: "",
+    audioUrl: "", coverImage: "", durationSec: 0, ageGroups: ["5-6"], quiz: [],
+    lyrics: [{ text: "Same source", timeSec: 0 }, { text: "Same source", timeSec: 1 }],
+    vocab: ["Same source", "Same source"], translations,
+  });
+  const [culture, setCulture] = useState<CultureContent>({
+    title: "Source title", category: "tet", intro: "", audioUrl: "", coverImage: "",
+    funFacts: ["Same source", "Same source"], tags: [], quiz: [], translations,
+  });
+  return <>
+    {field === "funFacts"
+      ? <CultureEditor value={culture} onChange={setCulture} />
+      : <StoryEditor value={story} onChange={setStory} />}
+    <output>{JSON.stringify(field === "funFacts" ? culture : story)}</output>
+  </>;
+}
+
+describe.each([
+  { field: "lyrics" as const, remove: "Xóa dòng 1", move: "Đưa dòng 2 lên", add: "Thêm dòng lời", input: "Dòng lời 1", translated: "Tiếng Anh · Dòng lời 1" },
+  { field: "vocab" as const, remove: "Xóa Từ truyện 1", move: "Đưa Từ truyện 2 lên", add: "Thêm từ truyện", input: "Từ truyện 1", translated: "Tiếng Anh · Từ vựng 1" },
+  { field: "funFacts" as const, remove: "Xóa Thông tin thú vị 1", move: "Đưa Thông tin thú vị 2 lên", add: "Thêm thông tin thú vị", input: "Thông tin thú vị 1", translated: "Tiếng Anh · Thông tin thú vị 1" },
+])("CMS source rows: $field", ({ field, remove, move, add, input, translated }) => {
+  const readValue = () => JSON.parse(screen.getByRole("status").textContent!) as StoryContent & CultureContent;
+  const translations = (): Translations => ({
+    en: { title: "English title", [field]: ["First English", "Second English"] },
+    fr: { title: "French title", [field]: ["First French", "Second French"] },
+    ja: { title: "Japanese title" },
+  });
+
+  it("removes the matching translation in every language, even with duplicate source text", () => {
+    render(<SourceForm field={field} translations={translations()} />);
+    fireEvent.click(screen.getByRole("button", { name: remove }));
+    expect(readValue()[field]).toHaveLength(1);
+    expect(readValue().translations).toEqual({
+      en: { title: "English title", [field]: ["Second English"] },
+      fr: { title: "French title", [field]: ["Second French"] },
+      ja: { title: "Japanese title" },
+    });
+    expect(screen.getByLabelText(translated)).toHaveValue("Second English");
+  });
+
+  it("moves translations with their source rows in every language", () => {
+    render(<SourceForm field={field} translations={translations()} />);
+    fireEvent.click(screen.getByRole("button", { name: move }));
+    expect(readValue().translations).toEqual({
+      en: { title: "English title", [field]: ["Second English", "First English"] },
+      fr: { title: "French title", [field]: ["Second French", "First French"] },
+      ja: { title: "Japanese title" },
+    });
+    expect(screen.getByLabelText(translated)).toHaveValue("Second English");
+  });
+
+  it("keeps untranslated positions empty when moving a partially translated list", () => {
+    render(<SourceForm field={field} translations={{ en: { [field]: ["First English"] } }} />);
+    fireEvent.click(screen.getByRole("button", { name: move }));
+    expect(readValue().translations?.en?.[field]).toEqual(["", "First English"]);
+    expect(screen.getByLabelText(translated)).toHaveValue("");
+  });
+
+  it("does not attach a stale translation beyond the source length to an appended row", () => {
+    render(<SourceForm field={field} translations={{ en: { [field]: ["First English", "Second English", "Orphan"] } }} />);
+    fireEvent.click(screen.getByRole("button", { name: add }));
+    expect(readValue()[field]).toHaveLength(3);
+    expect(readValue().translations?.en?.[field]).toEqual(["First English", "Second English", ""]);
+  });
+
+  it("does not resurrect a deleted translation when a new source row is added", () => {
+    render(<SourceForm field={field} translations={{ en: { [field]: ["First English"] } }} />);
+    fireEvent.click(screen.getByRole("button", { name: remove }));
+    fireEvent.click(screen.getByRole("button", { name: add }));
+    expect(readValue().translations?.en?.[field]).toBeUndefined();
+    expect(screen.getByLabelText(translated)).toHaveValue("");
+  });
+
+  it("preserves translations when editing source text without changing row identity", () => {
+    render(<SourceForm field={field} translations={translations()} />);
+    fireEvent.change(screen.getByLabelText(input), { target: { value: "Edited source" } });
+    expect(readValue().translations).toEqual(translations());
+  });
+
+  it("keeps legacy content without translations editable", () => {
+    render(<SourceForm field={field} />);
+    fireEvent.click(screen.getByRole("button", { name: move }));
+    fireEvent.click(screen.getByRole("button", { name: remove }));
+    fireEvent.click(screen.getByRole("button", { name: add }));
+    expect(readValue()[field]).toHaveLength(2);
+    expect(readValue().translations).toBeUndefined();
   });
 });

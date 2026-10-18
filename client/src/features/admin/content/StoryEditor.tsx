@@ -7,6 +7,7 @@ import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
 import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 import { TranslationEditor } from "./TranslationEditor.js";
+import { remapTranslationRows } from "./translationRows.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function StoryEditor({
   value,
@@ -110,7 +111,10 @@ export function StoryEditor({
         label="Từ truyện"
         name="vocab"
         value={value.vocab}
-        onChange={(vocab) => patch({ vocab })}
+        onChange={(vocab, order) => patch({
+          vocab,
+          translations: remapTranslationRows(value.translations, "vocab", order),
+        })}
       />
       <fieldset>
         <legend>Lời / dòng đọc</legend>
@@ -153,18 +157,25 @@ export function StoryEditor({
                 aria-label={`Đưa dòng ${i + 1} lên`}
                 disabled={i === 0}
                 onClick={() => {
-                  const lyrics = [...value.lyrics];
-                  [lyrics[i - 1], lyrics[i]] = [lyrics[i], lyrics[i - 1]];
-                  patch({ lyrics });
+                  const order = value.lyrics.map((_, index) => index);
+                  [order[i - 1], order[i]] = [order[i], order[i - 1]];
+                  patch({
+                    lyrics: order.map((index) => value.lyrics[index]),
+                    translations: remapTranslationRows(value.translations, "lyrics", order),
+                  });
                 }}
               >
                 Lên
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  patch({ lyrics: value.lyrics.filter((_, at) => at !== i) })
-                }
+                onClick={() => {
+                  const order = value.lyrics.map((_, index) => index).filter((index) => index !== i);
+                  patch({
+                    lyrics: order.map((index) => value.lyrics[index]),
+                    translations: remapTranslationRows(value.translations, "lyrics", order),
+                  });
+                }}
               >
                 Xóa dòng {i + 1}
               </button>
@@ -175,7 +186,10 @@ export function StoryEditor({
           type="button"
           disabled={value.lyrics.length >= 500}
           onClick={() =>
-            patch({ lyrics: [...value.lyrics, { text: "", timeSec: 0 }] })
+            patch({
+              lyrics: [...value.lyrics, { text: "", timeSec: 0 }],
+              translations: remapTranslationRows(value.translations, "lyrics", [...value.lyrics.map((_, index) => index), null]),
+            })
           }
         >
           Thêm dòng lời

@@ -1,6 +1,9 @@
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { resolve } from 'node:path';
+import postcss from 'postcss';
+import tailwindcss from 'tailwindcss';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi as viDict } from '../i18n/vi.js';
@@ -9,6 +12,7 @@ import { createTranslator } from '../i18n/translator.js';
 import { companionToUiLanguage, useUiLanguageStore } from '../i18n/uiLanguageStore.js';
 import { PublicLayout } from '../app/layouts/PublicLayout.js';
 import { KidsLayout } from '../app/layouts/KidsLayout.js';
+import { ParentLayout } from '../app/layouts/ParentLayout.js';
 import { useAuthStore } from '../store/authStore.js';
 import { useChildStore, type ChildProfile } from '../store/childStore.js';
 
@@ -141,5 +145,42 @@ describe('remembering the manual choice', () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe('vi');
     useUiLanguageStore.getState().clearManualLanguage();
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+});
+
+describe('mobile language controls', () => {
+  let appStyles: string;
+  beforeAll(async () => {
+    const config = resolve('tailwind.config.js');
+    const result = await postcss([tailwindcss(config)]).process('@tailwind utilities;', { from: undefined });
+    appStyles = result.css;
+  });
+  afterEach(() => sessionStorage.clear());
+
+  it.each([
+    ['kids', KidsLayout],
+    ['parent', ParentLayout],
+  ] as const)('keeps the %s switch visible with mobile base CSS and changes the interface', (_, Layout) => {
+    useUiLanguageStore.setState({ manualLanguage: null });
+    useChildStore.setState({ activeChild: enChild, children: [enChild] });
+    sessionStorage.setItem('vietverse_parent_gate_token', 'local-test-gate');
+    sessionStorage.setItem('vietverse_parent_gate_unlocked', String(Date.now() + 60_000));
+    render(
+      <QueryClientProvider client={queryClient}>
+        {/* jsdom applies base CSS, not desktop media queries; browser QA covers actual widths. */}
+        <style>{appStyles}</style>
+        <MemoryRouter>
+          <Routes><Route path="/" element={<Layout />} /></Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const header = screen.getByRole('banner');
+    const vietnamese = within(header).getByRole('button', { name: 'Show the interface in Vietnamese' });
+    expect(vietnamese).toBeVisible();
+    fireEvent.click(vietnamese);
+    expect(within(header).getByRole('button', { name: 'Hiển thị giao diện bằng tiếng Việt' })).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('vi');
+    fireEvent.click(within(header).getByRole('button', { name: 'Hiển thị giao diện bằng tiếng Anh' }));
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('en');
   });
 });
