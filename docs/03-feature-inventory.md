@@ -10,6 +10,10 @@
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.
 - Quyết định kỹ thuật, không đổi nghiệp vụ/API/quyền/điểm. Quy tắc trình bày, test trình duyệt và giới hạn tại [public-header-responsive.md](./public-header-responsive.md).
 
+## CTA đăng ký trên Landing — 2026-10-18, local
+
+Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã đăng nhập giữ đích cũ. Tạm chờ khi chưa xác định xong phiên; không đổi thẻ khám phá, copy, quyền hay API. Quyết định, giả định và bằng chứng tại [landing-register-cta.md](./landing-register-cta.md) (2026-10-18, sửa local, chờ review/merge).
+
 ## Chuyển bài tiếp theo sau khi hoàn thành — 2026-10-17, local
 
 - Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.
