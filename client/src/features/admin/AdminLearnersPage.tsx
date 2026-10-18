@@ -47,7 +47,12 @@ export const AdminLearnersPage: React.FC = () => {
   });
 
   // Query learner details when modal opens
-  const { data: learnerDetail, isLoading: loadingDetail } = useQuery({
+  const {
+    data: learnerDetail,
+    isLoading: loadingDetail,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useQuery({
     queryKey: ['adminLearnerDetail', selectedLearnerId],
     queryFn: async () => {
       const res = await api.get(`/admin/learners/${selectedLearnerId}`);
@@ -244,11 +249,17 @@ export const AdminLearnersPage: React.FC = () => {
         title="Hồ Sơ Toàn Diện Của Bé"
         className="max-w-3xl"
       >
-        {loadingDetail || !learnerDetail ? (
+        {detailError ? (
+          <QueryErrorState error={detailError} onRetry={() => refetchDetail()} />
+        ) : loadingDetail ? (
           <div className="py-12 text-center">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <span className="text-stone-500 text-sm font-bold">Đang tải hồ sơ bé…</span>
           </div>
+        ) : !learnerDetail?.child ? (
+          <p className="py-12 text-center text-sm text-stone-500">
+            Không tìm thấy hồ sơ học viên.
+          </p>
         ) : (
           <div className="space-y-6">
             {/* Child Summary Header Card */}
@@ -266,7 +277,14 @@ export const AdminLearnersPage: React.FC = () => {
                     {learnerDetail.child?.parentId?.email})
                   </p>
                   <p className="text-xs text-stone-500 mt-0.5">
-                    Giới hạn phiên học: <strong>{learnerDetail.child?.screenTimeLimit || 20} phút</strong>
+                    Giới hạn phiên học:{' '}
+                    <strong>
+                      {learnerDetail.child.screenTimeLimit == null
+                        ? 'Chưa có dữ liệu'
+                        : learnerDetail.child.screenTimeLimit === 0
+                          ? 'Không giới hạn'
+                          : `${learnerDetail.child.screenTimeLimit} phút`}
+                    </strong>
                   </p>
                 </div>
               </div>
@@ -298,17 +316,26 @@ export const AdminLearnersPage: React.FC = () => {
                         <span className="font-bold text-stone-800">
                           {p.lessonId?.title || 'Bài học'}
                         </span>
+                        <span className="text-stone-600 block">
+                          {p.status === 'completed'
+                            ? 'Hoàn thành'
+                            : p.status === 'in_progress'
+                              ? 'Đang học'
+                              : p.status === 'not_started'
+                                ? 'Chưa bắt đầu'
+                                : 'Chưa rõ trạng thái'}
+                        </span>
                         <span className="text-stone-500 block text-[11px]">
-                          Hoàn thành: {new Date(p.updatedAt).toLocaleDateString('vi-VN')}
+                          Cập nhật: {new Date(p.updatedAt).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold inline-flex items-center gap-1 tabular-nums">
-                          {p.stars || 3}
+                          {p.stars ?? 'Chưa có dữ liệu'}
                           <Star className="w-3.5 h-3.5 fill-current" aria-label="sao" />
                         </span>
                         <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold tabular-nums">
-                          {p.scorePercent || 100}%
+                          {p.scorePercent == null ? 'Chưa có dữ liệu' : `${p.scorePercent}%`}
                         </span>
                       </div>
                     </div>

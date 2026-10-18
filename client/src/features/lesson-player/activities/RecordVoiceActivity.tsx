@@ -11,6 +11,7 @@ import {
 } from '../../../components/ui/icons.js';
 import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
+import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
 import { targetTextSize } from './targetTextSize.js';
 import { useT } from '../../../i18n/index.js';
@@ -21,6 +22,7 @@ export interface RecordVoiceActivityProps {
     prompt: string;
     subPrompt?: string;
     targetWord?: string;
+    audioUrl?: string;
     hints?: string[];
   };
   childId: string;
@@ -52,6 +54,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
   } = useAudioRecorder(JSON.stringify([childId,lessonId,activity.id,contentVersion]));
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isStartingRecording, setIsStartingRecording] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [intentExpired, setIntentExpired] = useState(false);
@@ -67,7 +70,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     const child = useChildStore.subscribe((state,previous) => { if (state.activeChild?._id !== previous.activeChild?._id) generation.current++; });
     return () => { mounted.current = false; generation.current++; auth(); child(); };
   },[]);
-  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); setIntentExpired(false); },[contextKey]);
+  useEffect(() => { generation.current++; setIsStartingRecording(false); setIsSubmitted(false); setIsUploading(false); setUploadError(null); setIntentExpired(false); },[contextKey]);
 
   const handleSubmit = async () => {
     if (!audioBlob) return;
@@ -115,6 +118,16 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
         {activity.prompt}
       </h2>
 
+      {activity.subPrompt && <p className="text-kid-base text-stone-600 mb-4 whitespace-pre-line">{activity.subPrompt}</p>}
+      {!isStartingRecording && !isRecording && !isPlaying && (
+        <AudioButton
+          audioUrl={activity.audioUrl}
+          textToSpeak={activity.targetWord || activity.subPrompt || activity.prompt}
+          label={t('lesson.listenModel')}
+          contentKey={contextKey}
+        />
+      )}
+
       {activity.targetWord && (
         <div className="max-w-full bg-white border-4 border-primary/30 rounded-2xl px-5 sm:px-8 py-3 my-4 inline-block shadow-sm">
           <span className={`${targetTextSize(activity.targetWord)} block font-black font-display text-primary break-words text-balance`}>
@@ -155,7 +168,15 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
           ) : (
             <div className="flex flex-col items-center space-y-3">
               <button
-                onClick={startRecording}
+                onClick={async () => {
+                  const epoch = generation.current, key = contextKey;
+                  setIsStartingRecording(true);
+                  try { await startRecording(); }
+                  finally {
+                    if (mounted.current && epoch === generation.current && key === contextRef.current) setIsStartingRecording(false);
+                  }
+                }}
+                disabled={isStartingRecording}
                 className="w-24 h-24 bg-primary hover:bg-primary-hover text-white rounded-full flex items-center justify-center shadow-kid-primary hover:scale-105 active:scale-95 transition-transform min-h-[58px] min-w-[58px]"
                 aria-label={t('lesson.startRecordingAria')}
               >

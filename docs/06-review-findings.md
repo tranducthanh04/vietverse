@@ -1,5 +1,17 @@
 # 06 — Kết quả review senior BA/code
 
+## Thực hiện audit khách hàng — 2026-10-18, local, chưa deploy
+
+- **F01 một phần — xếp hết thẻ sai mất reset:** đổi điều kiện hiện "Xếp lại" để cho reset cả lượt đã đủ thẻ nhưng sai, giữ ẩn khi đúng. Hai test tái hiện fail vì mất nút trước sửa, qua sau sửa; bao phủ chọn lại đúng và thẻ trùng chữ/`orderedItems` legacy. Reset không gọi `onComplete`, không hoàn tim/cấp điểm. Chưa đóng F01: quy tắc bắt buộc retry, gợi ý song ngữ và nút tiếp tục của player vẫn chờ owner chốt.
+- **F04 finalize 404 giữa hai lần đọc:** đã có test xác định cho request khác commit trước lần đọc intent (cả completed và TTL xóa intent); hai ca đều fail 404 trước sửa. Đọc lại receipt có ownership trước kết luận mất intent; không khôi phục bản thu đã xóa.
+- **F05 đổi quà ảo trừ hai lần:** test dùng DB tạm, chặn hai caller ngay trước atomic write để cùng vượt precheck; trước sửa có hai giao dịch thành công. Thêm điều kiện chưa sở hữu trong atomic write, giữ lỗi 400 đã sở hữu và kiểm chứng rollback/retry khi ledger lỗi.
+- **F06 legacy grading:** bỏ fallback `isCorrect`; sort/matching thiếu hoặc rỗng không đạt; giữ canonical grading, word_card và lookup record_voice ở service. Không bảo đảm mọi dữ liệu legacy đã đủ đáp án; cần content owner xử lý qua CMS.
+- **F11 paid policy:** từ chối thiếu active/expiry hoặc ngày không hợp lệ, giữ free/replay. Không tự sửa subscription cũ.
+- **F09 nghe mẫu và F12 bản thu:** record_voice hiển thị hướng dẫn/nghe mẫu; kho phụ huynh có load-error/retry và playback-error. Phần error state admin của F12 đã tích hợp local như mục dưới; chưa nghiệm thu production.
+- **F08 và F12 admin — đã sửa, tích hợp local:** `AdminLearnersPage` giữ 0 điểm/0 sao, hiển thị đúng status và giới hạn phiên học, không đoán thành tích khi thiếu dữ liệu; lỗi tải chi tiết có retry, hồ sơ rỗng không còn spinner vô hạn. Không đổi server/API/nghiệp vụ. Chi tiết tại `docs/admin-learner-progress.md`; bằng chứng RED/GREEN và kiểm chứng bản kết hợp do chat đồng hành ghi ở `plans/reports/2026-10-18-parallel-customer-completion.md`. Chưa nghiệm thu route browser thật hoặc deploy.
+- **F01 phần retry và F13 vẫn mở:** bản sửa reset và các bản sửa admin không giải quyết mâu thuẫn chấm từng câu/chấm cuối bài hoặc hoàn thiện nội dung song ngữ. Không đóng các mục này khi chuẩn bị PR.
+- Các ca hồi quy đã chạy fail trước/pass sau; log tổng kiểm chứng ở `plans/journals/2026-10-18-customer-completion.md`. Không coi test mock audio là nghiệm thu giọng đọc thật/Cloudinary, không đóng yêu cầu AI trả phí hoặc lỗi production chỉ bằng bản sửa local.
+
 ## Header công khai tràn khi đổi VI/EN — 2026-10-18, sửa local
 
 - Đã tái hiện bằng font/CSS thật: ở 1536px, hàng tiếng Việt rộng 1457px vượt khung 1280px và đẩy nút đăng ký ra ngoài màn hình. Header fixed không nhất thiết làm tăng document.scrollWidth, nên test cũ chỉ đo trang bỏ sót lỗi.

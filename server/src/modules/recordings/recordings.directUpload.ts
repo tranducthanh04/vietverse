@@ -41,9 +41,12 @@ export class DirectRecordingsService {
       const existing = await findOwnedRecordingReceipt(parentId, intentId);
       if (existing) return existing;
       const intent = await RecordingUploadIntent.findOne({ _id: intentId, parentId }).lean();
-      if (!intent) throw intentNotFound();
-      // Completed without a visible receipt: the recording was removed with the child.
-      if (intent.status === 'completed') throw intentNotFound();
+      if (!intent || intent.status === 'completed') {
+        // Another finalize can commit (and TTL can remove the intent) between these reads.
+        const committed = await findOwnedRecordingReceipt(parentId, intentId);
+        if (committed) return committed;
+        throw intentNotFound();
+      }
       if (intent.expiresAt.getTime() <= Date.now()) throw intentExpired();
       const claimToken = await claimIntent(parentId, intentId);
       if (claimToken) return DirectRecordingsService.finalizeClaimed(parentId, intent, claimToken);

@@ -119,8 +119,9 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
     if (!audioUrl) return;
     playerRef.current?.pause();
     const player = new Audio(audioUrl); playerRef.current = player; setIsPlaying(true);
-    player.onended = player.onerror = () => { if (mounted.current) setIsPlaying(false); };
-    void player.play().catch(() => { if (mounted.current) setIsPlaying(false); });
+    const settled = () => { if (mounted.current && playerRef.current === player) setIsPlaying(false); };
+    player.onended = player.onerror = settled;
+    void player.play().catch(settled);
   },[audioUrl]);
   const uploadRecording = useCallback(async (params: RecordingContext) => {
     if (!audioBlob) throw new Error('Chưa có bản ghi âm để tải lên');

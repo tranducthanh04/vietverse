@@ -25,6 +25,7 @@ it('places each tapped word into a slot and completes correctly when the order m
   // All three placed in the right order -> graded as correct with the assembled answer.
   expect(onComplete).toHaveBeenCalledTimes(1);
   expect(onComplete).toHaveBeenCalledWith(true, ['Bé', 'thương', 'mẹ']);
+  expect(screen.queryByRole('button', { name: 'Xếp lại' })).not.toBeInTheDocument();
 });
 
 it('reports an incorrect answer when the words are placed out of order', () => {
@@ -45,4 +46,34 @@ it('lets the child clear a partial attempt and try again before it is graded', (
   // Every word is available again and nothing has been graded yet.
   for (const word of order) expect(screen.getByRole('button', { name: word })).toBeInTheDocument();
   expect(onComplete).not.toHaveBeenCalled();
+});
+
+it('lets the child reset a fully incorrect attempt and submit a corrected order', () => {
+  const onComplete = vi.fn();
+  render(<SortOrderActivity activity={{ id: 'sort', prompt: 'Xếp để đọc', correctAnswer: order }} onComplete={onComplete} />);
+  for (const word of ['mẹ', 'thương', 'Bé']) fireEvent.click(screen.getByRole('button', { name: word }));
+  expect(onComplete).toHaveBeenNthCalledWith(1, false, ['mẹ', 'thương', 'Bé']);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Xếp lại' }));
+  expect(onComplete).toHaveBeenCalledTimes(1);
+  for (const word of order) expect(screen.getByRole('button', { name: word })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Xếp lại' })).not.toBeInTheDocument();
+
+  for (const word of order) fireEvent.click(screen.getByRole('button', { name: word }));
+  expect(onComplete).toHaveBeenCalledTimes(2);
+  expect(onComplete).toHaveBeenNthCalledWith(2, true, ['Bé', 'thương', 'mẹ']);
+  expect(screen.queryByRole('button', { name: 'Xếp lại' })).not.toBeInTheDocument();
+});
+
+it('restores every repeated word when resetting an incorrect legacy orderedItems attempt', () => {
+  const onComplete = vi.fn();
+  render(<SortOrderActivity activity={{ id: 'sort', prompt: 'Xếp để đọc', orderedItems: ['Bé', 'yêu', 'Bé'] }} onComplete={onComplete} />);
+  fireEvent.click(screen.getByRole('button', { name: 'yêu' }));
+  fireEvent.click(screen.getAllByRole('button', { name: 'Bé' })[0]);
+  fireEvent.click(screen.getByRole('button', { name: 'Bé' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Xếp lại' }));
+  expect(screen.getAllByRole('button', { name: 'Bé' })).toHaveLength(2);
+  expect(screen.getByRole('button', { name: 'yêu' })).toBeInTheDocument();
+  expect(onComplete).toHaveBeenCalledTimes(1);
+  expect(onComplete).toHaveBeenCalledWith(false, ['yêu', 'Bé', 'Bé']);
 });

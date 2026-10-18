@@ -44,4 +44,10 @@ Technical repair, not a new business rule: CMS now remaps translated lyrics, voc
 
 ## Release acceptance still needed
 
+### Recording activity follow-up — 2026-10-18, local
+
+The recording activity now displays its existing subPrompt and offers model listening using audioUrl or labelled device speech (targetWord, falling back to subPrompt/prompt). The model control is unmounted/stopped while requesting microphone permission, recording or replaying the child's take; listening never completes the activity. Parent recordings distinguish load failures from an empty archive, offer fetch retry and report playback failure instead of silently resetting. Upload completion still requires an owned, version-bound receipt.
+
+The backend finalize flow now rechecks the owned receipt if the intent becomes completed or disappears between reads. Deterministic database tests reproduce the previous 404 race, including intent TTL removal. This is not a fix for missing provider configuration, approval of a paid voice service, or real-device acceptance. See the current implementation journal at `plans/journals/2026-10-18-customer-completion.md`.
+
 Listen to representative words, long passages and rhymes on target desktop/mobile browsers. Confirm accent, tone marks, pacing, missing voices, failed assets, stopping/navigation and text layout. Device TTS quality varies and may use the browser/OS speech service; do not promise offline or studio-quality narration. Obtain source audio for consistent results. No push/deploy occurs as part of this local feedback pass.

@@ -1,5 +1,14 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Đợt thực hiện audit khách hàng — 2026-10-18, local
+
+- Backend: legacy grading không tin cờ đúng của client; subscription yêu cầu active/ngày hết hạn đầy đủ; đổi quà ảo chặn trừ trùng trong atomic write; finalize đọc lại receipt để tránh 404 khi request khác vừa commit. Không đổi mức điểm, ngưỡng đỗ, API payload hoặc DB schema.
+- Bài `record_voice`: hiển thị `subPrompt`, thêm nút nghe mẫu với audio nguồn hoặc TTS có nhãn. Ẩn/dừng mẫu khi xin quyền micro, đang thu hoặc nghe lại bản của bé. Nghe mẫu không hoàn thành activity; hoàn thành vẫn cần upload receipt.
+- Kho bản thu phụ huynh: lỗi tải có thông báo/thử lại, không giả thành danh sách rỗng; lỗi phát có thông báo và cho bấm phát lại. Đổi bé dừng audio và xóa lỗi cũ.
+- Bài `sort_order`: nút "Xếp lại" còn hiện sau khi chọn đủ thẻ nhưng sai thứ tự; khôi phục đủ thẻ, kể cả từ lặp. Bấm reset không gọi `onComplete`; chọn đủ thẻ lần tiếp theo vẫn dùng cách chấm/tim hiện có. Không thay quy tắc cho tiếp tục sau câu sai; phần đó còn chờ quyết định player/song ngữ.
+- F08 và phần admin của F12 **đã tích hợp local**: chi tiết học viên giữ đúng 0 điểm/0 sao, phân biệt trạng thái tiến độ, giới hạn 0 là không giới hạn; dữ liệu thiếu không tự điền thành tích. Lỗi tải có thông báo/thử lại, hồ sơ không tồn tại có trạng thái riêng. Không đổi API/điểm/quyền; xem `docs/admin-learner-progress.md` và bằng chứng từ chat đồng hành tại `plans/reports/2026-10-18-parallel-customer-completion.md`. Chưa nghiệm thu browser thật/deploy.
+- **Chưa đóng:** F01 phần bắt buộc retry/gợi ý, F13 song ngữ, thiếu provider/audio được duyệt, lỗi cấu hình storage production, nghiệm thu iOS/Android thật, late-upload cleanup, curriculum và các mục khác của audit. Chuẩn bị PR cho phần đã hoàn thành không đồng nghĩa đóng toàn bộ kế hoạch. Chi tiết tiến độ trong `plans/journals/2026-10-18-customer-completion.md`.
+
 ## Header công khai VI/EN — 2026-10-18, local
 
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.

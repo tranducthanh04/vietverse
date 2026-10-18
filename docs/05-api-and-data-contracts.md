@@ -2,6 +2,16 @@
 
 Base URL: `/api/v1`.
 
+## Sửa integrity sau audit khách hàng — 2026-10-18, local
+
+Không thêm endpoint/payload/schema hoặc migration:
+
+- Lesson complete: activity legacy thiếu canonical answer không được tính đúng từ `isCorrect`; sort/matching có đáp án rỗng không tự đạt. Mức đỗ và thưởng giữ nguyên. Nội dung thiếu cần biên tập CMS, không sửa snapshot tự động.
+- GET/complete lesson và stage eligibility dùng paid policy strict: active true, monthly/yearly, expiresAt hợp lệ lớn hơn hiện tại. Gói thiếu field không được coi là còn hạn; quyền replay hoàn thành vẫn giữ nguyên.
+- `POST /points/shop/redeem`: filter atomic cho quà ảo thêm điều kiện `ownedItemIds` chưa chứa item; yêu cầu cạnh tranh thua trả 400 đã sở hữu, không có ledger/debit thứ hai. Các lỗi insufficient funds/refund lock giữ contract cũ.
+- `POST /recordings/finalize`: khi intent completed hoặc vừa bị TTL xóa, đọc lại receipt theo intent/ownership trước trả 404. Nếu receipt có thật, trả cùng 201/ID như retry bình thường; không suy diễn receipt từ trạng thái intent.
+- Client record_voice nhận `audioUrl` hiện có và hiển thị `subPrompt`; không đổi context upload, ownership, version hoặc điều kiện hoàn thành.
+
 ## Hoạt động bổ sung — contract triển khai local 2026-10-09
 
 Quyết định nghiệp vụ đã duyệt: thêm `multi_select`, `group_sort`, `fill_blanks`, `follow_steps`, không đổi bảy loại cũ hoặc công thức điểm. Canonical/model, draft/publish, grader, màn bé/session và CMS/editor/preview đã triển khai local; bằng chứng và giới hạn ở [QA](./08-customer-alignment.md). Chưa xác nhận deploy/import/publish production.

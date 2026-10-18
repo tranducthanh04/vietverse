@@ -10,6 +10,7 @@ import {
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
+import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
 import { useT } from '../../i18n/index.js';
 import { claimPlayback, releasePlayback } from '../../hooks/useNarration.js';
 
@@ -17,6 +18,7 @@ export const ParentRecordingsPage: React.FC = () => {
   const { activeChild } = useChildStore();
   const t = useT();
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playbackError, setPlaybackError] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Stable identity: registered as the single active player shared with narration.
@@ -32,8 +34,12 @@ export const ParentRecordingsPage: React.FC = () => {
     setPlayingId(null);
   }, []);
   useEffect(() => () => stopPlayback(), [stopPlayback]);
+  useEffect(() => {
+    stopPlayback();
+    setPlaybackError(false);
+  }, [activeChild?._id, stopPlayback]);
 
-  const { data: recordings = [], isLoading } = useQuery({
+  const { data: recordings = [], isLoading, error, refetch } = useQuery({
     queryKey: ['childRecordings', activeChild?._id],
     queryFn: async () => {
       const res = await api.get(`/recordings/children/${activeChild?._id}`);
@@ -48,6 +54,7 @@ export const ParentRecordingsPage: React.FC = () => {
       return;
     }
     stopPlayback();
+    setPlaybackError(false);
     claimPlayback(stopPlayback); // Stops narration or any other active reader.
     const audio = new Audio(url);
     audioRef.current = audio;
@@ -56,11 +63,16 @@ export const ParentRecordingsPage: React.FC = () => {
       if (audioRef.current === audio) stopPlayback();
     };
     audio.onended = ended;
-    audio.onerror = ended;
+    const failed = () => {
+      if (audioRef.current !== audio) return;
+      stopPlayback();
+      setPlaybackError(true);
+    };
+    audio.onerror = failed;
     try {
-      void audio.play().catch(ended);
+      void audio.play().catch(failed);
     } catch {
-      ended();
+      failed();
     }
   };
 
@@ -75,7 +87,10 @@ export const ParentRecordingsPage: React.FC = () => {
         </p>
       </div>
 
-      {isLoading ? (
+      {playbackError && <p role="alert" className="p-4 rounded-xl bg-red-50 text-red-700">{t('parentPortal.recordingPlaybackError')}</p>}
+      {error ? (
+        <QueryErrorState error={error} onRetry={() => { void refetch(); }} />
+      ) : isLoading ? (
         <div className="py-12 text-center" role="status" aria-live="polite">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" aria-hidden="true" />
           <p className="font-bold text-stone-600">{t('parentPortal.recordingsLoading')}</p>
