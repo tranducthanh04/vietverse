@@ -71,6 +71,7 @@ export const KidsLayout: React.FC = () => {
 
   const navItems = [
     { to: '/kham-pha', label: t('kidsLayout.navMap'), icon: <DomainIcon.questMap className="w-6 h-6" /> },
+    { to: '/gia', label: t('kidsLayout.navCourses'), icon: <DomainIcon.lessons className="w-6 h-6" /> },
     { to: '/kho-truyen', label: t('kidsLayout.navStories'), icon: <DomainIcon.stories className="w-6 h-6" /> },
     { to: '/van-hoa', label: t('kidsLayout.navCulture'), icon: <DomainIcon.culture className="w-6 h-6" /> },
     { to: '/diem-thuong', label: t('kidsLayout.navRewards'), icon: <DomainIcon.rewardsShop className="w-6 h-6" /> },
@@ -78,7 +79,7 @@ export const KidsLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col justify-between pb-24 md:pb-8 font-sans">
+    <div className="min-h-screen bg-cream flex flex-col justify-between pb-44 min-[400px]:pb-24 font-sans">
       <SkipLink />
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
@@ -187,22 +188,22 @@ export const KidsLayout: React.FC = () => {
       </main>
 
       {/* Bottom Kid Navigation Bar */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-cream-border py-2 px-4 z-40 shadow-lg">
-        <div className="max-w-md mx-auto flex items-center justify-around">
+      <nav className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-cream-border p-2 z-40 shadow-lg">
+        <div className="max-w-xl mx-auto grid grid-cols-3 min-[400px]:grid-cols-6 gap-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center p-2 rounded-2xl transition-[color,transform] motion-reduce:transition-none min-w-[56px] min-h-[48px] ${
+                `flex flex-col items-center justify-center px-1 py-2 rounded-2xl transition-colors motion-reduce:transition-none min-w-0 min-h-[56px] ${
                   isActive
-                    ? 'text-primary font-black scale-110'
+                    ? 'text-primary font-black'
                     : 'text-stone-500 font-bold hover:text-stone-800'
                 }`
               }
             >
               {item.icon}
-              <span className="text-[11px] font-display mt-0.5">{item.label}</span>
+              <span className="text-[11px] leading-4 font-display mt-0.5 text-center max-w-full break-words">{item.label}</span>
             </NavLink>
           ))}
         </div>
