@@ -14,6 +14,10 @@
 - Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.
 - Quyết định kỹ thuật, không đổi nghiệp vụ/API/quyền/điểm. Quy tắc trình bày, test trình duyệt và giới hạn tại [public-header-responsive.md](./public-header-responsive.md).
 
+## CTA đăng ký trên Landing — 2026-10-18, local
+
+Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã đăng nhập giữ đích cũ. Tạm chờ khi chưa xác định xong phiên; không đổi thẻ khám phá, copy, quyền hay API. Quyết định, giả định và bằng chứng tại [landing-register-cta.md](./landing-register-cta.md) (2026-10-18, sửa local, chờ review/merge).
+
 ## Chuyển bài tiếp theo sau khi hoàn thành — 2026-10-17, local
 
 - Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.
@@ -116,6 +120,7 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - [x] Screen time: `ChildSessionGuard` và `ScreenTimeGuard` dùng chung cho bản đồ, lesson trực tiếp và khám phá đã đăng nhập. Hết giờ thì unmount nội dung; gia hạn sau Parent Gate cập nhật timer đang chạy. Parent portal vẫn truy cập được khi hết giờ học.
 - [x] Responsive navigation & Touch targets: Menu hamburger di động cho PublicLayout, thanh tab chuyển phân hệ di động cho AdminLayout, chuẩn hóa toàn bộ nút header đạt tối thiểu 44px và giữ nhãn chữ Góc Phụ Huynh trên mọi kích cỡ màn hình (P1-FE.5, P2-FE.1).
 - [x] Loại bỏ demo credentials khỏi production: Gated bằng `import.meta.env.DEV` tại LoginPage (P1-FE.6).
+- [x] Lưu screen time có error/retry VI/EN và bỏ qua phản hồi cũ khi đổi bé/tài khoản hoặc rời trang (local 2026-10-18). Không đổi mức giới hạn/Parent Gate/API; xem [parent-settings-save.md](./parent-settings-save.md).
 
 ## Làm mới dữ liệu sau đồng bộ offline — 2026-10-18, local
 
