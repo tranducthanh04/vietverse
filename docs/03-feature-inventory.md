@@ -9,6 +9,11 @@
 - F08 và phần admin của F12 **đã tích hợp local**: chi tiết học viên giữ đúng 0 điểm/0 sao, phân biệt trạng thái tiến độ, giới hạn 0 là không giới hạn; dữ liệu thiếu không tự điền thành tích. Lỗi tải có thông báo/thử lại, hồ sơ không tồn tại có trạng thái riêng. Không đổi API/điểm/quyền; xem `docs/admin-learner-progress.md` và bằng chứng từ chat đồng hành tại `plans/reports/2026-10-18-parallel-customer-completion.md`. Chưa nghiệm thu browser thật/deploy.
 - **Chưa đóng:** F01 phần bắt buộc retry/gợi ý, F13 song ngữ, thiếu provider/audio được duyệt, lỗi cấu hình storage production, nghiệm thu iOS/Android thật, late-upload cleanup, curriculum và các mục khác của audit. Chuẩn bị PR cho phần đã hoàn thành không đồng nghĩa đóng toàn bộ kế hoạch. Chi tiết tiến độ trong `plans/journals/2026-10-18-customer-completion.md`.
 
+## Header công khai VI/EN — 2026-10-18, local
+
+- Sửa tràn nút khi chuyển tiếng Việt: nới khung desktop, điều chỉnh khoảng cách menu/slogan theo breakpoint; trên màn nhỏ, thao tác tài khoản vẫn truy cập qua menu. VI/EN luôn hiện với vùng bấm 44px.
+- Quyết định kỹ thuật, không đổi nghiệp vụ/API/quyền/điểm. Quy tắc trình bày, test trình duyệt và giới hạn tại [public-header-responsive.md](./public-header-responsive.md).
+
 ## Chuyển bài tiếp theo sau khi hoàn thành — 2026-10-17, local
 
 - Màn hình hoàn thành bài giờ có nút "Bài tiếp theo" khi bài vừa làm đã đạt và còn bài kế mở khóa; bấm vào mở thẳng bài kế (`/hoc/:id`) thay vì bắt quay lại bản đồ. Hoàn thành bài cũng làm mới danh mục `/stages` để bản đồ mở khóa bài kế ngay.

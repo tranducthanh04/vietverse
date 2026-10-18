@@ -12,6 +12,12 @@
 - **F01 phần retry và F13 vẫn mở:** bản sửa reset và các bản sửa admin không giải quyết mâu thuẫn chấm từng câu/chấm cuối bài hoặc hoàn thiện nội dung song ngữ. Không đóng các mục này khi chuẩn bị PR.
 - Các ca hồi quy đã chạy fail trước/pass sau; log tổng kiểm chứng ở `plans/journals/2026-10-18-customer-completion.md`. Không coi test mock audio là nghiệm thu giọng đọc thật/Cloudinary, không đóng yêu cầu AI trả phí hoặc lỗi production chỉ bằng bản sửa local.
 
+## Header công khai tràn khi đổi VI/EN — 2026-10-18, sửa local
+
+- Đã tái hiện bằng font/CSS thật: ở 1536px, hàng tiếng Việt rộng 1457px vượt khung 1280px và đẩy nút đăng ký ra ngoài màn hình. Header fixed không nhất thiết làm tăng document.scrollWidth, nên test cũ chỉ đo trang bỏ sót lỗi.
+- Sửa chiều rộng khung và breakpoint bố cục, không che overflow hay rút gọn bản dịch. Test kiểm tra từng control, khung header, chồng lấn, menu và chuyển ngôn ngữ; bao phủ khách/phụ huynh ở 320-1920px, gồm sát breakpoint.
+- Quyết định kỹ thuật, không đổi API/nghiệp vụ. Chưa deploy hoặc nghiệm thu thiết bị thật; chi tiết tại [public-header-responsive.md](./public-header-responsive.md).
+
 ## Follow-up feedback — 2026-10-18, sửa local
 
 - **P2 — nút VI/EN biến mất trên mobile [ĐÃ SỬA LOCAL]:** `KidsLayout` và `ParentLayout` dùng `hidden sm:inline-flex`, không có nút thay thế dưới 640px. Bỏ điều kiện ẩn, cho header/nhóm nút khu bé xuống hàng khi thiếu chỗ; giữ control thật, vùng chạm 44px, nhãn truy cập và lựa chọn lưu trong localStorage. Không thay Parent Gate, quyền hoặc chính sách ngôn ngữ.
