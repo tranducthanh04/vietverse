@@ -34,7 +34,12 @@ and PR #15; audio/F04 and CoverPlaceholder are explicitly excluded.
 ## Handoff
 
 Remote main advanced to a8014ee (PR #16 points link) during verification.
-Baseline integration and final checks are recorded in the PR handoff.
+Merged that baseline without conflicts. Post-merge checks passed: 342 client
+tests, client typecheck/build, lint (same 103 warnings/zero errors), and all 72
+browser navigations. Server and lockfile inputs are byte-identical to the
+497-test server run; no server changes were introduced. The final independent
+review/simplifier pass found no actionable issue or useful simplification and
+independently reran all 23 focused tests. Final screenshots use the merged base.
 No self-merge, production writes, deployment or audio work. Coordinator owns
 review/merge; CI must be checked at the exact head SHA before acceptance.
 
