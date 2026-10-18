@@ -396,6 +396,7 @@ export const en: Dictionary = {
     practiceAgain: 'Practice again',
   },
   kidsLayout: {
+    pointsLinkAria: 'Open Rewards: {points} ViVi Points',
     pickChildAria: 'Choose child profile',
     pickChildLabel: 'Choose child profile:',
     childFallback: 'Little one',
