@@ -147,6 +147,10 @@ Nguồn: mục 3 của `plans/reports/review-261013-0835-post-vercel-audit.md`. 
 - Đã bổ sung Helmet cho lớp DB guard của entrypoint Vercel; response `503 DATABASE_UNAVAILABLE` trước đây bỏ qua security headers nay vẫn có `X-Content-Type-Options: nosniff`, có regression test serverless.
 - Đã nâng `bcrypt` lên `6.0.0`, loại bỏ chuỗi native `node-pre-gyp/tar`; `npm audit --omit=dev` hiện không còn advisory production. React Router nâng lên `7.18.2` để nhận bản vá runtime, `concurrently` nâng patch lên `9.2.5` (`shell-quote` 1.12.0); audit toolchain dev còn Vitest/Tailwind advisory và chưa dùng `npm audit fix --force`.
 
+## F13 nguồn bản dịch Khám phá — 2026-10-18, local
+
+- F13 prerequisite (2026-10-18): đã lưu nguồn Khám phá mới theo checksum, không sửa snapshot 09/10 hoặc importer mặc định. Catalog chỉ đọc có 415 cặp Việt–ngoại ngữ rõ nguồn; 5 khối thiếu câu Việt và các gloss chưa gắn nhãn locale được giữ riêng, không tự dịch. Chỉ hoàn tất bước giữ nguồn/coverage, chưa đóng F13/player. Quyết định kỹ thuật và blockers B11/B15/B19/B20, retry-vs-final-grading ở [coverage 18/10](./customer-source/2026-10-18/coverage.md). Không thay audio, dữ liệu thật, điểm hoặc quyền.
+
 ## Feedback giá và narration — 2026-10-12, local
 
 - Giá tháng 250.000đ ở FE/BE; năm 990.000đ, tiết kiệm 67% so với 12 tháng mua riêng. Đơn cũ giữ amount đã lưu; QR/PayOS chưa bật, không tạo giao dịch thật.
