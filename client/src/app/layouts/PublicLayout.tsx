@@ -27,10 +27,10 @@ export const PublicLayout: React.FC = () => {
 
   useFocusMainOnRouteChange();
 
-  // Close mobile menu on route change
+  // Also close on hash-only and repeated navigation so the menu cannot cover the target.
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [location.pathname]);
+  }, [location.key]);
 
   const navLinks = [
     { to: '/', label: t('publicNav.home'), end: true },
@@ -212,6 +212,12 @@ export const PublicLayout: React.FC = () => {
                 </li>
                 <li className="hover:text-primary transition-colors">
                   <Link to="/kham-pha" className="inline-flex items-center min-h-[44px]">{t('footer.exploreMap')}</Link>
+                </li>
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/#lo-trinh-hoc-tap" className="inline-flex items-center min-h-[44px]">{t('footer.exploreRoadmap')}</Link>
+                </li>
+                <li className="hover:text-primary transition-colors">
+                  <Link to="/gia" className="inline-flex items-center min-h-[44px]">{t('footer.exploreCourses')}</Link>
                 </li>
                 <li className="hover:text-primary transition-colors">
                   <Link to="/kho-truyen" className="inline-flex items-center min-h-[44px]">{t('footer.exploreStories')}</Link>

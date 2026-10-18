@@ -7,6 +7,11 @@
   guards, permissions, points or audio. Decisions, presentation assumption and
   verification limits: [map-child-greeting.md](./map-child-greeting.md).
 
+## Điều hướng footer công khai — 2026-10-18, local
+
+- FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
+- **Giả định trình bày:** lộ trình là phần năm chặng hiện có trên Landing, không tạo trang/học liệu mới. Khách xem được không cần đăng nhập; không đổi quyền học, API hoặc điểm. Chi tiết và giới hạn tại [footer-navigation.md](./footer-navigation.md).
+
 ## Nhận diện thương hiệu header khu bé — 2026-10-18, local
 
 - KIDS-HEADER-BRANDING: bổ sung wordmark `app.name` và đầy đủ `publicNav.subtagline` VI/EN vào `KidsLayout`, dùng link semantic tới trang chủ `/` hiện có. Nguồn khách: tab cấu trúc, mục `HEADER CHUNG` → `Bên trái`; không tạo logo asset, copy hoặc route mới.

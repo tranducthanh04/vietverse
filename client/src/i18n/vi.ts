@@ -72,6 +72,8 @@ export const vi = {
     exploreTitle: 'Khám Phá Học Tập',
     exploreWhat: 'VietVerse là gì',
     exploreMap: 'Lộ trình 5 chặng thám hiểm',
+    exploreRoadmap: 'Lộ trình học tập',
+    exploreCourses: 'Khóa học',
     exploreStories: 'Kho truyện dân gian tương tác',
     exploreCulture: 'Khám phá văn hóa truyền thống',
     policyTitle: 'Quy Định & Quyền Riêng Tư',
