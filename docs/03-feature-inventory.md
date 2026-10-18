@@ -5,6 +5,11 @@
 - KIDS-PICKER-NAME-WRAP: tên hợp lệ 30 ký tự không có khoảng trắng tràn khỏi nút trong dropdown dù trang không cuộn ngang. Sửa ba dòng class của option: thêm khoảng cách tên/điểm, cho tên co và xuống dòng, giữ cột điểm không co; không đổi trigger hoặc handler chọn bé.
 - **Giả định trình bày:** hiển thị đầy đủ tên bằng wrap thay vì cắt hoặc đổi tên; giữ giới hạn API 30 ký tự, Escape trả focus về trigger, click ngoài giữ focus nơi vừa click, branding/navigation/điểm và Parent Gate hiện hữu. Browser RED đã tái hiện bằng CSS/font thật; năm component test là characterization, không phải unit RED. Kết quả full/browser sau sửa còn chờ; xem [kids-picker-name-wrap.md](./kids-picker-name-wrap.md).
 
+## Điều hướng footer công khai — 2026-10-18, local
+
+- FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
+- **Giả định trình bày:** lộ trình là phần năm chặng hiện có trên Landing, không tạo trang/học liệu mới. Khách xem được không cần đăng nhập; không đổi quyền học, API hoặc điểm. Chi tiết và giới hạn tại [footer-navigation.md](./footer-navigation.md).
+
 ## Nhận diện thương hiệu header khu bé — 2026-10-18, local
 
 - KIDS-HEADER-BRANDING: bổ sung wordmark `app.name` và đầy đủ `publicNav.subtagline` VI/EN vào `KidsLayout`, dùng link semantic tới trang chủ `/` hiện có. Nguồn khách: tab cấu trúc, mục `HEADER CHUNG` → `Bên trái`; không tạo logo asset, copy hoặc route mới.
