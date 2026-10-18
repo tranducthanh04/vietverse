@@ -106,5 +106,11 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - [x] Loại bỏ demo credentials khỏi production: Gated bằng `import.meta.env.DEV` tại LoginPage (P1-FE.6).
 - [x] Lưu screen time có error/retry VI/EN và bỏ qua phản hồi cũ khi đổi bé/tài khoản hoặc rời trang (local 2026-10-18). Không đổi mức giới hạn/Parent Gate/API; xem [parent-settings-save.md](./parent-settings-save.md).
 
+## Làm mới dữ liệu sau đồng bộ offline — 2026-10-18, local
+
+- Worker nhận QueryClient của ứng dụng, làm mới điểm/lịch sử, bản đồ và tiến độ phụ huynh cho các bé có lượt nộp được server xác nhận; tải lại danh sách hồ sơ một lần mỗi batch để cập nhật số dư trên header.
+- Không suy ra đỗ bài từ HTTP thành công, không cộng điểm local; lỗi tải lại không gửi lại bài đã xác nhận. Có guard tài khoản và giữ lựa chọn bé khi phản hồi chậm.
+- Chưa deploy/nghiệm thu mạng offline trên thiết bị thật. Quyết định, giả định và tiêu chí tại [offline-sync-refresh.md](./offline-sync-refresh.md).
+
 
 
