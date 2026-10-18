@@ -15,6 +15,8 @@
 
 ## Follow-up feedback — 2026-10-18, sửa local
 
+- **LANDING-REGISTER-CTA (audit 5.1):** ba nút CTA từng đưa khách qua route protected tới đăng nhập. Đã sửa local để tới đăng ký trực tiếp, giữ đích cũ khi đã đăng nhập và chờ bootstrap khi chưa rõ phiên. Không đổi auth store/guard. Test và giới hạn tại [landing-register-cta.md](./landing-register-cta.md); chưa xác nhận phát hành.
+
 - **P2 — nút VI/EN biến mất trên mobile [ĐÃ SỬA LOCAL]:** `KidsLayout` và `ParentLayout` dùng `hidden sm:inline-flex`, không có nút thay thế dưới 640px. Bỏ điều kiện ẩn, cho header/nhóm nút khu bé xuống hàng khi thiếu chỗ; giữ control thật, vùng chạm 44px, nhãn truy cập và lựa chọn lưu trong localStorage. Không thay Parent Gate, quyền hoặc chính sách ngôn ngữ.
 - **P2 — bản dịch lệch dòng sau biên tập CMS [ĐÃ SỬA LOCAL]:** thao tác trên `lyrics`, `vocab`, `funFacts` trước đây chỉ đổi mảng nguồn. `StringRows` nay gửi thêm ánh xạ vị trí dòng (tùy chọn, caller cũ không đổi); hai editor dùng chung `remapTranslationRows` để cập nhật nguồn và bản dịch trong một lần thay đổi form. Giữ đúng cả nguồn trùng chữ, bản dịch thiếu dòng và ngôn ngữ chỉ dịch tiêu đề. Dòng mới không tái dùng bản dịch thừa; xóa phần dịch cuối thì bỏ trường/ngôn ngữ rỗng.
 - **Quyết định kỹ thuật, không đổi nghiệp vụ/API:** không thêm field vào payload, không tự dịch/duyệt, không publish hay migrate DB. Sửa chữ/mốc giây giữ bản dịch cùng dòng để content owner rà ý nghĩa. Nháp/live đã lệch từ trước cần đối soát thủ công, không suy đoán để tự sửa dữ liệu.
