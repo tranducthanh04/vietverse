@@ -1,8 +1,34 @@
 # Long child names in the profile picker
 
-Date: 2026-10-19. Task: KIDS-PICKER-NAME-WRAP. Status: local integrated checks
-pass at `44d6d7ef634b9bf60dc842d92ef4d05bace65fda`, base
-`2c055f28da748ad18dccd0e5256ebd8bcc397a4b`. PR CI is pending; no merge/deploy claim.
+Date: 2026-10-19. Task: KIDS-PICKER-NAME-WRAP. Status: PR #29 Draft/HOLD due
+to external FE Vercel deployment quota. Latest local checks pass at
+`820b7329667a61a11267279d454475d3e4d6211f`/base
+`40282b502149ed2682870eb55960ea3474fa4d8a`. Remote and local heads differ as
+detailed below; local success is not remote CI or a merge/deploy claim.
+
+## Current remote and local gate
+
+- Remote PR #29 head: `cf135525beeeb827b01aa25e03125c4d158d7cf4`.
+  FE Vercel reported `Deployment rate limited - retry in 24 hours` at
+  2026-10-19 01:24:44 Asia/Saigon. BE preview succeeded; GitHub Actions has not
+  run for the conflicting PR at this update. This is not a CSS or F04 failure.
+- Coordinator authorized one local normal merge of pinned main
+  `40282b502149ed2682870eb55960ea3474fa4d8a` (after PR #25), producing local
+  `820b7329667a61a11267279d454475d3e4d6211f`. Additive docs conflicts preserve
+  both picker and cover entries; greeting remains intact and both incoming
+  features match base. Fresh local checks exit 0: focused 100 tests/9 files,
+  full frontend 460/46 files, root typecheck/build for server and client,
+  lint zero errors/100 warnings and diff-check. Final reviewer has no findings.
+- No push until the quota gate is verified/authorized. No automatic retry,
+  upgrade/payment, manual deployment or dummy commit to bypass the limit.
+  No new browser run was performed at this head. Reuse of the historical
+  picker32+4/header32+8/stage48+6/greeting30+6+30PATCH evidence is supported by
+  identical transitive fixture imports, config/fonts/locked dependencies and
+  harnesses, plus byte-identical generated global CSS (102484 bytes, SHA256
+  `2a7cc3dd8590df7e676911a1635cbe8df42c80d7476c7d9928cd6a7763c01306`).
+  Fixtures do not import CoverPlaceholder or the application router. Full proof
+  and unchanged artifact provenance are recorded in the journal; no artifact
+  head is rewritten to make the old run look fresh.
 
 ## Finding and source trace
 
@@ -49,6 +75,10 @@ pass at `44d6d7ef634b9bf60dc842d92ef4d05bace65fda`, base
   change. No new behavior is inferred from the unrelated branding/parent work.
 
 ## Verification boundaries
+
+The browser results and 70/430 suite counts in this section identify historical
+`44d6d7e`, not fresh runs at `820b7329`. Latest local outcomes and reuse evidence
+are in the current-gate section above; artifact provenance remains unchanged.
 
 - Five component tests passed before the fix: complete names/balances in VI/EN,
   selection of both names, Escape/outside dismissal and no incidental mutation.

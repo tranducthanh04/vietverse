@@ -5,10 +5,12 @@ Task: KIDS-PICKER-NAME-WRAP.
 Base: `6cf4ce52724867be75b733c741c5cb72a0b823b5`.
 Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 
-Current status: final local integrated checks pass at `44d6d7e`; PR CI remains
-pending. Earlier pending entries below describe historical checkpoints and are
-superseded for local verification by the final integration section. No merge or
-deployment is claimed.
+Current status: PR #29 remote `cf135525` is Draft/HOLD for external FE Vercel
+quota; local tested `820b7329` passes fresh 100/9 focused, 460/46 full frontend,
+typecheck/build/lint and diff-check. No new browser runs; proven-input reuse is
+documented in the latest section. Earlier pending entries are historical.
+Remote CI/preview gates are distinct and still held; no push, merge of this PR
+into main or production deployment is claimed.
 
 ## Context and finding
 
@@ -214,3 +216,72 @@ Normal picker mode requires SMOKE_THREE_PROFILES unset. Run its additional mode
 with SMOKE_THREE_PROFILES=1 using the exit-code-preserving PowerShell block in
 `docs/kids-picker-name-wrap.md`; capture Node LASTEXITCODE before cleanup and
 propagate nonzero, so cleanup cannot turn a failing assertion into apparent pass.
+
+## PR29 external quota HOLD and local main integration
+
+- Coordinator reports remote PR #29 at
+  `cf135525beeeb827b01aa25e03125c4d158d7cf4`, Draft/HOLD. At 2026-10-19
+  01:24:44 Asia/Saigon, FE Vercel reported
+  `Deployment rate limited - retry in 24 hours`. BE preview is SUCCESS; no
+  GitHub Actions run exists yet for the conflicting PR at this handoff.
+  This external deployment gate is not a reproduced CSS or F04 defect.
+- Only one local normal merge was authorized: pinned main
+  `40282b502149ed2682870eb55960ea3474fa4d8a` after PR #25 into the picker branch.
+  Local resulting HEAD is `820b7329667a61a11267279d454475d3e4d6211f`.
+  Additive docs/03 and docs/06 conflicts retained the complete picker and cover
+  sections; greeting was preserved. No cover implementation is edited here.
+- Historical checkpoint before the latest verification section: remote remained
+  the older head and this local integration had not been pushed; fresh
+  focused/full/typecheck/build/lint were running. Do not record planned
+  suite counts as passes or reuse historical `44d6d7e` counts for this head.
+  Browser reuse requires proven identical relevant inputs before it is claimed.
+- No push until quota gate verification/authorization; no retry-for-green,
+  paid upgrade, manual deployment or dummy commit to bypass the provider limit.
+  Documentation-only checkpoint/commit remains with the coordinator later.
+- This update modifies only the four owned picker docs/journal, not shared plan,
+  cover source, audio/F04 or production. No commit/push by this writer.
+
+## Latest local verification while PR29 remains HOLD
+
+- Tested local HEAD: `820b7329667a61a11267279d454475d3e4d6211f`;
+  base: `40282b502149ed2682870eb55960ea3474fa4d8a`. Tester reports fresh exit 0
+  for focused 100 tests/9 files, full frontend 460/46 files, root typecheck/build
+  (server and client), lint zero errors/100 warnings and diff-check. This is not
+  a final documentation-only commit hash. No local backend/F04 test run claimed.
+- Latest focused reproduction uses the earlier eight-file command plus
+  `src/test/coverPlaceholder.test.tsx` (client working directory), producing
+  the 100-test/nine-file scope. The earlier 70-test command remains historical;
+  full frontend/typecheck/build/lint commands are unchanged.
+- No browser scripts were rerun on this local head. Reuse is explicitly from
+  original artifacts: picker32 F7Dg01/three-profile4 UwZnux, stage48+6 bliQGX,
+  greeting30+6/30PATCH Y7mQWO at `44d6d7e`; header32 B1lBHC/boundary8 Ft7O3R
+  from the earlier `4c7f4d9` plus refined working CSS checkpoint. Exact paths
+  and original results remain in the prior entries; artifact heads are unchanged.
+- Tester generated global CSS with PostCSS/Tailwind/autoprefixer for old
+  `44d6d7e` and current inputs: both 102484 bytes, identical SHA256
+  `2a7cc3dd8590df7e676911a1635cbe8df42c80d7476c7d9928cd6a7763c01306`.
+  Post-build CSS remained exactly equal to pre-build in both comparisons:
+  FormFields SHA256
+  `7df7752aab425a7beefa76792d0f456efa135442981254ffcefc9ec22ec2e59f`,
+  index SHA256
+  `058f5d7ef137ac0475b2db8f8119df12e4270e3b2d3a4a1bd0fb791704d107a3`.
+- Main independently checked current dist CSS and KidsLayout hashes against the
+  recorded values and confirmed they match.
+- Relevant transitive imports have zero changes: picker27/header30/stage35/
+  greeting31 modules. Reviewer independently confirmed no CoverPlaceholder or
+  application-router import in these fixture mounts; components, stores,
+  dictionaries/assets, config, fonts, locked dependencies and four harnesses
+  are unchanged. This establishes reuse for those fixtures, not a fresh run or
+  acceptance of arbitrary live pages. The source/name/quota/onboarding/stress
+  limitations from earlier entries remain in force.
+- Final reviewer reports no actionable findings; cover and greeting remain
+  identical to base. Results and reuse proof are tester/reviewer handoff, not
+  additional executions by the documentation writer.
+- Remote PR29 still points to `cf135525beeeb827b01aa25e03125c4d158d7cf4`,
+  Draft/HOLD: FE preview 24-hour quota, BE preview success, no GHA run for the
+  conflicting PR at the reported state. Fresh local success does not satisfy
+  those remote gates. No push/merge until quota verification/authorization;
+  no retry, paid upgrade, manual deployment or dummy commit to evade it.
+- A final docs-only commit may follow under coordinator ownership. This writer
+  edits only the four owned documentation files; no commit/push/deploy or shared
+  plan, cover source, audio/F04 or production change.
