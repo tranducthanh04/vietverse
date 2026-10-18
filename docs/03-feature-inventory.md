@@ -74,6 +74,7 @@
 | Culture | Bài văn hóa/narration | Có | GET public, quiz auth; admin draft cover upload | CultureArticle, ExplorationLog, ContentDraft | Hoàn thiện (P2.5 safe search); cover upload production gate riêng |
 | Culture | Quiz +5 điểm | Có | `POST /culture/:id/quiz` | PointTransaction, Child | Hoàn thiện (P1.3 idempotency & compensation) |
 | Points | Lịch sử điểm | Bảng cộng/trừ, Hôm nay/Hôm qua, Xem thêm | `GET /points/children/:childId` | PointTransaction | Mở rộng 2026-10-09: phân trang cursor, `totalEarned` |
+| Points | Liên kết số dư header khu bé | Pill ViVi mở `/diem-thuong` bằng click hoặc Enter; nhãn VI/EN gồm đích và số dư bé hiện tại | Giữ nguyên route/guard/API | Child.viviPoints | NAV-POINTS-LINK, kiểm chứng local 2026-10-18; không đổi cách tính điểm |
 | Points | Điểm theo hoạt động | +1 mỗi hoạt động đạt lần đầu | Nộp bài | PointTransaction, Child | Mới 2026-10-09 (giả định chỉ khi đỗ) |
 | Points | Quy tắc điểm cấu hình | Trang admin `/admin/quy-tac-diem` | `GET/PATCH /admin/point-rules` | PointRule, AdminAuditLog | Mới 2026-10-09 |
 | Shop | Loại vật phẩm và dùng avatar/khung | Tab lọc 4 loại + quà hiện vật; Phòng báu vật có Dùng/Đang dùng; header khu bé | `/points/children/:childId/collection`, `/equip`, `POST /admin/inventory` | ShopItem, Child | Mới 2026-10-09 |
@@ -105,6 +106,8 @@ Bổ sung CMS 2026-10-09: bộ nhập có nguồn 20 giáo án/21 bài đọc/t�
 - Database hiện có được giữ nguyên lesson, tài khoản, tiến độ, ledger, redemption và stock; migration nội dung là công việc riêng.
 
 ## Tình trạng khoảng trống kỹ thuật & UX đã khắc phục
+
+- NAV-POINTS-LINK: **yêu cầu nghiệp vụ đã giao** là nhấn số dư ViVi mở Điểm thưởng. **Quyết định kỹ thuật** dùng `Link`, tên truy cập VI/EN có số dư, vùng chạm tối thiểu 44px và focus-visible toàn cục; giữ `formatPoints`, số 0, hồ sơ đang chọn và guard đăng nhập/phiên bé. **Giả định trình bày** giữ pill màu vàng/chỉ số trên mặt nút, đích được mô tả trong accessible name; không thêm chữ làm rộng header. Bằng chứng và giới hạn: [journal](../plans/journals/2026-10-18-kids-points-link.md).
 
 - [x] Lỗi mạng khi complete lesson/culture quiz: Đã phân biệt lỗi mạng lưu vào offline queue `vietverse_offline_completions` và hiển thị trạng thái chờ đồng bộ, lỗi server hiển thị nút Thử lại (P1.5).
 - [x] Admin route: Bảo vệ hoàn toàn bằng middleware RBAC server-side và Zod validation (P1.7).

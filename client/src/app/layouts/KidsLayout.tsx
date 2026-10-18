@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Link, Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   DomainIcon,
@@ -22,6 +22,7 @@ export const KidsLayout: React.FC = () => {
   const { activeChild, children, selectChild } = useChildStore();
   const t = useT();
   const { language } = useUiLanguage();
+  const points = formatPoints(activeChild?.viviPoints ?? 0, language);
 
   useFocusMainOnRouteChange();
 
@@ -141,13 +142,16 @@ export const KidsLayout: React.FC = () => {
           {/* Points Pill & Parent Gate Link */}
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 max-w-full ml-auto">
             <LanguageSwitcher />
-            <div className="flex items-center gap-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
+            <Link
+              to="/diem-thuong"
+              aria-label={t('kidsLayout.pointsLinkAria', { points })}
+              className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 transition-colors border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px] min-w-[44px]"
+            >
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
-              <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
-                {formatPoints(activeChild?.viviPoints || 0, language)}
+                {points}
               </span>
-            </div>
+            </Link>
 
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
