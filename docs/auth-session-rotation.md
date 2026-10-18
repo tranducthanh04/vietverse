@@ -1,6 +1,6 @@
 # Atomic refresh-token rotation and logout
 
-Date: 2026-10-18. Status: implemented and fully checked locally on base `8ac98f9`;
+Date: 2026-10-18. Status: locally verified, then integrated main `1422099`;
 PR CI and release gates remain pending. Scope is separate from PR #18 and audio/F04.
 
 ## Existing policy, unchanged
@@ -73,7 +73,10 @@ Six deterministic RED cases before the source fix, then GREEN; expanded 14 new
 plus 36 existing auth tests pass (50 total). Independent full validation on base
 `8ac98f9`: 511 server and 343 client tests pass; typecheck/build pass; lint has
 zero errors and 103 existing warnings. Two-pass source/test review found no
-actionable code findings. Details are recorded in
+actionable code findings. After integrating main `1422099` at `37c87b4`, fresh
+client tests pass 366/366 in 39 files and typecheck/build/lint pass (same warning
+count). Server, root package and lockfile are unchanged, so the 511-server-test
+evidence is retained, not represented as an additional run. Details are recorded in
 `plans/journals/2026-10-18-auth-refresh-rotation.md`. These checks do not prove
 production, cross-tab browser behavior or unknown-commit recovery. The existing
 recording-finalize race remains held/unresolved even though this local run passed.

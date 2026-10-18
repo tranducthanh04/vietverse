@@ -1,6 +1,6 @@
 # Auth refresh rotation: atomic session boundary
 
-Date: 2026-10-18. Base: `8ac98f9`.
+Date: 2026-10-18. Initial tested base: `8ac98f9`; integrated base: `1422099`.
 Branch: `codex/auth-refresh-rotation`, isolated worktree.
 
 ## Root causes and implementation
@@ -50,6 +50,12 @@ Branch: `codex/auth-refresh-rotation`, isolated worktree.
   unknown commit acknowledgement was incorporated into the plan and docs.
 - PR CI, coordinator merge and post-merge verification remain pending; local
   passing tests are not a production/browser acceptance claim.
+- Integration verification at `37c87b41ff370a7bfa13cf17652b7d20d7948c27` after
+  normal merge of main `1422099`: client 366/366 in 39 files, typecheck/build/lint
+  exit 0, same 103 warnings. Server/root package/lockfile diff from tested auth
+  commit `1449694` is empty, so 511 server results are reused, not rerun.
+  Incremental independent review confirms the nine-file auth-only delta and
+  preserved main Settings/CTA documentation, no actionable findings.
 - Owning docs: docs/03-feature-inventory.md, docs/04-system-architecture.md,
   docs/05-api-and-data-contracts.md, docs/06-review-findings.md and
   docs/auth-session-rotation.md. Baseline sections remain intact.
