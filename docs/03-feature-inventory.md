@@ -5,6 +5,13 @@
 - FOOTER-NAV: bổ sung `Khóa học` / `Courses` tới `/gia` và `Lộ trình học tập` / `Learning roadmap` tới `/#lo-trinh-hoc-tap`; giữ nguyên bốn liên kết cũ, liên hệ và trạng thái legal chưa khả dụng.
 - **Giả định trình bày:** lộ trình là phần năm chặng hiện có trên Landing, không tạo trang/học liệu mới. Khách xem được không cần đăng nhập; không đổi quyền học, API hoặc điểm. Chi tiết và giới hạn tại [footer-navigation.md](./footer-navigation.md).
 
+## Refresh/logout nguyên tử — 2026-10-18, local
+
+- Rotation, thu hồi family khi reuse và logout các phiên hiện có dùng transaction với cùng khóa ghi `User.__v` theo tài khoản. Tiêu thụ token cũ, tạo token mới và đọc profile trả về trong cùng transaction; lỗi trước commit không để token bị tiêu thụ một nửa.
+- Giữ chính sách reuse nghiêm ngặt, **không thêm grace period**: dùng lại token đã revoked thu hồi family, commit trước khi trả 401. Access JWT vẫn 15 phút; login/Google tạo family mới nằm ngoài khóa này, không hứa account logout chặn đăng nhập mới đồng thời.
+- Lỗi DB tạm thời trả 503 `DATABASE_UNAVAILABLE`, JWT sai/hết hạn trả 401, lỗi lập trình không bị đổi thành lỗi đăng nhập. Không set/clear refresh cookie khi thao tác thất bại. Mất ACK commit có thể trả 503 dù DB đã commit; không bảo đảm mọi 503 cho phép dùng lại token cũ.
+- Cần MongoDB replica set, không migration/schema mới. Chi tiết timeout, giới hạn và kiểm chứng tại [auth-session-rotation.md](./auth-session-rotation.md). Đây là scope auth riêng, không gồm audio/F04/PIN/email policy hoặc PR #18; chưa thu hồi phiên production/deploy.
+
 ## Điều hướng Khóa học khu bé — 2026-10-18, local
 
 - KIDS-COURSES-NAV: thêm liên kết `Khóa học` / `Courses` tới `/gia`, giữ đủ năm mục cũ, số dư ViVi, chọn bé và Parent Gate. Không đổi checkout, quyền học, điểm hoặc API.
@@ -69,7 +76,7 @@ Ba CTA chính trên Landing dẫn khách thẳng tới `/dang-ky`; người đã
 | Nhóm | Tính năng | UI | API/server | Dữ liệu chính | Trạng thái |
 | --- | --- | --- | --- | --- | --- |
 | Auth | Đăng ký/đăng nhập | Có | Có JWT + refresh cookie | User, Subscription | Hoàn thiện |
-| Auth | Refresh/logout | Có Axios interceptor | Có rotation theo family + revoke DB | RefreshToken | Hoàn thiện (P1.1) |
+| Auth | Refresh/logout | Có Axios interceptor | Rotation/revoke cùng transaction và khóa tài khoản | RefreshToken, User.__v | P1.1 có bản sửa concurrency local 2026-10-18; xem giới hạn ở đầu tài liệu |
 | Auth | Google SSO | Nút UI ở đăng nhập/đăng ký, liên kết email cũ bằng mật khẩu Vietverse | Google Identity Services ID token + nonce một lần, JWT/refresh hiện tại | User.googleId, GoogleAuthFlow | Đã triển khai code; cần `GOOGLE_CLIENT_ID`, Authorized JS origins và nghiệm thu browser Google thật |
 | Subscription | Xem gói và tạo checkout | Bảng giá gọi checkout; trang cài đặt hiển thị gói hiện tại/trạng thái quay về | Tạo payment link PayOS; xác minh chữ ký + amount trên webhook; cập nhật subscription trong transaction | PaymentOrder, Subscription | Đã triển khai code; cần cấu hình credentials/webhook URL và kiểm thử giao dịch PayOS trước khi mở production |
 | Phụ huynh | Thanh toán thử PayOS | `/phu-huynh/thanh-toan-thu`, nút tạo link cố định 10.000đ và theo dõi webhook | API yêu cầu đăng nhập parent/admin; ghi riêng `PaymentTestOrder`; webhook xác minh chữ ký và amount, không tác động subscription | PaymentTestOrder | Đã triển khai; khoản tiền là thật trên production, chỉ xác nhận end-to-end sau khi phụ huynh tự chuyển khoản |
