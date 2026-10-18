@@ -32,8 +32,12 @@ patch does not resolve the separate taxonomy disagreement in customer docs.
   unknown types had two poem labels. Existing search/filter/navigation passed.
 - GREEN: 7 story-label tests plus 10 presentation tests pass; independent
   reviewer reran the same 17 tests and found no actionable code/test issue.
-- Full `npm test`: 497 backend tests / 51 files and 311 client tests / 36 files
+- Initial full `npm test`: 497 backend tests / 51 files and 311 client tests / 36 files
   pass. Uses a temporary MongoDB replica set, not production data.
+- After merging main `c7519c0` (header and offline PRs), client 321/321 in
+  37 files and server/client typecheck/build pass again; diff-check is clean.
+  Story implementation/tests, browser fixture inputs, server code and lockfile
+  are unchanged by the merges, so their earlier evidence remains applicable.
 - `npm run typecheck`, `npm run build`: server and client pass.
 - `npm run lint`: 0 errors, 103 pre-existing warnings. The unrelated audio
   playback test retains its existing React act warning.

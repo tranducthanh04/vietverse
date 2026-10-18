@@ -24,5 +24,10 @@ local fixtures; four screenshots are included. Real device/production
 acceptance remains open. Submit a separate scoped PR for coordinator review;
 do not self-merge or change tasks already assigned to the other chats.
 
+Pre-PR baseline updates: merged main normally after header PR11, then after
+offline PR13 (`c7519c0`), without conflicts or changes to story code. Fresh
+client321/321, typecheck/build and diff-check pass on the combined branch.
+No rebase or force-push. Earlier backend/browser inputs remain unchanged.
+
 ak CLI unavailable: local journal fallback, no CLI index/validation claim.
 AgentWiki publish skipped.
