@@ -3,6 +3,7 @@ import "./content.css";
 import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
 import { useFieldErrorA11y } from "./fieldIssuesContext.js";
+import type { SourceRowOrder } from "./translationRows.js";
 
 export function TextField({
   label,
@@ -80,7 +81,7 @@ export function StringRows({
   label: string;
   name: string;
   value: string[];
-  onChange: (value: string[]) => void;
+  onChange: (value: string[], sourceOrder?: SourceRowOrder) => void;
 }) {
   return (
     <fieldset>
@@ -101,9 +102,9 @@ export function StringRows({
             aria-label={`Đưa ${label} ${i + 1} lên`}
             disabled={i === 0}
             onClick={() => {
-              const next = [...value];
-              [next[i - 1], next[i]] = [next[i], next[i - 1]];
-              onChange(next);
+              const order = value.map((_, index) => index);
+              [order[i - 1], order[i]] = [order[i], order[i - 1]];
+              onChange(order.map((index) => value[index]), order);
             }}
           >
             Lên
@@ -111,13 +112,16 @@ export function StringRows({
           <button
             type="button"
             aria-label={`Xóa ${label} ${i + 1}`}
-            onClick={() => onChange(value.filter((_, j) => i !== j))}
+            onClick={() => {
+              const order = value.map((_, index) => index).filter((index) => index !== i);
+              onChange(order.map((index) => value[index]), order);
+            }}
           >
             Xóa
           </button>
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...value, ""])}>
+      <button type="button" onClick={() => onChange([...value, ""], [...value.map((_, index) => index), null])}>
         Thêm {label.toLocaleLowerCase("vi")}
       </button>
     </fieldset>

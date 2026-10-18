@@ -7,6 +7,7 @@ import { FieldNotes } from "./EditorialNotes.js";
 import { useNoteDescription } from "./editorialNotesContext.js";
 import { useFieldErrorA11y } from "./fieldIssuesContext.js";
 import { TranslationEditor } from "./TranslationEditor.js";
+import { remapTranslationRows } from "./translationRows.js";
 import type { CoverUploadContext } from './CoverImageUpload.js';
 export function CultureEditor({
   value,
@@ -65,7 +66,10 @@ export function CultureEditor({
         label="Thông tin thú vị"
         name="funFacts"
         value={value.funFacts}
-        onChange={(funFacts) => patch({ funFacts })}
+        onChange={(funFacts, order) => patch({
+          funFacts,
+          translations: remapTranslationRows(value.translations, "funFacts", order),
+        })}
       />
       <StringRows
         label="Thẻ chủ đề"
