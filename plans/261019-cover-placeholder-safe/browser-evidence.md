@@ -135,3 +135,32 @@ Parent Gate, screen-time expiry, WCAG/axe or screen-reader acceptance. Full foot
 navigation and source22 runtime mapping are not re-certified here. F04/audio,
 F13 and other unrelated findings remain open. Owned browser/server closed
 normally at completion. No tracked historical images were modified.
+
+## Greeting28 integration: evidence reuse, not a new browser run
+
+Normal merge9721db492f016c842b57002fd6cf4d17126c595b incorporates reviewed main
+2c055f28da748ad18dccd0e5256ebd8bcc397a4b. The96 activations/24 reloads above
+were executed on9aeb349, not on9721db4; no new screenshots are claimed.
+
+The entire client delta from that browser-tested revision is QuestMapPage plus
+its new unit-test file. The cover fixture mounts only story/culture list/detail
+under AdaptiveContentLayout, selecting PublicLayout or ChildSessionGuard and
+KidsLayout. It does not import the app router or mount QuestMapPage. All mounted
+sources, imports, guards, stores, dictionaries, assets, index.html/index.css,
+Tailwind/PostCSS/Vite configuration and package/lock inputs remain byte-identical.
+The runner, synthetic data, request interception and viewport matrix are unchanged;
+runner SHA256 remains
+C058686E1DCEE0727C508CF188D1E986A7D80EEE2BBBE19973379863E8A2844E.
+The final expanded runner was tested as a working file on9aeb349 and committed
+in57b34; equality refers to that tested hash, not the older runner blob at9aeb349.
+
+Tailwind scans the new map source even though the fixture does not mount it.
+The added [overflow-wrap:anywhere] utility targets only that exact class, found
+only on the absent greeting paragraph. Other added classes already exist in the
+application. No global style or CSS configuration changed; generated CSS is not
+claimed byte-identical. Thus the new scoped rule does not change mounted cover,
+header or footer geometry, and the prior browser evidence is reused explicitly.
+Fresh integrated unit/full-frontend/typecheck/build/lint results are recorded in
+the journal. All synthetic-auth and production/physical-device limits above remain.
+Independent read-only review confirmed the mounted-input comparison and compiled
+the added utility to verify it emits only its exact class selector, no global rule.

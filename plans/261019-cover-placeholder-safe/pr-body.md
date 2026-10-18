@@ -11,31 +11,37 @@ COVER-FALLBACK-SAFE prevents constructor/toString/__proto__/hasOwnProperty
 strings from selecting Object.prototype values and crashing React. Production
 fix and30 regression tests are unchanged from prior head852349f.
 
-Normal merge `9aeb349145e77bc8524f89bce7c172a542536212` integrates main
-`05872f40b2f8c4c6b90ad18263dd8c8ee11d1d33` (source22/header23/footer24).
-Conflicts only in docs03/06; preserved both sides. No auth/source/header/footer
-implementation delta against pinned main, no greeting28 mixed in.
+Normal merge `9721db492f016c842b57002fd6cf4d17126c595b` integrates reviewed main
+`2c055f28da748ad18dccd0e5256ebd8bcc397a4b` (source22/header23/footer24/greeting28).
+This final integration conflicted only in docs03; both sections are preserved.
+No auth/source/header/footer/greeting implementation delta against pinned main.
 
 ## Evidence
 
 - Before:10 of30 tests failed (eight inherited-key cases, two real culture-route
   render errors); after:30 pass. Twelve known variants/styles stay intact.
-- [x] Fresh integrated focused tests:98/98 (cover, presentation, translation,
-  header and footer). Full frontend:446/446 across44 files, exit0.
+- [x] Fresh integrated focused tests:107/107 (cover, presentation, translation,
+  header, footer and greeting). Full frontend:455/455 across45 files, exit0.
 - [x] Root typecheck/build pass; lint0 errors/100 existing warnings.
 - [x] Backend/package/lock inputs match bf865 exactly. Main agent's same-session
   full root run there passed525 backend tests across53 files; reused unchanged
   inputs, not represented as a new cover-worktree backend execution.
 - Historical full runs and RED/GREEN evidence remain in the task journal.
   Existing audioPlayback act warning is retained; no F04 closure claim.
-- Fresh guest/public-footer and authenticated KidsLayout/header browser evidence
+- Guest/public-footer and authenticated KidsLayout/header browser evidence
   is recorded in `plans/261019-cover-placeholder-safe/browser-evidence.md`.
   Old tracked screenshots remain historical, not new-header evidence.
-- [x] Fresh expanded browser run:96 list-to-detail activations (48 each mode),
+- [x] Browser evidence from9aeb349, reused after greeting integration (not fresh):
+  96 list-to-detail activations (48 each mode),
   24 legacy reloads, VI/EN320/640/1366. Known/fallback/supplied covers, keyboard,
   six kids nav items, new branding/footer, current header/bottom clearance pass.
   Zero overflow, console/page errors or unexpected requests.30 synthetic
   exploration POSTs fulfilled in-memory, zero forwarded backend writes.
+- The complete client delta is QuestMapPage and its test; neither is mounted by
+  the cover fixture. Mounted sources/guards/stores/dictionaries/CSS/config,
+  runner and fixture inputs are unchanged. The added wrapping utility targets
+  only the absent greeting paragraph; generated CSS is not claimed identical.
+  Detailed evidence-equivalence reasoning is in the browser report.
 - [x] Independent source review and conditional simplifier found no actionable
   issue or worthwhile refactor; reviewer independently ran30 cover tests.
 - Browser harness first failed before any activation because a CSS home-link
@@ -78,11 +84,14 @@ className, decorative aria-hidden and supplied images remain unchanged.
 ## Deviations From Plan
 
 - Normal pinned-main integrations were required as auth20/source22/header23/
-  footer24 landed. Documentation conflicts preserve both sides; no history rewrite.
+  footer24/greeting28 landed. Documentation conflicts preserve both sides; no
+  history rewrite. Paused at57b34 until coordinator confirmed28 post-merge gates.
 - Expanded the browser fixture from guest-only to guest plus authenticated kids
   because the integrated header/footer changed browser inputs.
 - Reused525 backend results only after byte-level server/package/lock equivalence
   to bf865; did not rerun the unchanged backend or claim a fresh backend run.
+- Reused96 browser activations/24 reloads after proving the incoming greeting
+  does not change relevant mounted inputs; no new browser run/screenshots claimed.
 - Corrected the proven duplicate-home-link harness selector; retained its first
   zero-activation failure. No production or acceptance-assertion change.
 - ak CLI unavailable: local plan/journal fallback, no plan-index closure claim.

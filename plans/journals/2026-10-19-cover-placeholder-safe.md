@@ -167,3 +167,46 @@ production account/data/point mutation is performed or accepted by this test.
 - No further production edits since9aeb349; integration evidence/runner/docs
   additions only. Scope remains separate from greeting28 and picker wrapping.
   Await exact-head remote CI and coordinator review/merge; no self-merge.
+
+## Greeting28 pinned integration - 2026-10-19
+
+Packaged checkpoint57b34a85a53b3adc3b12b8bf96edfcbc22a12a61 passed remote
+CI39152549725 and both previews. Main advanced after packaging; work stopped
+until coordinator confirmed PR28 mainCI39152555013 and FE/BE deployment success
+on2c055f28da748ad18dccd0e5256ebd8bcc397a4b and authorized one pinned normal merge.
+
+Merge9721db492f016c842b57002fd6cf4d17126c595b preserves both histories. Only
+docs/03-feature-inventory.md conflicted; both cover and greeting sections remain.
+Cover production/tests/runner match57b34 exactly, and incoming greeting production,
+tests/docs/evidence match2c055 exactly. Scope against main remains16 cover-owned
+files. No shared-checkout change, audio work, force-push or self-merge.
+
+Fresh first-pass checks on9721db4, all exit0:
+
+- `npm exec --workspace client -- vitest run` with the explicit coverPlaceholder,
+  qaPresentation, supportTranslation, kidsHeaderBranding, footerNavigation and
+  mapChildGreeting test files, plus `--maxWorkers=1`:107/107 tests,6 files.
+- `npm exec --workspace client -- vitest run --maxWorkers=1`:455/455 tests,45 files.
+  Existing ParentRecordingsPage act warning remains; no skipped/weakened tests,
+  retry for green or audio/F04 resolution claim.
+- `npm run typecheck`, `npm run build`, `npm run lint`:passed. Lint0 errors and
+  100 inherited warnings. No production or config change needed.
+- Empty diff against bf865 for server, root/client package manifests and lock
+  confirms unchanged backend inputs. Reuse525 backend tests/53 files from the
+  earlier same-session root run; this is not a new backend execution.
+
+The96 browser activations/24 reloads on9aeb349 are reused, not freshly executed:
+only unmounted QuestMapPage and its test change in the complete client delta.
+Mounted sources/guards/stores/dictionaries/CSS/config/runners/fixture inputs are
+unchanged. The new arbitrary wrapping CSS rule only matches the absent map
+paragraph; no claim of byte-identical generated CSS. Full rationale and unchanged
+runner hash are in browser-evidence.md. Historical failures and screenshots remain.
+Independent review of9721db4 found no actionable issue, confirmed all incoming
+greeting files and scoped cover delta, and checked the new utility emits only its
+class selector. Runner comparison uses the tested working-file hash later committed
+in57b34, not the historical9aeb runner blob. No browser rerun is claimed.
+
+Only evidence/PR-body/journal documentation changes after these checks. Exact
+new-head CI and coordinator review/merge remain pending. No human policy or
+credential action is needed for this lookup fix. ak CLI remains unavailable;
+local journal fallback is not a plan-index closure or whole-backlog completion.
