@@ -151,7 +151,7 @@ export function useNarration({
         if (!started) {
           clearTimeout(speechWatchdog.current);
           speechWatchdog.current = setTimeout(() => {
-            if (!started && token === session.current) fail(t("audio.cantRead"));
+            if (!started && token === session.current) fail(t("audio.tryAgain"));
           }, SPEECH_START_TIMEOUT_MS);
         }
       };
