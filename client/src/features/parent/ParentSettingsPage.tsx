@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Check,
@@ -21,7 +21,36 @@ export const ParentSettingsPage: React.FC = () => {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const saveAttempt = useRef(0);
+  const saving = useRef(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [paymentMessage, setPaymentMessage] = useState('');
+
+  useEffect(() => {
+    const invalidateSave = () => {
+      saveAttempt.current += 1;
+      saving.current = false;
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      setSelectedLimit(useChildStore.getState().activeChild?.screenTimeLimit ?? 20);
+      setIsSaving(false);
+      setIsSaved(false);
+      setSaveError(false);
+    };
+    // Invalidate synchronously, including A -> B -> A switches within one render.
+    const unsubscribeChild = useChildStore.subscribe((state, previous) => {
+      if (state.activeChild?._id !== previous.activeChild?._id) invalidateSave();
+    });
+    const unsubscribeAuth = useAuthStore.subscribe((state, previous) => {
+      if (state.user?.id !== previous.user?.id) invalidateSave();
+    });
+    return () => {
+      saveAttempt.current += 1;
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      unsubscribeChild();
+      unsubscribeAuth();
+    };
+  }, []);
 
   useEffect(() => {
     const requestedOrderCode = searchParams.get('orderCode');
@@ -62,18 +91,37 @@ export const ParentSettingsPage: React.FC = () => {
   ];
 
   const handleSave = async () => {
-    if (!activeChild?._id) return;
+    if (!activeChild?._id || saving.current) return;
+    const childId = activeChild._id;
+    const ownerId = useAuthStore.getState().user?.id;
+    const attempt = ++saveAttempt.current;
+    const isCurrent = () => attempt === saveAttempt.current
+      && useChildStore.getState().activeChild?._id === childId
+      && useAuthStore.getState().user?.id === ownerId;
+    saving.current = true;
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    setIsSaved(false);
+    setSaveError(false);
     try {
       setIsSaving(true);
       await api.patch('/parent/screen-time', {
-        childId: activeChild._id,
+        childId,
         limitMinutes: selectedLimit,
       });
-      await selectChild(activeChild._id);
+      if (!isCurrent()) return;
+      await selectChild(childId);
+      if (!isCurrent()) return;
       setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
+      savedTimer.current = setTimeout(() => {
+        if (isCurrent()) setIsSaved(false);
+      }, 3000);
+    } catch {
+      if (isCurrent()) setSaveError(true);
     } finally {
-      setIsSaving(false);
+      if (isCurrent()) {
+        saving.current = false;
+        setIsSaving(false);
+      }
     }
   };
 
@@ -107,7 +155,12 @@ export const ParentSettingsPage: React.FC = () => {
               type="button"
               role="radio"
               aria-checked={selectedLimit === opt.value}
-              onClick={() => setSelectedLimit(opt.value)}
+              disabled={isSaving || !activeChild}
+              onClick={() => {
+                setSelectedLimit(opt.value);
+                setIsSaved(false);
+                setSaveError(false);
+              }}
               className={`w-full p-4 rounded-2xl border-2 text-left transition-[background-color,border-color,box-shadow] flex items-center justify-between ${
                 selectedLimit === opt.value
                   ? 'border-primary bg-primary-light/40 shadow-sm'
@@ -128,9 +181,15 @@ export const ParentSettingsPage: React.FC = () => {
           ))}
         </div>
 
+        {saveError && (
+          <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {t('parentPortal.saveSettingsError')}
+          </p>
+        )}
+
         <div className="flex items-center justify-between pt-4 border-t border-cream-border">
           {isSaved ? (
-            <span className="text-emerald-600 font-bold text-sm flex items-center space-x-1">
+            <span role="status" className="text-emerald-600 font-bold text-sm flex items-center space-x-1">
               <Check className="w-4 h-4" />
               <span>{t('parentPortal.saveSuccess')}</span>
             </span>
@@ -142,6 +201,7 @@ export const ParentSettingsPage: React.FC = () => {
             variant="primary"
             size="md"
             isLoading={isSaving}
+            disabled={!activeChild}
             onClick={handleSave}
           >
             {t('parentPortal.btnSaveSettings')}
