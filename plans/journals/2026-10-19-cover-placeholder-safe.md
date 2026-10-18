@@ -50,7 +50,7 @@ no dev branch. ak CLI is unavailable; local journal/plan fallback, no plan-index
 completion claimed. AgentWiki publish skipped. Dependencies use existing root
 and nested client node_modules through local junctions, no package/lock changes.
 
-## Final local verification
+## Initial local verification on 5baf917
 
 - Full root npm test, started 00:02:28 Asia/Saigon on 19 October: 497/497 backend
   tests in 51 files, 419/419 frontend tests in 42 files, exit0. Local temporary
@@ -74,6 +74,36 @@ and nested client node_modules through local junctions, no package/lock changes.
   no authenticated kids flow, production/physical devices, audio playback/provider,
   mutations or taxonomy acceptance. No runtime behavior beyond cover lookup changed.
 - node --check and git diff --check passed; pre-package fetch still main5baf917.
+
+## Integration of auth PR #20
+
+- The pre-publish fetch detected main moving to
+  `53a447a369fed0d69b455749a053b694a159a753`. Packaging stopped before staging;
+  the coordinator explicitly authorized a normal merge of that pinned commit.
+- Checkpoint `1cfe243f722570b299c3e388652f313a2a988329` contains the scoped
+  cover change. Merge `09777417db46c7fd87d7916d9230321c799062d0` incorporates
+  pinned main without rewriting history. Conflicts only at the top of docs/03
+  and docs/06 were resolved by retaining both cover and auth sections. Comparison
+  against pinned main retains exactly the 14 owned cover files, no auth delta.
+- Read the incoming auth contract, architecture/API notes and review findings:
+  transactions, strict no-grace reuse and unknown-commit limitations remain
+  unchanged by this cover task. No auth code was modified during integration.
+- Fresh focused suite: 71/71. Root typecheck/build pass; lint 0 errors and 100
+  existing warnings. One fresh full root npm test after the merge passed with
+  exit0: backend 511/511 in 52 files (started 00:10:30 Asia/Saigon on 19 October,
+  182.52s), frontend 419/419 in 42 files (started 00:13:35, 26.76s). No failures.
+  Existing audioPlayback React act warning remains. recordingFinalize23 passed,
+  but F04 remains unresolved; no rerun-for-green, skipped or weakened tests.
+- Main CI39148207625 completed successfully on exact pinned base
+  53a447a369fed0d69b455749a053b694a159a753 before publication.
+- Browser evidence is reused, not claimed rerun after the merge:
+  `git diff --exit-code 1cfe243 HEAD -- client package.json package-lock.json`
+  returns 0 with no diff. The incoming 5baf917-to-53a447a range also has no client
+  or package/lock changes. All browser inputs, including the cover fix, match
+  the final 48-activation/12-reload run. The fixture is guest/local HTTP data,
+  so it does not establish auth-rotation browser acceptance.
+- Server and package/lock files match pinned main exactly. No skipped tests,
+  retries-for-green, force push, amend, stash, self-merge or deploy.
 
 ## Remaining gates
 
