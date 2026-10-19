@@ -54,7 +54,8 @@ export class RecordingsController {
         return sendError(res, 'Liên kết nghe bản thu không hợp lệ hoặc đã hết hạn.', 403, 'RECORDING_TOKEN_INVALID');
       }
       const recording = await Recording.findById(id).select('storageKey mimeType').lean();
-      if (!recording) {
+      // Recordings made before audio moved to local disk have no storageKey: answer cleanly instead of a 500.
+      if (!recording?.storageKey) {
         return sendError(res, 'Không tìm thấy bản thu âm.', 404, 'NOT_FOUND');
       }
       const ext = recording.storageKey.split('.').pop() ?? '';

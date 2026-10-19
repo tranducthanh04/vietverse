@@ -3,7 +3,8 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { app } from '../app.js';
 import { env } from '../config/env.js';
-import { Child, Lesson, Stage } from '../models/index.js';
+import { Types } from 'mongoose';
+import { Child, Lesson, Recording, Stage } from '../models/index.js';
 import { AuthService } from '../modules/auth/auth.service.js';
 import { makeWav, makeTempStorageDir } from './audioFixtures.js';
 
@@ -57,5 +58,12 @@ describe('recording audio playback', () => {
     expect((await request(app).get(`/api/v1/recordings/${recordingId}/audio?t=${otherRecordingToken}`)).status).toBe(403);
     // A normal access token (no recording audience) is not accepted either.
     expect((await request(app).get(`/api/v1/recordings/${recordingId}/audio?t=${token}`)).status).toBe(403);
+  });
+
+  it('answers 404 instead of 500 for a legacy recording without a storageKey', async () => {
+    await Recording.collection.updateOne({ _id: new Types.ObjectId(recordingId) }, { $unset: { storageKey: '' }, $set: { url: 'https://res.cloudinary.com/x/video/upload/legacy.webm' } });
+    const res = await request(app).get(audioUrl);
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
   });
 });
