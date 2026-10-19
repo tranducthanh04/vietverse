@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Types } from 'mongoose';
 import { parseDraft, validatePublish } from '../modules/content/content.validation.js';
 import { toContentPayload } from '../modules/content/content.dto.js';
-import { CultureArticle, Story } from '../models/index.js';
+import { CultureArticle, Story, Lesson } from '../models/index.js';
 
 const quiz = { question: 'When?', options: ['Tet', 'Other'], correctAnswer: 0 };
 const culture = { title: 'Tết', category: 'tet', intro: 'Giới thiệu', funFacts: ['Sự thật'], quiz: [quiz] };
@@ -70,5 +70,19 @@ describe('Companion-language translations', () => {
     });
     const payload = toContentPayload('story', (await Story.findById(saved._id))!);
     expect(payload.translations?.en).toMatchObject({ title: 'Dragon-snake', lyrics: ['Dragon-snake climbs'], vocab: ['row'] });
+  });
+
+  it('persists an activity when-wrong hint and its support-language translations on the live lesson', async () => {
+    const saved = await Lesson.create({
+      stageId: new Types.ObjectId(), order: 1, title: 'Bài 1',
+      activities: [{
+        id: 'a1', type: 'listen_choose', prompt: 'Con vật nào bơi dưới ao?',
+        options: [{ id: 'cá', text: 'Cá' }, { id: 'gà', text: 'Gà' }], correctAnswer: 'cá',
+        wrongHint: 'cá', wrongHintTranslations: { en: { wrongHint: 'fish' }, ko: { wrongHint: '물고기' } },
+      }],
+    });
+    const payload = toContentPayload('lesson', (await Lesson.findById(saved._id))!);
+    expect(payload.activities[0].wrongHint).toBe('cá');
+    expect(payload.activities[0].wrongHintTranslations).toEqual({ en: { wrongHint: 'fish' }, ko: { wrongHint: '물고기' } });
   });
 });

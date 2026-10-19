@@ -42,7 +42,7 @@ beforeEach(() => {
   api.defaults.adapter = async (config) => ({ data: { data: await request(config) }, status: 200, statusText: 'OK', headers: {}, config });
 });
 
-afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; vi.restoreAllMocks(); vi.useRealTimers(); });
+afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; document.cookie = 'vv_has_session=; Max-Age=0; path=/'; vi.restoreAllMocks(); vi.useRealTimers(); });
 
 describe('multilingual onboarding', () => {
   it('keeps multiple selections, prevents empty selection, and sends all languages', async () => {
@@ -95,6 +95,7 @@ describe('parent gate recovery', () => {
 describe('child route hydration and session limits', () => {
   it('hydrates a direct parent reload before rendering progress', async () => {
     useAuthStore.setState({ user: null, isLoading: true });
+    document.cookie = 'vv_has_session=1; path=/'; // returning user carries the readable session hint
     sessionStorage.setItem('vietverse_parent_gate_token', 'gate');
     sessionStorage.setItem('vietverse_parent_gate_unlocked', String(Date.now() + 60000));
     request = (config) => {

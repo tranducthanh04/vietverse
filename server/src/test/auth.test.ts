@@ -134,6 +134,31 @@ describe('Auth API Endpoints', () => {
     expect(familyRevokedRes.body.success).toBe(false);
   });
 
+  it('issues a readable vv_has_session hint alongside the httpOnly refresh cookie and clears it on logout', async () => {
+    const registerRes = await request(app).post('/api/v1/auth/register').send({
+      email: 'hint@example.com',
+      password: 'Password123!',
+      displayName: 'Mẹ Hint',
+    });
+    const setCookies = registerRes.headers['set-cookie'] as unknown as string[];
+    const refreshCookie = setCookies.find((c) => c.startsWith('refreshToken='));
+    const hintCookie = setCookies.find((c) => c.startsWith('vv_has_session='));
+    expect(refreshCookie).toBeDefined();
+    expect(refreshCookie!.toLowerCase()).toContain('httponly');
+    // The hint must be readable by client JS, so it must NOT be httpOnly, and it carries no token.
+    expect(hintCookie).toBeDefined();
+    expect(hintCookie!.toLowerCase()).not.toContain('httponly');
+    expect(hintCookie).toContain('vv_has_session=1');
+
+    const cookieHeader = setCookies.map((c) => c.split(';')[0]).join('; ');
+    const logoutRes = await request(app).post('/api/v1/auth/logout').set('Cookie', cookieHeader);
+    const clearedCookies = logoutRes.headers['set-cookie'] as unknown as string[];
+    const clearedHint = clearedCookies.find((c) => c.startsWith('vv_has_session='));
+    expect(clearedHint).toBeDefined();
+    // Express clears a cookie by setting it empty with an expiry in the past.
+    expect(clearedHint).toMatch(/vv_has_session=;/);
+  });
+
   it('POST /api/v1/auth/logout revokes the refresh token', async () => {
     const loginRes = await request(app).post('/api/v1/auth/register').send({
       email: 'logout@example.com',

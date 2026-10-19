@@ -56,6 +56,15 @@ export const lessons = exercises.map((exercise, index) => {
   const sort: IActivity = { id: '', type: 'sort_order', prompt: `Xếp để đọc: ${exercise.order.join(' ')}.`, orderedItems: exercise.order, correctAnswer: exercise.order };
   const speak: IActivity = { id: '', type: 'record_voice', prompt: exercise.speak, targetWord: exercise.reading, audioUrl: '' };
   const review = choice('review', exercise.question, exercise.choices);
+  // Gợi ý mẫu khi trả lời sai, kèm bản dịch theo ngôn ngữ hỗ trợ — minh hoạ đúng đặc tả khách
+  // ("cá = fish / 물고기 / 魚 / poisson / 鱼" và "mèo = cat / 고양이 / 猫 / chat / 猫").
+  if (exercise.title === 'Con vật quanh em') {
+    const fish = { wrongHint: 'cá', wrongHintTranslations: { en: { wrongHint: 'fish' }, ja: { wrongHint: '魚' }, ko: { wrongHint: '물고기' }, zh: { wrongHint: '鱼' }, fr: { wrongHint: 'poisson' } } };
+    const cat = { wrongHint: 'mèo', wrongHintTranslations: { en: { wrongHint: 'cat' }, ja: { wrongHint: '猫' }, ko: { wrongHint: '고양이' }, zh: { wrongHint: '猫' }, fr: { wrongHint: 'chat' } } };
+    Object.assign(listen, fish);
+    Object.assign(review, fish);
+    Object.assign(fill, cat);
+  }
   // Bài 20 là nhiệm vụ tổng kết "Báu vật Nước Nam": tài liệu mô tả đúng năm thử thách
   // (nghe, âm, đọc, nói, vận dụng), nên bỏ thẻ từ mở đầu để còn đúng năm hoạt động.
   const activities = order === 20 ? [listen, fill, sort, speak, review] : [reading, listen, index % 2 ? match : fill, sort, speak, review];

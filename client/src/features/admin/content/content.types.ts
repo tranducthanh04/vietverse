@@ -22,6 +22,8 @@ export type Activity = {
   options?: { id: string; text?: string; imageUrl: string; audioUrl: string }[];
   correctAnswer?: string | string[] | number | boolean | Record<string, string>;
   hints?: string[];
+  wrongHint?: string;
+  wrongHintTranslations?: ActivityTranslations;
   targetWord?: string;
   targetPhonetic?: string;
   pairs?: { left: string; right: string }[];
@@ -56,6 +58,12 @@ export const supportLanguageLabels: Record<SupportLanguage, string> = {
   zh: "Tiếng Trung",
   fr: "Tiếng Pháp",
 };
+export type ActivityTranslation = {
+  wrongHint?: string;
+};
+export type ActivityTranslations = Partial<
+  Record<SupportLanguage, ActivityTranslation>
+>;
 export type CultureTranslation = {
   title?: string;
   intro?: string;

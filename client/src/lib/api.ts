@@ -21,6 +21,42 @@ export function getApiAccessToken(): string | null {
   return inMemoryToken;
 }
 
+/**
+ * Readable companion to the httpOnly `refreshToken`: the server sets it to `1` whenever it issues a
+ * refresh session and clears it on logout. The SPA checks it on a cold load so a guest who has never
+ * signed in skips `POST /auth/refresh` entirely — that request would 401 and the browser would log a
+ * red console error on every public page. The hint is never a credential; the server still validates
+ * the refresh token on each call.
+ */
+export const SESSION_HINT_COOKIE = 'vv_has_session';
+
+export function hasSessionHint(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.cookie.split(';').some((entry) => entry.trim().startsWith(`${SESSION_HINT_COOKIE}=`));
+}
+
+/**
+ * Sessions issued before the hint cookie existed carry only the httpOnly refresh token. Each browser
+ * therefore gets one bootstrap refresh without a hint: a returning user is restored (and receives the
+ * hint), a guest sees a single 401 and is quiet afterwards.
+ */
+const LEGACY_SESSION_PROBE_KEY = 'vv_session_probe_v1';
+
+export function hasProbedLegacySession(): boolean {
+  // Without storage, keep the pre-hint behaviour (always try) rather than signing a user out.
+  try { return localStorage.getItem(LEGACY_SESSION_PROBE_KEY) === '1'; } catch { return false; }
+}
+
+export function markLegacySessionProbed(): void {
+  try { localStorage.setItem(LEGACY_SESSION_PROBE_KEY, '1'); } catch { /* storage unavailable: probe again next load */ }
+}
+
+/** Best-effort local clear so a stale hint self-heals even when the logout request cannot reach the server. */
+export function clearSessionHint(): void {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${SESSION_HINT_COOKIE}=; Max-Age=0; path=/`;
+}
+
 // Cookie-writing auth requests must finish in order, even after their page unmounts.
 // Ignoring a stale JS callback alone cannot undo a response's Set-Cookie header.
 let authRequestTail: Promise<unknown> = Promise.resolve();

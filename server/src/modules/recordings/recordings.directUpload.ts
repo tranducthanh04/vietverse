@@ -42,8 +42,15 @@ export class DirectRecordingsService {
       if (existing) return existing;
       const intent = await RecordingUploadIntent.findOne({ _id: intentId, parentId }).lean();
       if (!intent) throw intentNotFound();
-      // Completed without a visible receipt: the recording was removed with the child.
-      if (intent.status === 'completed') throw intentNotFound();
+      // The receipt and the `completed` status commit together in one transaction.
+      // A concurrent finalize can observe `completed` here while the receipt read at
+      // the top of the loop raced that same commit and missed it. Re-read once before
+      // concluding the recording is gone; genuine absence means it was removed with the child.
+      if (intent.status === 'completed') {
+        const settled = await findOwnedRecordingReceipt(parentId, intentId);
+        if (settled) return settled;
+        throw intentNotFound();
+      }
       if (intent.expiresAt.getTime() <= Date.now()) throw intentExpired();
       const claimToken = await claimIntent(parentId, intentId);
       if (claimToken) return DirectRecordingsService.finalizeClaimed(parentId, intent, claimToken);
