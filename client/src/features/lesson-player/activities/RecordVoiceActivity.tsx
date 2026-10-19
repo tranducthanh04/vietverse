@@ -93,10 +93,12 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       if (!current()) return;
       // Timeouts end the spinner; the upload task keeps its intent, so "Thử gửi lại" asks finalize first.
       const timedOut = err?.code === 'ECONNABORTED' || err?.code === 'ETIMEDOUT' || err?.code === 'RECORDING_UPLOAD_TIMEOUT';
-      const offline = err?.code === 'ERR_NETWORK';
+      const networkFailed = err?.code === 'ERR_NETWORK' || err?.code === 'RECORDING_UPLOAD_NETWORK';
+      const providerRejected = err?.code === 'RECORDING_PROVIDER_REJECTED';
       const msg = err.response?.data?.error?.message
         || (timedOut ? t('lesson.uploadTimeout') : undefined)
-        || (offline ? t('lesson.uploadOffline') : undefined)
+        || (networkFailed ? t('lesson.uploadOffline') : undefined)
+        || (providerRejected ? t('lesson.uploadProviderRejected') : undefined)
         || err.message || t('lesson.uploadError');
       setUploadError(msg);
       setIntentExpired(err.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED');

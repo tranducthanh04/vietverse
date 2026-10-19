@@ -120,6 +120,31 @@ describe('CMS draft and publish boundaries', () => {
     expect(original.activities[0].prompt).toBe('Prompt');
   });
 
+  it('keeps the when-wrong hint and its support-language translations through draft, publish and read projection', () => {
+    const act = activity('listen_choose', {
+      options: [option('a'), option('b')], correctAnswer: 'a',
+      wrongHint: 'mèo',
+      wrongHintTranslations: { en: { wrongHint: 'cat' }, ko: { wrongHint: '고양이' } },
+    });
+    const draft = parseDraft('lesson', lesson([act]));
+    expect(draft.activities[0].wrongHint).toBe('mèo');
+    expect(draft.activities[0].wrongHintTranslations).toEqual({ en: { wrongHint: 'cat' }, ko: { wrongHint: '고양이' } });
+    expect(validatePublish('lesson', draft)).toEqual([]);
+    // The read projection whitelists the new fields so the child view receives the hint.
+    const dto = toContentPayload('lesson', lesson([act]));
+    expect(dto.activities[0].wrongHint).toBe('mèo');
+    expect(dto.activities[0].wrongHintTranslations).toEqual({ en: { wrongHint: 'cat' }, ko: { wrongHint: '고양이' } });
+  });
+
+  it('leaves the when-wrong hint absent for legacy activities and rejects an unsupported hint language', () => {
+    const legacy = parseDraft('lesson', lesson([activity('listen_choose', { options: [option('a'), option('b')], correctAnswer: 'a' })]));
+    expect(legacy.activities[0].wrongHint).toBeUndefined();
+    expect(legacy.activities[0].wrongHintTranslations).toBeUndefined();
+    expect(() => parseDraft('lesson', lesson([activity('review', {
+      options: [option('a'), option('b')], correctAnswer: 'a', wrongHintTranslations: { de: { wrongHint: 'Katze' } },
+    })]))).toThrow();
+  });
+
   it('normalizes uniquely matched legacy text answers only in a copied draft', () => {
     const original = parseDraft('lesson', lesson([activity('fill_blank', {
       options: [option('a', 'bút'), option('b', 'cặp')], correctAnswer: 'bút',

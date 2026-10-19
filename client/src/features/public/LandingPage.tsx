@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   Key,
@@ -21,10 +21,24 @@ import {
   DomainIcon,
 } from '../../components/ui/icons.js';
 import { useT } from '../../i18n/index.js';
+import { useAuthStore } from '../../store/authStore.js';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const roadmapRef = useRef<HTMLHeadingElement>(null);
   const t = useT();
+  const user = useAuthStore((state) => state.user);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  // Wait for session restoration before treating a returning visitor as a guest.
+  const isRestoringSession = isLoading && !user;
+
+  useEffect(() => {
+    if (location.hash !== '#lo-trinh-hoc-tap') return;
+    // Run after this page mounts, including delayed navigation and history entry.
+    roadmapRef.current?.focus({ preventScroll: true });
+    roadmapRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+  }, [location.hash, location.key]);
 
   return (
     <div className="flex flex-col w-full">
@@ -65,7 +79,9 @@ export const LandingPage: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 w-full sm:w-auto">
                 <button
-                  onClick={() => navigate('/bat-dau')}
+                  disabled={isRestoringSession}
+                  aria-busy={isRestoringSession}
+                  onClick={() => navigate(user ? '/bat-dau' : '/dang-ky')}
                   className="btn-3d-primary inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold text-base select-none shadow-lg cursor-pointer"
                 >
                   <Key className="w-5 h-5" />
@@ -314,7 +330,7 @@ export const LandingPage: React.FC = () => {
             <span className="text-xs uppercase font-bold tracking-wide">{t('landing.mapBadge')}</span>
           </div>
 
-          <h2 className="font-display text-3xl lg:text-4xl text-primary text-center font-extrabold mb-3">
+          <h2 id="lo-trinh-hoc-tap" ref={roadmapRef} tabIndex={-1} className="scroll-mt-24 font-display text-3xl lg:text-4xl text-primary text-center font-extrabold mb-3">
             {t('landing.mapTitle')}
           </h2>
 
@@ -390,7 +406,9 @@ export const LandingPage: React.FC = () => {
 
           {/* Nút Khám Phá Lớn Giữa Bản Đồ */}
           <button
-            onClick={() => navigate('/kham-pha')}
+            disabled={isRestoringSession}
+            aria-busy={isRestoringSession}
+            onClick={() => navigate(user ? '/kham-pha' : '/dang-ky')}
             className="btn-3d-accent inline-flex items-center gap-3 px-10 py-5 rounded-full font-display text-xl font-bold select-none cursor-pointer"
           >
             <LockOpen className="w-6 h-6" aria-hidden="true" />
@@ -422,7 +440,9 @@ export const LandingPage: React.FC = () => {
               </p>
 
               <button
-                onClick={() => navigate('/bat-dau')}
+                disabled={isRestoringSession}
+                aria-busy={isRestoringSession}
+                onClick={() => navigate(user ? '/bat-dau' : '/dang-ky')}
                 className="btn-3d-accent inline-flex items-center justify-center gap-3 px-10 py-5 rounded-full font-display text-xl font-bold select-none cursor-pointer mb-14"
               >
                 <Sparkles className="w-6 h-6" />

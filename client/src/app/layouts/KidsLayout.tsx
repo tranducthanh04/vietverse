@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Link, Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   DomainIcon,
@@ -22,6 +22,7 @@ export const KidsLayout: React.FC = () => {
   const { activeChild, children, selectChild } = useChildStore();
   const t = useT();
   const { language } = useUiLanguage();
+  const points = formatPoints(activeChild?.viviPoints ?? 0, language);
 
   useFocusMainOnRouteChange();
 
@@ -70,6 +71,7 @@ export const KidsLayout: React.FC = () => {
 
   const navItems = [
     { to: '/kham-pha', label: t('kidsLayout.navMap'), icon: <DomainIcon.questMap className="w-6 h-6" /> },
+    { to: '/gia', label: t('kidsLayout.navCourses'), icon: <DomainIcon.lessons className="w-6 h-6" /> },
     { to: '/kho-truyen', label: t('kidsLayout.navStories'), icon: <DomainIcon.stories className="w-6 h-6" /> },
     { to: '/van-hoa', label: t('kidsLayout.navCulture'), icon: <DomainIcon.culture className="w-6 h-6" /> },
     { to: '/diem-thuong', label: t('kidsLayout.navRewards'), icon: <DomainIcon.rewardsShop className="w-6 h-6" /> },
@@ -77,11 +79,24 @@ export const KidsLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col justify-between pb-24 md:pb-8 font-sans">
+    <div className="min-h-screen bg-cream flex flex-col justify-between pb-44 min-[400px]:pb-24 font-sans">
       <SkipLink />
       {/* Top Header */}
       <header className="px-3 sm:px-4 py-2.5 bg-white border-b-2 border-cream-border sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to="/"
+            aria-label={t('app.name')}
+            className="basis-full min-w-0 lg:basis-auto lg:max-w-[18rem] flex flex-col gap-1 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+          >
+            <span className="font-display text-2xl text-primary tracking-tight font-extrabold">
+              {t('app.name')}
+            </span>
+            <span className="text-xs leading-4 text-secondary font-semibold whitespace-normal break-words">
+              {t('publicNav.subtagline')}
+            </span>
+          </Link>
+
           {/* Active Child Profile & Switcher */}
           <div className="relative" ref={pickerRef}>
             <button
@@ -141,13 +156,16 @@ export const KidsLayout: React.FC = () => {
           {/* Points Pill & Parent Gate Link */}
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 max-w-full ml-auto">
             <LanguageSwitcher />
-            <div className="flex items-center gap-1.5 bg-amber-100 border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px]">
+            <Link
+              to="/diem-thuong"
+              aria-label={t('kidsLayout.pointsLinkAria', { points })}
+              className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 transition-colors border-2 border-accent/60 px-3 py-1.5 rounded-full shadow-sm min-h-[44px] min-w-[44px]"
+            >
               <DomainIcon.points className="w-5 h-5 text-accent-dark shrink-0" />
-              <span className="sr-only">ViVi Points:</span>
               <span className="font-black font-display text-stone-900 text-sm sm:text-base">
-                {formatPoints(activeChild?.viviPoints || 0, language)}
+                {points}
               </span>
-            </div>
+            </Link>
 
             {/* Parent Corner Lock Button - Keeping label clear on all screen sizes */}
             <button
@@ -183,22 +201,22 @@ export const KidsLayout: React.FC = () => {
       </main>
 
       {/* Bottom Kid Navigation Bar */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-cream-border py-2 px-4 z-40 shadow-lg">
-        <div className="max-w-md mx-auto flex items-center justify-around">
+      <nav className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-cream-border p-2 z-40 shadow-lg">
+        <div className="max-w-xl mx-auto grid grid-cols-3 min-[400px]:grid-cols-6 gap-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center p-2 rounded-2xl transition-[color,transform] motion-reduce:transition-none min-w-[56px] min-h-[48px] ${
+                `flex flex-col items-center justify-center px-1 py-2 rounded-2xl transition-colors motion-reduce:transition-none min-w-0 min-h-[56px] ${
                   isActive
-                    ? 'text-primary font-black scale-110'
+                    ? 'text-primary font-black'
                     : 'text-stone-500 font-bold hover:text-stone-800'
                 }`
               }
             >
               {item.icon}
-              <span className="text-[11px] font-display mt-0.5">{item.label}</span>
+              <span className="text-[11px] leading-4 font-display mt-0.5 text-center max-w-full break-words">{item.label}</span>
             </NavLink>
           ))}
         </div>

@@ -76,7 +76,7 @@ it('keeps instructions readable after media failure without autoplay', () => {
   expect(container.querySelectorAll('audio')).toHaveLength(1);
   expect(screen.getByRole('button', { name: 'Nghe hướng dẫn' })).toBeEnabled();
   fireEvent.error(audio);
-  expect(screen.getByRole('status')).toHaveTextContent('Chưa phát được audio');
+  expect(screen.getByRole('status')).toHaveTextContent(/Chưa mở được âm thanh/);
   expect(play).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: 'Nghe hướng dẫn' })).toBeDisabled();
   expect(screen.getByRole('checkbox', { name: 'Bước 1: Đứng lên' })).toBeInTheDocument();
