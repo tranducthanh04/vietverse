@@ -1,12 +1,53 @@
 # Long child names in the profile picker
 
-Date: 2026-10-19. Task: KIDS-PICKER-NAME-WRAP. Status: PR #29 Draft/HOLD due
-to external FE Vercel deployment quota. Latest local checks pass at
-`820b7329667a61a11267279d454475d3e4d6211f`/base
-`40282b502149ed2682870eb55960ea3474fa4d8a`. Remote and local heads differ as
-detailed below; local success is not remote CI or a merge/deploy claim.
+Date: 2026-10-19. Task: RESUME-PICKER-PR29. Status: local integration verified;
+existing PR #29 remains Draft pending exact-head CI/previews and coordinator
+review. This supersedes the historical local-only/quota restriction below,
+not the separate audio/F04 exclusion. No author merge or deployment is allowed.
 
-## Current remote and local gate
+## Resumed integration and fresh verification
+
+- Accepted local `1d3485ed3cd476c4ef0f83907e228953913f0d9e` was opened in a
+  new managed worktree `resume-picker-pr29/codeDuAN` on
+  `codex/resume-picker-pr29`; the missing original checkout was not restored.
+  Normal merge `ecbad05` incorporates main
+  `4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66`, preserving both additive docs
+  sections and all current-main behavior. The shared checkout was not changed.
+- Tested implementation/harness HEAD:
+  `4b0071d1e5d3c92822fddbcff589ed3956766c53`. Only three product CSS class
+  lines differ from main. Subsequent evidence edits are documentation-only.
+- Fresh focused checks: 94/94 in ten files, including picker, child journeys,
+  header/points/courses, parent-stage links, greeting and auth lifecycle/Google
+  adapters. Full frontend: 482/482 in 48 files. Root typecheck/build pass for
+  client and server; lint passes with zero errors and 99 existing warnings.
+  The first lint attempt failed before checking source because client-local
+  ESLint packages were not linked; the raw failure is retained. Restoring only
+  ignored dependency junctions selected installed ESLint9.39.5. No install,
+  package/lock/config/env edit or test weakening occurred.
+- Fresh real-CSS/font Chrome runs: 32/32 normal geometry/interaction cases and
+  4/4 three-profile cases. At320x844/900 the menu bottom is483, last option
+  bottom416 and Add Child bottom473, above the fixed nav at706/762. Mouse and
+  Tab/Enter select the intended profile and reach the existing Add destination;
+  targets remain at least44px. Zero page/console errors or unexpected requests.
+- Artifacts: `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-FdqG67`
+  (32 cases), `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-RPJlb2`
+  (four cases). Both contain geometry, screenshots, an immutable harness copy
+  and a run receipt with head/source hashes, network errors and cleanup.
+  Commands/logs and exact limitations are in the owning journal.
+- The fixture uses real layout/guards/store and intercepted synthetic children
+  requests, not a real backend. The authenticated user is injected; App's
+  bootstrap/refresh is not mounted. PR30's API/auth changes were inspected and
+  focused auth tests rerun, not assumed compatible from old screenshots.
+  Add Child uses a destination fixture, not the real onboarding form. Only
+  loopback and GET requests for public Google Fonts are allowed; no provider,
+  production account/data, payment, publication or audio actions occur.
+- Browser/Vite services are stopped. The existing full-suite audio warning is
+  preserved; passing those unchanged tests is not F04 acceptance. Parent mobile
+  identity/competency findings, R01 and all other consolidated findings remain
+  outside this picker-only repair. Independent review and merge belong to the
+  coordinator; exact remote head/checks must be verified after the ordinary push.
+
+## Historical remote and local gate (before resume)
 
 - Remote PR #29 head: `cf135525beeeb827b01aa25e03125c4d158d7cf4`.
   FE Vercel reported `Deployment rate limited - retry in 24 hours` at

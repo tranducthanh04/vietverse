@@ -5,12 +5,11 @@ Task: KIDS-PICKER-NAME-WRAP.
 Base: `6cf4ce52724867be75b733c741c5cb72a0b823b5`.
 Worktree: `C:/Users/Asus/.codex/worktrees/kids-picker-name-wrap/codeDuAN`.
 
-Current status: PR #29 remote `cf135525` is Draft/HOLD for external FE Vercel
-quota; local tested `820b7329` passes fresh 100/9 focused, 460/46 full frontend,
-typecheck/build/lint and diff-check. No new browser runs; proven-input reuse is
-documented in the latest section. Earlier pending entries are historical.
-Remote CI/preview gates are distinct and still held; no push, merge of this PR
-into main or production deployment is claimed.
+Current status: RESUME-PICKER-PR29 local integration is verified at `4b0071d`,
+base `4a6b0a1`. Fresh94 focused/482 full frontend and32+4 browser cases pass;
+root types/build and lint pass. The final section supersedes the historical
+local-only/quota restriction. PR29 remains Draft for exact-head CI/previews and
+coordinator review. No author merge or manual deployment is authorized.
 
 ## Context and finding
 
@@ -285,3 +284,110 @@ propagate nonzero, so cleanup cannot turn a failing assertion into apparent pass
 - A final docs-only commit may follow under coordinator ownership. This writer
   edits only the four owned documentation files; no commit/push/deploy or shared
   plan, cover source, audio/F04 or production change.
+
+## RESUME-PICKER-PR29 - fresh integration, 2026-10-19
+
+### Scope, provenance and safety
+
+- Resumed after the user's new request to finish delivery, as narrowed by the
+  coordinator to this one picker task. Sources: audit5.2, plan6, consolidated
+  RESPONSIVE, the accepted picker docs/history. Read AGENTS/docs README,
+  relevant child/auth/architecture/API rules, all review findings, shared plan,
+  full customer audit and consolidated QA. These remain separate from business
+  decisions about R01, points, language, grading, PIN/email or F04.
+- Shared `D:/ki9/codeDuAN` was inspected read-only: HEAD35c51ca,402 deleted,
+  eight modified and19 untracked entries. No restore/reset/stash/stage/switch/
+  pull/overwrite there. Old picker location was not recreated or restored.
+- New managed worktree:
+  `C:/Users/Asus/.codex/worktrees/resume-picker-pr29/codeDuAN`, new branch
+  `codex/resume-picker-pr29`. Clean start at accepted
+  `1d3485ed3cd476c4ef0f83907e228953913f0d9e`; remote PR29 head
+  `cf135525beeeb827b01aa25e03125c4d158d7cf4` verified ancestor.
+- Normal merge `ecbad05` includes main
+  `4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66`, no conflicts. Both additive
+  docs03/06 entries retained; no unrelated documentation cleanup. Current-main
+  branding/greeting/navigation/auth/audio remain intact. Diff from main has
+  exactly the three accepted CSS class-line changes as its only product edit.
+- Harness-only commit `4b0071d1e5d3c92822fddbcff589ed3956766c53` pins source
+  hashes, keeps an immutable source copy/receipt, forces the synthetic API URL,
+  uses envFile:false/own cache/strict loopback listener, and denies requests
+  except intercepted children GET/select PATCH, local GET and public font GET.
+  Vite resolves requested port0 to5173 on this version; receipts record the
+  actual exclusively owned port, and it is no longer listening after cleanup.
+- PR30 changes to api/authStore were read in full. This fixture injects a
+  synthetic user and mounts guards/KidsLayout, not App.fetchMe; children and
+  selection remain real store transitions against intercepted responses.
+  It does not prove login, cookie/bootstrap, backend ownership, or onboarding.
+  Focused authGateLifecycle/googleSignIn regression covers adapter behavior.
+- Reused installed locked dependencies through ignored junctions, with a new
+  client cache. Both lockfiles hash
+  `9a1c45fa0446f731bc593a1a9d644141e0659be33e6bb8481b6ad1509a33643f`.
+  No dependencies installed/updated; no package, lock, env or config file edited.
+  No real dotenv files exist in this new checkout (examples only).
+
+### Fresh commands and results
+
+All commands ran sequentially on the tested4b0071d implementation, Node22.15.0,
+Vitest3.2.7. Later documentation-only changes do not modify the tested inputs.
+Raw log directory:
+`C:/Users/Asus/AppData/Local/Temp/vietverse-resume-picker-pr29-20261019-1010`.
+
+| Check | Result | Raw output |
+| --- | --- | --- |
+| Focused Vitest, one worker/no file parallelism |94/94;10 files;exit0|focused.log/json|
+| Full frontend, one worker/no file parallelism |482/482;48 files;exit0|full-client.log/json|
+| npm run typecheck (root) |server+client exit0|typecheck.log|
+| npm run build (root) |server+client exit0|build.log|
+| First npm run lint |exit2 before source lint: missing @eslint/js|lint.log|
+| npm run lint after restoring client-local package links |exit0;0 errors/99 warnings|lint-after-client-links.log|
+| Normal picker browser |32/32;exit0|browser-normal.log|
+| Three-profile browser |4/4;exit0|browser-three.log|
+| node --check browser-smoke.mjs; git diff --check |exit0|tool execution receipt|
+
+Focused command, from client/:
+`node ../node_modules/vitest/vitest.mjs run --maxWorkers=1 --no-file-parallelism src/test/kidsPickerNameWrap.test.tsx src/test/childStore.test.ts src/test/childJourneys.test.tsx src/test/kidsHeaderBranding.test.tsx src/test/kidsPointsNavigation.test.tsx src/test/kidsCoursesNavigation.test.tsx src/test/parentStageLinks.test.tsx src/test/mapChildGreeting.test.tsx src/test/authGateLifecycle.test.ts src/test/googleSignIn.test.tsx`.
+Both Vitest commands also used default+JSON reporters and an absolute outputFile
+in the raw directory. Full run uses the same flags without file selectors.
+Root types/build/lint are unchanged npm scripts. Browser commands are the two
+modes documented above; PowerShell propagates LASTEXITCODE, including failure.
+
+Lint diagnosis: root-only dependency junction exposed ESLint10.11.0 while
+client config imports client-local @eslint/js. The installed client tree has
+ESLint9.39.5. Linked its existing packages/.bin into the new ignored client
+node_modules, leaving both caches private. The corrected lint ran once; no
+source assertion was weakened. The initial failure is retained, not erased.
+The full-suite audioPlayback act warning remains unchanged and nonfatal.
+No new targeted audio/F04 or local backend test suite was run.
+
+### Fresh browser acceptance and review
+
+- Normal:10:15:25-10:15:56 Asia/Saigon,32 cases, VI/EN x320/390/640/1366 x
+  zero/1234567890 points xspaced/unbroken30. Artifact directory
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-FdqG67`.
+- Three profiles:10:16:08-10:16:15,4 cases, VI/EN x320x844/900. Directory
+  `C:/Users/Asus/AppData/Local/Temp/vietverse-picker-name-RPJlb2`.
+- All name/points ranges stay in options without clipping/overlap, options
+  are at least44px; Escape/outside focus and trigger ellipsis stay unchanged.
+ 32-case run performs128 synthetic select PATCHes. Four-case run performs8
+  PATCHes and validates both mouse/Tab-Enter navigation to `/bat-dau`.
+- Three-profile menu bottom483, last option336..416, Add Child429..473,
+  fixed nav top706/762. Both last and Add hit-tests are true after scrolling;
+  actual mouse/keyboard interactions pass. This is a destination fixture,
+  not actual account/quota enforcement or the onboarding form.
+- Zero page exceptions, zero console errors and zero unexpected requests in
+  both receipts. Real Be Vietnam Pro font loaded, no fallback-font acceptance.
+  Browser/Vite cleanup true; fresh port checks found no owned listener.
+- Viewed VI320 large/unbroken, VI320x844 three-profile and EN1366 spaced
+  screenshots. No additional product defect found in this bounded review.
+  Product hash remains
+  `54f0da74a5d30e845e55986a68676911fd6f55772972633b7a6edbf15332f041`.
+- Existing historical RED/results and all other QA folders remain unchanged.
+  No subagents used in this resumed task. This is author review, not a new
+  independent approval; coordinator owns independent review/merge/postchecks.
+  No whole-web, production, real-device, WCAG or audio/F04 acceptance claim.
+- Only an ordinary fast-forward push to existing PR29 is permitted after
+  fresh remote-ancestor verification; no duplicate PR, force push, direct-main,
+  self/auto-merge, manual deploy or quota workaround. Exact-head remote CI and
+  previews remain the next gate. R01 stays held pending coordinator release.
+- AgentKit CLI is unavailable; native Git/runner/Markdown fallback used.
+  No plan-index closure. AgentWiki publish skipped.
