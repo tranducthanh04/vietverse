@@ -31,4 +31,7 @@ Explicit pinned new worktree overrides pull-before-code's dev/stash workflow.
 - Steps1-2 complete: fresh RED27=10fail17pass, focused GREEN97/97.
 - Step3 complete: server534/client504, both typechecks/builds, lint0errors99warnings,
   browser4matrices/12screenshots. See report.md for raw failures and fixture limits.
-- Step4 local review complete (no outstanding findings); commit/push/PR pending.
+- Step4 local review complete (no outstanding findings); implementation3983720
+  committed, currentmain2a8 integrated atd730e58. Final integration511FE and all
+  quality/browser gates pass. See ../261019-resume-parent-gate-integration/report.md.
+  Ordinary push/new PR follows this delivery checkpoint; coordinator owns merge.

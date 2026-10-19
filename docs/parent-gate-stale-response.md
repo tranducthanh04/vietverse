@@ -48,3 +48,9 @@ Fresh evidence and command receipts live in
 `plans/261019-resume-parent-gate-403/`. Historical green tests are not reused as
 integration acceptance. Audio/F04 and other open findings are not closed.
 Rollback is the scoped API comparison revert; no migration or data rewrite.
+
+Final integration: coordinator authorized merging main2a8cd86 (PR15 story labels)
+into commit3983720. Runtime/test changes remain identical. Fresh integration gates
+and source-continuity limits are recorded in
+`plans/261019-resume-parent-gate-integration/report.md`; this supersedes only the
+delivery checkpoint, not the original receipts or contract.
