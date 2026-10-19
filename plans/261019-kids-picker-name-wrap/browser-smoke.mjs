@@ -14,7 +14,13 @@ const html = await readFile(resolve(root, 'index.html'), 'utf8');
 const output = await mkdtemp(resolve(tmpdir(), 'vietverse-picker-name-'));
 const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const componentHash = createHash('sha256').update(await readFile(resolve(root, 'src/app/layouts/KidsLayout.tsx'))).digest('hex');
-const port = 5198;
+const startedAt = new Date().toISOString();
+const sourceHashes = {};
+for (const path of ['client/src/app/layouts/KidsLayout.tsx', 'client/src/lib/api.ts', 'client/src/store/authStore.ts', 'client/src/store/childStore.ts', 'client/src/components/ChildSessionGuard.tsx', 'client/src/components/ui/ProtectedRoute.tsx', 'client/src/index.css', 'client/index.html', 'client/vite.config.ts', 'client/tailwind.config.js', 'package-lock.json']) {
+  sourceHashes[path] = createHash('sha256').update(await readFile(resolve(path))).digest('hex');
+}
+await writeFile(resolve(output, 'browser-smoke-source.mjs'), await readFile(new URL(import.meta.url)));
+let port;
 const threeProfileDiagnostic = process.env.SMOKE_THREE_PROFILES === '1';
 const names = {
   unbroken: 'abcdefghij'.repeat(3),
@@ -52,8 +58,11 @@ createRoot(document.getElementById('root')).render(React.createElement(QueryClie
   React.createElement(Route,{path:'/bat-dau',element:React.createElement('h1',null,'Add child destination')})))));
 `;
 process.chdir(root);
+// Never inherit an API override pointing at a real backend in this synthetic fixture.
+process.env.VITE_API_URL = '/api/v1';
 const server = await createServer({ root, envFile: false,
-  server: { host: '127.0.0.1', port, strictPort: true, hmr: false, watch: null },
+  cacheDir: resolve(root, 'node_modules/.vite-picker-smoke'),
+  server: { host: '127.0.0.1', port: 0, strictPort: true, hmr: false, watch: null },
   plugins: [{ name: 'picker-name-fixture', resolveId(id) { if (id === fixtureId) return id; }, load(id) { if (id === fixtureId) return fixture; },
     configureServer(vite) { vite.middlewares.use(async (req, res, next) => {
       if (!/^\/kham-pha(?:\?|$)/.test(req.url || '')) return next();
@@ -122,13 +131,24 @@ async function geometry(page, name) {
 
 let browser;
 const records = [];
+const errors = [], unexpected = [], selections = [], consoleErrors = [];
+let passed = false;
 try {
   await server.listen();
+  port = server.httpServer.address().port;
   browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
   const page = await browser.newPage({ reducedMotion: 'reduce' });
-  const errors = [], unexpected = [], selections = [];
   let profiles;
   page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+  await page.route('**/*', route => {
+    const request = route.request(), url = new URL(request.url());
+    const local = url.origin === `http://127.0.0.1:${port}`;
+    const font = url.protocol === 'https:' && ['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname);
+    if (request.method() === 'GET' && (local || font)) return route.continue();
+    unexpected.push(request.method() + ' ' + url.origin + url.pathname);
+    return route.abort();
+  });
   await page.route('**/api/**', async route => {
     const path = new URL(route.request().url()).pathname, method = route.request().method();
     let data;
@@ -276,8 +296,16 @@ try {
     assert.equal(records.length, 32);
     console.log(`PASS 32 geometry/interaction cases; head=${head}; artifacts=${output}`);
   }
+  passed = true;
 } finally {
   console.log(`Evidence: ${output}`);
   await browser?.close();
   await server.close();
+  await writeFile(resolve(output, 'run-receipt.json'), JSON.stringify({
+    head, componentHash, sourceHashes, startedAt, finishedAt: new Date().toISOString(),
+    mode: threeProfileDiagnostic ? 'three-profiles' : 'normal', passed,
+    cases: records.length, port, errors, consoleErrors, unexpected, selections,
+    cleanup: { browser: true, vite: true },
+    boundary: 'Real components/CSS/font with synthetic children API and injected authenticated user; no auth bootstrap or onboarding form acceptance.',
+  }, null, 2));
 }
