@@ -270,3 +270,73 @@ def test_start_draft_error_reported_without_discard():
     results = apply_manifest(client, lesson_manifest(), dry_run=False, actor_id=client.user_id)
     assert results[0]["status"] == "error"
     assert not any(c[0] in ("save_draft", "publish", "discard_draft") for c in client.calls)
+
+
+# ---- replace-from: chỉ thay audio lần cũ tự ghi (live==url cũ, text đổi), chừa phần còn lại ----
+
+OLD_URL = "/api/v1/media/audio/oldoldoldoldold0.mp3"
+NEW_URL = "/api/v1/media/audio/newnewnewnewnew0.mp3"
+
+
+def replace_manifest(new_text="Trong sân có gà.", url=NEW_URL):
+    return {"contents": [{"kind": "lesson", "contentId": "L1", "contentVersion": 1, "title": "Bài 1", "clips": [
+        {"field": "activities.0.audioUrl", "text": new_text, "file": "a.mp3", "url": url}]}]}
+
+
+def old_manifest(old_text="Cùng đọc và tìm hiểu.", url=OLD_URL):
+    return {"contents": [{"kind": "lesson", "contentId": "L1", "clips": [
+        {"field": "activities.0.audioUrl", "text": old_text, "url": url}]}]}
+
+
+def store_live_audio(audio_value):
+    return {("lesson", "L1"): {"live": {"contentVersion": 1, "payload": {
+        "activities": [{"type": "word_card", "prompt": "x", "targetWord": "Trong sân có gà.", "audioUrl": audio_value}],
+    }}, "draft": None}}
+
+
+def test_replace_from_replaces_matching_field():
+    """Live đang giữ đúng url lần cũ và text đã đổi -> thay bằng url mới."""
+    client = FakeClient(store_live_audio(OLD_URL))
+    results = apply_manifest(client, replace_manifest(), dry_run=False,
+                             actor_id=client.user_id, replace_from=old_manifest())
+    assert results[0]["status"] == "applied"
+    assert client.saved_payload()["activities"][0]["audioUrl"] == NEW_URL
+
+
+def test_replace_from_skips_admin_audio():
+    """Live là audio admin (url khác url lần cũ) -> không đụng."""
+    client = FakeClient(store_live_audio("/api/v1/media/audio/adminadminadmin0.mp3"))
+    results = apply_manifest(client, replace_manifest(), dry_run=False,
+                             actor_id=client.user_id, replace_from=old_manifest())
+    assert client.writes() == []
+    assert results[0]["status"] == "skipped"
+
+
+def test_replace_from_skips_unchanged_text():
+    """Text mới trùng text cũ -> không thay dù url khớp."""
+    client = FakeClient(store_live_audio(OLD_URL))
+    results = apply_manifest(
+        client, replace_manifest(new_text="Cùng đọc và tìm hiểu."), dry_run=False,
+        actor_id=client.user_id, replace_from=old_manifest(old_text="Cùng đọc và tìm hiểu."))
+    assert client.writes() == []
+    assert results[0]["status"] == "skipped"
+
+
+def test_replace_from_skips_field_missing_from_old_run():
+    """Lần cũ không ghi ô này -> giữ nguyên dù live đang có audio."""
+    client = FakeClient(store_live_audio("/api/v1/media/audio/livelivelivelive0.mp3"))
+    empty_old = {"contents": [{"kind": "lesson", "contentId": "L1", "clips": []}]}
+    results = apply_manifest(client, replace_manifest(), dry_run=False,
+                             actor_id=client.user_id, replace_from=empty_old)
+    assert client.writes() == []
+    assert results[0]["status"] == "skipped"
+
+
+def test_replace_from_dry_run_makes_no_writes():
+    """Dry-run vẫn không ghi gì ngay cả khi có replace-from."""
+    client = FakeClient(store_live_audio(OLD_URL))
+    results = apply_manifest(client, replace_manifest(), dry_run=True,
+                             actor_id=client.user_id, replace_from=old_manifest())
+    assert client.writes() == []
+    assert results[0]["status"] == "planned"
+    assert results[0]["fields"] == ["activities.0.audioUrl"]

@@ -46,12 +46,70 @@ Chi tiết cài đặt và lệnh ở [`scripts/tts/README.md`](../scripts/tts/R
 
 | Loại | Trường được gắn | Text đọc |
 | --- | --- | --- |
-| Bài học | `activities[].audioUrl` | `prompt` của hoạt động |
+| Bài học | `activities[].audioUrl` | **theo loại hoạt động** — xem bảng ngay dưới |
 | Bài học | `activities[].options[].audioUrl` | `text` của lựa chọn (chỉ khi lựa chọn có chữ) |
 | Bài học | `vocabulary[].audioUrl` | `word` của từ vựng |
 | Truyện | `audioUrl` (một file cho cả truyện) | toàn bộ `lyrics[].text` |
 | Truyện | `lyrics[].timeSec`, `durationSec` | mốc tính từ WordBoundary của edge-tts |
 | Văn hoá | `audioUrl` | `intro` |
+
+### Text của `activities[].audioUrl` theo loại hoạt động
+
+Trong trình chơi, nút nghe của mỗi hoạt động khi **không** có `audioUrl` sẽ đọc một chuỗi
+`textToSpeak` dự phòng. Audio sinh ra cho `audioUrl` phải đọc **đúng chuỗi đó**, nếu không thì
+"nghe" sẽ khác "đọc". Bảng dưới rút **trực tiếp từ các component** (quyết định phản chiếu code,
+không phải suy đoán):
+
+| `type` | Text đọc (trường trong payload) | Component phản chiếu |
+| --- | --- | --- |
+| `word_card` | `targetWord` | `WordCardActivity.tsx` — nút "Nghe đọc"; thẻ to thường là **cả đoạn đọc** |
+| `listen_choose` | `prompt` | `ListenChooseActivity.tsx` |
+| `fill_blank` | `prompt` | `WrongAnswerFeedback` (trong `FillBlankActivity.tsx`) |
+| `sort_order` | `prompt` | `WrongAnswerFeedback` (trong `SortOrderActivity.tsx`) |
+| `review` | `prompt` | `WrongAnswerFeedback` (trong `ReviewActivity.tsx`) |
+| `multi_select` | `prompt` + `subPrompt` | `NewActivityFrame.tsx` (`MultiSelectActivity`) |
+| `group_sort` | `prompt` + `subPrompt` | `NewActivityFrame.tsx` (`GroupSortActivity`) |
+| `fill_blanks` | `prompt` + `subPrompt` | `NewActivityFrame.tsx` (`FillBlanksActivity`) |
+| `follow_steps` | `prompt` + `subPrompt` + từng `steps[].text` | `NewActivityFrame.tsx` (`FollowStepsActivity`) |
+| `drag_match` | — (**không sinh clip**) | `DragMatchActivity.tsx` — không phát `activities[].audioUrl` |
+| `record_voice` | — (**không sinh clip**) | `RecordVoiceActivity.tsx` — không phát `activities[].audioUrl` |
+
+- Các phần được **nối bằng `". "`** sau khi bỏ phần rỗng (giống `.filter(Boolean).join(". ")`
+  trong `NewActivityFrame.tsx`).
+- **Sửa lỗi production**: trước đây công cụ dùng `prompt` cho **mọi** loại, nên `word_card` đọc
+  câu hướng dẫn ("Cùng đọc và tìm hiểu.") thay vì đoạn đọc trong `targetWord`. Nay đã theo bảng này.
+- **Loại không phát `activities[].audioUrl`** (`drag_match`, `record_voice`) **không sinh clip**
+  cho ô đó — tránh sinh audio không ai nghe. Bảng phủ đủ 11 loại trong enum server
+  (`content.validation.ts`).
+- **Quyết định nghiệp vụ (phiên chính, 2026-10-19)**: vẫn **giữ sinh audio cho
+  `options[].audioUrl` và `vocabulary[].audioUrl`** như trước. Việc này **nằm ngoài phạm vi** lỗi
+  đang sửa (dù hiện chưa có component nào trong trình chơi phát hai ô đó), nên không gỡ trong lượt
+  này để không phá hành vi/test đang xanh.
+
+## Sửa audio mà công cụ đã tự sinh sai trước đó (`--replace-from`)
+
+Dùng khi một lần chạy **cũ** đã ghi `audioUrl` bằng text **sai** (ví dụ `word_card` từng đọc
+`prompt`) và nội dung đã lên production. Cờ `--replace-from <manifest-cũ>` cho phép công cụ **thay**
+đúng những ô đó, đồng thời **vẫn chừa** audio do người khác tải lên.
+
+Một ô chỉ được thay khi **đồng thời** thoả cả ba điều kiện:
+
+- giá trị `audioUrl` hiện tại trên bản live **đúng bằng** `url` mà manifest cũ đã ghi cho **chính ô đó**;
+- text mới (theo bảng loại hoạt động ở trên) **khác** với text cũ trong manifest cũ;
+- clip mới đã có `url` (đã `upload`).
+
+Mọi trường hợp khác **giữ nguyên**: audio admin tải lên (url khác url cũ), ô mà lần cũ **không**
+ghi, và ô có text **không đổi**. Không có `--replace-from` thì cả `export` lẫn `apply` **giữ hành
+vi cũ** (chỉ điền ô trống, không bao giờ đè).
+
+Quy trình (cần giữ **manifest của lần chạy cũ** — chính file đã dùng để `apply` sai trước đây):
+
+1. `export --replace-from out/manifest-cu.json` — manifest mới gồm cả ô cần sửa (ô trống **và** ô
+   có live khớp url cũ & text đã đổi).
+2. `generate` — sinh MP3 cho text mới.
+3. `upload` — đẩy MP3, lưu url mới vào manifest.
+4. `apply --replace-from out/manifest-cu.json` — **dry-run**, in kế hoạch thay; kiểm kỹ.
+5. `apply --replace-from out/manifest-cu.json --apply --i-have-backup` — ghi thật (sau khi backup DB).
 
 ## Mốc thời gian cho truyện
 
@@ -68,6 +126,9 @@ nếu không có mốc nào thì vẫn sinh audio cả truyện và điền mố
 
 - **Mặc định dry-run**: chỉ in những gì sẽ đổi; chỉ ghi khi có cờ `--apply`.
 - Chỉ điền ô `audioUrl` **đang trống**; **không ghi đè** audio có sẵn (kiểm cả ở bản live lẫn draft).
+- **Ngoại lệ duy nhất là chế độ `--replace-from`** (xem mục riêng ở trên): chỉ thay đúng audio mà
+  lần chạy cũ tự ghi (live khớp url cũ **và** text đã đổi), kiểm lại cả ở bản live lẫn draft; audio
+  người khác tải lên không bao giờ bị đụng.
 - Nội dung đang có **nháp dở của người khác** (`state = editing`) thì **bỏ qua** và báo lại, tránh
   đụng công việc biên tập đang diễn ra.
 - **Nên chạy `--apply` vào lúc không ai biên tập.** Giữa lúc công cụ đọc nội dung và lúc mở nháp

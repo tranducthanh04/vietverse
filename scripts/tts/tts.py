@@ -53,7 +53,8 @@ def _make_client(args: argparse.Namespace) -> VietverseClient:
 def cmd_export(args: argparse.Namespace) -> int:
     from ttslib.export import build_manifest
     client = _make_client(args)
-    data = build_manifest(client, args.api_base)
+    replace_from = manifest_mod.load(args.replace_from) if args.replace_from else None
+    data = build_manifest(client, args.api_base, replace_from=replace_from)
     manifest_mod.save(args.manifest, data)
     print(f"[export] Đã ghi manifest: {args.manifest}")
     return 0
@@ -87,10 +88,11 @@ def cmd_apply(args: argparse.Namespace) -> int:
         return 2
     client = _make_client(args)
     data = manifest_mod.load(args.manifest)
+    replace_from = manifest_mod.load(args.replace_from) if args.replace_from else None
     dry_run = not args.apply
     if dry_run:
         print("[apply] Chế độ DRY-RUN (chỉ in kế hoạch, không ghi). Thêm --apply để ghi thật.")
-    results = apply_manifest(client, data, dry_run=dry_run, actor_id=client.user_id)
+    results = apply_manifest(client, data, dry_run=dry_run, actor_id=client.user_id, replace_from=replace_from)
     applied = sum(1 for r in results if r["status"] == "applied")
     planned = sum(1 for r in results if r["status"] == "planned")
     skipped = sum(1 for r in results if r["status"] == "skipped")
@@ -115,6 +117,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_export = sub.add_parser("export", help="Xuất ô audioUrl trống ra manifest")
     _add_common(p_export, need_out=False)
+    p_export.add_argument(
+        "--replace-from", default=None,
+        help="Manifest của lần chạy cũ: xuất thêm các ô mà giá trị live đang khớp đúng url ô đó "
+             "trong manifest cũ VÀ text mới đã khác (sửa audio do lần cũ tự ghi sai).",
+    )
     p_export.set_defaults(func=cmd_export)
 
     p_generate = sub.add_parser("generate", help="Sinh MP3 bằng edge-tts")
@@ -133,6 +140,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(p_apply, need_out=False)
     p_apply.add_argument("--apply", action="store_true", help="Ghi thật (không có cờ này là dry-run)")
     p_apply.add_argument("--i-have-backup", action="store_true", help="Xác nhận đã backup DB trước khi --apply")
+    p_apply.add_argument(
+        "--replace-from", default=None,
+        help="Manifest của lần chạy cũ: cho phép THAY audio mà lần cũ tự ghi (giá trị live khớp "
+             "url cũ và text đã đổi); không có cờ này thì chỉ điền ô trống như trước.",
+    )
     p_apply.set_defaults(func=cmd_apply)
 
     return parser
