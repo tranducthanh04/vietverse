@@ -70,6 +70,22 @@ nếu không có mốc nào thì vẫn sinh audio cả truyện và điền mố
 - Chỉ điền ô `audioUrl` **đang trống**; **không ghi đè** audio có sẵn (kiểm cả ở bản live lẫn draft).
 - Nội dung đang có **nháp dở của người khác** (`state = editing`) thì **bỏ qua** và báo lại, tránh
   đụng công việc biên tập đang diễn ra.
+- **Nên chạy `--apply` vào lúc không ai biên tập.** Giữa lúc công cụ đọc nội dung và lúc mở nháp
+  vẫn có khe hẹp (TOCTOU): nếu đúng khe đó một admin khác mở nháp, server sẽ trả về chính nháp
+  của họ. Để không publish đè nhầm công việc dở của người khác, sau khi mở nháp công cụ **xác nhận
+  nháp trả về đúng là của mình** (so `updatedBy` với admin đang đăng nhập và `draftVersion` với mức
+  kỳ vọng); nếu không chắc thì **bỏ qua, không đụng** nháp đó và báo lại.
+- **Cô lập lỗi theo từng nội dung**: một nội dung lỗi (vd xung đột version, lỗi tạm 5xx) **không làm
+  dừng cả mẻ**. Nếu lỗi xảy ra sau khi đã mở nháp, công cụ **dọn (discard) nháp vừa mở** để lần chạy
+  lại không bị chặn, ghi nội dung đó là `error` rồi tiếp tục. Cuối cùng in tổng kết (áp dụng / dự
+  kiến / bỏ qua / lỗi) và **trả mã khác 0** nếu có nội dung lỗi.
+- **Chỉ tự retry trên thao tác an toàn**: `GET` và `publish` (server chống trùng publish bằng
+  receipt) được tự thử lại khi mạng chập chờn / lỗi 5xx; `start_draft`/`save_draft` **không** tự
+  retry (tránh conflict giả do gửi lại ghi không idempotent) — lỗi của chúng được xử lý ở lớp
+  từng-nội-dung ở trên.
+- **Mốc lyrics của truyện** chỉ được gắn khi còn **khớp lyrics hiện tại** (số dòng và nội dung từng
+  dòng không đổi kể từ lúc `export`); nếu lệch thì **bỏ qua** nội dung đó và báo, tránh gắn mốc sai
+  vị trí.
 - `--apply` bắt buộc kèm `--i-have-backup`; công cụ in nhắc backup DB (`deploy/selfhost/backup-now.sh`)
   trước khi cho ghi.
 - Gắn audio qua API draft → publish nên giữ đúng versioning và lịch sử nội dung; không ghi thẳng DB.

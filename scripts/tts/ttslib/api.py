@@ -49,6 +49,12 @@ class VietverseClient:
         self.backoff = backoff
         self._session = session or requests.Session()
         self._token: str | None = None
+        self._user_id: str | None = None
+
+    @property
+    def user_id(self) -> str | None:
+        """ID admin đang đăng nhập (lấy từ login). Dùng để xác nhận nháp là của script (I-2)."""
+        return self._user_id
 
     # ---- hạ tầng ----
     def _headers(self) -> dict[str, str]:
@@ -57,23 +63,32 @@ class VietverseClient:
             headers["Authorization"] = f"Bearer {self._token}"
         return headers
 
-    def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+    def _request(self, method: str, path: str, *, retriable: bool | None = None, **kwargs: Any) -> Any:
+        """Gọi API; chỉ tự retry khi `retriable` (mặc định: chỉ GET).
+
+        Ghi không idempotent (start_draft/save_draft/discard_draft) KHÔNG tự retry: một cú rớt
+        mạng sau khi server đã xử lý rồi retry lại sẽ đụng version đã tăng -> conflict giả (I-3).
+        Lỗi của chúng được để nổi lên và xử lý ở lớp từng-nội-dung của apply. GET an toàn để
+        retry; publish được truyền retriable=True vì server chống trùng bằng receipt.
+        """
         url = f"{self.base_url}{path}"
         headers = kwargs.pop("headers", {})
         headers = {**self._headers(), **headers}
+        if retriable is None:
+            retriable = method.upper() == "GET"
         last_error: Exception | None = None
         for attempt in range(1, self.max_retries + 1):
             try:
                 resp = self._session.request(method, url, headers=headers, timeout=self.timeout, **kwargs)
-            except requests.RequestException as exc:  # lỗi mạng -> retry
+            except requests.RequestException as exc:  # lỗi mạng
                 last_error = exc
-                if attempt < self.max_retries:
+                if retriable and attempt < self.max_retries:
                     time.sleep(self.backoff * attempt)
                     continue
                 raise ApiError(0, "NETWORK_ERROR", str(exc)) from exc
 
-            # 5xx có thể do tạm thời -> retry; 4xx là lỗi dứt khoát.
-            if resp.status_code >= 500 and attempt < self.max_retries:
+            # 5xx có thể do tạm thời -> chỉ retry khi idempotent; 4xx là lỗi dứt khoát.
+            if retriable and resp.status_code >= 500 and attempt < self.max_retries:
                 last_error = ApiError(resp.status_code, None, resp.text[:300])
                 time.sleep(self.backoff * attempt)
                 continue
@@ -100,6 +115,9 @@ class VietverseClient:
         if not token:
             raise ApiError(0, "NO_TOKEN", "Đăng nhập không trả về accessToken")
         self._token = token
+        user = data.get("user") if isinstance(data, dict) else None
+        user_id = user.get("id") if isinstance(user, dict) else None
+        self._user_id = str(user_id) if user_id is not None else None
         return token
 
     # ---- đọc nội dung ----
@@ -141,8 +159,10 @@ class VietverseClient:
 
     def publish(self, kind: str, content_id: str, expected_draft_version: int, base_content_version: int | None) -> dict[str, Any]:
         segment = KIND_TO_SEGMENT[kind]
+        # retriable=True: server chống trùng publish bằng receipt nên retry an toàn (I-3).
         return self._request(
             "POST", f"/api/v1/admin/content/{segment}/{content_id}/publish",
+            retriable=True,
             json={"expectedDraftVersion": expected_draft_version, "baseContentVersion": base_content_version},
         )
 

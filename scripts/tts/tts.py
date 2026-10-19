@@ -90,12 +90,16 @@ def cmd_apply(args: argparse.Namespace) -> int:
     dry_run = not args.apply
     if dry_run:
         print("[apply] Chế độ DRY-RUN (chỉ in kế hoạch, không ghi). Thêm --apply để ghi thật.")
-    results = apply_manifest(client, data, dry_run=dry_run)
+    results = apply_manifest(client, data, dry_run=dry_run, actor_id=client.user_id)
     applied = sum(1 for r in results if r["status"] == "applied")
     planned = sum(1 for r in results if r["status"] == "planned")
     skipped = sum(1 for r in results if r["status"] == "skipped")
-    print(f"[apply] Kết quả: áp dụng {applied}, dự kiến {planned}, bỏ qua {skipped}")
-    return 0
+    errors = [r for r in results if r["status"] == "error"]
+    print(f"[apply] Kết quả: áp dụng {applied}, dự kiến {planned}, bỏ qua {skipped}, lỗi {len(errors)}")
+    for r in errors:
+        print(f"[apply]   LỖI {r['kind']} {r['contentId']} ({r['title']}): {r['detail']}", file=sys.stderr)
+    # Trả mã khác 0 nếu có nội dung lỗi để người chạy biết cần xem lại.
+    return 1 if errors else 0
 
 
 def _add_common(parser: argparse.ArgumentParser, *, need_out: bool = True) -> None:
