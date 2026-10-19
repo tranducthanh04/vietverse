@@ -409,8 +409,8 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
 
       {/* Bottom Sticky Action Footer */}
       <footer className="p-4 bg-white border-t-2 border-cream-border sticky bottom-0 z-30">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex-1">
+        <div className="max-w-2xl mx-auto flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 sm:flex-1">
             {stepAnswered && (
               <div className="flex items-center space-x-2">
                 {newActivity ? <span role="status" className="font-bold text-stone-700">
@@ -434,7 +434,7 @@ const LearningSession: React.FC<{ lessonId: string; childId: string; userId: str
             size="kid"
             onClick={handleNextStep}
             disabled={isSubmitting || offlinePending || isSavingAnswer || Boolean(inputError) || (!stepAnswered && currentActivity?.type !== 'word_card')}
-            className="gap-2 px-6 sm:px-8 shrink-0"
+            className="w-full gap-2 px-6 sm:w-auto sm:px-8 shrink-0"
           >
             <span>{isSubmitting ? t('common.saving') : isLastStep ? t('lesson.finishLesson') : t('lesson.continueBtn')}</span>
             <ArrowRight className="w-6 h-6" />

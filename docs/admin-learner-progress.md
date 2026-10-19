@@ -46,6 +46,7 @@ real HTTP404 from a synthetic HTTP500 followed by real HTTP200 retry, and a
 synthetic HTTP200/null response. Missing screen-time fields remain component
 coverage, not an assertion about Mongoose's hydration defaults.
 
-This is not production/device acceptance. PR18 remains Draft/HOLD, including
-an unrelated existing 320px player-footer overflow found during full-player
-validation. Raw receipts and limits: `plans/261019-resume-nonaudio/`.
+This is not production/device acceptance. PR18 remains Draft pending coordinating
+review and exact-head CI. The existing320px footer overflow found during this
+validation is corrected by its narrowly approved CSS addendum; final bounded
+admin/player browser run passes13/13. Receipts: `plans/261019-resume-nonaudio/`.

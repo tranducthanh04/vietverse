@@ -10,10 +10,14 @@
   actual404, injected500 followed by actual200 retry, and injected200/null.
   Full-player text-only wrong/reset/correct reaches real server completion in
   VI320/EN1366, preserving two hearts through reset and granting no reset points.
-- **Open layout finding:** at VI320 the existing player footer extends to332px;
-  the completion button is outside the viewport. `LessonPlayerPage.tsx` is
-  unchanged from integrated main and outside this five-file assignment. The
-  browser layout assertion remains failed; no masking CSS or waived assertion.
+- **Footer finding, fixed locally by approved scope addendum:** initial VI320
+  footer extended to332px; the expanded matrix also reproduced EN320 at363px.
+  Three CSS class changes in `LessonPlayerPage.tsx` stack status/action below640px
+  while retaining the desktop row. Text,44px targets, handlers, disabled state,
+  sessions/rewards and audio are unchanged. Historical RED55/57 is retained;
+  GREEN57/57 covers VI/EN320/390/640/1366, Next/Finish, unanswered/wrong/correct,
+  bounds, overlap, hit testing and keyboard. Original admin/player flows now
+  pass13/13. [Contract and limits](./lesson-player-footer.md); not yet merged.
 - Main `4a6b0a1` contains prior audio/auth/feedback changes, all preserved. This
   PR introduces no audio change. New suite results do not retroactively close
   historical F04 failures or constitute provider/device acceptance. See

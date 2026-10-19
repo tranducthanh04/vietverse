@@ -3,14 +3,17 @@
 ## NONAUDIO PR18 integration — 2026-10-19, Draft/HOLD
 
 - Integrated main `4a6b0a1` without changing its auth/audio/feedback behavior.
-  Five production files remain the scope: virtual redemption, legacy grading,
-  paid eligibility, admin learner detail and incorrect-sort reset.
+  Original five-file scope: virtual redemption, legacy grading, paid eligibility,
+  admin learner detail and incorrect-sort reset. The approved footer addendum
+  adds CSS-only responsive layout in the existing lesson player.
 - Added a deterministic real-HTTP ownership-read barrier test. Authenticated
   browser verification now covers admin and text-only full-player reset through
   server completion at VI320/EN1366; this replaces the earlier browser gap only
   for these bounded flows, not whole-product/device/audio acceptance.
-- Browser layout still fails at VI320: unchanged player footer extends to332px.
-  Keep Draft/HOLD. Exact new results and historical F04 separation are in
+- Initial browser layout failed at VI320 (332px) and the expanded matrix also
+  caught EN320 (363px). The scoped footer repair passes57/57 matrix checks and
+  original admin/player flows pass13/13. See [footer contract](./lesson-player-footer.md).
+  Keep Draft pending exact-head CI/coordinating review. Results and historical F04 separation are in
   `plans/261019-resume-nonaudio/plan.md` and the accompanying evidence report.
   The dated sections below remain historical, not current merge authorization.
 
