@@ -170,7 +170,6 @@ export function validatePublish<K extends ContentKind>(kind: K, input: ContentPa
       if (a.type === 'sort_order') {
         minimum(a.orderedItems, 2, `${path}.orderedItems`);
         (a.orderedItems ?? []).forEach((item, j) => requireText(item, `${path}.orderedItems.${j}`));
-        duplicateIssues(a.orderedItems ?? [], `${path}.orderedItems`, issues);
         if (!Array.isArray(a.correctAnswer) || JSON.stringify(a.correctAnswer) !== JSON.stringify(a.orderedItems)) issues.push({ field: `${path}.correctAnswer`, message: 'Answer must match ordered items' });
       }
       if (a.type === 'multi_select' || a.type === 'group_sort') {

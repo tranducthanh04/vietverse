@@ -136,7 +136,7 @@ Nháp cho phép thiếu trường bắt buộc để biên tập dở, nhưng v�
 - `fill_blank`: đúng một câu có marker `__`, một ô trống như renderer hiện có; 2-8 options text, đáp án là ID option và text khớp `missing`. Không cho nhiều blanks mà UI chỉ hiển thị một.
 - Khi mở dữ liệu legacy dùng text đáp án thay ID option, editor chỉ chuyển sang ID nếu khớp duy nhất; hiển thị thay đổi trong draft và yêu cầu kiểm tra trước publish. Không sửa live hoặc snapshot legacy ngầm. Không xác định duy nhất thì yêu cầu admin chọn đáp án.
 - `drag_match`: 2-12 cặp text; vế trái và vế phải không trùng sau chuẩn hóa, tránh mapping mơ hồ.
-- `sort_order`: 2-12 thành phần text, không trùng khi renderer chưa hỗ trợ identity riêng; orderedItems và correctAnswer phải mô tả cùng thứ tự đích.
+- `sort_order`: 2-12 thành phần text; orderedItems và correctAnswer phải mô tả cùng thứ tự đích. Được phép trùng chữ (quyết định nghiệp vụ 19/10/2026: đồng dao như "Nu na nu nống", "meo meo" lặp từ). Renderer theo dõi mảnh theo vị trí và chấm theo giá trị, nên các mảnh trùng chữ đổi chỗ cho nhau vẫn đúng.
 - Lưu/preview nháp không đầy đủ vẫn được, nhưng chỉ cho chạy thử activity hợp lệ; hiển thị lỗi của phần còn thiếu. Publish bài legacy khung phải hoàn thiện payload, không tự thêm word card để lách validate.
 
 ### Truyện và văn hóa
