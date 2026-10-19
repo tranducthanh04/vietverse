@@ -60,12 +60,36 @@ Local fixture screenshots, not published stories:
 
 - No production publish/write or real-device acceptance. Reviewer should
   check CI on the final head before merging and smoke the deployed story list.
-- A separate baseline defect was reproduced: CoverPlaceholder's ordinary
+- Historical pre-integration defect: CoverPlaceholder's ordinary
   object lookup accepts an inherited key such as constructor, then receives
   an undefined icon and crashes if the malformed story has no cover. The
   enum does not normally permit this value. This patch does not change that
-  shared component; it was reported to the coordinator. The inherited-key
+  shared component; main PR25 subsequently fixed its own-key lookup, and that
+  existing fix is preserved in the 2026-10-19 integration. The inherited-key
   badge fixture supplies a cover to isolate the label behavior; other unknown
   fixtures retain the real placeholder. Do not claim arbitrary malformed
   catalog data is fully supported.
 - Rollback is a code revert; no migration, secret or external service setup.
+
+## Current-main integration: 2026-10-19
+
+- Human authorized resuming nonaudio delivery. A new isolated worktree preserves
+  the old PR head and normally merges main
+  `4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66`, producing
+  `5e4ae65174aeaa75b2d41503e6f6e07f96a5ef13` without conflicts. Story source,
+  label tests and browser harness remain byte-unchanged from the reviewed PR.
+- Fresh coordinator checks: story/cover focused37/37; full frontend484/484
+  across48 files with one worker; root server/client typecheck and build pass;
+  lint0 errors/99 existing warnings. The existing React act warning remains.
+- Fresh browser8/8: VI/EN at320/639/640/1280. All four new screenshots were
+  inspected using native vision and are byte-identical to the committed images.
+  Local synthetic GET/story fixtures only; no real account, publication, device
+  or production acceptance. Owned browser/server closed; port5194 is free.
+- Historical PR15 CI39141626708 failed F04 recordingFinalize.test.ts:148
+  with statuses[201,201,404,201]. That failure remains recorded. Integrating a
+  changed main requires new-head CI, not a rerun of the failed old head. No
+  local backend suite was rerun for this client-only delta, no audio was edited,
+  and these UI checks do not establish F04 repair or audio acceptance.
+- Final evidence-only documentation changes do not change the tested inputs.
+  Exact remote-head CI/previews, coordinating merge and main postchecks remain
+  delivery gates. No force-push, main push, bypass or manual deploy is allowed.
