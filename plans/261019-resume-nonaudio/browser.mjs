@@ -31,7 +31,7 @@ const check = async (id, run) => {
 };
 const freePort = () => new Promise((res, rej) => {const s=probe();s.on('error',rej);s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>res(port));});});
 const pace = () => {const p=lane.then(async()=>{await new Promise(r=>setTimeout(r,Math.max(0,nextAt-Date.now())));nextAt=Date.now()+750;});lane=p.catch(()=>{});return p;};
-const screenshot = async id => {await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:join(output,`${id}.png`),fullPage:true});};
+const screenshot = async id => {await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:join(output,`${id}.png`),fullPage:true,animations:'disabled'});};
 const layout = async id => {
   const dimensions=await page.evaluate(()=>({viewport:innerWidth,width:document.documentElement.scrollWidth}));
   observations.push({id,...dimensions});assert(dimensions.width<=dimensions.viewport+1,JSON.stringify(dimensions));
@@ -82,7 +82,11 @@ try {
     page.on('response',response=>{const url=new URL(response.url());if(url.pathname.startsWith('/api/'))requests.push({method:response.request().method(),path:url.pathname,status:response.status()});});
     return context;
   };
-  for(const [language,width] of [['vi',320],['en',1366]]) {
+  if (process.env.PR18_FOOTER_ONLY === '1') {
+    const { footerMatrix } = await import('./footer-matrix.mjs');
+    await footerMatrix({openContext,base,stage,check,observations,models:{User,Subscription,Child,Lesson,LessonProgress,PointTransaction}});
+  }
+  for(const [language,width] of process.env.PR18_FOOTER_ONLY === '1' ? [] : [['vi',320],['en',1366]]) {
     const tag=`${language}${width}`;
     const zero=await Child.create({parentId:admin._id,name:`QA detail ${tag}`,ageGroup:'5-6',companionLanguages:['en'],screenTimeLimit:0});
     const gone=await Child.create({parentId:admin._id,name:`QA absent ${tag}`,ageGroup:'5-6',companionLanguages:['en']});
@@ -182,6 +186,7 @@ try {
       assert.equal(data.pointsEarned,11);
       assert.equal((await Child.findById(learner.id)).viviPoints,11);
       observations.push({id:tag+'-completion',status:response.status(),data,heartsBeforeCompletion:2});
+      await expect(page.getByRole('dialog')).toBeVisible();
       await screenshot(`${tag}-sort-finished`);
     });
     await parentContext.close();

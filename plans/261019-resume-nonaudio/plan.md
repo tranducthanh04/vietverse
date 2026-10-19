@@ -1,6 +1,7 @@
 # Resume NONAUDIO PR18
 
-Status: in progress. Existing PR: https://github.com/tranducthanh04/vietverse/pull/18
+Status: local implementation/verification complete; Draft delivery and coordinating
+review pending. Existing PR: https://github.com/tranducthanh04/vietverse/pull/18
 
 ## Inputs and authority
 
@@ -17,13 +18,13 @@ Status: in progress. Existing PR: https://github.com/tranducthanh04/vietverse/pu
 
 - [x] Verify remote and preserve additive merge conflicts.
 - [x] Add real HTTP ownership-read barrier regression and positive controls.
-- [ ] Run focused tests and unchanged full FE/BE suites, typecheck/build/lint.
-- [ ] Browser: actual authenticated admin detail and text-only full player,
+- [x] Run focused tests and unchanged full FE/BE suites, typecheck/build/lint.
+- [x] Browser: actual authenticated admin detail and text-only full player,
   VI320 and EN1366, temporary loopback replica set, no audio/provider actions.
 - [ ] Review final diff, document evidence and limitations, commit and push
   existing PR18 only. Check fresh exact-head CI before any merge decision.
 
-## Current evidence / hold
+## Historical evidence / initial hold (superseded by final evidence below)
 
 - Exact-lock install passed. Focused final: 40 server + 26 client passed.
 - First focused run: new test barrier compared string with ObjectId and
@@ -66,3 +67,19 @@ again after the footer change. Historical F04 and browser1/2 failures stay intac
 Node/Mongo/Chrome on this Windows host are local test environments, not device
 or production acceptance. Admin copy remains Vietnamese by existing design.
 Fault injection is labelled separately from real HTTP success/404 responses.
+
+## Final local evidence, 2026-10-19
+
+- Normal merges32afb71 andde8b2ef preserve PR18 and main2a8cd86. Three approved
+  CSS class changes fix the footer without changing behavior or locale strings.
+- Focused server40/40 and initial client26/26; final focused client30/30.
+- Full server554/554 on the identical final server tree; final client500/500.
+- Fresh checks-2: typecheck/build/lint exit0; lint0errors/99warnings.
+- Valid pre-fix footer matrix55/57; final57/57. Original browser13/13.
+  Historical failures, including the invalid footer-1 labels, remain available.
+- Independent read-only review: no new findings; suitable for scoped Draft push,
+  not merge approval. Final gates subsequently passed as recorded above.
+- Remote main advanced to9b809bd after the approved2a8 integration. This is not
+  the local tested base; latest-main review/integration remains coordinator-owned.
+- Detailed commands, exact pins, reuse proof, artifacts and limitations:
+  [evidence.md](./evidence.md). No F04/audio/device/production acceptance.

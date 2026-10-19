@@ -1,5 +1,5 @@
 import { spawn, execFileSync } from 'node:child_process';
-import { createWriteStream, existsSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { createWriteStream, existsSync, writeFileSync, mkdirSync, readdirSync, copyFileSync } from 'node:fs';
 import { randomBytes, createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,9 @@ const attempt = process.argv[3] || '1';
 if (!/^[a-z-]+$/.test(phase || '') || !/^\d+$/.test(attempt)) throw new Error('Explicit phase required');
 const runDir = path.join(output, `${phase}-${attempt}`);
 mkdirSync(runDir);
+for (const file of ['run.mjs','safety.cjs','browser.mjs','footer.mjs','footer-matrix.mjs']) {
+  if (existsSync(path.join(output,file))) copyFileSync(path.join(output,file),path.join(runDir,`source-${file}`));
+}
 const git = (...args) => execFileSync('git', ['--no-optional-locks', ...args], { cwd: root, encoding: 'utf8' }).trim();
 const pin = () => ({ head: git('rev-parse','HEAD'), main:git('rev-parse','origin/main'), diffHash:createHash('sha256').update(git('diff','4a6b0a1','--','client','server','package-lock.json')).digest('hex') });
 const before = pin();
@@ -28,6 +31,9 @@ const choices = {
   focused:[['server',test('server',['virtualRedemptionConcurrency.test.ts','legacyGradingPolicy.test.ts','points.test.ts','pointsHistoryAndEquip.test.ts','lessonIntegrity.test.ts'],'server')],['client',test('client',['adminLearnerDetail.test.tsx','sortOrderActivity.test.tsx','wrongAnswerFeedbackActivities.test.tsx'],'client')]],
   full:[['server',test('server',[],'server')],['client',test('client',[],'client')]],
   checks:[['typecheck',['run','typecheck']],['build',['run','build']],['lint',['run','lint']]],
+  client:[['client',test('client',[],'client')]],
+  'client-focused':[['client',test('client',['adminLearnerDetail.test.tsx','sortOrderActivity.test.tsx','nextLessonNavigation.test.tsx','wrongAnswerFeedbackActivities.test.tsx'],'client')]],
+  footer:[['footer',null]],
   browser:[['browser',null]],
 };
 if (!choices[phase]) throw new Error('Unknown phase');
@@ -36,7 +42,7 @@ for (const [name,args] of choices[phase]) {
   if (pin().diffHash !== before.diffHash) throw new Error('Source changed');
   const childEnv = {...env};
   if (phase !== 'install') childEnv.NODE_OPTIONS = `--require=${path.join(output,'safety.cjs')}`;
-  const argv = name === 'browser' ? ['--import','tsx',path.join(output,'browser.mjs'),runDir] : [npm,...args];
+  const argv = ['browser','footer'].includes(name) ? ['--import','tsx',path.join(output,`${name}.mjs`),runDir] : [npm,...args];
   const log = createWriteStream(path.join(runDir,`${name}.log`),{flags:'wx'});
   const startedAt = new Date().toISOString();
   console.log(`${name}: started`);

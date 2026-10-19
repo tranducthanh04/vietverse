@@ -38,3 +38,18 @@ mean geometry uses fallback fonts. New audio/provider behavior, F04 closure,
 F13 translation completeness, auth/PIN/email policy, migrations, production
 data correctness and device/production acceptance were outside review scope.
 Incoming main changes are not independent acceptance of these domains.
+
+## Incremental review after approved footer addendum
+
+No new findings. Suitable for scoped Draft push subject to final frontend/root
+checks and exact-head CI; no merge approval. Reviewer independently read the
+three CSS-only changes, matrix source, RED55/57 and GREEN57/57 receipts and
+VI/EN320 screenshots. Button labels are full and controls separated/in bounds.
+Eight journeys activate Next/Finish and receive real HTTP200 with12 points.
+Original browser-3 now passes13/13 with no page errors. Server tree identity
+`ab85b50ef824a77aec9886e1af2af1bfbac6548a` matches32afb71 andde8b2ef.
+
+Recorded-answer status variants are not directly exercised by the sort matrix.
+Footer-1 is retained as a harness-label error; footer-2 is valid historical RED.
+The reviewer made no edits and did not rerun tests. No new audio/auth/F04/F13
+acceptance, device acceptance, merge or deployment is inferred.

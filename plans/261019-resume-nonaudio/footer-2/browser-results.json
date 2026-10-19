@@ -1,0 +1,2783 @@
+{
+  "results": [
+    {
+      "id": "vi320-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-Finish-correct",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: Document exceeds viewport: {\"viewport\":{\"width\":320,\"height\":900},\"documentWidth\":332,\"footer\":{\"left\":0,\"right\":320,\"top\":716,\"bottom\":900,\"width\":320,\"height\":184},\"button\":{\"left\":107.859375,\"right\":332.3125,\"top\":779,\"bottom\":839,\"width\":224.453125,\"height\":60},\"disabled\":false,\"hit\":true,\"buttonText\":\"Hoàn thành bài\",\"statusText\":\"Tuyệt vời! Bé giỏi lắm!\",\"buttonTextRects\":[{\"left\":131.859375,\"right\":276.3125,\"top\":798,\"bottom\":820}],\"statusTextRects\":[{\"left\":44,\"right\":95.859375,\"top\":737.9950561523438,\"bottom\":759.9950561523438},{\"left\":44,\"right\":81.5625,\"top\":767.9950561523438,\"bottom\":789.9950561523438},{\"left\":44,\"right\":69.578125,\"top\":797.9950561523438,\"bottom\":819.9949951171875},{\"left\":44,\"right\":79.546875,\"top\":827.9949951171875,\"bottom\":849.9949951171875},{\"left\":44,\"right\":85.125,\"top\":857.9949951171875,\"bottom\":879.9949951171875}],\"buttonFont\":\"20px\"}",
+      "stack": "AssertionError [ERR_ASSERTION]: Document exceeds viewport: {\"viewport\":{\"width\":320,\"height\":900},\"documentWidth\":332,\"footer\":{\"left\":0,\"right\":320,\"top\":716,\"bottom\":900,\"width\":320,\"height\":184},\"button\":{\"left\":107.859375,\"right\":332.3125,\"top\":779,\"bottom\":839,\"width\":224.453125,\"height\":60},\"disabled\":false,\"hit\":true,\"buttonText\":\"Hoàn thành bài\",\"statusText\":\"Tuyệt vời! Bé giỏi lắm!\",\"buttonTextRects\":[{\"left\":131.859375,\"right\":276.3125,\"top\":798,\"bottom\":820}],\"statusTextRects\":[{\"left\":44,\"right\":95.859375,\"top\":737.9950561523438,\"bottom\":759.9950561523438},{\"left\":44,\"right\":81.5625,\"top\":767.9950561523438,\"bottom\":789.9950561523438},{\"left\":44,\"right\":69.578125,\"top\":797.9950561523438,\"bottom\":819.9949951171875},{\"left\":44,\"right\":79.546875,\"top\":827.9949951171875,\"bottom\":849.9949951171875},{\"left\":44,\"right\":85.125,\"top\":857.9949951171875,\"bottom\":879.9949951171875}],\"buttonFont\":\"20px\"}\n    at geometry (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:46:7)\n    at async check (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:22:9)\n    at async <anonymous> (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:83:9)\n    at async check (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:22:9)\n    at async footerMatrix (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:64:5)\n    at async <anonymous> (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:87:5)"
+    },
+    {
+      "id": "vi320-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi390-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi640-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "vi1366-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en320-Finish-correct",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: Document exceeds viewport: {\"viewport\":{\"width\":320,\"height\":900},\"documentWidth\":363,\"footer\":{\"left\":0,\"right\":320,\"top\":806,\"bottom\":900,\"width\":320,\"height\":94},\"button\":{\"left\":155.671875,\"right\":363.484375,\"top\":824,\"bottom\":884,\"width\":207.8125,\"height\":60},\"disabled\":false,\"hit\":true,\"buttonText\":\"Finish lesson\",\"statusText\":\"Awesome! Great job!\",\"buttonTextRects\":[{\"left\":179.671875,\"right\":307.484375,\"top\":843,\"bottom\":865}],\"statusTextRects\":[{\"left\":44,\"right\":143.671875,\"top\":827.9950561523438,\"bottom\":849.9950561523438},{\"left\":44,\"right\":138.453125,\"top\":857.9950561523438,\"bottom\":879.9950561523438}],\"buttonFont\":\"20px\"}",
+      "stack": "AssertionError [ERR_ASSERTION]: Document exceeds viewport: {\"viewport\":{\"width\":320,\"height\":900},\"documentWidth\":363,\"footer\":{\"left\":0,\"right\":320,\"top\":806,\"bottom\":900,\"width\":320,\"height\":94},\"button\":{\"left\":155.671875,\"right\":363.484375,\"top\":824,\"bottom\":884,\"width\":207.8125,\"height\":60},\"disabled\":false,\"hit\":true,\"buttonText\":\"Finish lesson\",\"statusText\":\"Awesome! Great job!\",\"buttonTextRects\":[{\"left\":179.671875,\"right\":307.484375,\"top\":843,\"bottom\":865}],\"statusTextRects\":[{\"left\":44,\"right\":143.671875,\"top\":827.9950561523438,\"bottom\":849.9950561523438},{\"left\":44,\"right\":138.453125,\"top\":857.9950561523438,\"bottom\":879.9950561523438}],\"buttonFont\":\"20px\"}\n    at geometry (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:46:7)\n    at async check (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:22:9)\n    at async <anonymous> (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:83:9)\n    at async check (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:22:9)\n    at async footerMatrix (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\footer-matrix.mjs:64:5)\n    at async <anonymous> (C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\browser.mjs:87:5)"
+    },
+    {
+      "id": "en320-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en390-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en640-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Next-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Next-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Next-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Finish-unanswered",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Finish-wrong",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-Finish-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-footer-actions",
+      "status": "PASS"
+    },
+    {
+      "id": "no-page-errors-or-forbidden-requests",
+      "status": "PASS"
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad58f54039237a88390f7f9/complete",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "observations": [
+    {
+      "runtime": "155.0.8059.84",
+      "dbName": "nonaudio_dc09981e15e7",
+      "synthetic": true,
+      "frontendPort": 55138,
+      "apiPort": 55171
+    },
+    {
+      "id": "vi320-Next-unanswered",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 802,
+        "bottom": 900,
+        "width": 320,
+        "height": 98
+      },
+      "button": {
+        "left": 131.46875,
+        "right": 304,
+        "top": 820,
+        "bottom": 884,
+        "width": 172.53125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Tiếp theo",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 157.46875,
+          "right": 246,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-Next-wrong",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 776,
+        "bottom": 900,
+        "width": 320,
+        "height": 124
+      },
+      "button": {
+        "left": 135.46875,
+        "right": 304,
+        "top": 809,
+        "bottom": 869,
+        "width": 168.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 159.46875,
+          "right": 248,
+          "top": 828,
+          "bottom": 850
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 108.28125,
+          "top": 798,
+          "bottom": 820
+        },
+        {
+          "left": 16,
+          "right": 88.28125,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 58.21875,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-Next-correct",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 746,
+        "bottom": 900,
+        "width": 320,
+        "height": 154
+      },
+      "button": {
+        "left": 135.46875,
+        "right": 304,
+        "top": 794,
+        "bottom": 854,
+        "width": 168.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 159.46875,
+          "right": 248,
+          "top": 813,
+          "bottom": 835
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 95.859375,
+          "top": 767.9950561523438,
+          "bottom": 789.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 112.6875,
+          "top": 797.9950561523438,
+          "bottom": 819.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 79.546875,
+          "top": 827.9950561523438,
+          "bottom": 849.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 85.125,
+          "top": 857.9950561523438,
+          "bottom": 879.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-Finish-unanswered",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 802,
+        "bottom": 900,
+        "width": 320,
+        "height": 98
+      },
+      "button": {
+        "left": 75.546875,
+        "right": 304,
+        "top": 820,
+        "bottom": 884,
+        "width": 228.453125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 101.546875,
+          "right": 246,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-Finish-wrong",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 686,
+        "bottom": 900,
+        "width": 320,
+        "height": 214
+      },
+      "button": {
+        "left": 79.546875,
+        "right": 304,
+        "top": 764,
+        "bottom": 824,
+        "width": 224.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 103.546875,
+          "right": 248,
+          "top": 783,
+          "bottom": 805
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 41.578125,
+          "top": 708,
+          "bottom": 730
+        },
+        {
+          "left": 16,
+          "right": 49.359375,
+          "top": 738,
+          "bottom": 760
+        },
+        {
+          "left": 16,
+          "right": 38.25,
+          "top": 768,
+          "bottom": 790
+        },
+        {
+          "left": 16,
+          "right": 44.90625,
+          "top": 798,
+          "bottom": 820
+        },
+        {
+          "left": 16,
+          "right": 53.828125,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 58.21875,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-Finish-correct",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 332,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 716,
+        "bottom": 900,
+        "width": 320,
+        "height": 184
+      },
+      "button": {
+        "left": 107.859375,
+        "right": 332.3125,
+        "top": 779,
+        "bottom": 839,
+        "width": 224.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 131.859375,
+          "right": 276.3125,
+          "top": 798,
+          "bottom": 820
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 95.859375,
+          "top": 737.9950561523438,
+          "bottom": 759.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 81.5625,
+          "top": 767.9950561523438,
+          "bottom": 789.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 69.578125,
+          "top": 797.9950561523438,
+          "bottom": 819.9949951171875
+        },
+        {
+          "left": 44,
+          "right": 79.546875,
+          "top": 827.9949951171875,
+          "bottom": 849.9949951171875
+        },
+        {
+          "left": 44,
+          "right": 85.125,
+          "top": 857.9949951171875,
+          "bottom": 879.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi320-activated",
+      "next": "keyboard",
+      "finish": "keyboard",
+      "points": 12
+    },
+    {
+      "id": "vi390-Next-unanswered",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 802,
+        "bottom": 900,
+        "width": 390,
+        "height": 98
+      },
+      "button": {
+        "left": 201.46875,
+        "right": 374,
+        "top": 820,
+        "bottom": 884,
+        "width": 172.53125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Tiếp theo",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 227.46875,
+          "right": 316,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-Next-wrong",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 205.46875,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 168.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 229.46875,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 186.109375,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 58.21875,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-Next-correct",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 205.46875,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 168.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 229.46875,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 170.09375,
+          "top": 827.9949951171875,
+          "bottom": 849.9949951171875
+        },
+        {
+          "left": 44,
+          "right": 126.234375,
+          "top": 857.9949951171875,
+          "bottom": 879.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-Finish-unanswered",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 802,
+        "bottom": 900,
+        "width": 390,
+        "height": 98
+      },
+      "button": {
+        "left": 145.546875,
+        "right": 374,
+        "top": 820,
+        "bottom": 884,
+        "width": 228.453125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 171.546875,
+          "right": 316,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-Finish-wrong",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 149.546875,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 224.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 173.546875,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 108.28125,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 136.0625,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-Finish-correct",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 776,
+        "bottom": 900,
+        "width": 390,
+        "height": 124
+      },
+      "button": {
+        "left": 149.546875,
+        "right": 374,
+        "top": 809,
+        "bottom": 869,
+        "width": 224.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 173.546875,
+          "right": 318,
+          "top": 828,
+          "bottom": 850
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 95.859375,
+          "top": 797.9950561523438,
+          "bottom": 819.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 112.6875,
+          "top": 827.9950561523438,
+          "bottom": 849.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 126.234375,
+          "top": 857.9950561523438,
+          "bottom": 879.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi390-activated",
+      "next": "keyboard",
+      "finish": "pointer",
+      "points": 12
+    },
+    {
+      "id": "vi640-Next-unanswered",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 802,
+        "bottom": 900,
+        "width": 640,
+        "height": 98
+      },
+      "button": {
+        "left": 435.46875,
+        "right": 624,
+        "top": 820,
+        "bottom": 884,
+        "width": 188.53125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Tiếp theo",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 469.46875,
+          "right": 558,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-Next-wrong",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 439.46875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 184.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 471.46875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 233.890625,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-Next-correct",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 439.46875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 184.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 471.46875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 257.890625,
+          "top": 842.9950561523438,
+          "bottom": 864.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-Finish-unanswered",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 802,
+        "bottom": 900,
+        "width": 640,
+        "height": 98
+      },
+      "button": {
+        "left": 379.546875,
+        "right": 624,
+        "top": 820,
+        "bottom": 884,
+        "width": 244.453125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 413.546875,
+          "right": 558,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-Finish-wrong",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 383.546875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 240.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 415.546875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 233.890625,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-Finish-correct",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 383.546875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 240.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 415.546875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 257.890625,
+          "top": 842.9949951171875,
+          "bottom": 864.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi640-activated",
+      "next": "keyboard",
+      "finish": "keyboard",
+      "points": 12
+    },
+    {
+      "id": "vi1366-Next-unanswered",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 802,
+        "bottom": 900,
+        "width": 1366,
+        "height": 98
+      },
+      "button": {
+        "left": 830.46875,
+        "right": 1019,
+        "top": 820,
+        "bottom": 884,
+        "width": 188.53125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Tiếp theo",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 864.46875,
+          "right": 953,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-Next-wrong",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 834.46875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 184.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 866.46875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 347,
+          "right": 564.890625,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-Next-correct",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 834.46875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 184.53125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Tiếp theo",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 866.46875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 375,
+          "right": 588.890625,
+          "top": 842.9950561523438,
+          "bottom": 864.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-Finish-unanswered",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 802,
+        "bottom": 900,
+        "width": 1366,
+        "height": 98
+      },
+      "button": {
+        "left": 774.546875,
+        "right": 1019,
+        "top": 820,
+        "bottom": 884,
+        "width": 244.453125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 808.546875,
+          "right": 953,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-Finish-wrong",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 778.546875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 240.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Bé thử lại lần nữa nhé!",
+      "buttonTextRects": [
+        {
+          "left": 810.546875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 347,
+          "right": 564.890625,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-Finish-correct",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 778.546875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 240.453125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Hoàn thành bài",
+      "statusText": "Tuyệt vời! Bé giỏi lắm!",
+      "buttonTextRects": [
+        {
+          "left": 810.546875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 375,
+          "right": 588.890625,
+          "top": 842.9949951171875,
+          "bottom": 864.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "vi1366-activated",
+      "next": "keyboard",
+      "finish": "pointer",
+      "points": 12
+    },
+    {
+      "id": "en320-Next-unanswered",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 802,
+        "bottom": 900,
+        "width": 320,
+        "height": 98
+      },
+      "button": {
+        "left": 176.640625,
+        "right": 304,
+        "top": 820,
+        "bottom": 884,
+        "width": 127.359375,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Next",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 202.640625,
+          "right": 246,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-Next-wrong",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 806,
+        "bottom": 900,
+        "width": 320,
+        "height": 94
+      },
+      "button": {
+        "left": 180.640625,
+        "right": 304,
+        "top": 824,
+        "bottom": 884,
+        "width": 123.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 204.640625,
+          "right": 248,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 156.03125,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 48.234375,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-Next-correct",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 806,
+        "bottom": 900,
+        "width": 320,
+        "height": 94
+      },
+      "button": {
+        "left": 180.640625,
+        "right": 304,
+        "top": 824,
+        "bottom": 884,
+        "width": 123.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 204.640625,
+          "right": 248,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 143.671875,
+          "top": 827.9911499023438,
+          "bottom": 849.9911499023438
+        },
+        {
+          "left": 44,
+          "right": 138.453125,
+          "top": 857.9911499023438,
+          "bottom": 879.9911499023438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-Finish-unanswered",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 802,
+        "bottom": 900,
+        "width": 320,
+        "height": 98
+      },
+      "button": {
+        "left": 92.1875,
+        "right": 304,
+        "top": 820,
+        "bottom": 884,
+        "width": 211.8125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Finish lesson",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 118.1875,
+          "right": 246,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-Finish-wrong",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 776,
+        "bottom": 900,
+        "width": 320,
+        "height": 124
+      },
+      "button": {
+        "left": 101.328125,
+        "right": 309.140625,
+        "top": 809,
+        "bottom": 869,
+        "width": 207.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 125.328125,
+          "right": 253.140625,
+          "top": 828,
+          "bottom": 850
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 77.140625,
+          "top": 798,
+          "bottom": 820
+        },
+        {
+          "left": 16,
+          "right": 89.34375,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 48.234375,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-Finish-correct",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 363,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 806,
+        "bottom": 900,
+        "width": 320,
+        "height": 94
+      },
+      "button": {
+        "left": 155.671875,
+        "right": 363.484375,
+        "top": 824,
+        "bottom": 884,
+        "width": 207.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 179.671875,
+          "right": 307.484375,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 143.671875,
+          "top": 827.9950561523438,
+          "bottom": 849.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 138.453125,
+          "top": 857.9950561523438,
+          "bottom": 879.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en320-activated",
+      "next": "keyboard",
+      "finish": "keyboard",
+      "points": 12
+    },
+    {
+      "id": "en390-Next-unanswered",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 802,
+        "bottom": 900,
+        "width": 390,
+        "height": 98
+      },
+      "button": {
+        "left": 246.640625,
+        "right": 374,
+        "top": 820,
+        "bottom": 884,
+        "width": 127.359375,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Next",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 272.640625,
+          "right": 316,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-Next-wrong",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 250.640625,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 123.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 274.640625,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 193.8125,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-Next-correct",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 250.640625,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 123.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 274.640625,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 201.484375,
+          "top": 827.9950561523438,
+          "bottom": 849.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 80.65625,
+          "top": 857.9950561523438,
+          "bottom": 879.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-Finish-unanswered",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 802,
+        "bottom": 900,
+        "width": 390,
+        "height": 98
+      },
+      "button": {
+        "left": 162.1875,
+        "right": 374,
+        "top": 820,
+        "bottom": 884,
+        "width": 211.8125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Finish lesson",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 188.1875,
+          "right": 316,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-Finish-wrong",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 166.1875,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 207.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 190.1875,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 77.140625,
+          "top": 828,
+          "bottom": 850
+        },
+        {
+          "left": 16,
+          "right": 127.125,
+          "top": 858,
+          "bottom": 880
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-Finish-correct",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "footer": {
+        "left": 0,
+        "right": 390,
+        "top": 806,
+        "bottom": 900,
+        "width": 390,
+        "height": 94
+      },
+      "button": {
+        "left": 166.1875,
+        "right": 374,
+        "top": 824,
+        "bottom": 884,
+        "width": 207.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 190.1875,
+          "right": 318,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 143.671875,
+          "top": 827.9950561523438,
+          "bottom": 849.9950561523438
+        },
+        {
+          "left": 44,
+          "right": 138.453125,
+          "top": 857.9950561523438,
+          "bottom": 879.9950561523438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en390-activated",
+      "next": "keyboard",
+      "finish": "pointer",
+      "points": 12
+    },
+    {
+      "id": "en640-Next-unanswered",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 802,
+        "bottom": 900,
+        "width": 640,
+        "height": 98
+      },
+      "button": {
+        "left": 480.640625,
+        "right": 624,
+        "top": 820,
+        "bottom": 884,
+        "width": 143.359375,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Next",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 514.640625,
+          "right": 558,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-Next-wrong",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 484.640625,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 139.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 516.640625,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 193.8125,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-Next-correct",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 484.640625,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 139.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 516.640625,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 243.6875,
+          "top": 842.9949951171875,
+          "bottom": 864.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-Finish-unanswered",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 802,
+        "bottom": 900,
+        "width": 640,
+        "height": 98
+      },
+      "button": {
+        "left": 396.1875,
+        "right": 624,
+        "top": 820,
+        "bottom": 884,
+        "width": 227.8125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Finish lesson",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 430.1875,
+          "right": 558,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-Finish-wrong",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 400.1875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 223.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 432.1875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 16,
+          "right": 193.8125,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-Finish-correct",
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "documentWidth": 640,
+      "footer": {
+        "left": 0,
+        "right": 640,
+        "top": 806,
+        "bottom": 900,
+        "width": 640,
+        "height": 94
+      },
+      "button": {
+        "left": 400.1875,
+        "right": 624,
+        "top": 824,
+        "bottom": 884,
+        "width": 223.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 432.1875,
+          "right": 560,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 44,
+          "right": 243.6875,
+          "top": 842.9949951171875,
+          "bottom": 864.9949951171875
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en640-activated",
+      "next": "keyboard",
+      "finish": "keyboard",
+      "points": 12
+    },
+    {
+      "id": "en1366-Next-unanswered",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 802,
+        "bottom": 900,
+        "width": 1366,
+        "height": 98
+      },
+      "button": {
+        "left": 875.640625,
+        "right": 1019,
+        "top": 820,
+        "bottom": 884,
+        "width": 143.359375,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Next",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 909.640625,
+          "right": 953,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-Next-wrong",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 879.640625,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 139.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 911.640625,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 347,
+          "right": 524.8125,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-Next-correct",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 879.640625,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 139.359375,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Next",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 911.640625,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 375,
+          "right": 574.6875,
+          "top": 842.9911499023438,
+          "bottom": 864.9911499023438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-Finish-unanswered",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 802,
+        "bottom": 900,
+        "width": 1366,
+        "height": 98
+      },
+      "button": {
+        "left": 791.1875,
+        "right": 1019,
+        "top": 820,
+        "bottom": 884,
+        "width": 227.8125,
+        "height": 64
+      },
+      "disabled": true,
+      "hit": false,
+      "buttonText": "Finish lesson",
+      "statusText": "",
+      "buttonTextRects": [
+        {
+          "left": 825.1875,
+          "right": 953,
+          "top": 841,
+          "bottom": 863
+        }
+      ],
+      "statusTextRects": [],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-Finish-wrong",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 795.1875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 223.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Give it another try!",
+      "buttonTextRects": [
+        {
+          "left": 827.1875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 347,
+          "right": 524.8125,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-Finish-correct",
+      "viewport": {
+        "width": 1366,
+        "height": 900
+      },
+      "documentWidth": 1366,
+      "footer": {
+        "left": 0,
+        "right": 1366,
+        "top": 806,
+        "bottom": 900,
+        "width": 1366,
+        "height": 94
+      },
+      "button": {
+        "left": 795.1875,
+        "right": 1019,
+        "top": 824,
+        "bottom": 884,
+        "width": 223.8125,
+        "height": 60
+      },
+      "disabled": false,
+      "hit": true,
+      "buttonText": "Finish lesson",
+      "statusText": "Awesome! Great job!",
+      "buttonTextRects": [
+        {
+          "left": 827.1875,
+          "right": 955,
+          "top": 843,
+          "bottom": 865
+        }
+      ],
+      "statusTextRects": [
+        {
+          "left": 375,
+          "right": 574.6875,
+          "top": 842.9911499023438,
+          "bottom": 864.9911499023438
+        }
+      ],
+      "buttonFont": "20px"
+    },
+    {
+      "id": "en1366-activated",
+      "next": "keyboard",
+      "finish": "pointer",
+      "points": 12
+    },
+    {
+      "cleanup": "browser, vite, API, mongoose and temporary replica set stopped"
+    }
+  ]
+}
