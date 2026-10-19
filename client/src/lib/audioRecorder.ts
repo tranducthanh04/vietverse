@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useChildStore } from '../store/childStore.js';
+import { claimPlayback, releasePlayback } from '../hooks/useNarration.js';
 import { createDirectRecordingUpload, RECORDING_MAX_BYTES, recordingContextChanged, type RecordingContext, type RecordingReceipt } from './directRecordingUpload.js';
 
 export interface UseAudioRecorderReturn {
@@ -35,6 +36,16 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
   const captured = useRef<{ userId?: string; childId?: string; generation: number; sessionKey: string } | null>(null);
   const taskRef = useRef<{ blob: Blob; key: string; task: ReturnType<typeof createDirectRecordingUpload> } | null>(null);
 
+  // Stable identity: the playback player joins the app-wide single-reader rule (claimPlayback) just
+  // like ParentRecordingsPage, so starting another reader (narration, a parent recording) stops this
+  // one and resets isPlaying, and a stale player from a rapid re-tap can never flip the live state.
+  const stopPlayback = useCallback(() => {
+    const player = playerRef.current;
+    playerRef.current = null;
+    if (player) { player.onended = null; player.onerror = null; player.pause(); }
+    releasePlayback(stopPlayback);
+    if (mounted.current) setIsPlaying(false);
+  },[]);
   const release = useCallback(() => {
     if (timerRef.current !== null) { clearInterval(timerRef.current); timerRef.current = null; }
     if (deadlineRef.current !== null) { clearTimeout(deadlineRef.current); deadlineRef.current = null; }
@@ -46,8 +57,8 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
       recorderRef.current = null;
     }
     streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null;
-    playerRef.current?.pause(); playerRef.current = null;
-  },[]);
+    stopPlayback();
+  },[stopPlayback]);
   const clearRecording = useCallback(() => {
     generation.current++; captured.current = null; taskRef.current = null; release();
     if (urlRef.current) URL.revokeObjectURL(urlRef.current); urlRef.current = null;
@@ -116,11 +127,15 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
   const stopRecording = useCallback(() => { if (recorderRef.current?.state === 'recording') recorderRef.current.stop(); },[]);
   const playRecording = useCallback(() => {
     if (!audioUrl) return;
-    playerRef.current?.pause();
-    const player = new Audio(audioUrl); playerRef.current = player; setIsPlaying(true);
-    player.onended = player.onerror = () => { if (mounted.current) setIsPlaying(false); };
-    void player.play().catch(() => { if (mounted.current) setIsPlaying(false); });
-  },[audioUrl]);
+    stopPlayback();              // tear down any player we currently own (e.g. a rapid second tap)
+    claimPlayback(stopPlayback); // stop narration or any other active reader, and register as the single reader
+    const player = new Audio(audioUrl); playerRef.current = player;
+    if (mounted.current) setIsPlaying(true);
+    // Only the live player may touch shared state: a paused/aborted stale player's events are ignored.
+    const settle = () => { if (playerRef.current === player) stopPlayback(); };
+    player.onended = settle; player.onerror = settle;
+    try { void player.play().catch(settle); } catch { settle(); }
+  },[audioUrl,stopPlayback]);
   const uploadRecording = useCallback(async (params: RecordingContext) => {
     if (!audioBlob) throw new Error('Chưa có bản ghi âm để tải lên');
     const owner = captured.current;
