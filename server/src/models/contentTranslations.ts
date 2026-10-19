@@ -26,8 +26,18 @@ export interface IStoryTranslation {
   vocab?: string[];
 }
 
+/**
+ * One reviewed translation of a lesson activity's child-facing feedback. Every field is optional.
+ * `wrongHint` is the when-wrong hint in a support language (e.g. "mèo = cat"), shown under the
+ * Vietnamese `wrongHint` so a child reads the meaning in their chosen companion language.
+ */
+export interface IActivityTranslation {
+  wrongHint?: string;
+}
+
 export type CultureTranslations = Partial<Record<SupportLanguage, ICultureTranslation>>;
 export type StoryTranslations = Partial<Record<SupportLanguage, IStoryTranslation>>;
+export type ActivityTranslations = Partial<Record<SupportLanguage, IActivityTranslation>>;
 
 // A single reusable sub-schema per content kind, mounted under each support-language key.
 const cultureTranslationEntry = new Schema<ICultureTranslation>(
@@ -36,6 +46,10 @@ const cultureTranslationEntry = new Schema<ICultureTranslation>(
 );
 const storyTranslationEntry = new Schema<IStoryTranslation>(
   { title: String, description: String, lyrics: { type: [String] }, vocab: { type: [String] } },
+  { _id: false },
+);
+const activityTranslationEntry = new Schema<IActivityTranslation>(
+  { wrongHint: String },
   { _id: false },
 );
 
@@ -47,3 +61,4 @@ function perLanguage(entry: Schema): Record<string, { type: Schema }> {
 
 export const cultureTranslationFields = perLanguage(cultureTranslationEntry);
 export const storyTranslationFields = perLanguage(storyTranslationEntry);
+export const activityTranslationFields = perLanguage(activityTranslationEntry);

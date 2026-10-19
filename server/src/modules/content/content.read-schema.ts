@@ -7,12 +7,15 @@ const text = z.string();
 const optionalText = text.optional();
 const media = text.default('');
 const strings = z.array(text);
+const supportLanguage = z.enum(SUPPORT_LANGUAGES);
 const activity = z.object({
   id: text.default(''), type: z.enum(['listen_choose', 'word_card', 'drag_match', 'fill_blank', 'sort_order', 'record_voice', 'review', 'multi_select', 'group_sort', 'fill_blanks', 'follow_steps']),
   prompt: text.default(''), subPrompt: optionalText, audioUrl: media, imageUrl: media,
   options: z.array(z.object({ id: text, text: optionalText, imageUrl: media, audioUrl: media })).optional(),
   correctAnswer: z.union([text, strings, z.number(), z.boolean(), z.record(text)]).optional(),
-  hints: strings.optional(), targetWord: optionalText, targetPhonetic: optionalText,
+  hints: strings.optional(), wrongHint: optionalText,
+  wrongHintTranslations: z.record(supportLanguage, z.object({ wrongHint: optionalText })).optional(),
+  targetWord: optionalText, targetPhonetic: optionalText,
   pairs: z.array(z.object({ left: text, right: text })).optional(),
   blanks: z.array(z.object({ sentence: text, missing: text })).optional(),
   orderedItems: strings.optional(), pointsWeight: z.number().optional(),
@@ -22,7 +25,6 @@ const activity = z.object({
   steps: z.array(z.object({ id: text, text })).optional(),
 });
 const quiz = z.array(z.object({ question: text, options: strings, correctAnswer: z.number(), explanation: optionalText })).default([]);
-const supportLanguage = z.enum(SUPPORT_LANGUAGES);
 const cultureTranslations = z.record(supportLanguage, z.object({ title: optionalText, intro: optionalText, funFacts: strings.optional() })).optional();
 const storyTranslations = z.record(supportLanguage, z.object({ title: optionalText, description: optionalText, lyrics: strings.optional(), vocab: strings.optional() })).optional();
 export const readSchemas = {

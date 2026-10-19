@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { CircleCheck, CircleX, Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
+import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface ListenChooseActivityProps {
@@ -18,6 +19,8 @@ export interface ListenChooseActivityProps {
     }>;
     correctAnswer: string;
     hints?: string[];
+    wrongHint?: string;
+    wrongHintTranslations?: Partial<Record<string, { wrongHint?: string }>>;
   };
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
@@ -28,13 +31,17 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
 }) => {
   const t = useT();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const feedbackRef = useRef<WrongAnswerFeedbackHandle>(null);
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
     const isCorrect = id === activity.correctAnswer;
+    // Replay the question audio once, synchronously inside the tap so device speech is allowed.
+    if (!isCorrect) feedbackRef.current?.replay();
     onComplete(isCorrect, id);
   };
   const hasImages = activity.options?.some((option) => option.imageUrl) ?? false;
+  const isWrongSelected = selectedId !== null && selectedId !== activity.correctAnswer;
 
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto">
@@ -54,6 +61,9 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
         {/* Without source audio, device speech can only read the prompt; do not imply a listening clip exists. */}
         {!activity.audioUrl && <MissingSourceAudioNotice hint={t('lesson.hintReadAbove')} />}
       </div>
+
+      {/* When the child chooses wrong: replay the audio and show a friendly hint right under the question. */}
+      <WrongAnswerFeedback ref={feedbackRef} show={isWrongSelected} activity={activity} canReplay />
 
       {/* Options: picture cards when the lesson has images, compact lettered rows otherwise */}
       <div
