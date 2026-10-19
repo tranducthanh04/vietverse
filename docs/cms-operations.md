@@ -85,6 +85,16 @@ Thông báo lỗi vẫn do server quyết định; phần này chỉ thêm đi�
 - Nếu Cloudinary UI không có `max_file_size`, 5 MiB vẫn được chặn ở client/backend; không ghi nhận provider đã chặn vượt cỡ nếu chưa có bằng chứng thật.
 - Không upload ảnh khách hàng để smoke test nếu chưa có yêu cầu riêng. Asset mồ côi do mất response cần đối soát theo public ID; không xóa wildcard.
 
+## Tải audio nội dung qua CMS (2026-10-19)
+
+Đây là **quyết định triển khai** cho mọi ô `audioUrl` trong CMS: hoạt động (activity), từng lựa chọn (option), từ vựng (vocabulary) của bài học, và form truyện/đồng dao lẫn văn hóa. Mỗi ô audio có nút **"Tải audio lên"** bên cạnh ô dán URL tay.
+
+- Admin chọn tệp MP3/M4A/OGG/WAV tối đa 10 MB; client kiểm định dạng theo MIME hoặc đuôi tệp và chặn quá cỡ trước khi gọi. Nút gọi `POST /api/v1/admin/content/audio` (multipart `audio`), backend lưu theo **sha256 nội dung** nên tải lại cùng tệp trả cùng URL; server vẫn tự kiểm magic bytes và giới hạn kích thước. URL trả về dạng `/api/v1/media/audio/<sha256 16 hex>.<ext>` được điền vào ô `audioUrl`.
+- Có trạng thái "Đang tải audio…", báo lỗi thân thiện (dùng thông báo của server nếu có) và nút "Thử tải audio lại" khi thất bại; có khối nghe thử (`<audio controls>`) ngay dưới ô. **Vẫn** cho dán URL tay như trước.
+- Giống ảnh bìa: URL sau khi tải chỉ nằm trong form local; admin phải bấm **Lưu nháp** để lưu, còn publish/visibility vẫn qua CAS và cờ `CMS_PUBLISH_ENABLED`. Trong lúc đang tải (truyện/văn hóa) thao tác Lưu nháp bị khóa để không mất URL vừa nhận.
+- URL audio lưu trong DB là **tương đối** (`/api/v1/...`). Khi FE và API khác domain, client tự ghép URL `/api/...` thành tuyệt đối theo origin của API base cho cả màn bé, trang truyện/văn hóa, nghe thử trong CMS và cổng phụ huynh. URL `https` tuyệt đối giữ nguyên.
+- **Giới hạn/giả định:** endpoint lưu trữ audio của BE thuộc phase song song (`feat/audio-local-be`); khi thiếu biến `AUDIO_STORAGE_DIR` thì production trả `503 AUDIO_STORAGE_UNAVAILABLE` và FE hiển thị thông báo bận, không âm thầm hỏng. Không kiểm chứng end-to-end trên môi trường thật trong phase FE này.
+
 ## Bản dịch theo ngôn ngữ hỗ trợ (2026-10-17)
 
 Đây là **quyết định triển khai** cho story/đồng dao và văn hóa: form nháp có khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn theo từng ngôn ngữ (`en`, `ja`, `ko`, `zh`, `fr`). Admin nhập bản dịch cho tiêu đề, phần giới thiệu/mô tả, từng thẻ "Có thể bé chưa biết?"/từng dòng đọc và từ vựng; mỗi ô dịch hiện nội dung tiếng Việt gốc làm gợi ý (placeholder) để đối chiếu. Lưu bằng **Lưu nháp** và kiểm tra bằng **Xem trước** như các trường khác; bản dịch là tùy chọn và **không** là điều kiện publish.

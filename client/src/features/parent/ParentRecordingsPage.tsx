@@ -13,6 +13,7 @@ import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { useT } from '../../i18n/index.js';
 import { claimPlayback, releasePlayback } from '../../hooks/useNarration.js';
+import { resolveMediaUrl } from '../../lib/mediaUrl.js';
 
 export const ParentRecordingsPage: React.FC = () => {
   const { activeChild } = useChildStore();
@@ -54,7 +55,8 @@ export const ParentRecordingsPage: React.FC = () => {
     stopPlayback();
     setPlaybackErrorId(null);
     claimPlayback(stopPlayback); // Stops narration or any other active reader.
-    const audio = new Audio(url);
+    // Recording URLs are stored app-relative with a signed token; rebase onto the API origin.
+    const audio = new Audio(resolveMediaUrl(url));
     audioRef.current = audio;
     setPlayingId(id);
     const ended = () => {

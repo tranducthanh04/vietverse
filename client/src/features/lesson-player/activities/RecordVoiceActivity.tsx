@@ -48,13 +48,11 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     clearRecording,
     playRecording,
     uploadRecording,
-    restartExpiredUpload,
   } = useAudioRecorder(JSON.stringify([childId,lessonId,activity.id,contentVersion]));
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [intentExpired, setIntentExpired] = useState(false);
   const userId = useAuthStore(state => state.user?.id);
   const activeChildId = useChildStore(state => state.activeChild?._id);
   const contextKey = JSON.stringify([userId,activeChildId,childId,lessonId,activity.id,contentVersion]);
@@ -67,7 +65,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     const child = useChildStore.subscribe((state,previous) => { if (state.activeChild?._id !== previous.activeChild?._id) generation.current++; });
     return () => { mounted.current = false; generation.current++; auth(); child(); };
   },[]);
-  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); setIntentExpired(false); },[contextKey]);
+  useEffect(() => { generation.current++; setIsSubmitted(false); setIsUploading(false); setUploadError(null); },[contextKey]);
 
   const handleSubmit = async () => {
     if (!audioBlob) return;
@@ -75,7 +73,6 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
     const current = () => mounted.current && epoch === generation.current && key === contextRef.current;
     try {
       setIsUploading(true);
-      if (intentExpired) { restartExpiredUpload(); setIntentExpired(false); }
       setUploadError(null);
       const res = await uploadRecording({
         childId,
@@ -91,17 +88,17 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       onComplete(true, recordingId);
     } catch (err: any) {
       if (!current()) return;
-      // Timeouts end the spinner; the upload task keeps its intent, so "Thử gửi lại" asks finalize first.
+      // A failed upload keeps the blob, so "Thử gửi lại" simply re-posts the same recording.
+      const code = err?.response?.data?.error?.code;
       const timedOut = err?.code === 'ECONNABORTED' || err?.code === 'ETIMEDOUT' || err?.code === 'RECORDING_UPLOAD_TIMEOUT';
       const networkFailed = err?.code === 'ERR_NETWORK' || err?.code === 'RECORDING_UPLOAD_NETWORK';
-      const providerRejected = err?.code === 'RECORDING_PROVIDER_REJECTED';
-      const msg = err.response?.data?.error?.message
+      const storageUnavailable = code === 'AUDIO_STORAGE_UNAVAILABLE';
+      const msg = (storageUnavailable ? t('lesson.uploadStorageUnavailable') : undefined)
+        || err.response?.data?.error?.message
         || (timedOut ? t('lesson.uploadTimeout') : undefined)
         || (networkFailed ? t('lesson.uploadOffline') : undefined)
-        || (providerRejected ? t('lesson.uploadProviderRejected') : undefined)
         || err.message || t('lesson.uploadError');
       setUploadError(msg);
-      setIntentExpired(err.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED');
     } finally {
       if (current()) setIsUploading(false);
     }
@@ -190,7 +187,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
               <Button
                 variant="ghost"
                 size="md"
-                onClick={() => { clearRecording(); setUploadError(null); setIntentExpired(false); }}
+                onClick={() => { clearRecording(); setUploadError(null); }}
                 disabled={isUploading}
                 className="flex items-center space-x-2 text-stone-600"
               >
@@ -216,7 +213,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
                 onClick={handleSubmit}
                 className="w-full max-w-xs"
               >
-                {intentExpired ? t('lesson.sendNewAttempt') : uploadError ? t('lesson.sendRetry') : t('lesson.sendRecording')}
+                {uploadError ? t('lesson.sendRetry') : t('lesson.sendRecording')}
               </Button>
             ) : (
               <div className="text-emerald-600 font-bold flex items-center space-x-1">

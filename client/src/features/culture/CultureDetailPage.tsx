@@ -162,11 +162,11 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
   return (
     <div className="py-6 px-4 max-w-4xl mx-auto">
       {/* Real Audio Player element */}
-      {article.audioUrl && (
+      {narration.audioSrc && (
         <audio
-          key={article.audioUrl}
+          key={narration.audioSrc}
           ref={narration.audioRef}
-          src={article.audioUrl}
+          src={narration.audioSrc}
           preload="auto"
           {...narration.audioEvents}
         />

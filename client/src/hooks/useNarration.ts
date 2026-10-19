@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "../i18n/index.js";
+import { resolveMediaUrl } from "../lib/mediaUrl.js";
 
 let activeStop: (() => void) | undefined;
 // Media players outside this hook (e.g. parent recordings) share the single-reader rule.
@@ -33,6 +34,9 @@ export function useNarration({
   contentKey?: string;
 }) {
   const t = useT();
+  // DB stores app-relative media URLs ("/api/..."); rebase them onto the API origin so the <audio>
+  // element loads from the right host when the SPA and API are on different domains.
+  const resolvedAudioUrl = resolveMediaUrl(audioUrl);
   const textKey = JSON.stringify(text);
   const audioRef = useRef<HTMLAudioElement>(null);
   const session = useRef(0);
@@ -44,7 +48,7 @@ export function useNarration({
     undefined,
   );
   const [isPlaying, setPlaying] = useState(false);
-  const [mode, setMode] = useState<"asset" | "tts">(audioUrl ? "asset" : "tts");
+  const [mode, setMode] = useState<"asset" | "tts">(resolvedAudioUrl ? "asset" : "tts");
   const [error, setError] = useState("");
   const [segmentIndex, setSegmentIndex] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -76,7 +80,7 @@ export function useNarration({
   useEffect(() => {
     failedAsset.current = false;
     usingSpeech.current = false;
-    setMode(audioUrl ? "asset" : "tts");
+    setMode(resolvedAudioUrl ? "asset" : "tts");
     setError("");
     setCurrentTime(0);
     const audio = audioRef.current;
@@ -86,7 +90,7 @@ export function useNarration({
       stop();
       audio?.pause();
     };
-  }, [audioUrl, textKey, lang, contentKey, stop]);
+  }, [resolvedAudioUrl, textKey, lang, contentKey, stop]);
 
   const speak = (token: number) => {
     if (token !== session.current || !running.current || usingSpeech.current)
@@ -222,7 +226,7 @@ export function useNarration({
     setPlaying(true);
     setError("");
     const audio = audioRef.current;
-    if (audioUrl && audio && !failedAsset.current) {
+    if (resolvedAudioUrl && audio && !failedAsset.current) {
       setMode("asset");
       try {
         void audio.play().catch(() => {
@@ -262,13 +266,16 @@ export function useNarration({
 
   return {
     audioRef,
+    // The resolved, origin-absolute URL to set on the <audio src>. Use this instead of the raw
+    // audioUrl so playback works when the API lives on a different domain than the SPA.
+    audioSrc: resolvedAudioUrl,
     mode,
     isPlaying,
     error,
     segmentIndex,
     currentTime,
     duration,
-    canPlay: (mode === "asset" && !!audioUrl) || (speechAvailable && hasText),
+    canPlay: (mode === "asset" && !!resolvedAudioUrl) || (speechAvailable && hasText),
     toggle,
     replay,
     stop,

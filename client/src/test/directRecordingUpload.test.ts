@@ -1,198 +1,90 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { api, setApiAccessToken } from '../lib/api.js';
 import { createDirectRecordingUpload } from '../lib/directRecordingUpload.js';
 
-const receipt = { id: '123456789012345678901234' };
-const intent = { intentId: 'abcdefabcdefabcdefabcdef', expiresAt: new Date(Date.now()+600000).toISOString(),
-  upload: { url: 'https://api.cloudinary.com/v1_1/test-cloud/video/upload', fields: { public_id: 'random-id', overwrite: 'false', signature: 'signature', api_key: 'key', timestamp: '123', upload_preset: 'signed' } } };
-let calls: Array<{ path: string; body: Record<string, unknown> }>;
-let provider: RequestInit[];
-let finalizeFailure: unknown;
+const receipt = { id: '123456789012345678901234', url: '/api/v1/recordings/123456789012345678901234/audio?t=tok', durationSec: 1 };
+let calls: Array<{ path: string; form: FormData }>;
+let nextFailure: unknown;
+let responseBody: unknown;
 const previousAdapter = api.defaults.adapter;
 beforeEach(() => {
-  calls = []; provider = []; finalizeFailure = undefined;
+  calls = []; nextFailure = undefined; responseBody = { recording: receipt };
   setApiAccessToken('private-jwt');
-  sessionStorage.setItem('vietverse_parent_gate_token','private-gate');
   api.defaults.adapter = async config => {
-    calls.push({ path: config.url!, body: JSON.parse(config.data) });
-    if (config.url === '/recordings/finalize' && finalizeFailure) {
-      const error = finalizeFailure; finalizeFailure = undefined; throw error;
-    }
-    return { data: { data: config.url?.endsWith('upload-intent') ? intent : receipt }, status: 201, statusText: 'Created', headers: {}, config };
+    calls.push({ path: config.url!, form: config.data as FormData });
+    if (nextFailure !== undefined) { const error = nextFailure; nextFailure = undefined; throw error; }
+    return { data: { data: responseBody }, status: 201, statusText: 'Created', headers: {}, config };
   };
-  vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); return { ok: true }; }));
 });
-afterEach(() => { api.defaults.adapter = previousAdapter; setApiAccessToken(null); sessionStorage.clear(); vi.unstubAllGlobals(); });
-const make = (isCurrent = () => true, blob = new Blob(['voice'],{ type: 'audio/webm' })) => createDirectRecordingUpload(blob,{ childId: 'child', lessonId: 'lesson', activityId: 'voice', contentVersion: 3, durationSec: 1 },isCurrent);
+afterEach(() => { api.defaults.adapter = previousAdapter; setApiAccessToken(null); });
+const make = (isCurrent = () => true, blob = new Blob(['voice'], { type: 'audio/webm' })) =>
+  createDirectRecordingUpload(blob, { childId: 'child', lessonId: 'lesson', activityId: 'voice', contentVersion: 3, durationSec: 1 }, isCurrent);
 
-describe('direct recording workflow', () => {
-  it('can explicitly resend when the intent expired before any provider upload', async () => {
-    const receivedRequests: string[] = [];
-    let rejectExpired = true;
-    const adapter = api.defaults.adapter as Function;
-    api.defaults.adapter = async config => {
-      if (config.url?.endsWith('upload-intent')) {
-        receivedRequests.push(JSON.parse(config.data).requestId);
-        if (rejectExpired) throw { response: { data: { error: { code: 'UPLOAD_INTENT_EXPIRED' } } } };
-      }
-      return adapter(config);
-    };
+describe('recording upload (single multipart call)', () => {
+  it('uploads once to /recordings/upload with every required field', async () => {
+    const result = await make().submit();
+    expect(result).toMatchObject({ id: receipt.id });
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload']);
+    const form = calls[0].form;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get('audio')).toBeInstanceOf(Blob);
+    expect(form.get('childId')).toBe('child');
+    expect(form.get('lessonId')).toBe('lesson');
+    expect(form.get('activityId')).toBe('voice');
+    expect(form.get('contentVersion')).toBe('3');
+    // The old Cloudinary two-step must be gone entirely.
+    expect(calls.some(c => /upload-intent|finalize/.test(c.path))).toBe(false);
+  });
+  it('accepts a bare receipt shape as well as { recording }', async () => {
+    responseBody = receipt;
+    expect(await make().submit()).toMatchObject({ id: receipt.id });
+  });
+  it('rejects a response without a valid recording id', async () => {
+    responseBody = { recording: { url: '/x' } };
+    await expect(make().submit()).rejects.toThrow('chưa xác nhận');
+  });
+  it('surfaces a network failure unchanged so the UI can show the offline message', async () => {
+    nextFailure = Object.assign(new Error('Network Error'), { code: 'ERR_NETWORK' });
+    await expect(make().submit()).rejects.toMatchObject({ code: 'ERR_NETWORK' });
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload']);
+  });
+  it('surfaces a 503 AUDIO_STORAGE_UNAVAILABLE so the UI can map it', async () => {
+    nextFailure = { response: { status: 503, data: { error: { code: 'AUDIO_STORAGE_UNAVAILABLE' } } } };
+    await expect(make().submit()).rejects.toMatchObject({ response: { data: { error: { code: 'AUDIO_STORAGE_UNAVAILABLE' } } } });
+  });
+  it('keeps the blob and simply re-posts on the next submit after a failure', async () => {
     const task = make();
+    nextFailure = Object.assign(new Error('Network Error'), { code: 'ERR_NETWORK' });
     await expect(task.submit()).rejects.toBeDefined();
-    await expect(task.submit()).rejects.toBeDefined();
-    expect(receivedRequests[1]).toBe(receivedRequests[0]);
-    expect(provider).toHaveLength(0);
-    task.restartExpired(); rejectExpired = false;
-    expect(await task.submit()).toEqual(receipt);
-    expect(receivedRequests[2]).not.toBe(receivedRequests[0]);
-    expect(provider).toHaveLength(1);
+    expect(await task.submit()).toMatchObject({ id: receipt.id });
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload', '/recordings/upload']);
+    expect(calls[1].form.get('childId')).toBe('child');
   });
-  it('retains the audio and only creates a new requestId after explicit expired-intent restart', async () => {
-    const blob = new Blob(['retained voice'], { type: 'audio/webm' });
-    const task = make(() => true, blob);
-    const expired = { response: { status: 409, data: { error: { code: 'UPLOAD_INTENT_EXPIRED' } } } };
-    finalizeFailure = expired;
-    await expect(task.submit()).rejects.toEqual(expired);
-    finalizeFailure = expired;
-    await expect(task.submit()).rejects.toEqual(expired);
-    expect(provider).toHaveLength(1);
-    expect(calls.filter(c => c.path.endsWith('upload-intent'))).toHaveLength(1);
-    task.restartExpired();
-    expect(await task.submit()).toEqual(receipt);
-    const requests = calls.filter(c => c.path.endsWith('upload-intent'));
-    expect(requests[1].body.requestId).not.toBe(requests[0].body.requestId);
-    expect(provider).toHaveLength(2);
-    expect(((provider[1].body as FormData).get('file') as Blob).size).toBe(blob.size);
-  });
-  it('does not allow an explicit restart to bypass a non-expiry failure', async () => {
+  it('caches a success and never re-uploads on a later submit', async () => {
     const task = make();
-    finalizeFailure = { response: { status: 503, data: { error: { code: 'DATABASE_UNAVAILABLE' } } } };
-    await expect(task.submit()).rejects.toBeDefined();
-    expect(() => task.restartExpired()).toThrow();
-    expect(await task.submit()).toEqual(receipt);
-    expect(provider).toHaveLength(1);
+    expect(await task.submit()).toMatchObject({ id: receipt.id });
+    expect(await task.submit()).toMatchObject({ id: receipt.id });
+    expect(calls).toHaveLength(1);
   });
-  it('only retries finalize after a saved upload, with no app credentials sent to Cloudinary', async () => {
-    finalizeFailure = { response: { status: 503, data: { error: { code: 'DATABASE_UNAVAILABLE' } } } };
+  it('shares one in-flight request for concurrent submits', async () => {
     const task = make();
-    await expect(task.submit()).rejects.toBeDefined();
-    expect(await task.submit()).toEqual(receipt);
-    expect(provider).toHaveLength(1);
-    expect(provider[0].credentials).toBe('omit');
-    const headers = new Headers(provider[0].headers);
-    expect(headers.has('Authorization')).toBe(false);
-    expect(headers.has('X-Parent-Gate-Token')).toBe(false);
-    expect(headers.has('Cookie')).toBe(false);
-    const form = provider[0].body as FormData;
-    expect(form.get('file')).toBeInstanceOf(Blob);
-    expect([...form.keys()]).not.toContain('childId');
-    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize','/recordings/finalize']);
-    expect(calls[1].body).toEqual({ intentId: intent.intentId });
+    const [a, b] = await Promise.all([task.submit(), task.submit()]);
+    expect(a).toBe(b);
+    expect(calls).toHaveLength(1);
   });
-  it('first checks finalize when the provider may have saved a file but the response was lost', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); throw new TypeError('network lost'); }));
-    const task = make();
-    await expect(task.submit()).rejects.toBeDefined();
-    expect(await task.submit()).toEqual(receipt);
-    expect(provider).toHaveLength(1);
-    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
+  it('rejects an oversize recording before any request', async () => {
+    await expect(make(() => true, new Blob([new Uint8Array(5242881)], { type: 'audio/webm' })).submit()).rejects.toThrow('5 MiB');
+    expect(calls).toHaveLength(0);
   });
-  it('codes a first-attempt provider network failure so the child sees the offline message', async () => {
-    // RECORDING_UPLOAD_NETWORK is what RecordVoiceActivity maps to lesson.uploadOffline;
-    // the first attempt must carry it (no finalize is tried before any upload succeeded).
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); throw new TypeError('Failed to fetch'); }));
-    const task = make();
-    await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_NETWORK' });
-    expect(provider).toHaveLength(1);
-    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
-  });
-  it('times out a stalled provider upload and checks finalize first on the next submit', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => {
-      provider.push(config);
-      expect(config.signal).toBeInstanceOf(AbortSignal);
-      throw new DOMException('signal timed out', 'TimeoutError');
-    }));
-    const task = make();
-    await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_TIMEOUT' });
-    expect(await task.submit()).toEqual(receipt);
-    expect(provider).toHaveLength(1);
-    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
-  });
-  it('aborts the provider upload after 60 seconds even without AbortSignal.timeout', async () => {
-    vi.useFakeTimers();
-    const native = AbortSignal.timeout;
-    Object.defineProperty(AbortSignal, 'timeout', { value: undefined, configurable: true, writable: true });
-    try {
-      vi.stubGlobal('fetch', vi.fn((_url, config: RequestInit) => { provider.push(config); return new Promise((_resolve, reject) => {
-        config.signal!.addEventListener('abort', () => reject(config.signal!.reason));
-      }); }));
-      const pending = make().submit();
-      const outcome = expect(pending).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_TIMEOUT' });
-      await vi.waitFor(() => expect(provider).toHaveLength(1));
-      await vi.advanceTimersByTimeAsync(60_000);
-      await outcome;
-    } finally {
-      Object.defineProperty(AbortSignal, 'timeout', { value: native, configurable: true, writable: true });
-      vi.useRealTimers();
-    }
-  });
-  it('uploads again only after an ambiguous upload is confirmed missing', async () => {
-    let attempts = 0;
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); if (++attempts===1) throw new TypeError('lost'); return { ok: true }; }));
-    const task = make();
-    await expect(task.submit()).rejects.toBeDefined();
-    finalizeFailure = { response: { status: 404, data: { error: { code: 'UPLOAD_ASSET_NOT_FOUND' } } } };
-    expect(await task.submit()).toEqual(receipt);
-    expect(provider).toHaveLength(2);
-    expect(calls.filter(c => c.path.endsWith('upload-intent'))).toHaveLength(1);
-  });
-  it.each(['NOT_FOUND','UPLOAD_INTENT_EXPIRED','DATABASE_UNAVAILABLE'])('does not bypass %s by reuploading or issuing a new intent', async code => {
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); throw new TypeError('lost'); }));
-    const task = make(); await expect(task.submit()).rejects.toBeDefined();
-    finalizeFailure = { response: { status: 409, data: { error: { code } } } };
-    await expect(task.submit()).rejects.toBeDefined();
-    expect(provider).toHaveLength(1);
-    expect(calls.filter(c => c.path.endsWith('upload-intent'))).toHaveLength(1);
-  });
-  it('rejects context changes while provider upload is pending without finalizing', async () => {
-    let current = true, finish!: () => void;
-    vi.stubGlobal('fetch', vi.fn((_url, config: RequestInit) => { provider.push(config); return new Promise(resolve => { finish = () => resolve({ ok: true }); }); }));
-    const task = make(() => current);
-    const pending = task.submit();
-    await vi.waitFor(() => expect(provider).toHaveLength(1));
-    current = false; finish();
-    await expect(pending).rejects.toMatchObject({ code: 'RECORDING_CONTEXT_CHANGED' });
-    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
-  });
-  it('guards dispatch too, so queued requests cannot run under a changed account', async () => {
+  it('guards dispatch so a queued request cannot run under a changed account', async () => {
     let current = true;
     const interceptor = api.interceptors.request.use(config => { current = false; return config; });
     try { await expect(make(() => current).submit()).rejects.toMatchObject({ code: 'RECORDING_CONTEXT_CHANGED' }); }
     finally { api.interceptors.request.eject(interceptor); }
     expect(calls).toHaveLength(0);
   });
-  it('rejects oversize before creating permission and uses a new requestId for a different Blob/context', async () => {
-    await expect(make(() => true,new Blob([new Uint8Array(5242881)], { type: 'audio/webm' })).submit()).rejects.toThrow('5 MiB');
+  it('rejects a context change detected before the request is sent', async () => {
+    await expect(make(() => false).submit()).rejects.toMatchObject({ code: 'RECORDING_CONTEXT_CHANGED' });
     expect(calls).toHaveLength(0);
-    await make().submit(); await make().submit();
-    const ids = calls.filter(c => c.path.endsWith('upload-intent')).map(c => c.body.requestId);
-    expect(ids[0]).not.toBe(ids[1]);
-  });
-  it('surfaces a friendly coded error and never finalizes when the provider rejects the upload', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); return { ok: false, status: 400, text: async () => 'Invalid Signature' }; }));
-    try {
-      const task = make();
-      await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_PROVIDER_REJECTED', providerStatus: 400, message: expect.stringContaining('thu lại') });
-      expect(provider).toHaveLength(1);
-      // The asset was not stored, so finalize is never attempted for a missing asset.
-      expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
-      expect(warn).toHaveBeenCalledWith('[recording] Cloudinary rejected the direct upload', 400, 'Invalid Signature');
-    } finally { warn.mockRestore(); }
-  });
-  it.each(['http://api.cloudinary.com/v1_1/test/video/upload','https://attacker.test/upload','https://api.cloudinary.com/v1_1/test/image/upload'])('does not send audio to an unsafe destination %s', async url => {
-    api.defaults.adapter = async config => ({ data: { data: { ...intent, upload: { ...intent.upload,url } } }, status:201,statusText:'Created',headers:{},config });
-    await expect(make().submit()).rejects.toBeDefined();
-    expect(provider).toHaveLength(0);
   });
 });

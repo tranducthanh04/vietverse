@@ -30,30 +30,24 @@ async function record(hook: { result: { current: ReturnType<typeof useAudioRecor
   act(() => hook.result.current.stopRecording());
 }
 describe('recorder lifecycle', () => {
-  it('retains the same Blob for explicit expired-intent resend through the real hook', async () => {
-    vi.stubEnv('VITE_DIRECT_RECORDING_UPLOAD','true');
+  it('uploads once to /recordings/upload and retains the Blob for a retry after failure', async () => {
     const previousAdapter = api.defaults.adapter;
-    let expired = true;
-    const requests: string[] = [], files: Blob[] = [];
+    let failNext = true;
+    const uploads: { path: string; form: FormData }[] = [];
     api.defaults.adapter = async config => {
-      if (config.url?.endsWith('upload-intent')) {
-        requests.push(JSON.parse(config.data).requestId);
-        return { data: { data: { intentId:'abcdefabcdefabcdefabcdef', expiresAt:'2030-01-01', upload:{ url:'https://api.cloudinary.com/v1_1/test/video/upload', fields:{ public_id:'id',timestamp:'123',overwrite:'false',upload_preset:'signed',api_key:'key',signature:'sig' } } } },status:201,statusText:'Created',headers:{},config };
-      }
-      if (expired) throw { response:{ data:{ error:{ code:'UPLOAD_INTENT_EXPIRED' } } } };
-      return { data:{ data:{ id:'123456789012345678901234' } },status:201,statusText:'Created',headers:{},config };
+      uploads.push({ path: config.url!, form: config.data as FormData });
+      if (failNext) { failNext = false; throw Object.assign(new Error('Network Error'), { code: 'ERR_NETWORK' }); }
+      return { data:{ data:{ recording:{ id:'123456789012345678901234' } } },status:201,statusText:'Created',headers:{},config };
     };
-    vi.stubGlobal('fetch',vi.fn(async (_url,config: RequestInit) => { files.push((config.body as FormData).get('file') as Blob); return { ok:true }; }));
     try {
       const hook = renderHook(useAudioRecorder); await record(hook);
       const retained = hook.result.current.audioBlob;
-      await expect(hook.result.current.uploadRecording({ childId:'child' })).rejects.toBeDefined();
-      act(() => hook.result.current.restartExpiredUpload());
-      expired = false;
+      await expect(hook.result.current.uploadRecording({ childId:'child' })).rejects.toMatchObject({ code:'ERR_NETWORK' });
       await expect(hook.result.current.uploadRecording({ childId:'child' })).resolves.toMatchObject({ id:'123456789012345678901234' });
       expect(hook.result.current.audioBlob).toBe(retained);
-      expect(requests[0]).not.toBe(requests[1]);
-      expect(files.map(file => file.size)).toEqual([5,5]);
+      expect(uploads.map(u => u.path)).toEqual(['/recordings/upload','/recordings/upload']);
+      expect(uploads[0].form.get('audio')).toBeInstanceOf(Blob);
+      expect(uploads.every(u => u.form.get('childId') === 'child')).toBe(true);
     } finally { api.defaults.adapter = previousAdapter; }
   });
   it('reports overshoot instead of pretending a blocked main thread produced a valid take', async () => {

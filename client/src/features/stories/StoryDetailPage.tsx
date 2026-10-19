@@ -108,11 +108,11 @@ export const StoryDetailPage: React.FC = () => {
   return (
     <div className="py-6 px-4 max-w-4xl mx-auto">
       {/* Real HTMLAudioElement for true audio playback */}
-      {story.audioUrl && (
+      {narration.audioSrc && (
         <audio
-          key={story.audioUrl}
+          key={narration.audioSrc}
           ref={narration.audioRef}
-          src={story.audioUrl}
+          src={narration.audioSrc}
           preload="auto"
           {...narration.audioEvents}
         />

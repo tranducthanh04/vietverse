@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { TextField } from "./FormFields.js";
 import { CoverImageUpload, type CoverUploadContext } from './CoverImageUpload.js';
+import { ContentAudioUpload } from './ContentAudioUpload.js';
+import { resolveMediaUrl } from '../../../lib/mediaUrl.js';
 function allowedMediaUrl(value: string) {
   if (!value) return true;
   if (
@@ -40,20 +42,23 @@ export function MediaAsset({
         </button>
       </p>
     );
+  // Stored URLs are app-relative ("/api/..."); rebase onto the API origin for the preview element
+  // so "nghe thử" works even when the admin app and API are on different domains.
+  const src = resolveMediaUrl(url);
   return audio ? (
     <audio
-      key={url}
+      key={src}
       aria-label="Nghe thử audio"
-      src={url}
+      src={src}
       controls
       preload="none"
       onError={() => setFailedUrl(url)}
     />
   ) : (
     <img
-      key={url}
+      key={src}
       className="cms-media-img"
-      src={url}
+      src={src}
       alt="Ảnh nội dung"
       onError={() => setFailedUrl(url)}
     />
@@ -83,6 +88,11 @@ export function MediaFields({
         name={`${prefix}audioUrl`}
         value={value.audioUrl ?? ""}
         onChange={(audioUrl) => onChange({ audioUrl })}
+      />
+      <ContentAudioUpload
+        disabled={uploadDisabled}
+        onBusyChange={onUploadBusy}
+        onUploaded={(audioUrl) => onChange({ audioUrl })}
       />
       <MediaAsset audio url={value.audioUrl ?? ""} />
       {"imageUrl" in value && (
