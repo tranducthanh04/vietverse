@@ -2,6 +2,13 @@
 
 ## NONAUDIO PR18 integration — 2026-10-19, Draft/HOLD
 
+- Approved main `9b809bd` is integrated at `adc4705` with both additive docs
+  sections preserved and no new product fix. Fresh frontend505/505, focused57/57,
+  browser13/13 and footer57/57 pass; root types/build/lint exit0. Original554BE
+  remains its original run with identical-server/config/lock continuity proof,
+  not a new execution or F04 closure. See the separate current
+  `plans/261019-resume-nonaudio/integration-evidence.md`; exact-head CI and
+  independent coordinating review remain required before merge.
 - F05 now has a real authenticated HTTP regression synchronizing both database
   ownership reads before either debit: one HTTP200, one400, balance90 from100,
   one owned item, one redeem ledger and one redemption. Compensation, physical

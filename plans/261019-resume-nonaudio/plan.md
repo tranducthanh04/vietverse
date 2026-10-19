@@ -1,7 +1,21 @@
 # Resume NONAUDIO PR18
 
-Status: local implementation/verification complete; Draft delivery and coordinating
-review pending. Existing PR: https://github.com/tranducthanh04/vietverse/pull/18
+Status: approved main9b809 local integration verified; prior9f67c3c
+delivery remains historical. Existing PR: https://github.com/tranducthanh04/vietverse/pull/18
+
+## Current continuation: approved main9b809
+
+- [x] Normal merge exact9b809bd3b27ea69cad2da2413825ffb8912d3f98: adc4705.
+- [x] Preserve both docs03/06 sections; inspect all seven incoming picker files.
+- [x] Confirm server/config/package/lock identity against tested32afb71.
+- [x] Fresh focused integration:57/57, including picker and child journeys.
+- [x] Fresh full frontend505/505, root types/build/lint, browser13/13/footer57/57.
+- [ ] Separate current evidence/manifest; ordinary existingPR18 push, provided
+  remote main is still the approved9b809. No author merge or deploy.
+- [ ] Verify automatic exact-head CI/previews; hand off coordinator review.
+
+Prior sections and evidence.md describe previous pins/results. Preserve raw
+failures and prior manifests; integration-evidence.md records this new pin.
 
 ## Inputs and authority
 

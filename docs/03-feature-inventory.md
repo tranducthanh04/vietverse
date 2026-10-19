@@ -2,6 +2,13 @@
 
 ## NONAUDIO PR18 integration — 2026-10-19, Draft/HOLD
 
+- Current local integration: approved main `9b809bd` via normal merge `adc4705`.
+  Picker and non-audio documentation are both retained. Fresh frontend505/505,
+  focused57/57, browser13/13, footer57/57 and root types/build/lint pass (99warnings,
+  0errors). Server554 evidence is reused only with identical source/config/lock
+  proof; no new audio acceptance. Current evidence:
+  `plans/261019-resume-nonaudio/integration-evidence.md`. Draft until final-head
+  CI/previews and coordinator review; earlier pins below are historical.
 - Integrated main `4a6b0a1` without changing its auth/audio/feedback behavior.
   Original five-file scope: virtual redemption, legacy grading, paid eligibility,
   admin learner detail and incorrect-sort reset. The approved footer addendum

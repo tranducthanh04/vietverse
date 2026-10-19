@@ -33,6 +33,7 @@ const choices = {
   checks:[['typecheck',['run','typecheck']],['build',['run','build']],['lint',['run','lint']]],
   client:[['client',test('client',[],'client')]],
   'client-focused':[['client',test('client',['adminLearnerDetail.test.tsx','sortOrderActivity.test.tsx','nextLessonNavigation.test.tsx','wrongAnswerFeedbackActivities.test.tsx'],'client')]],
+  'client-integration':[['client',test('client',['adminLearnerDetail.test.tsx','sortOrderActivity.test.tsx','nextLessonNavigation.test.tsx','wrongAnswerFeedbackActivities.test.tsx','kidsPickerNameWrap.test.tsx','childJourneys.test.tsx'],'client')]],
   footer:[['footer',null]],
   browser:[['browser',null]],
 };
