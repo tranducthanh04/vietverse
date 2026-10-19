@@ -62,3 +62,12 @@ builds, lint0errors99warnings and browser4/4 PASS. New12screenshots are byte-ide
 to original12 inspected images. Server tree/package/lock/config identical; prior
 534 server evidence retained at original tested base, not claimed newly executed.
 Final commands/evidence provenance: plans/261019-resume-parent-gate-integration/report.md.
+
+Post-picker continuation: coordinator requested complete PR-body evidence contract
+and exact normalmerge main9b809 after PR29 postgreen. Merge14c48652 has no conflict;
+API/tests/server/package/lock unchanged. Fresh109focused and516fullFE, quality5,
+browser3fourmatrices pass; all12images match original inspected bytes. Body now
+includes workflow/delegation/decisions/deviations/checklist/human actions/issues/ship
+mode. Same independent reviewer confirms no body or implementation findings; final
+coordinator acceptance remains pending. New report and local manifest are appended,
+not overwritten; original RED and failed lint logs retained. No new task or policy.

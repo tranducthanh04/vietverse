@@ -54,3 +54,9 @@ into commit3983720. Runtime/test changes remain identical. Fresh integration gat
 and source-continuity limits are recorded in
 `plans/261019-resume-parent-gate-integration/report.md`; this supersedes only the
 delivery checkpoint, not the original receipts or contract.
+
+Latest PR31 continuation integrates approved main9b809bd (PR29) at14c48652.
+The API/test patch is unchanged. Fresh109focused,516full frontend, quality and four
+browser matrices pass; server534 retains original execution provenance with exact
+source continuity. See `plans/261019-resume-parent-gate-integration/post-picker-report.md`.
+The PR-body omission is corrected; coordinator final review/CI/merge remain separate.
