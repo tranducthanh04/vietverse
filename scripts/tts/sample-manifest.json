@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-10-19T10:00:00+07:00",
+  "apiBase": "http://localhost:5093",
+  "voice": null,
+  "rate": null,
+  "contents": [
+    {
+      "kind": "lesson",
+      "contentId": "000000000000000000000001",
+      "contentVersion": 1,
+      "title": "Câu mẫu để thử edge-tts",
+      "clips": [
+        { "field": "activities.0.audioUrl", "text": "Xin chào, bé khỏe không?", "file": null, "url": null },
+        { "field": "activities.0.options.0.audioUrl", "text": "Con mèo", "file": null, "url": null },
+        { "field": "vocabulary.0.audioUrl", "text": "Quả táo", "file": null, "url": null }
+      ]
+    },
+    {
+      "kind": "story",
+      "contentId": "000000000000000000000002",
+      "contentVersion": 1,
+      "title": "Đồng dao mẫu",
+      "clips": [
+        {
+          "field": "audioUrl",
+          "text": "Con cò bé bé\nNó đậu cành tre",
+          "file": null,
+          "url": null,
+          "lyricLines": ["Con cò bé bé", "Nó đậu cành tre"],
+          "durationSec": null,
+          "lineTimes": null
+        }
+      ]
+    }
+  ]
+}

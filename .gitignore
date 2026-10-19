@@ -14,3 +14,9 @@ stitch_*/
 *.zip
 
 client/eslint-*.txt
+
+# Script TTS (scripts/tts): audio sinh ra + cache + môi trường chạy local
+scripts/tts/out/
+scripts/tts/.venv/
+scripts/tts/**/__pycache__/
+scripts/tts/.pytest_cache/
