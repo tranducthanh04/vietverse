@@ -40,6 +40,9 @@ describe('CMS draft and publish boundaries', () => {
     activity('fill_blank', { options: [option('a', 'bút'), option('b', 'cặp')], correctAnswer: 'a', blanks: [{ sentence: 'Bé viết bằng _____.', missing: 'bút' }] }),
     activity('drag_match', { pairs: [{ left: 'mẹ', right: 'mother' }, { left: 'bố', right: 'father' }] }),
     activity('sort_order', { orderedItems: ['Bé', 'đọc sách'], correctAnswer: ['Bé', 'đọc sách'] }),
+    // Folk rhymes repeat words; the player compares by value, so repeated tiles are interchangeable.
+    activity('sort_order', { orderedItems: ['Nu', 'na', 'nu', 'nống'], correctAnswer: ['Nu', 'na', 'nu', 'nống'] }),
+    activity('sort_order', { orderedItems: ['Con', 'gì', 'kêu', 'meo', 'meo'], correctAnswer: ['Con', 'gì', 'kêu', 'meo', 'meo'] }),
   ])('publishes a usable $type activity and derives activity count', (value) => {
     const draft = parseDraft('lesson', { ...lesson([value]), totalActivities: 999 });
     expect(draft.totalActivities).toBe(1);
