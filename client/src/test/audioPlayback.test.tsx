@@ -22,13 +22,18 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); upload.mockReset(); });
 function showRecordings() {
   useChildStore.setState({ activeChild: { _id: 'child-1' } as never });
   vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [
-    { _id: 'rec-1', url: 'https://res.cloudinary.com/x/video/upload/one.webm', createdAt: '2026-10-13T00:00:00.000Z', wordOrPrompt: 'A' },
+    { _id: 'rec-1', audioUrl: 'https://api.example.test/api/v1/recordings/rec-1/audio?t=signed', createdAt: '2026-10-13T00:00:00.000Z', wordOrPrompt: 'A' },
   ] } });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   return render(<QueryClientProvider client={client}><ParentRecordingsPage /></QueryClientProvider>);
 }
 
 describe('parent recordings playback', () => {
+  it('plays the signed audioUrl the API returns', async () => {
+    showRecordings();
+    fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
+    expect((play.mock.contexts[0] as HTMLAudioElement).src).toBe('https://api.example.test/api/v1/recordings/rec-1/audio?t=signed');
+  });
   it('resets the play state when the browser rejects play()', async () => {
     play.mockRejectedValueOnce(new Error('NotAllowedError'));
     showRecordings();

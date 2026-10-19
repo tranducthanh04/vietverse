@@ -120,7 +120,7 @@ export const ParentRecordingsPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={() => handleTogglePlay(rec._id, rec.url)}
+                    onClick={() => handleTogglePlay(rec._id, rec.audioUrl)}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-[color,background-color,box-shadow] ${
                       isPlaying
                         ? 'bg-primary text-white shadow-md animate-pulse'
