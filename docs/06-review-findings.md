@@ -555,6 +555,7 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - F01: bốn mục chính sách chưa có tài liệu được duyệt ghi rõ `Chưa khả dụng`, bỏ affordance click giả. Quyết định UX, không tự công bố chính sách pháp lý mới.
 - F02: tab chặng chỉ hiện một prefix, tương thích title có/không có `Chặng N:`.
 - F03: card truyện phân biệt bản đọc, audio thiếu duration và duration hợp lệ; không hiện `0 giây` hoặc duration stale khi không có audio.
+- Follow-up STORY-TYPE-LABEL 2026-10-18 (local): sửa fallback mọi type thành thơ tại StoriesPage; đủ 4 nhãn VI/EN và bỏ badge type lạ ở cả hai vị trí responsive. RED 5/7 lỗi nhãn, GREEN 7/7; filter/search/nav giữ nguyên. Giả định hiển thị và lỗi CoverPlaceholder inherited-key còn ngoài phạm vi được ghi rõ tại [story-type-labels.md](./story-type-labels.md); không đóng taxonomy/học liệu/production acceptance.
 - O01: bỏ hứa hẹn dùng thử 7 ngày/trọn đời và catalog 23 bài karaoke chưa được xác nhận. Không đổi giá, checkout hoặc quyền subscription.
 - Cloudinary: nhận diện lỗi404 lồng SDK đúng contract retry; lỗi provider khác vẫn503 an toàn. Live upload/preset chưa nghiệm thu do thiếu cấu hình local. Bằng chứng và giới hạn: `plans/261012-qa-fixes/verification.md`.
 - CMS cover image: đã thêm signed upload riêng cho admin story/culture, JPG/PNG/WebP tối đa 5 MiB, retry cùng asset ID và xác minh metadata; chỉ cập nhật form nháp, không tự publish. Cần preset `vietverse_content_images_signed` và env Production; chưa upload ảnh thật.
