@@ -36,8 +36,11 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional().default(''),
   CLOUDINARY_API_KEY: z.string().optional().default(''),
   CLOUDINARY_API_SECRET: z.string().optional().default(''),
-  CLOUDINARY_RECORDING_UPLOAD_PRESET: z.string().optional().default(''),
   CLOUDINARY_IMAGE_UPLOAD_PRESET: z.string().optional().default(''),
+  // Absolute (or dev-relative) directory where recordings and content audio live on disk.
+  // Unset: dev falls back to <repo>/server/.data/audio; production refuses every audio
+  // endpoint with 503 AUDIO_STORAGE_UNAVAILABLE instead of writing to an ephemeral path.
+  AUDIO_STORAGE_DIR: z.string().optional().default(''),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@vietverse.edu.vn'),
   SEED_ADMIN_PASSWORD: z.string().default('AdminPass123!'),
   SEED_PARENT_EMAIL: z.string().email().default('phuhuynh@vietverse.edu.vn'),

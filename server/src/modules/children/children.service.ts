@@ -9,7 +9,7 @@ import { Redemption } from '../../models/Redemption.js';
 import mongoose, { Types } from 'mongoose';
 import { RecordingUploadIntent } from '../../models/RecordingUploadIntent.js';
 import { User } from '../../models/User.js';
-import { collectChildAudioAssets, destroyAudioAssets, type AudioAsset } from '../../services/audioAssetCleanup.js';
+import { localAudioStorage } from '../../services/localAudioStorage.js';
 import { mapTransactionError } from '../../utils/dbErrors.js';
 
 export class ChildrenService {
@@ -78,9 +78,9 @@ export class ChildrenService {
   }
 
   static async deleteChild(childId: string, parentId: string) {
-    // Provider assets are read inside the deleting transaction (exactly what is
-    // removed) and destroyed only after commit; storage failures never fail the delete.
-    let audioAssets: AudioAsset[] = [];
+    // Audio file keys are read inside the deleting transaction (exactly what is removed) and
+    // the files are unlinked only after commit; a disk failure never fails the delete.
+    let storageKeys: string[] = [];
     let deleted: IChild;
     try {
       let attempts = 0;
@@ -91,8 +91,10 @@ export class ChildrenService {
         if (!child) throw { statusCode: 404, message: 'Không tìm thấy hồ sơ bé' };
         // Sequential session operations; a failure rolls the entire cascade back.
         await LessonProgress.deleteMany({ childId: child._id }, { session });
-        audioAssets = await collectChildAudioAssets(child._id, session);
+        const recordings = await Recording.find({ childId: child._id }).select('storageKey').session(session).lean();
+        storageKeys = recordings.map(recording => recording.storageKey).filter((key): key is string => Boolean(key));
         await Recording.deleteMany({ childId: child._id }, { session });
+        // Legacy Cloudinary upload intents may still exist until the one-off cleanup runs.
         await RecordingUploadIntent.deleteMany({ childId: child._id }, { session });
         await ExplorationLog.deleteMany({ childId: child._id }, { session });
         await PointTransaction.deleteMany({ childId: child._id }, { session });
@@ -103,7 +105,8 @@ export class ChildrenService {
     } catch (error) {
       throw mapTransactionError(error, () => ({ statusCode: 503, code: 'DATABASE_UNAVAILABLE', message: 'Không thể xóa hồ sơ lúc này. Vui lòng thử lại.' }));
     }
-    await destroyAudioAssets(audioAssets, { source: 'child_deletion', childId: deleted._id as Types.ObjectId });
+    // Best-effort removal of the child's recordings from disk; storage errors are swallowed.
+    await Promise.all(storageKeys.map(key => localAudioStorage.deleteKey(key)));
     return deleted;
   }
 

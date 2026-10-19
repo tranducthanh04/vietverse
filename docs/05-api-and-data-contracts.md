@@ -103,32 +103,27 @@ Quyết định tương thích 2026-10-11: `POST/PUT /children` nhận `companio
 
 ## Content và recording
 
-### Signed recording upload — triển khai local 2026-10-09, chưa cutover
+### Audio lưu trên đĩa BE — cutover 2026-10-19
 
-QA 2026-10-12 (quyết định kỹ thuật): adapter nhận cả `error.http_code` lồng của SDK và `http_code` phẳng. Chỉ provider404 trả `UPLOAD_ASSET_NOT_FOUND` cho retry; lỗi khác vẫn503 `UPLOAD_STORAGE_UNAVAILABLE`, không xuất đối tượng SDK chứa credentials. Không đổi quyền, điểm hoặc schema.
+Quyết định nghiệp vụ: mọi audio (bản thu của bé và narration nội dung) lưu trên đĩa của BE qua biến `AUDIO_STORAGE_DIR`; self-host dùng volume `vietverse_audio` mount `/data/audio` (có backup). Ảnh bìa vẫn ở Cloudinary — Cloudinary không còn phục vụ audio, luồng signed upload-intent/finalize cũ đã ngừng. Thiếu `AUDIO_STORAGE_DIR`: dev dùng `<repo>/server/.data/audio`; production trả `503 AUDIO_STORAGE_UNAVAILABLE` cho mọi endpoint đọc/ghi audio (các endpoint khác vẫn chạy). Bố cục đĩa: `recordings/<childId>/<uuid>.<ext>`, `content/<sha256 16 hex>.<ext>`; ghi atomic (file tạm rồi rename). URL audio lưu trong DB dạng tương đối `/api/v1/...`; client đổi URL bắt đầu bằng `/api/` thành tuyệt đối theo origin của API base.
 
-Quyết định đã duyệt: giữ 5 MiB (`5242880` byte), dùng signed Cloudinary trực tiếp để không đưa file qua giới hạn function Vercel4,5MB. Không đổi ownership, contentVersion/unlock hoặc điểm.
+**Bản thu của bé**
 
-- POST `/recordings/upload-intent` (JWT): JSON strict `{requestId: UUID, childId, lessonId?, activityId?, contentVersion?:number, wordOrPrompt?:string<=5000, byteLength:1..5242880, mimeType, durationSec:0..180}`. Lesson/activity phải có cùng nhau; standalone không có version. MIME chấp nhận audio/webm/mp4/ogg/mpeg/wav/x-wav và application/ogg; bỏ tham số codec trước kiểm tra. Client metadata chỉ kiểm sớm, không là bằng chứng audio thực.
-- Trả201 wrapper `{intentId, expiresAt:ISO, upload:{url,fields}}`. URL cố định HTTPS Cloudinary account/video/upload; fields gồm public_id ngẫu nhiên, timestamp, overwrite=false, upload_preset signed, api_key public, signature. Không trả secret/JWT hoặc tên/ID bé trong public_id. Browser dùng fetch riêng với credentials=omit, không gửi app headers.
-- Unique `{parentId,requestId}`: retry đúng context/file declaration trả cùng intent; khác payload409 `UPLOAD_INTENT_CONFLICT`; pending hết hạn409 `UPLOAD_INTENT_EXPIRED`. Không tự cấp mới khi finalize lỗi; chủ động thu/gửi lượt mới khi hết hạn.
-- POST `/recordings/finalize` (JWT): JSON strict **chỉ** `{intentId:ObjectId}`. Server recheck owner/unlock/snapshot, SDK inspect đúng public_id ngoài transaction; không tin URL/bytes/duration từ browser. Audio metadata phải có codec, không có video metadata populated, format cho phép webm/mp4/m4a/ogg/mp3/wav, secure_url HTTPS đúng Cloudinary account. Bytes thực `(0,5242880]`, duration thực `(0,180]`; thiếu metadata bị từ chối. Đây là siết kiểm chứng; multipart cũ vẫn clamp duration client và không chứng minh audio bằng metadata.
-- Trả201 Recording receipt `{id,_id,childId,lessonId?,activityId?,contentVersion?,url,publicId?,durationSec,wordOrPrompt?,createdAt}`. Không xuất uploadIntentId/state/fingerprint. Receipt và Recording cùng transaction, unique sparse `Recording.uploadIntentId`; retry/concurrent trả cùng ID, completed hết hạn vẫn trả receipt. Sau intent TTL, receipt tra từ Recording và kiểm ownership bé. Chỉ receipt mới được dùng làm answer.
-- Lỗi: schema/context400; auth401; không sở hữu/context không tồn tại404; asset chưa có404 `UPLOAD_ASSET_NOT_FOUND` (chỉ mã này cho phép reupload sau upload response không rõ); intent conflict/expired409; asset quá size413 `UPLOAD_TOO_LARGE`; metadata/video/duration422 `UPLOAD_AUDIO_INVALID`; storage503 `UPLOAD_STORAGE_UNAVAILABLE`; DB503 `DATABASE_UNAVAILABLE`. Không lỗi nào cấp điểm hoặc hoàn thành activity.
-- `RecordingUploadIntent`: parent/request/fingerprint, context, publicId/timestamp, pending/completed, recordingId, expiresAt10 phút, deleteAt7 ngày; TTL deleteAt và unique parent/request. `RateLimitBucket`: string `_id=scope:digestIP`, hits, resetAt; TTL resetAt, reset atomic không chờ TTL. `Recording.uploadIntentId` unique sparse/select:false cho bản direct, legacy không có field.
-- DELETE bé: Child và các collections phụ thuộc, thêm RecordingUploadIntent, được cascade tuần tự trong Mongo transaction; finalize/legacy ghi Child.__v để tranh chấp với delete. Failure503 rollback DB. Không xóa Cloudinary trong transaction; xem debt retention/runbook. Không mở quyền đọc audio.
+- `POST /recordings/upload` (JWT): multipart field `audio` + `childId`, `lessonId?`, `activityId?`, `contentVersion?`, `wordOrPrompt?`. Dùng lại ownership/unlock/activity-version và rate limit tài khoản của luồng cũ (10/phút, 200/ngày → `429`). `lessonId`/`activityId` phải đi cùng nhau; standalone không có version. Server kiểm định dạng bằng magic bytes (webm/ogg/mp4-m4a/mp3/wav), giới hạn 5 MiB (`5242880`), tự đọc thời lượng bằng `music-metadata` (thiếu metadata lưu `durationSec=0`); không tin client. Ghi file xong mới tạo Recording trong transaction (ghi `Child.__v` để tranh chấp với delete); DB lỗi thì xóa file vừa ghi.
+- Trả `201` receipt `{id,_id,childId,lessonId?,activityId?,contentVersion?,audioUrl,durationSec,mimeType?,byteSize?,wordOrPrompt?,createdAt}`. Không xuất `storageKey`. Chỉ `id` của receipt được dùng làm answer thu âm; thiếu version chỉ khớp bài version 0; bản khác bé/bài/activity/version không tính đạt.
+- `audioUrl` là `/api/v1/recordings/:id/audio?t=<token>`. Token HMAC ký bằng `JWT_SECRET` (audience `recording-audio`, gắn recordingId, hạn 1 giờ), được ký mới mỗi lần API trả recording vì thẻ `<audio>` không gửi được Bearer.
+- `GET /recordings/:id/audio?t=` (công khai theo token): token sai/hết hạn/không khớp recording → `403 RECORDING_TOKEN_INVALID`; không tìm thấy bản thu → 404. Hỗ trợ Range (`206`), `Cache-Control: private, no-store`.
+- Lỗi upload: schema/context 400; auth 401; không sở hữu/context không tồn tại 404; bài học khóa 403; magic bytes sai 422 `AUDIO_INVALID`; quá 5 MiB 413 `AUDIO_TOO_LARGE`; storage chưa sẵn sàng 503 `AUDIO_STORAGE_UNAVAILABLE`; DB 503 `DATABASE_UNAVAILABLE`. Không lỗi nào cấp điểm.
+- `GET /recordings/children/:childId`: tối đa 200 bản mới nhất; mỗi phần tử kèm `audioUrl` đã ký token, không xuất `storageKey`.
+- `POST /recordings/upload-intent` và `POST /recordings/finalize` trả `410 RECORDING_FLOW_MOVED` (client không gọi nữa). `Recording` model bỏ `url/publicId/resourceType/uploadIntentId`, thêm `storageKey` (bắt buộc), `mimeType`, `byteSize`. Model `AudioCleanupTask` đã gỡ; không tạo mới `RecordingUploadIntent` (model intent còn giữ để dọn 8 bản pending cũ và để cascade khi xóa bé).
+- DELETE bé: đọc `storageKey` các recording trong transaction cascade (cùng `RecordingUploadIntent` legacy), sau commit xóa file trên đĩa (best-effort, không làm hỏng thao tác xóa). Failure 503 rollback DB.
 
-**Cập nhật 2026-10-13 (review sau khi chuyển backend sang Vercel):**
-- Finalize đồng thời: request đầu giành intent (`pending → finalizing`, lease 45 s); request khác chờ có jitter (tối đa 15 s) rồi trả **cùng receipt**. Quá thời gian chờ trả `409 UPLOAD_FINALIZE_IN_PROGRESS` (không còn 503). Mọi nhánh lỗi tra receipt theo intent trước khi ném lỗi; lỗi inspect/nghiệp vụ trả intent về `pending`.
-- Inspect khoan dung với file thiếu duration (WebM của Chrome): nhận nếu có codec audio, format hợp lệ, ≤ 5 MiB; lưu `durationSec = 0`. Luồng video placeholder chỉ coi là audio khi provider đánh dấu `is_audio`. Vẫn từ chối video thật, quá cỡ, duration > 180.
-- Cloudinary giới hạn tần suất (HTTP 420/429) trả `503 UPLOAD_STORAGE_RATE_LIMITED` kèm `Retry-After`.
-- `POST /recordings/upload-intent` có limiter riêng theo tài khoản: 10/phút, 200/ngày (`429`). Chữ ký upload hết hiệu lực sau khoảng 15 phút.
-- `RecordingUploadIntent`: thêm trạng thái `finalizing` (+ `claimToken`, lease); intent chưa hoàn tất giữ 30 ngày, đã hoàn tất giữ 7 ngày kể từ lúc hoàn tất (để đối soát asset mồ côi).
-- DELETE bé: sau commit, xóa asset audio trên Cloudinary (`invalidate: true`, đúng `resource_type`); lỗi provider ghi vào collection mới `AudioCleanupTask` (status `pending`) để xử lý lại, không làm hỏng thao tác xóa. `Recording.resourceType` mới lưu loại asset cho bản legacy.
-- `GET /recordings/children/:childId`: tối đa 200 bản mới nhất, shape không đổi.
-- `/health`200 liveness; `/ready`200 ping DB hoặc503 `DATABASE_UNAVAILABLE`. API production rate limit shared Mongo auth30/15m/API120/m, store lỗi503 `RATE_LIMIT_UNAVAILABLE`.
-
-Giả định môi trường chưa xác minh: preset/metadata provider thực, IP qua rewrite, replica set/network/transaction, native build, cookie auth và webhook. Multipart legacy chỉ dùng local/Render/client cũ; không hứa file5MiB qua endpoint này trên Vercel.
+**Audio nội dung**
+- `POST /admin/content/audio` (JWT + admin): multipart `audio` (mp3/m4a/ogg/wav, ≤ 10 MiB; webm không nhận cho nội dung). Lưu theo sha256 nội dung nên gửi lại cùng file trả cùng URL. Trả `201 {url:"/api/v1/media/audio/<sha16>.<ext>"}`, `Cache-Control: no-store`. Sai định dạng 422 `AUDIO_INVALID`, quá cỡ 413 `AUDIO_TOO_LARGE`, không admin 403.
+- `GET /media/audio/:name` (công khai): tên kiểm bằng regex `^[a-f0-9]{16}\.(mp3|m4a|ogg|wav)$` (chặn path traversal); sai tên 400, không có file 404, storage chưa sẵn sàng 503. `Cache-Control: public, max-age=31536000, immutable`, hỗ trợ Range (`206`).
+- `audioUrl` nội dung gắn qua CMS draft→publish (phase FE), không ghi thẳng DB. Validation nội dung (`content.validation`, `admin.validation`, `content.read-schema`) chấp nhận URL `/api/v1/media/audio/<sha>.<ext>` bên cạnh HTTPS cũ.
+- Vercel không có đĩa bền: audio không khả dụng ở deployment Vercel (`503`), không âm thầm hỏng.
+- `/health` 200 liveness; `/ready` 200 ping DB hoặc 503 `DATABASE_UNAVAILABLE`. API production rate limit shared Mongo auth 30/15m / API 120/m, store lỗi 503 `RATE_LIMIT_UNAVAILABLE`.
 
 ### Signed CMS cover-image upload — 2026-10-12
 
@@ -148,8 +143,12 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 | POST | `/stories/:id/explored` | Auth | Ghi exploration cho child (idempotent qua unique index `{childId, kind, refId}`) |
 | GET | `/culture`, `/culture/:id` | Public | Đọc bài văn hóa (query `category`, `search` được escape regex; limit 100) |
 | POST | `/culture/:id/quiz` | Auth | Chấm quiz và thưởng (+5 points idempotent, rollback tự động nếu lỗi) |
-| POST | `/recordings` | Auth + multipart | **Legacy.** Production mặc định tắt (`410 LEGACY_RECORDING_UPLOAD_DISABLED`, bật lại bằng `LEGACY_RECORDING_UPLOAD_ENABLED=true`); dev/test bật. Upload file âm thanh bé đọc (`audio/*`, `application/ogg`; max 5MB; duration capped 180s; Dev/Test fallback Base64 <= 2MB) |
-| GET | `/recordings/children/:childId` | Auth | Parent ownership; tối đa 200 bản mới nhất |
+| POST | `/recordings/upload` | Auth + multipart | Upload bản thu của bé lên đĩa BE (field `audio`; magic bytes; max 5MB; thời lượng đọc server). Trả receipt kèm `audioUrl` đã ký token |
+| GET | `/recordings/:id/audio?t=` | Token HMAC | Nghe bản thu; token sai/hết hạn `403`; hỗ trợ Range; `Cache-Control: private, no-store` |
+| POST | `/recordings/upload-intent`, `/recordings/finalize` | — | `410 RECORDING_FLOW_MOVED` (luồng Cloudinary cũ đã ngừng) |
+| GET | `/recordings/children/:childId` | Auth | Parent ownership; tối đa 200 bản mới nhất; mỗi bản kèm `audioUrl` đã ký token |
+| POST | `/admin/content/audio` | Auth + admin | Upload audio nội dung (mp3/m4a/ogg/wav, ≤10MB), lưu theo hash; trả `{url:"/api/v1/media/audio/<sha>.<ext>"}` |
+| GET | `/media/audio/:name` | Public | Phát audio nội dung; tên là hash (regex chống traversal); Range; `Cache-Control: public, max-age=31536000, immutable` |
 
 ## Subscription và thanh toán
 

@@ -12,4 +12,14 @@ out="$(vv_compose exec -T vietverse-backup sh /scripts/dump.sh manual)" ||
 path="$VV_HOME/backups/${out##*/}"
 [ -s "$path" ] || vv_die "không thấy file backup $path"
 vv_log "backup: $path ($(du -h "$path" | cut -f1))"
+
+# Audio volume archive alongside the mongodump (never fails the DB backup).
+if aout="$(vv_compose exec -T vietverse-backup sh /scripts/dump-audio.sh manual 2>&1)"; then
+  apath="$VV_HOME/backups/${aout##*/}"
+  [ -s "$apath" ] && vv_log "backup audio: $apath ($(du -h "$apath" | cut -f1))" ||
+    vv_log "CẢNH BÁO: không thấy file backup audio $apath"
+else
+  vv_log "CẢNH BÁO: backup audio thất bại: $aout"
+fi
+
 printf '%s\n' "$path"

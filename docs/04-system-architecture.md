@@ -45,15 +45,12 @@ MongoDB  User, Child, Stage, Lesson, Progress, Recording, Points, Shop, Redempti
 
 ## Storage audio
 
-- Quyết định triển khai Vercel (2026-10-09): BE cấp intent có chữ ký, browser gửi file thẳng Cloudinary bằng HTTP client riêng không có JWT/cookie/Parent Gate; BE đọc metadata rồi finalize transaction. Upload provider riêng lẻ không hoàn thành bài/cấp điểm.
-- Giới hạn 5 MiB và 180s được kiểm chứng từ provider; metadata thiếu/video bị từ chối. Intent pending cho phép finalize 10 phút, TTL 7 ngày; receipt Recording đọc được sau TTL với ownership.
-- Finalize/legacy persist và xóa bé cùng write boundary trên Child; cascade DB và receipt atomic trên replica set. Intent cũng bị cascade. Không gọi Cloudinary trong transaction; xóa DB chưa đồng nghĩa xóa vật lý mọi asset audio.
-
-- Có abstraction `IStorageService`.
-- Review2026-10-10: issuance/reuse intent cũng cùng Child write transaction với delete. Legacy publicId UUID/overwrite=false; persist ID ổn định và reconcile commit mất ACK, không cleanup khi DB outcome chưa chắc chắn. FE explicit expiry resend giữ Blob; elapsed timer stop179s margin1s/background, server strict180s; hoàn toàn blocked main thread vẫn là giới hạn browser.
-- Production có thể dùng Cloudinary.
-- Local/dev fallback lưu Data URI trực tiếp trong MongoDB.
-- Fallback phù hợp demo nhỏ, không phù hợp lưu trữ production lâu dài vì phình dữ liệu và khó CDN/retention.
+- Cutover 2026-10-19: mọi audio (bản thu của bé + narration nội dung) lưu trên đĩa BE qua `AUDIO_STORAGE_DIR` (self-host: volume `vietverse_audio` → `/data/audio`, backup tar.gz hằng ngày). Không còn dùng Cloudinary cho audio; service `localAudioStorage` ghi atomic (file tạm → rename), sniff magic bytes và đọc thời lượng bằng `music-metadata`.
+- Bố cục đĩa: bản thu `recordings/<childId>/<uuid>.<ext>`; audio nội dung `content/<sha256 16 hex>.<ext>` (dedupe theo nội dung). Giới hạn: bản thu 5 MiB, audio nội dung 10 MiB, đọc thời lượng phía server, không tin client.
+- Bản thu là dữ liệu nhạy cảm của trẻ: `audioUrl` không public mà là `/api/v1/recordings/:id/audio?t=<token>` với token HMAC (`JWT_SECRET`, hạn 1 giờ, gắn recordingId). Audio nội dung là học liệu, phát công khai tại `/api/v1/media/audio/<hash>.<ext>` với cache bất biến. Cả hai hỗ trợ HTTP Range.
+- Persist bản thu và xóa bé cùng write boundary trên Child (cascade DB atomic trên replica set); file được ghi trước transaction và xóa nếu DB lỗi, file của bé bị xóa (best-effort) sau khi cascade commit.
+- Thiếu `AUDIO_STORAGE_DIR`: dev dùng `<repo>/server/.data/audio`; production trả `503 AUDIO_STORAGE_UNAVAILABLE` cho mọi endpoint đọc/ghi audio, các endpoint khác vẫn phục vụ.
+- Vercel không có đĩa bền nên audio không khả dụng ở deployment Vercel (503), không âm thầm hỏng. Ảnh bìa vẫn ở Cloudinary (xem "Storage ảnh CMS").
 
 ## Storage ảnh CMS
 
