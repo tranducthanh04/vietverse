@@ -35,7 +35,7 @@ export const ReviewActivity: React.FC<ReviewActivityProps> = ({
   const isWrongSelected = selectedId !== null && selectedId !== activity.correctAnswer;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto">
+    <div className="flex min-w-0 flex-col items-center justify-center p-6 text-center max-w-full sm:max-w-xl mx-auto">
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>

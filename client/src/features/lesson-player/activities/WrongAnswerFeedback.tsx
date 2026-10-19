@@ -69,11 +69,11 @@ export const WrongAnswerFeedback = forwardRef<WrongAnswerFeedbackHandle, WrongAn
           <div
             role="status"
             aria-live="polite"
-            className="w-full max-w-md mx-auto my-4 rounded-2xl border-2 border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 animate-fade-in"
+            className="w-full min-w-0 max-w-md mx-auto my-4 rounded-2xl border-2 border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 [overflow-wrap:anywhere] animate-fade-in"
           >
             <p className="flex items-center justify-center gap-2 font-bold font-display text-kid-sm">
               <Lightbulb className="w-5 h-5 shrink-0" aria-hidden="true" />
-              <span>{hasContentHint ? activity.wrongHint : t('lesson.wrongHintGeneric')}</span>
+              <span className="min-w-0">{hasContentHint ? activity.wrongHint : t('lesson.wrongHintGeneric')}</span>
             </p>
             {hasContentHint && (
               <SupportTranslation
