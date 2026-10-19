@@ -1,14 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import { app } from '../app.js';
+import { env } from '../config/env.js';
 import { Stage } from '../models/Stage.js';
 import { Lesson } from '../models/Lesson.js';
 import { ShopItem } from '../models/ShopItem.js';
 import { Story } from '../models/Story.js';
 import { CultureArticle } from '../models/CultureArticle.js';
 import { ExplorationLog } from '../models/ExplorationLog.js';
+import { makeWav, makeTempStorageDir } from './audioFixtures.js';
 
 describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
+  const originalStorageDir = env.AUDIO_STORAGE_DIR;
+  let storage: { dir: string; cleanup: () => void };
+  beforeEach(() => { storage = makeTempStorageDir(); env.AUDIO_STORAGE_DIR = storage.dir; });
+  afterEach(() => { env.AUDIO_STORAGE_DIR = originalStorageDir; storage.cleanup(); });
   it('executes full 11-step end-to-end user journey across all features and button actions', async () => {
     // 0. Seed essential initial stage, lesson, shop item, story, and culture article
     const stage = await Stage.create({
@@ -179,10 +185,10 @@ describe('VietVerse Full End-to-End User Journey & Button Logic Test', () => {
     // ==========================================
     // STEP 5: Complete Lesson 1, Earn +10 ViVi Points and 3 Stars
     // ==========================================
-    const recordingRes = await request(app).post('/api/v1/recordings')
+    const recordingRes = await request(app).post('/api/v1/recordings/upload')
       .set('Authorization', `Bearer ${parentToken}`)
       .field('childId', childId).field('lessonId', lesson1Id).field('activityId', 'act-2').field('contentVersion', '0')
-      .attach('audio', Buffer.from('audio fixture'), { filename: 'voice.webm', contentType: 'audio/webm' })
+      .attach('audio', makeWav(), { filename: 'voice.wav', contentType: 'audio/wav' })
       .expect(201);
     const completeRes = await request(app)
       .post(`/api/v1/lessons/${lesson1Id}/complete`)

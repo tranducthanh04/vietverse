@@ -1,5 +1,7 @@
 # Rollout backend Vercel — Vietverse
 
+> **Audio không khả dụng trên Vercel (từ 2026-10-19).** Audio (bản thu của bé + narration nội dung) đã chuyển sang lưu trên đĩa của BE qua `AUDIO_STORAGE_DIR`. Vercel không có đĩa bền, nên `AUDIO_STORAGE_DIR` không được đặt và mọi endpoint audio (`POST /recordings/upload`, `GET /recordings/:id/audio`, `POST /admin/content/audio`, `GET /media/audio/:name`) trả `503 AUDIO_STORAGE_UNAVAILABLE` thay vì âm thầm hỏng. Deploy có audio thật chỉ chạy trên self-host (`vietverse.io.vn`). Các mục Cloudinary signed-upload / finalize / `AudioCleanupTask` / orphan reconciliation bên dưới là **lịch sử** của luồng audio cũ và không còn áp dụng; `CLOUDINARY_*` nay chỉ phục vụ ảnh bìa CMS.
+
 ## CORS, cookie và đích DB — sửa local 2026-10-13, chưa deploy
 
 - BE Production: `CLIENT_ORIGIN` phải là origin HTTPS chính xác của FE đang phục vụ người dùng (hiện tại là alias FE production). Muốn thêm domain FE khác (custom domain, alias phụ) thì khai báo `CLIENT_ORIGINS` gồm các origin HTTPS phân tách dấu phẩy; env sai định dạng làm BE từ chối khởi động. Không còn origin cứng hoặc `localhost` trong code. Preview FE có domain riêng sẽ bị 403 `ORIGIN_NOT_ALLOWED` cho tới khi được thêm vào `CLIENT_ORIGINS` của đúng môi trường BE.

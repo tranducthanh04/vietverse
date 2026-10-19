@@ -1,5 +1,20 @@
 # 06 — Kết quả review senior BA/code
 
+## Audio chuyển sang lưu trên đĩa BE — 2026-10-19, local (nhánh `feat/audio-local-be`, phase 01)
+
+Bối cảnh: audio chuyển từ Cloudinary sang đĩa của BE (volume `vietverse_audio`). Thay đổi này **thay thế** luồng signed upload-intent/finalize Cloudinary trong các review trước; những điểm "còn mở" cũ về audio Cloudinary dưới đây không còn áp dụng.
+
+- **Giải quyết rủi ro cũ:**
+  - URL bản thu nay **không công khai** (trước đây là URL Cloudinary công khai cho tới khi bị xóa). `GET /recordings/:id/audio?t=` dùng token HMAC (`JWT_SECRET`, audience `recording-audio`, gắn recordingId, hạn 1 giờ); token sai/hết hạn → 403. Đóng mục "Còn mở: type authenticated + URL ký cho audio".
+  - Bỏ `AudioCleanupTask` và backlog dọn asset provider: xóa bé nay xóa thẳng file trên đĩa (best-effort sau commit), không còn hàng đợi reconcile Cloudinary.
+  - `durationSec` đọc phía server bằng `music-metadata` (thiếu metadata → 0), không tin client; magic bytes thay cho tin MIME client.
+- **Rủi ro/giả định mới (cần nghiệm thu trước khi coi là đóng):**
+  - **Audio nội dung công khai theo hash** (`/api/v1/media/audio/<16 hex>.<ext>`, cache immutable): bài trả phí có thể bị nghe lén nếu đoán được hash. Không gian 64-bit nên xác suất rất thấp — **chấp nhận được** (quyết định của plan). Bản thu của bé vẫn ký token vì nhạy cảm hơn.
+  - **`AUDIO_STORAGE_DIR` phải trỏ volume bền, ghi được.** Thiếu biến: production trả `503 AUDIO_STORAGE_UNAVAILABLE` cho mọi endpoint đọc/ghi audio (các endpoint khác vẫn chạy); dev fallback `<repo>/server/.data/audio`. Vercel không có đĩa bền → audio không khả dụng, không âm thầm hỏng.
+  - **Quyền ghi volume:** API chạy user `node` (uid 1000 cố định trong image). Thêm one-shot `vietverse-audio-init` chown `/data/audio` về `1000:1000` và đặt world-readable để container backup (chạy `VV_UID` của host) đọc read-only được dù uid khác 1000. Cần nghiệm thu trên host thật nếu `VV_UID` ≠ 1000.
+  - **Backup:** `dump-audio.sh` tar.gz volume audio vào `./backups` mỗi ngày, giữ cùng `BACKUP_KEEP` như mongodump; khôi phục bằng cách giải nén vào volume (xem `self-host-deployment.md`).
+- **Kiểm chứng:** server typecheck + build sạch; các bộ test audio mới/được sửa qua (upload, playback token+Range, content audio + media, 503 production, 410 flow-moved, validation URL media; deploymentIndexes, children cascade, recordingOwnership, full_flow, parentDashboard). **Chưa chạy** `docker compose config` (máy dev không có docker) — đã kiểm cú pháp YAML; cần chạy trên host. **Chưa** chạy trình duyệt thật và chưa gộp FE (phase 02).
+
 ## COVER-FALLBACK-SAFE — 2026-10-19, sửa local
 
 - Lookup icon story/culture từng đọc thuộc tính kế thừa của object; category `constructor`, `toString`, `__proto__`, `hasOwnProperty` không có ảnh làm React ném `Element type is invalid`. Model category là string, nên dữ liệu legacy có thể đi tới cả list/detail.

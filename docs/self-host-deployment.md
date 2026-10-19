@@ -19,16 +19,17 @@ Internet ─443─► nginx host (TLS; /etc/nginx/sites-available/vietverse.conf
                                             ├─ /api/*       ─► vietverse-api:5000  (Node 22, dist/server.js)
                                             └─ /healthz     ─► vietverse-api:5000/health
                          vietverse-api ─► vietverse-mongo:27017 (mongo:7, rs0, keyFile, auth)
-                         vietverse-backup (mongo:7, mongodump hằng ngày → ~/vietverse/backups)
-                         vietverse-mongo-keyfile / vietverse-mongo-init: one-shot, chạy mỗi lần `up`
+                         vietverse-backup (mongo:7, mongodump + tar.gz audio hằng ngày → ~/vietverse/backups)
+                         vietverse-api ─► volume vietverse_audio (/data/audio: bản thu + audio nội dung)
+                         vietverse-mongo-keyfile / vietverse-mongo-init / vietverse-audio-init: one-shot, chạy mỗi lần `up`
 ```
 
 | Thành phần | Giá trị cố định |
 | --- | --- |
 | Compose project | `vietverse` (đặt trong `compose.yml` bằng `name:`; script luôn kèm `-p vietverse`) |
-| Container | `vietverse-web`, `vietverse-api`, `vietverse-mongo`, `vietverse-backup`, one-shot `vietverse-mongo-keyfile`, `vietverse-mongo-init` |
+| Container | `vietverse-web`, `vietverse-api`, `vietverse-mongo`, `vietverse-backup`, one-shot `vietverse-mongo-keyfile`, `vietverse-mongo-init`, `vietverse-audio-init` |
 | Network | `vietverse_net` (bridge riêng) |
-| Volume | `vietverse_mongo_data`, `vietverse_mongo_config`, `vietverse_mongo_keyfile` |
+| Volume | `vietverse_mongo_data`, `vietverse_mongo_config`, `vietverse_mongo_keyfile`, `vietverse_audio` (audio BE, mount `/data/audio`) |
 | Image | `vietverse/api:<git sha 12>`, `vietverse/web:<git sha 12>`, nhãn `io.vietverse.project=vietverse` |
 | Port publish | duy nhất `127.0.0.1:15081` → `vietverse-web:80`; API và Mongo không publish |
 | Giới hạn | mongo 2 GB / 2 CPU, api 1 GB / 2 CPU, web 256 MB / 1 CPU, backup 512 MB / 1 CPU |
@@ -51,8 +52,8 @@ Mẫu đầy đủ: [`deploy/selfhost/.env.example`](../deploy/selfhost/.env.exa
 | --- | --- | --- |
 | Mongo | `MONGO_ROOT_USERNAME/PASSWORD`, `MONGO_APP_USERNAME/PASSWORD`, `MONGO_BACKUP_USERNAME/PASSWORD` | Có (tự sinh). Mật khẩu chỉ chữ/số |
 | API | `CLIENT_ORIGIN=https://vietverse.io.vn`, `JWT_SECRET`, `JWT_REFRESH_SECRET` | Có (JWT tự sinh) |
-| API cố định | `NODE_ENV=production`, `PORT=5000`, `SELF_HOSTED=1`, `TRUST_PROXY_HOPS=2`, `CMS_PUBLISH_ENABLED=false`, `LEGACY_RECORDING_UPLOAD_ENABLED=false` | Đã có sẵn |
-| Tích hợp | `GOOGLE_CLIENT_ID`, `CLOUDINARY_*` (5 biến), `PAYOS_*` (3 biến, đủ cả bộ hoặc trống) | Tùy chọn; thiếu thì Google/thu âm/ảnh CMS/thanh toán không hoạt động |
+| API cố định | `NODE_ENV=production`, `PORT=5000`, `SELF_HOSTED=1`, `TRUST_PROXY_HOPS=2`, `CMS_PUBLISH_ENABLED=false`, `AUDIO_STORAGE_DIR=/data/audio` (đặt trong `compose.yml`) | Đã có sẵn |
+| Tích hợp | `GOOGLE_CLIENT_ID`, `CLOUDINARY_*` (4 biến, chỉ còn cho ảnh CMS), `PAYOS_*` (3 biến, đủ cả bộ hoặc trống) | Tùy chọn; thiếu thì Google/ảnh CMS/thanh toán không hoạt động. **Audio (thu âm + narration) lưu trên volume `vietverse_audio`, không dùng Cloudinary** |
 | Vận hành | `VIETVERSE_TAG`, `VIETVERSE_PREVIOUS_TAG` (do `up.sh` ghi), `VV_UID/VV_GID` (do `init.sh` ghi), `BACKUP_HOUR=2`, `BACKUP_KEEP=14` | Tự động |
 
 - `MONGODB_URI` **không** nằm trong `.env`: `compose.yml` ghép `mongodb://<app>:<pw>@vietverse-mongo:27017/vietverse?replicaSet=rs0&authSource=vietverse`.
@@ -120,7 +121,20 @@ Index đã thêm không bị gỡ (chỉ additive) nên bản cũ vẫn chạy �
 ## 4. Backup và restore
 
 - Tự động: `vietverse-backup` dump DB `vietverse` mỗi ngày sau `BACKUP_HOUR` giờ VN (mặc định 02:00) vào `~/vietverse/backups/vietverse-YYYY-MM-DD_HHMMSS.archive.gz`, giữ 14 bản daily mới nhất. Container chạy bằng UID của `anhduong` nên file thuộc user này (quyền 600). Dump lỗi → container chuyển `unhealthy` (xem `docker ps`, `docker logs vietverse-backup`).
-- Thủ công: `./backup-now.sh` → `vietverse-manual-*.archive.gz` (không bị xóa tự động).
+- Audio: cùng vòng chạy, `dump-audio.sh` nén volume `vietverse_audio` (mount read-only `/audio`) thành `~/vietverse/backups/vietverse-audio-YYYY-MM-DD_HHMMSS.tar.gz`, giữ cùng `BACKUP_KEEP` bản. Lỗi dump audio cũng đẩy container sang `unhealthy`.
+- Thủ công: `./backup-now.sh` → `vietverse-manual-*.archive.gz` (DB) và `vietverse-audio-manual-*.tar.gz` (audio); cả hai không bị xóa tự động.
+- Khôi phục audio (volume ghi đè, không qua `restore.sh`): dừng API, giải nén tar vào volume, rồi bật lại API —
+
+```bash
+cd ~/vietverse
+docker compose -p vietverse stop vietverse-api
+# Giải nén vào gốc volume audio; tar đã chứa recordings/ và content/
+docker run --rm -v vietverse_audio:/data/audio -v "$PWD/backups":/b:ro mongo:7 \
+  sh -c 'cd /data/audio && tar -xzf /b/vietverse-audio-<time>.tar.gz'
+docker run --rm -v vietverse_audio:/data/audio --user 0:0 mongo:7 \
+  sh -c 'chown -R 1000:1000 /data/audio && chmod -R u=rwX,go=rX /data/audio'
+docker compose -p vietverse start vietverse-api
+```
 - **[QĐ D6 chờ owner]** Bản sao ngoài máy: chưa chốt nơi lưu; tới khi chốt, chép thủ công `~/vietverse/backups/*` ra máy khác.
 - Restore (chỉ vào DB `vietverse`):
 
@@ -169,7 +183,9 @@ Xóa DNS record nếu không dùng nữa, rồi so lại trạng thái các dự
 
 Vercel FE/BE và Atlas giữ nguyên ít nhất 14 ngày sau cutover. Rollback ≤ 5 phút: gỡ redirect trên Vercel (deploy lại commit trước) hoặc trỏ người dùng về `vietverse-nine.vercel.app`; nếu đã có dữ liệu ghi trên máy mới thì `backup-now.sh` rồi `mongorestore` ngược về Atlas theo [vercel-deployment.md](./vercel-deployment.md). Chưa thực hiện bước nào ở mục này.
 
-## Cloudinary trên self-host — 2026-10-17
+## Cloudinary trên self-host — 2026-10-17 (lịch sử; audio đã chuyển sang đĩa 2026-10-19)
+
+> Từ 2026-10-19, audio (thu âm + narration) lưu trên volume `vietverse_audio` qua `AUDIO_STORAGE_DIR=/data/audio`, **không còn dùng Cloudinary**. `CLOUDINARY_RECORDING_UPLOAD_PRESET` không còn tác dụng (có thể bỏ khỏi `.env`); `CLOUDINARY_*` còn lại chỉ phục vụ ảnh bìa CMS. Mục dưới giữ làm lịch sử.
 
 - Triệu chứng trước đó: bé thu âm xong báo "Lưu trữ thu âm chưa sẵn sàng" (503 `UPLOAD_STORAGE_UNAVAILABLE`) vì cả 5 biến `CLOUDINARY_*` trong `~/vietverse/.env` để trống.
 - Đã nạp bằng `~/vietverse/set-env.sh` (sao lưu `.env` trước: `~/vietverse/.env.bak-20261017-122350`): `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_RECORDING_UPLOAD_PRESET=vietverse_recordings_signed`, `CLOUDINARY_IMAGE_UPLOAD_PRESET=vietverse_content_images_signed`. Hai preset signed đã có sẵn trên account từ đợt Vercel. Giá trị secret không ghi vào repo.
