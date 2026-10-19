@@ -1,0 +1,834 @@
+{
+  "createdAt": "2026-10-19T04:08:17.458Z",
+  "headDuringLocalChecks": "9b809bd3b27ea69cad2da2413825ffb8912d3f98",
+  "base": "9b809bd3b27ea69cad2da2413825ffb8912d3f98",
+  "headAtCollection": "9b809bd3b27ea69cad2da2413825ffb8912d3f98",
+  "directories": {
+    "startup": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-OfyqJ5",
+    "red": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF",
+    "initialGreen": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb",
+    "targetedGreen": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS",
+    "textEnds": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG",
+    "quality": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL"
+  },
+  "summary": {
+    "red": {
+      "passed": 24,
+      "failed": 4
+    },
+    "initialGreen": {
+      "passed": 93,
+      "failed": 5
+    },
+    "targetedGreen": {
+      "passed": 5
+    },
+    "distinctMatrixCasesCovered": 98,
+    "textEndCases": 12,
+    "unchangedShortCardRectangles": 24,
+    "baselineFullSortResetAbsent": 32,
+    "baselineFooterOverflows": [],
+    "tests": {
+      "focused": {
+        "passed": 118,
+        "files": 8
+      },
+      "full": {
+        "passed": 509,
+        "files": 50
+      }
+    }
+  },
+  "entries": [
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-OfyqJ5\\harness.mjs",
+      "bytes": 17521,
+      "sha256": "c3c060964f5f1a3bfd620ee2f164c784c9cbdde48dcceca250b42506e1599aef"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-OfyqJ5\\product.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-fill_blank-short.png",
+      "bytes": 43032,
+      "sha256": "9650f856410545c0ee851d94fda56e0bab5c41e8454676cfd53d1fd564c58bdf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-review-original216-failure.png",
+      "bytes": 25444,
+      "sha256": "0db73e017bedcc47278d16e8efde35312793b624f93da0edcc72b7f6b2dc9a78"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-review-original216.png",
+      "bytes": 82286,
+      "sha256": "99cff77f3b237b200e5f0b673cb0f7c35408c83c15bcb6198a1fb08fc9df4ae8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-review-originalRaw228-failure.png",
+      "bytes": 25444,
+      "sha256": "0db73e017bedcc47278d16e8efde35312793b624f93da0edcc72b7f6b2dc9a78"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-review-originalRaw228.png",
+      "bytes": 83374,
+      "sha256": "62cac25794db3f23c9d2f822f048704f5ef2713b75ee0340eeef2d7680d58a3e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-review-short.png",
+      "bytes": 36723,
+      "sha256": "459341ee37fd2e2e727d96fca3b89c1643b1bf41a297486dc155c92a4eb5180b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-1366-sort_order-short.png",
+      "bytes": 35401,
+      "sha256": "faade2e24adf2299e31c4b13560354b4d369e2815644ca62a7ea7a5e0ac1ef8a"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-320-fill_blank-short.png",
+      "bytes": 33422,
+      "sha256": "5203c07a7b2d8eb79cfd079dac791e5f72099afd4db0bc648fd37d98796d1c33"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-320-review-short.png",
+      "bytes": 29287,
+      "sha256": "59d0fcb4cb007f7f9ab8266f41c1ba355761ee29810b83d620a76c3b25371b5e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\en-320-sort_order-short.png",
+      "bytes": 29121,
+      "sha256": "33091ceeccd99299209fb50a9bdb28e50617fc1d7e37d6ae4f84d4dba2d01a0c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\harness.mjs",
+      "bytes": 17834,
+      "sha256": "6a6effb9c0acf37e0408294279ee0329c9db149258edcb8c6861c9850aedec9c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\product.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\receipt.json",
+      "bytes": 92546,
+      "sha256": "7801822639bafd91cb6da3bc5e67743261b469499f1dc63348b050065b2bf159"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-1366-fill_blank-short.png",
+      "bytes": 43758,
+      "sha256": "0486d20e945be3a8330a4e3fb711ed1d10c618dd69dd8ef655c95c3301b087ac"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-1366-review-short.png",
+      "bytes": 37423,
+      "sha256": "0dc3e2162b78c407df68cb998979f411c456a57e199a31cf2e666aac12a6dd87"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-1366-sort_order-short.png",
+      "bytes": 36075,
+      "sha256": "8b79e9a8d7adb136c8d90da2edeb5c9818647fbe856011a11b712af58a9e8cf5"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-fill_blank-short.png",
+      "bytes": 34180,
+      "sha256": "6b5d3e3e6166e9ce365af3c41b4555e20fcfa396da9b9158d546d377f0efc7c2"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-review-original216-failure.png",
+      "bytes": 18145,
+      "sha256": "ac0d11013b422e62ffee644dbee6b49103d9d22beb2cf70d1ceb92d25692ee92"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-review-original216.png",
+      "bytes": 79919,
+      "sha256": "491591f8cb9d86ece866be38255d8563d161dc79fd60a87776fe452fa1cec698"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-review-originalRaw228-failure.png",
+      "bytes": 18145,
+      "sha256": "ac0d11013b422e62ffee644dbee6b49103d9d22beb2cf70d1ceb92d25692ee92"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-review-originalRaw228.png",
+      "bytes": 80784,
+      "sha256": "8a2de73082dda4b86a0ab90b29915c6ee093708347f1fd9c6e08c4808f125d84"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-review-short.png",
+      "bytes": 30067,
+      "sha256": "8f9201fd3bf8a998046f639eb13bdafbb879508f63f183539a6237c11689f03e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-red-QdusmF\\vi-320-sort_order-short.png",
+      "bytes": 29870,
+      "sha256": "d54cdb408553b04202820d984d47f79311fd25d201d2e25da55f506558c62db6"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-fill_blank-boundarySpaced.png",
+      "bytes": 937193,
+      "sha256": "f705b023e5434a30a65661447c411ff66292f65cd7304410804b6207fa153efe"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-fill_blank-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-fill_blank-original216.png",
+      "bytes": 85708,
+      "sha256": "6c60d07a5d561e14f6a172f00187178f7b82e901e52db20c5feacdfcecb7462a"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-fill_blank-short.png",
+      "bytes": 43032,
+      "sha256": "9650f856410545c0ee851d94fda56e0bab5c41e8454676cfd53d1fd564c58bdf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-review-boundarySpaced.png",
+      "bytes": 929360,
+      "sha256": "0fad918e52342f4eca5240e1b755d7b47ca9d96a900b55471b56eb8b7e5aa0f9"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-review-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-review-original216.png",
+      "bytes": 79553,
+      "sha256": "1e1312be77118607c6f7f327d548d8a929f0dc34014ca03536ab6a99d8d834c8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-review-originalRaw228.png",
+      "bytes": 80841,
+      "sha256": "a5642ba87e6b9bdf7f7742acadc53659308a9ffa0d14cece0a5c4c44be73f0d8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-review-short.png",
+      "bytes": 36723,
+      "sha256": "459341ee37fd2e2e727d96fca3b89c1643b1bf41a297486dc155c92a4eb5180b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-sort_order-boundarySpaced.png",
+      "bytes": 928813,
+      "sha256": "1a0494bc94cc46ae09d7036853dfb722d72d902f7e78c0ec30c57836ecb367cf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-sort_order-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-sort_order-original216.png",
+      "bytes": 77998,
+      "sha256": "da65c1313bf03156e3361b311c63be1dbbbf8b7872a93e68269ae65ade3f7035"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-1366-sort_order-short.png",
+      "bytes": 35401,
+      "sha256": "faade2e24adf2299e31c4b13560354b4d369e2815644ca62a7ea7a5e0ac1ef8a"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-fill_blank-boundarySpaced.png",
+      "bytes": 270296,
+      "sha256": "9a8d1261fbbcb71aa189fa980aedd3bfbcd294417db8a09e8f559405452a3570"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-fill_blank-boundaryUnbroken.png",
+      "bytes": 19423,
+      "sha256": "bb27a1a833c7f6a72a804b60c777c29815ec4c8f07af1506ae97bed0848087e1"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-fill_blank-original216.png",
+      "bytes": 72446,
+      "sha256": "15db8a8efd790063368be87c25d590830e381d26aa9c53f099430c43567a3784"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-fill_blank-short.png",
+      "bytes": 33422,
+      "sha256": "5203c07a7b2d8eb79cfd079dac791e5f72099afd4db0bc648fd37d98796d1c33"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-review-boundarySpaced.png",
+      "bytes": 110067,
+      "sha256": "73543caa5f103a5eb5b327c82f444efd4c4592e09e6e0803e1550df0e1530612"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-review-boundaryUnbroken.png",
+      "bytes": 19460,
+      "sha256": "22dca8e3563781e839eb392d5d9653e3b65b8077c5ff4e1b494f50656a029b5f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-review-original216-failure.png",
+      "bytes": 52993,
+      "sha256": "b0ac7587b6db7b1f909f989d9550984b888fd89325df2de3ae6aabe1ce11d52d"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-review-original216.png",
+      "bytes": 54339,
+      "sha256": "18fdf6ef51ea00724c85261b756de76638e02751054d12cbb204f22c3ea0f85b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-review-short.png",
+      "bytes": 29287,
+      "sha256": "59d0fcb4cb007f7f9ab8266f41c1ba355761ee29810b83d620a76c3b25371b5e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-sort_order-boundarySpaced.png",
+      "bytes": 265314,
+      "sha256": "c29b4082dae88d501cbffddd9544cd538ea119cff8e34a5385e3b5019e82d7ae"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-sort_order-boundaryUnbroken.png",
+      "bytes": 19423,
+      "sha256": "bb27a1a833c7f6a72a804b60c777c29815ec4c8f07af1506ae97bed0848087e1"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-sort_order-original216.png",
+      "bytes": 69377,
+      "sha256": "7fc5a01ab9a4f525caecba834f8537f4bbf30d6a71cad8dd07e92ed0eca3a032"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-320-sort_order-short.png",
+      "bytes": 29121,
+      "sha256": "33091ceeccd99299209fb50a9bdb28e50617fc1d7e37d6ae4f84d4dba2d01a0c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\en-390-fill_blank-original216-failure.png",
+      "bytes": 70558,
+      "sha256": "7f9046063a7bdc1303bd2dd9684036325115978ad79775ca304a7f483586b132"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\harness.mjs",
+      "bytes": 17834,
+      "sha256": "6a6effb9c0acf37e0408294279ee0329c9db149258edcb8c6861c9850aedec9c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\product.diff",
+      "bytes": 2175,
+      "sha256": "837faf538f0e1b2a0a63a45b0829892e1cf140417b617c5f382c7e22d96ee3b4"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\receipt.json",
+      "bytes": 1068139,
+      "sha256": "6e573a7259cbd1f1334044237d1a6ab61bb4f480d935ad8f62224b4ca1574e1e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-fill_blank-boundarySpaced.png",
+      "bytes": 937878,
+      "sha256": "f286937c62040d8406173556b4361777da8b03acd18059df3dc96c07dcd61667"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-fill_blank-boundaryUnbroken.png",
+      "bytes": 56384,
+      "sha256": "781ba4d0609ad1a7b6064ed4ee513e9db5e59adb4416293392e8382b3d035bba"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-fill_blank-original216.png",
+      "bytes": 86350,
+      "sha256": "5ad016b8c0f63fc14b69cd8bd7e49033783b8ec35faa9f8a56ec0bb37e20ba10"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-fill_blank-short.png",
+      "bytes": 43758,
+      "sha256": "0486d20e945be3a8330a4e3fb711ed1d10c618dd69dd8ef655c95c3301b087ac"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-review-boundarySpaced.png",
+      "bytes": 930037,
+      "sha256": "5c41eba06d471453a3323727ddf174aa64072099717c6637462b485117b009e3"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-review-boundaryUnbroken.png",
+      "bytes": 56384,
+      "sha256": "781ba4d0609ad1a7b6064ed4ee513e9db5e59adb4416293392e8382b3d035bba"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-review-original216.png",
+      "bytes": 80225,
+      "sha256": "c10cb5207eb051ea3a420c25d7dc7477658f8d962c221f0dcb4a9d43990f50cf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-review-short.png",
+      "bytes": 37423,
+      "sha256": "0dc3e2162b78c407df68cb998979f411c456a57e199a31cf2e666aac12a6dd87"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-sort_order-boundarySpaced.png",
+      "bytes": 929489,
+      "sha256": "65641699e12c2ccc24306072a5863b093f0a0fddf3f8e8ec5b93adbd6b0878d2"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-sort_order-boundaryUnbroken.png",
+      "bytes": 56384,
+      "sha256": "781ba4d0609ad1a7b6064ed4ee513e9db5e59adb4416293392e8382b3d035bba"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-sort_order-original216.png",
+      "bytes": 78685,
+      "sha256": "40d9099f8fbdcf76cd5a7b38c56209ce234b9ec3fbdeb7cf4ed26bc70a3dbbfc"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-1366-sort_order-short.png",
+      "bytes": 36075,
+      "sha256": "8b79e9a8d7adb136c8d90da2edeb5c9818647fbe856011a11b712af58a9e8cf5"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-fill_blank-boundarySpaced.png",
+      "bytes": 269914,
+      "sha256": "61399d29c793c53a5334586c3897bb0e5a2b7e54508b38eb7616fb16abe38847"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-fill_blank-boundaryUnbroken.png",
+      "bytes": 20073,
+      "sha256": "d11b97b65d7325a163d2bb4ee92c042e98b937ee3d4959a56bbb8eff65a5f283"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-fill_blank-original216.png",
+      "bytes": 72585,
+      "sha256": "dd27ca47e6fcaa991d787845f70fa41435dd3e91802c2b048fd45a1ae48827ab"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-fill_blank-short.png",
+      "bytes": 34180,
+      "sha256": "6b5d3e3e6166e9ce365af3c41b4555e20fcfa396da9b9158d546d377f0efc7c2"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-boundarySpaced.png",
+      "bytes": 110812,
+      "sha256": "8b037a46b04dc043cc7b82a4af670ecc647b808400b73847579894a90537529f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-boundaryUnbroken.png",
+      "bytes": 20106,
+      "sha256": "03c902d6d73bc9103b9672701755931c06dbcb30d004752e2a9af1626e525a48"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-original216-failure.png",
+      "bytes": 53252,
+      "sha256": "f09caf401c6100e8bf8000b73c2bcaf070124c3ee1b6d509926631a8fa6d9eb4"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-original216.png",
+      "bytes": 54722,
+      "sha256": "ddeec85830a987f36b139fa0cc39fc08803da81fac458c0e20716639813e73d8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-originalRaw228-failure.png",
+      "bytes": 53252,
+      "sha256": "f09caf401c6100e8bf8000b73c2bcaf070124c3ee1b6d509926631a8fa6d9eb4"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-originalRaw228.png",
+      "bytes": 54722,
+      "sha256": "ddeec85830a987f36b139fa0cc39fc08803da81fac458c0e20716639813e73d8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-review-short.png",
+      "bytes": 30067,
+      "sha256": "8f9201fd3bf8a998046f639eb13bdafbb879508f63f183539a6237c11689f03e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-sort_order-boundarySpaced.png",
+      "bytes": 264935,
+      "sha256": "2a349f899bbd989ca14d1debcb3c19eccc50fbb1574d8247c8cc05474e5b934c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-sort_order-boundaryUnbroken.png",
+      "bytes": 20073,
+      "sha256": "d11b97b65d7325a163d2bb4ee92c042e98b937ee3d4959a56bbb8eff65a5f283"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-sort_order-original216.png",
+      "bytes": 69013,
+      "sha256": "f656da55bc30d6402656f5a775293c1260e8fb17ee7b3a28c8f3a150bf24f7b9"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-320-sort_order-short.png",
+      "bytes": 29870,
+      "sha256": "d54cdb408553b04202820d984d47f79311fd25d201d2e25da55f506558c62db6"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-8v69Vb\\vi-390-fill_blank-original216-failure.png",
+      "bytes": 71326,
+      "sha256": "22f0603a05472ad9b0751a9f3e9d52c328896d15d8b4db3596d360790ea8d651"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\en-320-review-original216-answer-reachable.png",
+      "bytes": 55902,
+      "sha256": "3a6522d0fcd1ea8ebc60c86d7692c84736bac76f2a6decb3a95b0ef990c1c43d"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\en-320-review-original216.png",
+      "bytes": 54339,
+      "sha256": "18fdf6ef51ea00724c85261b756de76638e02751054d12cbb204f22c3ea0f85b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\en-390-fill_blank-original216-answer-reachable.png",
+      "bytes": 73569,
+      "sha256": "0e516fd43c7e099a6c0c25f0a82eb9ab8f610353e8339a47aab70d4d6c4560aa"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\harness.mjs",
+      "bytes": 18633,
+      "sha256": "4dfe366f0013d4de82e5849b11a11b583ad04259400a908b1c0bff4275380ffc"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\product.diff",
+      "bytes": 2175,
+      "sha256": "837faf538f0e1b2a0a63a45b0829892e1cf140417b617c5f382c7e22d96ee3b4"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\receipt.json",
+      "bytes": 21813,
+      "sha256": "24ac1d52e0095ecf6fce87d7e5a62e46e2c306204fdeb2069271756a69332935"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\vi-320-review-original216-answer-reachable.png",
+      "bytes": 55343,
+      "sha256": "5adb8120a6cebaf1bcae521da54489bc3091eec667b40a0740dc31577fa293ef"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\vi-320-review-original216.png",
+      "bytes": 54722,
+      "sha256": "ddeec85830a987f36b139fa0cc39fc08803da81fac458c0e20716639813e73d8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\vi-320-review-originalRaw228-answer-reachable.png",
+      "bytes": 55211,
+      "sha256": "d4fc2167433f8f616b2c36916beee6d2b3a8f954b6a8dfad7489cc51adbdc90b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\vi-320-review-originalRaw228.png",
+      "bytes": 54722,
+      "sha256": "ddeec85830a987f36b139fa0cc39fc08803da81fac458c0e20716639813e73d8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-FCL5aS\\vi-390-fill_blank-original216-answer-reachable.png",
+      "bytes": 74366,
+      "sha256": "eb4aa0e3e32e8baab9803a91f2c9d981c11452c5ebdfa3c441d38001374833fb"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundarySpaced-answer-reachable.png",
+      "bytes": 107339,
+      "sha256": "56739132cca7e9c0d9223726b7d6de2af50b941bbc21ae93e8d9281500228c6f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundarySpaced-text-end.png",
+      "bytes": 107339,
+      "sha256": "56739132cca7e9c0d9223726b7d6de2af50b941bbc21ae93e8d9281500228c6f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundarySpaced.png",
+      "bytes": 937193,
+      "sha256": "f705b023e5434a30a65661447c411ff66292f65cd7304410804b6207fa153efe"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundaryUnbroken-answer-reachable.png",
+      "bytes": 59688,
+      "sha256": "e81d35ba17d11fba37a2b237bee2007714006d7209082b6e10e65937e77198c8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundaryUnbroken-text-end.png",
+      "bytes": 59688,
+      "sha256": "e81d35ba17d11fba37a2b237bee2007714006d7209082b6e10e65937e77198c8"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-fill_blank-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundarySpaced-answer-reachable.png",
+      "bytes": 140911,
+      "sha256": "e8339403e7af45ca1cbbca63c7cb60553d2c1b021883f2096fbf7e97cef5c6fd"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundarySpaced-text-end.png",
+      "bytes": 140911,
+      "sha256": "e8339403e7af45ca1cbbca63c7cb60553d2c1b021883f2096fbf7e97cef5c6fd"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundarySpaced.png",
+      "bytes": 929360,
+      "sha256": "0fad918e52342f4eca5240e1b755d7b47ca9d96a900b55471b56eb8b7e5aa0f9"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundaryUnbroken-answer-reachable.png",
+      "bytes": 67191,
+      "sha256": "99d96951471959cde6ab1fc05407236f75ae83edbc929d96862bc6069aa6cd8e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundaryUnbroken-text-end.png",
+      "bytes": 67191,
+      "sha256": "99d96951471959cde6ab1fc05407236f75ae83edbc929d96862bc6069aa6cd8e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-review-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-sort_order-boundarySpaced-text-end.png",
+      "bytes": 118924,
+      "sha256": "d63cabbe4970fa35ae1c81d53407704716ca5ae161f5990429f44b37d7f99bba"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-sort_order-boundarySpaced.png",
+      "bytes": 928813,
+      "sha256": "1a0494bc94cc46ae09d7036853dfb722d72d902f7e78c0ec30c57836ecb367cf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-sort_order-boundaryUnbroken-text-end.png",
+      "bytes": 58451,
+      "sha256": "b1db44d1460c123abe3686e8d7624a9c9609a3800a94af1019e829a9d6186b2c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\en-1366-sort_order-boundaryUnbroken.png",
+      "bytes": 55702,
+      "sha256": "94ee457e2f4e448ced8a4ee8fcf6c003282adbf1f3213832a8357c42588627af"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\harness.mjs",
+      "bytes": 19963,
+      "sha256": "e2d50c086a72b416b697d09a6a8556c2fa34ac8871e487dc91b101bae66b3e2b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\product.diff",
+      "bytes": 2175,
+      "sha256": "837faf538f0e1b2a0a63a45b0829892e1cf140417b617c5f382c7e22d96ee3b4"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\receipt.json",
+      "bytes": 232624,
+      "sha256": "5a1e01c9bafe53b992f647c72838efe3ffcbd3d3723b1ab54c8a17a4d3699e89"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundarySpaced-answer-reachable.png",
+      "bytes": 29292,
+      "sha256": "2ce2538d40f9eef31244cb8b6ede71d964dceca341bcad9d31c75dce93782ee2"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundarySpaced-text-end.png",
+      "bytes": 29292,
+      "sha256": "2ce2538d40f9eef31244cb8b6ede71d964dceca341bcad9d31c75dce93782ee2"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundarySpaced.png",
+      "bytes": 269914,
+      "sha256": "61399d29c793c53a5334586c3897bb0e5a2b7e54508b38eb7616fb16abe38847"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundaryUnbroken-answer-reachable.png",
+      "bytes": 27325,
+      "sha256": "888364d50592ecd92bdad3d409dee45130bea34147e6e434502d9e71dbe1573e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundaryUnbroken-text-end.png",
+      "bytes": 27325,
+      "sha256": "888364d50592ecd92bdad3d409dee45130bea34147e6e434502d9e71dbe1573e"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-fill_blank-boundaryUnbroken.png",
+      "bytes": 20073,
+      "sha256": "d11b97b65d7325a163d2bb4ee92c042e98b937ee3d4959a56bbb8eff65a5f283"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundarySpaced-answer-reachable.png",
+      "bytes": 26235,
+      "sha256": "39cef084ad914b675067b9e971b913144d4f77927d6f4137bf58ebd406b7b933"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundarySpaced-text-end.png",
+      "bytes": 26235,
+      "sha256": "39cef084ad914b675067b9e971b913144d4f77927d6f4137bf58ebd406b7b933"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundarySpaced.png",
+      "bytes": 110812,
+      "sha256": "8b037a46b04dc043cc7b82a4af670ecc647b808400b73847579894a90537529f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundaryUnbroken-answer-reachable.png",
+      "bytes": 24122,
+      "sha256": "443ca0d144d8286ef53365b5550b85f77a4f763011da224d9d1bc1135c23de33"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundaryUnbroken-text-end.png",
+      "bytes": 24122,
+      "sha256": "443ca0d144d8286ef53365b5550b85f77a4f763011da224d9d1bc1135c23de33"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-review-boundaryUnbroken.png",
+      "bytes": 20106,
+      "sha256": "03c902d6d73bc9103b9672701755931c06dbcb30d004752e2a9af1626e525a48"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-sort_order-boundarySpaced-text-end.png",
+      "bytes": 24870,
+      "sha256": "eaf7b59afa791c855c9a896bf4eee1fc74324238bc3823e05266b81eec9d5cbb"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-sort_order-boundarySpaced.png",
+      "bytes": 264935,
+      "sha256": "2a349f899bbd989ca14d1debcb3c19eccc50fbb1574d8247c8cc05474e5b934c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-sort_order-boundaryUnbroken-text-end.png",
+      "bytes": 22903,
+      "sha256": "68331b121fadcfd2b086e2622da303ad676f3332e29a3724cb29e6401c258330"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-green-ZbN7QG\\vi-320-sort_order-boundaryUnbroken.png",
+      "bytes": 20073,
+      "sha256": "d11b97b65d7325a163d2bb4ee92c042e98b937ee3d4959a56bbb8eff65a5f283"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\build.log",
+      "bytes": 5428,
+      "sha256": "8f4c82d4d6aac9b55e053a9e14ef5a91c3b9c8ec2a0caced6a7d3bad1c40d59b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\focused.json",
+      "bytes": 37815,
+      "sha256": "6c5e12f949286dd0814fbbf357f6ed396426c3b9591422d146519f67576fb840"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\focused.log",
+      "bytes": 1757,
+      "sha256": "ff6a56e7b2e12902bad4f77172a6ec2d0b6efeef4f4464a2e937626536c9c51d"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\full.json",
+      "bytes": 159527,
+      "sha256": "126e99e63624a105e754ac256935f146686d906d75feb8585b04c7bcd8b112bf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\full.log",
+      "bytes": 7467,
+      "sha256": "7b024676269c41db075412ecccb5d79fb15398e3b19287e60f3dd8d1c1254523"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\lint.log",
+      "bytes": 18537,
+      "sha256": "1eb41e518aca2e2f487f3f9e8e6946331d39efc7b4e17d0e3f7ddf2a8adc8ea1"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\receipt.json",
+      "bytes": 3340,
+      "sha256": "05fb08f5c6f3b73af063d22bfcc4581de271a10beb9ebf00b7287ebfaa015c9c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\runner.mjs",
+      "bytes": 3697,
+      "sha256": "069fcb3ff9875d3fec1585fbb31f825c06469a62bab08bddb62371741e89cd67"
+    },
+    {
+      "path": "C:\\Users\\Asus\\AppData\\Local\\Temp\\vietverse-hint-quality-ItAnzL\\typecheck.log",
+      "bytes": 206,
+      "sha256": "b70d3eb20902ff2ee52f8f59851c663ba704c74cbdd854a7339c9896e9978bda"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\features\\lesson-player\\activities\\WrongAnswerFeedback.tsx",
+      "bytes": 5059,
+      "sha256": "c936d6bbeda8ad92a9b9395e284f6433e7c5b6360c93290e26e9738ce045f93c"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\features\\lesson-player\\activities\\ReviewActivity.tsx",
+      "bytes": 3456,
+      "sha256": "a8c4a38fbf17082c1aeedcb9001c02fc37bc8326874a491fc192d3ac1ce0ef91"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\features\\lesson-player\\activities\\FillBlankActivity.tsx",
+      "bytes": 3740,
+      "sha256": "e05cc5257a10fef1e3dad2fdf9a0585f9ae3ba9ccb1a9e5ee5946961e815e911"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\features\\lesson-player\\activities\\SortOrderActivity.tsx",
+      "bytes": 4320,
+      "sha256": "04aa6649b5bc80842fd0107290605c5771210cca6b2829525a6b20a1ac80cd6f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\features\\lesson-player\\LessonPlayerPage.tsx",
+      "bytes": 22562,
+      "sha256": "505948da6c748207f52ee467515358ffbf22f15d637c486076ac744c8f1b1eac"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\components\\ui\\SupportTranslation.tsx",
+      "bytes": 2028,
+      "sha256": "be218268b98d28e99b550bf15efd9aba784b8a695515838add153041e872976a"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\hooks\\useNarration.ts",
+      "bytes": 9541,
+      "sha256": "55f6da4aafe13145af9a82be0f8d5d2225efa2fd049e4ce0b54af88b9ea07812"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\store\\lessonSessionStore.ts",
+      "bytes": 6156,
+      "sha256": "e2e023f276c8c7913de7f7dcc043b32b7e01f868b921bf48177e1070d26db539"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\store\\authStore.ts",
+      "bytes": 4697,
+      "sha256": "7258001bf231fb202e4933348edfbf58911717e4c82843423f33c92e742905cb"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\store\\childStore.ts",
+      "bytes": 3697,
+      "sha256": "66db2245c473c8a5a143504d7fdd24e8d83648bbb95a6b8bf9c5e3d5bbf72984"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\lib\\api.ts",
+      "bytes": 6393,
+      "sha256": "2c728e1ad2a4c0a71f0a1c55bddce7f0753d227a741f05d90a9dc26299e64988"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\index.css",
+      "bytes": 2273,
+      "sha256": "6d68fe7af90f1aaa0a0708040cb02466f9a7aa0aea73527a93b9f702069f8cdf"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\index.html",
+      "bytes": 1248,
+      "sha256": "188e8c2899a1a0bb6b05bfc93b6bcbc2b3cf39ab3e4b3e530e813d5e64bb0058"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\vite.config.ts",
+      "bytes": 1493,
+      "sha256": "913ae8872c87e64375c88eeba5ac202ac68dd491af988f6ceffb1cd581958163"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\tailwind.config.js",
+      "bytes": 6058,
+      "sha256": "420ea41248f09064fca9adb60abba0480061eb8df8acdb947a96e50e7bb7666a"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\package-lock.json",
+      "bytes": 394944,
+      "sha256": "9a1c45fa0446f731bc593a1a9d644141e0659be33e6bb8481b6ad1509a33643f"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\client\\src\\test\\wrongHintResponsive.test.tsx",
+      "bytes": 6458,
+      "sha256": "913ed670f9460e75052b32211f7d38dc2693fd64a7fc5c1009b202eba588c6d6"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\scripts\\verify-wrong-hint-browser.mjs",
+      "bytes": 19963,
+      "sha256": "e2d50c086a72b416b697d09a6a8556c2fa34ac8871e487dc91b101bae66b3e2b"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\scripts\\verify-wrong-hint-quality.mjs",
+      "bytes": 3697,
+      "sha256": "069fcb3ff9875d3fec1585fbb31f825c06469a62bab08bddb62371741e89cd67"
+    },
+    {
+      "path": "C:\\Users\\Asus\\.codex\\worktrees\\wrong-hint-overflow\\codeDuAN\\plans\\261019-wrong-hint-overflow\\collect-evidence.mjs",
+      "bytes": 4748,
+      "sha256": "1e0aea30c159045371a501b9fb627faf9a80d7377e8715bce9ad32859e20aae8"
+    }
+  ]
+}
