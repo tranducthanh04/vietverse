@@ -73,6 +73,29 @@ services:
     cpus: 2
     logging: *default-logging
 
+  # One-shot: makes the audio volume writable by the API runtime user (node = uid 1000 in the
+  # image) and world-readable so the backup container (any VV_UID) can archive it read-only.
+  vietverse-audio-init:
+    image: mongo:7
+    container_name: vietverse-audio-init
+    restart: "no"
+    user: "0:0"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        set -eu;
+        mkdir -p /data/audio/recordings /data/audio/content;
+        chown -R 1000:1000 /data/audio;
+        chmod -R u=rwX,go=rX /data/audio;
+        echo 'audio volume ready'
+    volumes:
+      - vietverse_audio:/data/audio
+    network_mode: none
+    mem_limit: 64m
+    cpus: 0.5
+    logging: *default-logging
+
   # One-shot on every `up`: rs.initiate (once) + create/update app and backup users.
   vietverse-mongo-init:
     image: mongo:7
@@ -119,20 +142,24 @@ services:
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       CMS_PUBLISH_ENABLED: ${CMS_PUBLISH_ENABLED:-false}
-      LEGACY_RECORDING_UPLOAD_ENABLED: ${LEGACY_RECORDING_UPLOAD_ENABLED:-false}
+      # All audio (child recordings + content narration) lives on this durable volume.
+      AUDIO_STORAGE_DIR: /data/audio
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
-      CLOUDINARY_RECORDING_UPLOAD_PRESET: ${CLOUDINARY_RECORDING_UPLOAD_PRESET:-}
       CLOUDINARY_IMAGE_UPLOAD_PRESET: ${CLOUDINARY_IMAGE_UPLOAD_PRESET:-}
       PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID:-}
       PAYOS_API_KEY: ${PAYOS_API_KEY:-}
       PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY:-}
+    volumes:
+      - vietverse_audio:/data/audio
     depends_on:
       vietverse-mongo:
         condition: service_healthy
       vietverse-mongo-init:
+        condition: service_completed_successfully
+      vietverse-audio-init:
         condition: service_completed_successfully
     # Healthcheck is defined in api.Dockerfile (GET http://127.0.0.1:5000/health).
     networks: [vietverse_net]
@@ -171,11 +198,14 @@ services:
       MONGO_BACKUP_PASSWORD: ${MONGO_BACKUP_PASSWORD:?MONGO_BACKUP_PASSWORD chưa đặt trong .env}
       BACKUP_HOUR: ${BACKUP_HOUR:-2}
       BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      # Directory inside the backup container where the audio volume is mounted (read-only).
+      AUDIO_SRC: /audio
       # POSIX TZ string (UTC+7) works without tzdata in the image.
       TZ: ICT-7
     volumes:
       - ./backups:/backups
       - ./app/deploy/selfhost/mongo:/scripts:ro
+      - vietverse_audio:/audio:ro
     depends_on:
       vietverse-mongo:
         condition: service_healthy
@@ -204,3 +234,6 @@ volumes:
     name: vietverse_mongo_config
   vietverse_mongo_keyfile:
     name: vietverse_mongo_keyfile
+  # Durable audio: child recordings and content narration. Backed up daily as tar.gz.
+  vietverse_audio:
+    name: vietverse_audio

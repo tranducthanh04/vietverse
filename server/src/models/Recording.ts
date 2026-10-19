@@ -5,10 +5,10 @@ export interface IRecording extends Document {
   lessonId?: Types.ObjectId;
   activityId?: string;
   contentVersion?: number;
-  url: string;
-  publicId?: string;
-  resourceType?: string;
-  uploadIntentId?: Types.ObjectId;
+  // Repo-relative path on the BE audio volume: recordings/<childId>/<uuid>.<ext>.
+  storageKey: string;
+  mimeType?: string;
+  byteSize?: number;
   durationSec: number;
   wordOrPrompt?: string;
   createdAt: Date;
@@ -31,14 +31,13 @@ const recordingSchema = new Schema<IRecording>(
       type: String,
       index: true,
     },
-    url: {
+    // On-disk location; the playback URL is derived (signed token) and never stored.
+    storageKey: {
       type: String,
       required: true,
     },
-    publicId: String,
-    // Provider resource type for physical deletion; legacy uploads used 'auto'.
-    resourceType: { type: String, select: false },
-    uploadIntentId: { type: Schema.Types.ObjectId, select: false },
+    mimeType: String,
+    byteSize: { type: Number, min: 0 },
     contentVersion: { type: Number, min: 0 },
     durationSec: {
       type: Number,
@@ -51,5 +50,4 @@ const recordingSchema = new Schema<IRecording>(
   }
 );
 
-recordingSchema.index({ uploadIntentId: 1 }, { unique: true, sparse: true });
 export const Recording = model<IRecording>('Recording', recordingSchema);

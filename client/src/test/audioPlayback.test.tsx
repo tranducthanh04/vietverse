@@ -22,13 +22,18 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); upload.mockReset(); });
 function showRecordings() {
   useChildStore.setState({ activeChild: { _id: 'child-1' } as never });
   vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [
-    { _id: 'rec-1', url: 'https://res.cloudinary.com/x/video/upload/one.webm', createdAt: '2026-10-13T00:00:00.000Z', wordOrPrompt: 'A' },
+    { _id: 'rec-1', audioUrl: 'https://api.example.test/api/v1/recordings/rec-1/audio?t=signed', createdAt: '2026-10-13T00:00:00.000Z', wordOrPrompt: 'A' },
   ] } });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   return render(<QueryClientProvider client={client}><ParentRecordingsPage /></QueryClientProvider>);
 }
 
 describe('parent recordings playback', () => {
+  it('plays the signed audioUrl the API returns', async () => {
+    showRecordings();
+    fireEvent.click(await screen.findByRole('button', { name: 'Phát bản ghi âm' }));
+    expect((play.mock.contexts[0] as HTMLAudioElement).src).toBe('https://api.example.test/api/v1/recordings/rec-1/audio?t=signed');
+  });
   it('resets the play state when the browser rejects play()', async () => {
     play.mockRejectedValueOnce(new Error('NotAllowedError'));
     showRecordings();
@@ -82,5 +87,12 @@ describe('record voice timeouts', () => {
     expect(screen.getByRole('button', { name: 'Thu lại' })).not.toBeDisabled();
     fireEvent.click(retry);
     await waitFor(() => expect(complete).toHaveBeenCalledWith(true, '123456789012345678901234'));
+  });
+  it('maps a 503 AUDIO_STORAGE_UNAVAILABLE to a friendly message with a retry', async () => {
+    upload.mockRejectedValueOnce({ response: { status: 503, data: { error: { code: 'AUDIO_STORAGE_UNAVAILABLE' } } } });
+    render(<RecordVoiceActivity activity={{ id: 'voice', prompt: 'Say A' }} childId="child" lessonId="lesson" onComplete={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi giọng đọc của bé' }));
+    expect(await screen.findByText(/Kho lưu trữ âm thanh đang bận/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thử gửi lại giọng đọc' })).toBeInTheDocument();
   });
 });

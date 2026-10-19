@@ -49,11 +49,11 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
 
   return (
     <span className="inline-flex flex-col items-center gap-1">
-      {audioUrl && (
+      {narration.audioSrc && (
         <audio
-          key={audioUrl}
+          key={narration.audioSrc}
           ref={narration.audioRef}
-          src={audioUrl}
+          src={narration.audioSrc}
           preload="none"
           {...narration.audioEvents}
         />

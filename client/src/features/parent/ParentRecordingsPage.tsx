@@ -13,6 +13,7 @@ import { useChildStore } from '../../store/childStore.js';
 import { Card } from '../../components/ui/Card.js';
 import { useT } from '../../i18n/index.js';
 import { claimPlayback, releasePlayback } from '../../hooks/useNarration.js';
+import { resolveMediaUrl } from '../../lib/mediaUrl.js';
 
 export const ParentRecordingsPage: React.FC = () => {
   const { activeChild } = useChildStore();
@@ -54,7 +55,8 @@ export const ParentRecordingsPage: React.FC = () => {
     stopPlayback();
     setPlaybackErrorId(null);
     claimPlayback(stopPlayback); // Stops narration or any other active reader.
-    const audio = new Audio(url);
+    // Recording URLs are stored app-relative with a signed token; rebase onto the API origin.
+    const audio = new Audio(resolveMediaUrl(url));
     audioRef.current = audio;
     setPlayingId(id);
     const ended = () => {
@@ -118,7 +120,7 @@ export const ParentRecordingsPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={() => handleTogglePlay(rec._id, rec.url)}
+                    onClick={() => handleTogglePlay(rec._id, rec.audioUrl)}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-[color,background-color,box-shadow] ${
                       isPlaying
                         ? 'bg-primary text-white shadow-md animate-pulse'

@@ -254,6 +254,7 @@ export const en: Dictionary = {
     uploadOffline: 'Lost your connection. Check your network, then tap "Try sending again".',
     uploadError: "Couldn't upload the recording to the server. Please check your network and try sending again!",
     uploadProviderRejected: "The storage didn't accept the recording. Try recording again; if it still fails, ask a parent to help check.",
+    uploadStorageUnavailable: 'The audio storage is busy right now. Wait a moment, then tap "Try sending again"; your recording is kept.',
     sendNewAttempt: 'Send again with a new attempt',
     sendRetry: 'Try sending the reading again',
     sendRecording: 'Send your reading',

@@ -1,0 +1,8 @@
+# Phụ thuộc cho script sinh audio tiếng Việt bằng edge-tts (chạy ở máy dev).
+# edge-tts là dịch vụ KHÔNG chính thức của Microsoft; chỉ dùng để sinh file audio tạm,
+# không nhúng vào runtime BE. Xem docs/content-audio-tts.md.
+edge-tts>=6.1.9
+requests>=2.31.0
+
+# Chỉ dùng khi chạy test:
+pytest>=8.0.0

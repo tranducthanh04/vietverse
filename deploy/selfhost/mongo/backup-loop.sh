@@ -20,20 +20,36 @@ prune() {
     while IFS= read -r old; do rm -f -- "$old" && echo "Đã xóa backup cũ: $old"; done
 }
 
+prune_audio() {
+  # Daily audio archives: vietverse-audio-YYYY-MM-DD_HHMMSS.tar.gz (manual ones are kept).
+  ls -1 /backups/vietverse-audio-[0-9]*.tar.gz 2>/dev/null | sort -r | tail -n +"$((KEEP + 1))" |
+    while IFS= read -r old; do rm -f -- "$old" && echo "Đã xóa audio backup cũ: $old"; done
+}
+
 echo "vietverse-backup: giờ chạy ${HOUR}:00, giữ ${KEEP} bản, TZ=${TZ:-UTC}"
 while true; do
   touch "$ALIVE"
   today="$(date +%Y-%m-%d)"
   hour_now="$(date +%H | sed 's/^0//')"
   if [ "${hour_now:-0}" -ge "$HOUR" ] && ! ls /backups/vietverse-"$today"_*.archive.gz >/dev/null 2>&1; then
+    ok=1
     if out="$(sh /scripts/dump.sh daily 2>&1)"; then
       echo "Backup OK: $out"
-      rm -f "$FAILED"
-      prune
     else
       echo "Backup THẤT BẠI: $out" >&2
-      touch "$FAILED"
+      ok=0
     fi
+    if [ "$ok" -eq 1 ]; then
+      if aout="$(sh /scripts/dump-audio.sh daily 2>&1)"; then
+        echo "Audio backup OK: $aout"
+      else
+        echo "Audio backup THẤT BẠI: $aout" >&2
+        ok=0
+      fi
+    fi
+    if [ "$ok" -eq 1 ]; then rm -f "$FAILED"; else touch "$FAILED"; fi
+    prune
+    prune_audio
   fi
   sleep 600
 done

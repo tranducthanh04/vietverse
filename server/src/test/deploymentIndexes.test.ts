@@ -11,10 +11,10 @@ beforeEach(async () => {
 });
 describe('additive deployment indexes', () => {
   it('does not mutate indexes/documents during dry-run, and apply preserves legacy indexes', async () => {
-    await Recording.collection.createIndex({ url: 1 },{ name:'legacy_url' });
-    await Recording.collection.dropIndex('uploadIntentId_1');
+    // A manually created index that is not declared on the schema must survive apply untouched.
+    await Recording.collection.createIndex({ wordOrPrompt: 1 },{ name:'legacy_manual' });
     const childId = new Types.ObjectId();
-    await Recording.create([{ childId,url:'/one.webm' },{ childId,url:'/two.webm' }]);
+    await Recording.create([{ childId,storageKey:'recordings/x/one.webm' },{ childId,storageKey:'recordings/x/two.webm' }]);
     const before = await Recording.collection.indexes();
     const report = await prepareDeploymentIndexes({ apply:false });
     expect(report.applied).toBe(false);
@@ -23,20 +23,14 @@ describe('additive deployment indexes', () => {
     await prepareDeploymentIndexes({ apply:true });
     expect(await Recording.countDocuments()).toBe(2);
     const indexes = await Recording.collection.indexes();
-    expect(indexes.find(index => index.name==='legacy_url')).toMatchObject({ key:{ url:1 } });
-    expect(indexes.find(index => index.name==='uploadIntentId_1')).toMatchObject({ key:{ uploadIntentId:1 },unique:true,sparse:true });
+    expect(indexes.find(index => index.name==='legacy_manual')).toMatchObject({ key:{ wordOrPrompt:1 } });
+    // Schema-declared recording index on childId is applied idempotently.
+    expect(indexes.find(index => index.name==='childId_1')).toMatchObject({ key:{ childId:1 } });
     expect((await RateLimitBucket.collection.indexes()).find(index => index.name==='resetAt_1')).toMatchObject({ expireAfterSeconds:0 });
     expect((await RecordingUploadIntent.collection.indexes()).find(index => index.name==='deleteAt_1')).toMatchObject({ expireAfterSeconds:0 });
     expect((await RecordingUploadIntent.collection.indexes()).find(index => index.name==='parentId_1_requestId_1')).toMatchObject({ unique:true });
     expect((await User.collection.indexes()).find(index => index.name==='google_identity_unique')).toMatchObject({ unique:true });
     expect((await GoogleAuthFlow.collection.indexes()).find(index => index.name==='expiresAt_1')).toMatchObject({ expireAfterSeconds:0 });
-  });
-  it('prevents duplicate receipts without requiring an intent ID on legacy recordings', async () => {
-    await prepareDeploymentIndexes({ apply:true });
-    const childId = new Types.ObjectId(), uploadIntentId = new Types.ObjectId();
-    await Recording.create([{ childId,url:'/legacy1' },{ childId,url:'/legacy2' },{ childId,url:'/direct',uploadIntentId }]);
-    await expect(Recording.create({ childId,url:'/duplicate',uploadIntentId })).rejects.toMatchObject({ code:11000 });
-    expect(await Recording.countDocuments()).toBe(3);
   });
 });
 

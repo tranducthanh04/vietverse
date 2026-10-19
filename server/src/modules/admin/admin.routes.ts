@@ -6,12 +6,15 @@ import { ROLES } from '../../constants/roles.js';
 import contentRouter from './content/content.routes.js';
 import pointRulesRouter from './pointRules.routes.js';
 import contentImagesRouter from './content/contentImages.routes.js';
+import contentAudioRouter from './content/contentAudio.routes.js';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole(ROLES.ADMIN));
 router.use('/content-images', contentImagesRouter);
+// More specific than '/content'; must be registered before the content router.
+router.use('/content/audio', contentAudioRouter);
 router.use('/content', contentRouter);
 router.use('/point-rules', pointRulesRouter);
 

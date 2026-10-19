@@ -89,8 +89,8 @@ describe('Parent dashboard reporting', () => {
     await LessonProgress.create({ childId, lessonId: lessons[0]._id, status: 'completed', createdAt: new Date('2026-01-03'), updatedAt: new Date('2026-01-03') });
     await ExplorationLog.create({ childId, kind: 'story', refId: story._id, createdAt: new Date('2026-01-04') });
     await ExplorationLog.create({ childId, kind: 'culture', refId: new Types.ObjectId(), createdAt: new Date('2026-01-05') });
-    await Recording.create(Array.from({ length: 12 }, (_, i) => ({ childId, wordOrPrompt: `Recording ${i}`, url: 'private-audio', createdAt: new Date(Date.UTC(2026, 0, 1, 0, i)) })));
-    await Recording.create({ childId: new Types.ObjectId(), wordOrPrompt: 'Other child secret', url: 'other-private-audio', createdAt: new Date('2026-02-01') });
+    await Recording.create(Array.from({ length: 12 }, (_, i) => ({ childId, wordOrPrompt: `Recording ${i}`, storageKey: 'private-audio', createdAt: new Date(Date.UTC(2026, 0, 1, 0, i)) })));
+    await Recording.create({ childId: new Types.ObjectId(), wordOrPrompt: 'Other child secret', storageKey: 'other-private-audio', createdAt: new Date('2026-02-01') });
     const res = await report();
     const activities = res.body.data.recentActivities;
     expect(activities).toHaveLength(10);
