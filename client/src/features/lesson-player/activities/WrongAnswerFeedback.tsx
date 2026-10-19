@@ -56,11 +56,11 @@ export const WrongAnswerFeedback = forwardRef<WrongAnswerFeedbackHandle, WrongAn
       <>
         {/* Keep the asset mounted even while hidden so a replay triggered inside the wrong-answer
             click (before this re-renders with show) still has an audio element to play. */}
-        {activity.audioUrl && (
+        {narration.audioSrc && (
           <audio
-            key={activity.audioUrl}
+            key={narration.audioSrc}
             ref={narration.audioRef}
-            src={activity.audioUrl}
+            src={narration.audioSrc}
             preload="none"
             {...narration.audioEvents}
           />

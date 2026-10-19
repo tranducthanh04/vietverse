@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useChildStore } from '../store/childStore.js';
-import { createDirectRecordingUpload, postCurrentRecordingRequest, recordingContextChanged, type RecordingContext, type RecordingReceipt } from './directRecordingUpload.js';
+import { createDirectRecordingUpload, RECORDING_MAX_BYTES, recordingContextChanged, type RecordingContext, type RecordingReceipt } from './directRecordingUpload.js';
 
 export interface UseAudioRecorderReturn {
   isRecording: boolean;
@@ -16,7 +16,6 @@ export interface UseAudioRecorderReturn {
   clearRecording: () => void;
   playRecording: () => void;
   uploadRecording: (params: RecordingContext) => Promise<RecordingReceipt>;
-  restartExpiredUpload: () => void;
 }
 const identity = () => ({ userId: useAuthStore.getState().user?.id, childId: useChildStore.getState().activeChild?._id });
 
@@ -127,23 +126,10 @@ export function useAudioRecorder(sessionKey = ''): UseAudioRecorderReturn {
     const owner = captured.current;
     const current = () => !!owner?.userId && mounted.current && owner.generation === generation.current && owner.sessionKey === sessionRef.current && owner.userId === identity().userId && owner.childId === identity().childId && owner.childId === params.childId;
     if (!current()) throw recordingContextChanged();
-    const direct = import.meta.env.PROD || import.meta.env.VITE_DIRECT_RECORDING_UPLOAD === 'true';
-    const limit = (direct ? 5 : 2) * 1024 * 1024;
-    if (!audioBlob.size || audioBlob.size > limit) throw new Error(`Bản thu âm vượt giới hạn ${direct ? 5 : 2} MiB.`);
-    if (direct) {
-      const context = { ...params,durationSec }, key = JSON.stringify(context);
-      if (taskRef.current?.blob !== audioBlob || taskRef.current?.key !== key) taskRef.current = { blob:audioBlob,key,task:createDirectRecordingUpload(audioBlob,context,current) };
-      return taskRef.current.task.submit();
-    }
-    const form = new FormData();
-    form.append('audio',audioBlob,audioBlob.type.includes('mp4') ? 'recording.mp4' : 'recording.webm');
-    for (const [key,value] of Object.entries(params)) if (value !== undefined) form.append(key,String(value));
-    form.append('durationSec',String(durationSec));
-    return postCurrentRecordingRequest<RecordingReceipt>('/recordings',form,current,{ headers:{ 'Content-Type':'multipart/form-data' } });
+    if (!audioBlob.size || audioBlob.size > RECORDING_MAX_BYTES) throw new Error('Bản thu âm vượt giới hạn 5 MiB.');
+    const context = { ...params,durationSec }, key = JSON.stringify(context);
+    if (taskRef.current?.blob !== audioBlob || taskRef.current?.key !== key) taskRef.current = { blob:audioBlob,key,task:createDirectRecordingUpload(audioBlob,context,current) };
+    return taskRef.current.task.submit();
   },[audioBlob,durationSec]);
-  const restartExpiredUpload = useCallback(() => {
-    if (!taskRef.current || taskRef.current.blob !== audioBlob) throw recordingContextChanged();
-    taskRef.current.task.restartExpired();
-  },[audioBlob]);
-  return { isRecording,isPlaying,audioBlob,audioUrl,durationSec,permissionStatus,errorMessage,startRecording,stopRecording,clearRecording,playRecording,uploadRecording,restartExpiredUpload };
+  return { isRecording,isPlaying,audioBlob,audioUrl,durationSec,permissionStatus,errorMessage,startRecording,stopRecording,clearRecording,playRecording,uploadRecording };
 }

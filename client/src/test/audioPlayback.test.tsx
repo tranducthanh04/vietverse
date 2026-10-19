@@ -83,4 +83,11 @@ describe('record voice timeouts', () => {
     fireEvent.click(retry);
     await waitFor(() => expect(complete).toHaveBeenCalledWith(true, '123456789012345678901234'));
   });
+  it('maps a 503 AUDIO_STORAGE_UNAVAILABLE to a friendly message with a retry', async () => {
+    upload.mockRejectedValueOnce({ response: { status: 503, data: { error: { code: 'AUDIO_STORAGE_UNAVAILABLE' } } } });
+    render(<RecordVoiceActivity activity={{ id: 'voice', prompt: 'Say A' }} childId="child" lessonId="lesson" onComplete={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi giọng đọc của bé' }));
+    expect(await screen.findByText(/Kho lưu trữ âm thanh đang bận/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thử gửi lại giọng đọc' })).toBeInTheDocument();
+  });
 });

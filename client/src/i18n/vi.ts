@@ -255,6 +255,7 @@ export const vi = {
     uploadOffline: 'Mất kết nối mạng. Bé kiểm tra mạng rồi bấm "Thử gửi lại" nhé.',
     uploadError: 'Không thể tải bản thu âm lên máy chủ. Bé hãy kiểm tra mạng và thử gửi lại nhé!',
     uploadProviderRejected: 'Kho lưu trữ chưa nhận được bản thu. Bé thử thu lại; nếu vẫn chưa được, nhờ bố mẹ kiểm tra giúp nhé.',
+    uploadStorageUnavailable: 'Kho lưu trữ âm thanh đang bận. Bé đợi một chút rồi bấm "Thử gửi lại" nhé; bản thu vẫn được giữ.',
     sendNewAttempt: 'Gửi lại bằng lượt mới',
     sendRetry: 'Thử gửi lại giọng đọc',
     sendRecording: 'Gửi giọng đọc của bé',

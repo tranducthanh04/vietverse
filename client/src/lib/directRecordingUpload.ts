@@ -3,112 +3,74 @@ import { api } from './api.js';
 
 export type RecordingContext = { childId: string; lessonId?: string; activityId?: string; contentVersion?: number; wordOrPrompt?: string };
 export type RecordingReceipt = { id: string; _id?: string; url?: string; durationSec?: number; contentVersion?: number };
-type UploadIntent = { intentId: string; expiresAt: string; upload: { url: string; fields: Record<string,string> } };
 export const recordingContextChanged = () => Object.assign(new Error('Phiên thu âm đã thay đổi. Vui lòng thu âm lại cho hồ sơ hiện tại.'), { code: 'RECORDING_CONTEXT_CHANGED' });
 const assertCurrent = (isCurrent: () => boolean) => { if (!isCurrent()) throw recordingContextChanged(); };
-export const PROVIDER_UPLOAD_TIMEOUT_MS = 60_000;
-// AbortSignal.timeout is missing on older Safari/Android WebViews; fall back to a controller.
-function providerTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => void } {
-  if (typeof AbortSignal.timeout === 'function') return { signal: AbortSignal.timeout(ms), clear: () => {} };
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new DOMException('Upload timed out', 'TimeoutError')), ms);
-  return { signal: controller.signal, clear: () => clearTimeout(timer) };
-}
+// The child's voice can be large on slow links; allow more than the default 30s API timeout.
+export const RECORDING_UPLOAD_TIMEOUT_MS = 60_000;
+export const RECORDING_MAX_BYTES = 5 * 1024 * 1024;
 
 // Guard dispatch, including refresh/queued retries, not only the api.post call.
 export async function postCurrentRecordingRequest<T>(path: string, body: unknown, isCurrent: () => boolean, config: AxiosRequestConfig = {}): Promise<T> {
   assertCurrent(isCurrent);
   const adapter = axios.getAdapter(api.defaults.adapter);
-  const response = await api.post<{ data: T }>(path,body,{ ...config, adapter: async request => {
+  const response = await api.post<{ data: T }>(path, body, { ...config, adapter: async request => {
     assertCurrent(isCurrent);
     return adapter(request);
   } });
   assertCurrent(isCurrent);
   return response.data.data;
 }
-function validateIntent(intent: UploadIntent) {
-  const url = new URL(intent.upload.url);
-  if (!/^[a-f\d]{24}$/i.test(intent.intentId) || url.protocol !== 'https:' || url.hostname !== 'api.cloudinary.com'
-    || url.username || url.password || url.port || url.search || url.hash
-    || !/^\/v1_1\/[a-z\d_-]+\/video\/upload$/i.test(url.pathname)) throw new Error('Địa chỉ gửi thu âm không hợp lệ.');
-  const allowed = new Set(['public_id','timestamp','overwrite','upload_preset','api_key','signature']);
-  if (!intent.upload.fields || intent.upload.fields.overwrite !== 'false'
-    || [...allowed].some(key => typeof intent.upload.fields[key] !== 'string' || !intent.upload.fields[key])
-    || Object.keys(intent.upload.fields).some(key => !allowed.has(key))) throw new Error('Quyền gửi thu âm không hợp lệ.');
+
+function recordingFilename(type: string) {
+  if (type.includes('mp4') || type.includes('m4a')) return 'recording.m4a';
+  if (type.includes('ogg')) return 'recording.ogg';
+  if (type.includes('wav')) return 'recording.wav';
+  if (type.includes('mpeg') || type.includes('mp3')) return 'recording.mp3';
+  return 'recording.webm';
 }
+
+/**
+ * A single multipart upload of the child's recording to the backend's own storage
+ * (`POST /recordings/upload`). The server validates the format by magic bytes, enforces the size
+ * limit and reads the true duration server-side, then returns the saved recording. There is no
+ * Cloudinary intent/finalize round-trip any more.
+ *
+ * Safe retry: one in-flight request is shared, so repeated `submit()` calls never fire concurrent
+ * duplicate uploads; a success is cached so a later submit returns the same receipt without
+ * re-uploading. A failed attempt clears the in-flight promise, so the child can simply press
+ * "send again" to retry with the same blob. Axios error codes (`ERR_NETWORK`, `ECONNABORTED`) and a
+ * `503 AUDIO_STORAGE_UNAVAILABLE` response are surfaced unchanged for the UI to map to friendly copy.
+ */
 export function createDirectRecordingUpload(blob: Blob, context: RecordingContext & { durationSec?: number }, isCurrent: () => boolean) {
-  let requestId = crypto.randomUUID();
-  let intent: UploadIntent | undefined, inFlight: Promise<RecordingReceipt> | undefined, receipt: RecordingReceipt | undefined;
-  let uploaded = false, attemptedProvider = false;
-  let expired = false;
-  const finalize = async () => {
-    const result = await postCurrentRecordingRequest<RecordingReceipt>('/recordings/finalize',{ intentId: intent!.intentId },isCurrent);
-    if (!result || !/^[a-f\d]{24}$/i.test(result.id)) throw new Error('Máy chủ chưa xác nhận bản thu âm.');
-    receipt = result; return result;
-  };
+  let inFlight: Promise<RecordingReceipt> | undefined, receipt: RecordingReceipt | undefined;
   const run = async () => {
     assertCurrent(isCurrent);
     if (receipt) return receipt;
-    if (!blob.size || blob.size > 5 * 1024 * 1024) throw new Error('Bản thu âm phải nhỏ hơn hoặc bằng 5 MiB.');
+    if (!blob.size || blob.size > RECORDING_MAX_BYTES) throw new Error('Bản thu âm phải nhỏ hơn hoặc bằng 5 MiB.');
     if ((context.durationSec ?? 0) > 180) throw new Error('Bản thu âm không được vượt quá 180 giây.');
-    if (!intent) {
-      const received = await postCurrentRecordingRequest<UploadIntent>('/recordings/upload-intent',{
-        ...context, durationSec: context.durationSec ?? 0, requestId, byteLength: blob.size, mimeType: blob.type,
-      },isCurrent);
-      validateIntent(received); intent = received;
-    }
-    if (uploaded) return finalize();
-    if (attemptedProvider) {
-      try { return await finalize(); } catch (error) {
-        const failure = error as { response?: { data?: { error?: { code?: string } } } };
-        if (failure.response?.data?.error?.code !== 'UPLOAD_ASSET_NOT_FOUND') throw error;
-      }
-    }
-    assertCurrent(isCurrent);
     const form = new FormData();
-    for (const [key,value] of Object.entries(intent.upload.fields)) form.append(key,value);
-    const extension = blob.type.includes('mp4') ? 'mp4' : blob.type.includes('ogg') ? 'ogg' : 'webm';
-    form.append('file',blob,`recording.${extension}`); attemptedProvider = true;
-    // A weak network must not leave "Gửi" spinning forever. attemptedProvider is
-    // already set, so the next submit asks finalize first before re-uploading.
-    const timeout = providerTimeoutSignal(PROVIDER_UPLOAD_TIMEOUT_MS);
-    try {
-      const response = await fetch(intent.upload.url,{ method:'POST',body:form,credentials:'omit',redirect:'error',signal:timeout.signal });
-      assertCurrent(isCurrent);
-      if (!response.ok) {
-        // The asset was not stored (bad signature, disallowed format, preset or provider
-        // outage). Surface the provider status to the console for diagnosis without
-        // exposing the request (which carries the signature) to the child.
-        let detail = '';
-        try { detail = (await response.text()).slice(0, 500); } catch { /* body already consumed or unreadable */ }
-        console.warn('[recording] Cloudinary rejected the direct upload', response.status, detail);
-        throw Object.assign(new Error('Kho lưu trữ chưa nhận được bản thu. Bé thử thu lại; nếu vẫn chưa được, nhờ bố mẹ kiểm tra giúp nhé.'),
-          { code: 'RECORDING_PROVIDER_REJECTED', providerStatus: response.status });
-      }
-      uploaded = true;
-    } catch (error) {
-      assertCurrent(isCurrent);
-      if ((error as { code?: string } | null)?.code === 'RECORDING_PROVIDER_REJECTED') throw error;
-      const name = (error as { name?: string } | null)?.name;
-      if (name === 'TimeoutError' || name === 'AbortError') throw Object.assign(new Error('Mạng chậm nên chưa gửi xong bản thu. Bé bấm gửi lại nhé; bản thu vẫn được giữ.'), { code: 'RECORDING_UPLOAD_TIMEOUT' });
-      throw Object.assign(new Error('Không gửi được bản thu âm. Vui lòng thử lại; bản thu vẫn được giữ.'), { code: 'RECORDING_UPLOAD_NETWORK' });
-    } finally {
-      timeout.clear();
-    }
-    return finalize();
+    form.append('audio', blob, recordingFilename(blob.type));
+    form.append('childId', context.childId);
+    if (context.lessonId) form.append('lessonId', context.lessonId);
+    if (context.activityId) form.append('activityId', context.activityId);
+    if (context.contentVersion !== undefined) form.append('contentVersion', String(context.contentVersion));
+    if (context.wordOrPrompt) form.append('wordOrPrompt', context.wordOrPrompt);
+    if (context.durationSec !== undefined) form.append('durationSec', String(context.durationSec));
+    // The server returns { recording }; tolerate a bare receipt too so FE/BE phases stay decoupled.
+    const payload = await postCurrentRecordingRequest<{ recording?: RecordingReceipt } & Partial<RecordingReceipt>>(
+      '/recordings/upload', form, isCurrent,
+      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: RECORDING_UPLOAD_TIMEOUT_MS },
+    );
+    const result = (payload?.recording ?? payload) as RecordingReceipt | undefined;
+    const id = result?.id ?? result?._id;
+    if (!result || typeof id !== 'string' || !/^[a-f\d]{24}$/i.test(id)) throw new Error('Máy chủ chưa xác nhận bản thu âm.');
+    receipt = { ...result, id };
+    return receipt;
   };
   return {
-    restartExpired() {
-      assertCurrent(isCurrent);
-      if (!expired || inFlight || receipt) throw new Error('Chỉ gửi bằng lượt mới sau khi lượt cũ đã hết hạn.');
-      requestId = crypto.randomUUID(); intent = undefined;
-      uploaded = false; attemptedProvider = false; expired = false;
-    },
     submit(): Promise<RecordingReceipt> {
-      inFlight ??= run().catch(error => {
-        if (error?.response?.data?.error?.code === 'UPLOAD_INTENT_EXPIRED') expired = true;
-        throw error;
-      }).finally(() => { inFlight = undefined; }); return inFlight;
+      inFlight ??= run().finally(() => { inFlight = undefined; });
+      return inFlight;
     },
   };
 }

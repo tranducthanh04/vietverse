@@ -13,6 +13,7 @@ import {
   Cake,
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
+import { resolveMediaUrl } from '../../lib/mediaUrl.js';
 import { Button } from '../../components/ui/Button.js';
 import { Modal } from '../../components/ui/Modal.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
@@ -341,7 +342,7 @@ export const AdminLearnersPage: React.FC = () => {
                         </span>
                       </div>
                       {rec.url && (
-                        <audio controls src={rec.url} className="h-8 w-full sm:w-56" />
+                        <audio controls src={resolveMediaUrl(rec.url)} className="h-8 w-full sm:w-56" />
                       )}
                     </div>
                   ))}
