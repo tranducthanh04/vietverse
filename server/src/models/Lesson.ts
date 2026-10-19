@@ -1,5 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { contentMetadataFields, type ContentMetadata } from './contentMetadata.js';
+import { activityTranslationFields, type ActivityTranslations } from './contentTranslations.js';
 
 export type ActivityType =
   | 'listen_choose'
@@ -31,6 +32,10 @@ export interface IActivity {
   options?: IActivityOption[];
   correctAnswer?: any; // string, string[], or id
   hints?: string[];
+  /** Friendly hint shown when the child answers wrong (Vietnamese). Optional, backward compatible. */
+  wrongHint?: string;
+  /** Reviewed translations of `wrongHint`, keyed by support language. Optional, backward compatible. */
+  wrongHintTranslations?: ActivityTranslations;
   targetWord?: string;
   targetPhonetic?: string;
   pairs?: { left: string; right: string }[];
@@ -91,6 +96,8 @@ const activitySchema = new Schema<IActivity>(
     ],
     correctAnswer: Schema.Types.Mixed,
     hints: [String],
+    wrongHint: String,
+    wrongHintTranslations: activityTranslationFields,
     targetWord: String,
     targetPhonetic: String,
     pairs: [

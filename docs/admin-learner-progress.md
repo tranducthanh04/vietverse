@@ -34,3 +34,18 @@ Browser/device/production acceptance remains separate.
 Owner requested one replacement non-audio PR including this admin fix, not a
 parallel admin PR for the same merge. New audio work remains held and unmerged in
 PR #12; this branch does not revert existing main audio behavior.
+
+## Integration evidence, 2026-10-19
+
+The paragraphs above describe the original extraction. Integration with main
+`4a6b0a1` preserves all current auth/audio changes. Fresh focused testing passes
+14 admin cases plus 12 sort/feedback cases. Actual authenticated browser checks
+at VI320 and EN1366 now confirm zero scores/stars, missing progress fields,
+all progress statuses and unlimited screen time. Error coverage distinguishes
+real HTTP404 from a synthetic HTTP500 followed by real HTTP200 retry, and a
+synthetic HTTP200/null response. Missing screen-time fields remain component
+coverage, not an assertion about Mongoose's hydration defaults.
+
+This is not production/device acceptance. PR18 remains Draft/HOLD, including
+an unrelated existing 320px player-footer overflow found during full-player
+validation. Raw receipts and limits: `plans/261019-resume-nonaudio/`.

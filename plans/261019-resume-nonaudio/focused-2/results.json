@@ -1,0 +1,68 @@
+{
+  "before": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "phase": "focused",
+  "node": "v22.15.0",
+  "startedAt": "2026-10-19T03:11:02.788Z",
+  "tasks": [
+    {
+      "name": "server",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test",
+        "-w",
+        "server",
+        "--",
+        "virtualRedemptionConcurrency.test.ts",
+        "legacyGradingPolicy.test.ts",
+        "points.test.ts",
+        "pointsHistoryAndEquip.test.ts",
+        "lessonIntegrity.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\focused-2\\server.json"
+      ],
+      "startedAt": "2026-10-19T03:11:02.909Z",
+      "finishedAt": "2026-10-19T03:11:20.155Z",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "name": "client",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test",
+        "-w",
+        "client",
+        "--",
+        "adminLearnerDetail.test.tsx",
+        "sortOrderActivity.test.tsx",
+        "wrongAnswerFeedbackActivities.test.tsx",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\focused-2\\client.json"
+      ],
+      "startedAt": "2026-10-19T03:11:20.344Z",
+      "finishedAt": "2026-10-19T03:11:32.395Z",
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "after": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "finishedAt": "2026-10-19T03:11:32.489Z"
+}

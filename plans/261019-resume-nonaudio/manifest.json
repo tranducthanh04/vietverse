@@ -1,0 +1,305 @@
+{
+  "generatedAt": "2026-10-19T03:28:19.793Z",
+  "main": "4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66",
+  "note": "Hashes identify the tested integrated working-tree contents, not the old HEAD alone. Raw attempts are retained, including failures.",
+  "sources": [
+    {
+      "path": "client/src/features/admin/AdminLearnersPage.tsx",
+      "sha256": "3003583758cdbaf0707d18b3f51397e747265443120e0f03789bdce686c103d7"
+    },
+    {
+      "path": "client/src/features/lesson-player/activities/SortOrderActivity.tsx",
+      "sha256": "115481c05364ac639dcec5f4e16280a630dc27e1efd725dd08a7e78dda52e59e"
+    },
+    {
+      "path": "client/src/test/adminLearnerDetail.test.tsx",
+      "sha256": "a70f52e16a3a7ac0e08828bab4ec56fd1ca88d02163b331c8c23c389fca5d8e1"
+    },
+    {
+      "path": "client/src/test/sortOrderActivity.test.tsx",
+      "sha256": "7c22b0959428ccdc4bb52fd1f33cddcec8f232c1e1ec1e4ddee7ff41f8105582"
+    },
+    {
+      "path": "server/src/modules/lessons/lessons.grading.ts",
+      "sha256": "1182dfc1621d247f48428a329efa3fa9afc2c4b2fa5b92ed52c24321f6dc7d98"
+    },
+    {
+      "path": "server/src/modules/lessons/lessons.policy.ts",
+      "sha256": "8d6aca2665a0c9c86d3a69bcc804505b027305a17edb66bd497300f600c1ec83"
+    },
+    {
+      "path": "server/src/modules/points/points.service.ts",
+      "sha256": "5fc51ff9313158ed9ba4c0f5492049c937bb4fdc8c164e3ce2bce2c00d6f17f6"
+    },
+    {
+      "path": "server/src/test/legacyGradingPolicy.test.ts",
+      "sha256": "7a5c7c81a66a1640b58511f985421d031745812c8281d6e3bacd2387cd2a6815"
+    },
+    {
+      "path": "server/src/test/virtualRedemptionConcurrency.test.ts",
+      "sha256": "1e5d96a7883a5732c1ff67fbece5ca773b472a46f4a974be4ec29895e2e0dd9c"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "plans/261019-resume-nonaudio/.gitattributes",
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/browser-results.json",
+      "sha256": "110cb71a0e4bb8f080c9fd7b44531878f3eddb75a642b8b939dbba2437a67b5f"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/browser.log",
+      "sha256": "cffb4398e9bf141dca269764dc791dcd18c5d235adf996802af541035dc54203"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-admin-404.png",
+      "sha256": "c5674aea288d310af41a249022e61119ebaa7133d24f87141c6e8a04c1ed3f9a"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-admin-retry.png",
+      "sha256": "4c3ed41a74fed30cad00926c1266b948d6cb5cb3620a8e9b7aae061146988a07"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-admin-values.png",
+      "sha256": "2f0c5df8f417755e26b779546999bfdbbff222071c59b6f631d1eabab9fcd8bf"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-full-player-wrong-reset-correct-failure.png",
+      "sha256": "49199acc9c69096093153630b3e7533d5d96f3f8618e002c1ecba1182dc70684"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-full-player-wrong-reset-correct-failure.txt",
+      "sha256": "beb8ddfe7d6bc8234301898ab6abd91355b4d2cb26add5b0a20e180d653ef2cc"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-sort-correct.png",
+      "sha256": "442b0ef3ee963144c7ff2a1f9c3084514330c90252e98e383aae28b057a028ae"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-sort-reset.png",
+      "sha256": "690c40a161eb70b06a9e97b6c3866dd574f964bcb1ddfa499c8dea6bf38c8e73"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/en1366-sort-wrong.png",
+      "sha256": "c55c645194005832657adac320e57599b38026b94c4ece457944e5d62a64981a"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/results.json",
+      "sha256": "7095cf59d53a52a0dc2ca7fe2e49d66df7befe4e5fbdcd013f7beee8ff07c189"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-admin-404.png",
+      "sha256": "6a5022949c728610afc402482aba518fcf7cc1079e2be3df9745c9ee9e659654"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-admin-retry.png",
+      "sha256": "73a428607714d988d938e0bf93908f8e4dd7b06cdbe08566904feaa336793784"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-admin-values.png",
+      "sha256": "eb76a33c1ae259a959706a3f5f764ffd464825db497c3387cd4fe6cb25c6e8a1"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-full-player-wrong-reset-correct-failure.png",
+      "sha256": "56fa1fb3898f4d4c3c8d331d9354f91847687312de9133a399ebbc9b043d3035"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-full-player-wrong-reset-correct-failure.txt",
+      "sha256": "2d5e192946dd2897875b6b55d83b08b9c239fcc57f8bb0ef3d12e871b1c1e5bb"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-sort-reset.png",
+      "sha256": "3ac9dd9d7ec213503c27ef4f8cb22d3a5e16f770faa80e59d49a380fae51f586"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-1/vi320-sort-wrong.png",
+      "sha256": "185e43e374371ad3957fcb7bb0fc8044e898fb8acfdb1464dc8d9a36b07aede6"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/browser-results.json",
+      "sha256": "b79e9443a12223df0273ae39839498367c0be8b5d87f9ee8878cef690bbb0162"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/browser.log",
+      "sha256": "8b233b1fdb4c4e04308e934a52d1fc6ffca7c5b16bea43daf1d707c0476716b6"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-admin-404.png",
+      "sha256": "6dc79e097a3e965c4b0aaa909fb1007d055cf6cc2c0503b102df3b04a8e4f5dd"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-admin-retry.png",
+      "sha256": "cccdd28a337a1a83b34b7fe5ba94b6a0f952b1bfdacbee704b7d3ba9db9c2ca7"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-admin-values.png",
+      "sha256": "c5b20a3fdf4a040ba58498f8c11e238cfb03b4571a3176254b3f24176de0c784"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-sort-correct.png",
+      "sha256": "562d7fa6e589b5111eb048999e9ab696d2c7c6b977303b98364dd79d53e5b9ab"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-sort-finished.png",
+      "sha256": "91e00c060096c5cbe97b6c05f74f605e5e79540d0f3b624ef2012a3ab0dd8cd1"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-sort-reset.png",
+      "sha256": "cc791dbce0f84c57bb8a80efe35438eee10a32e779b6db06bb970fadf485eadb"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/en1366-sort-wrong.png",
+      "sha256": "8c77bb9de1c4907d3eaf24c057029213e8d8016f7326cba7205d97ee704970f1"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/results.json",
+      "sha256": "fd8d76b7e0f18a1a260d9957e67b56e8dcc1d99087f2d25bcf8dde99cf728dc5"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-admin-404.png",
+      "sha256": "6a5022949c728610afc402482aba518fcf7cc1079e2be3df9745c9ee9e659654"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-admin-retry.png",
+      "sha256": "73a428607714d988d938e0bf93908f8e4dd7b06cdbe08566904feaa336793784"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-admin-values.png",
+      "sha256": "002267139054f63ca666fad9572cfdcc0d0525abe5413d05ccc5bad358d23303"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-full-player-layout-failure.png",
+      "sha256": "39729eed6ce6a4240a8594006d1a6d1698fd5f4babf6c4157240dda2a3aa966c"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-full-player-layout-failure.txt",
+      "sha256": "2d5e192946dd2897875b6b55d83b08b9c239fcc57f8bb0ef3d12e871b1c1e5bb"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-sort-correct.png",
+      "sha256": "11e59ac2e11733006711cbe152994e959d726df10da8d5a290c917ea4e1d566b"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-sort-finished.png",
+      "sha256": "827741dd56dfd032f95200e2dc66b3a5fde6ef86f5043543fe9da97671ac8c7b"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-sort-reset.png",
+      "sha256": "ba20b24d577de89388a42e038434eba1bf7ce3663d22709f5f8e8bfe0586e188"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser-2/vi320-sort-wrong.png",
+      "sha256": "2fbc94fc14a8cb8f58a3214693006ba243a81987ad236d03c7db1874203c9e53"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/browser.mjs",
+      "sha256": "b5f9ddcc96d2042d8f6c9146e7add069f39bf9361f5ec09b86324f3a9acdbbc9"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/checks-1/build.log",
+      "sha256": "15c7b22b1c5714525db5325b7de00f15e5552198d711120a663bd7a796016bc2"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/checks-1/lint.log",
+      "sha256": "47aa7de2fdcd9d80d59054cfed4d952703d33d0003971a7b8a8a3264329c74b8"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/checks-1/results.json",
+      "sha256": "521015e1f50fb42e95ca3cec01da3f133a95c30f4d26e5f07358aaba82325599"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/checks-1/typecheck.log",
+      "sha256": "b70d3eb20902ff2ee52f8f59851c663ba704c74cbdd854a7339c9896e9978bda"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-1/client.json",
+      "sha256": "8d31eb08af3245a45afc0aa1e3b0bab325189e784387ce1fff673ea9ec502ed5"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-1/client.log",
+      "sha256": "35e19396ceea40b57c4a4e8d7dc67847839fef59362a14d19b770aac67fd1241"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-1/results.json",
+      "sha256": "cf0a5d73c32aec977d1d3e85d1c612190aa98eedc403deb550da3cb1e8cfedd6"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-1/server.json",
+      "sha256": "9ff0a4abf8b4fa36277f1d87ac35d693dae91e137e70a9b620665cbe82af0a23"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-1/server.log",
+      "sha256": "6062a6802f85c43f3f10b0aca59c25ae34f3409212b305d4d38fb6f7f9f14a49"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-2/client.json",
+      "sha256": "78ffc141eb844832aa7b75978f58ba0c2fa802f0134e6c23553d6df94cbcf97f"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-2/client.log",
+      "sha256": "b912f3efa4a21b57d07caa0030c32a58dab62546647b0958319a70111b9aa5d7"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-2/results.json",
+      "sha256": "92690a35fe518b14574200042422bbe5f6524f375ad778e31651a42e9bee670d"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-2/server.json",
+      "sha256": "7a387d7c7e95ec3b061ee0d6a6a8beb6a65f068aa0aa1e516a436f4ff87fba53"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/focused-2/server.log",
+      "sha256": "77643197ca42bb160a2ba9b35109dde4ed6ecc06f445ac2ce26a89d4043e3153"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/full-1/client.json",
+      "sha256": "ccb4f51b6cbe6ada5afb7b3dded66a8011dd484ea5ca138d9d974a28986740ed"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/full-1/client.log",
+      "sha256": "5362373097375ca537a4d9110ed492581ea426ee833d6babcd081feb5bc3a4a4"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/full-1/results.json",
+      "sha256": "1e59451cc6a6b322a7a0e53b3b908fcbd8f3429f0166b881079ef9f4f4d637cd"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/full-1/server.json",
+      "sha256": "fc4757d617fbf6fe83319718abd77193eb12f1001e5067db85d9105c78de05b1"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/full-1/server.log",
+      "sha256": "76e4b158c83c75393340ed971dda3ec8ea3498c199b5c1de42ece1587f8b3b9b"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/install-1/install.log",
+      "sha256": "14dab87488d0326a6ec2178feb61363615969e34be1dca646861e15d586e1cdd"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/install-1/results.json",
+      "sha256": "565491fd051e0ed124b796149adf130105dad67c29a68edfb6ad9b474e1acc11"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/manifest.mjs",
+      "sha256": "46d7b930a859b8be9603f138e5c7285af1a334bfdd62abbcc5f0483d61019da3"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/plan.md",
+      "sha256": "36da1f6e0bf18909c717575b20b49d7c1721683d9db637527fd2e9a80ad4511c"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/review.md",
+      "sha256": "7053e21723be7623210d5aca4932fa1eb9a662e4b0f434731c688854ebeff704"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/run.mjs",
+      "sha256": "d5e2c5f25bf56b594efefd23b2f78d6e8e0708ea38e24e35be6bac12946ca861"
+    },
+    {
+      "path": "plans/261019-resume-nonaudio/safety.cjs",
+      "sha256": "41fcce0c9372cedaf1d6df02ab5f2007dc8c7f67fcd1941e506d006acf0b55cc"
+    }
+  ]
+}

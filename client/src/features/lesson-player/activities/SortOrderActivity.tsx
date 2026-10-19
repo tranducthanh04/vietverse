@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   RotateCcw,
 } from '../../../components/ui/icons.js';
+import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface SortOrderActivityProps {
   activity: {
     id: string;
     prompt: string;
+    audioUrl?: string;
     orderedItems?: string[];
     correctAnswer?: string[];
+    wrongHint?: string;
+    wrongHintTranslations?: Partial<Record<string, { wrongHint?: string }>>;
   };
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
@@ -29,6 +33,9 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
     selectedItems.length < targetOrder.length ||
     selectedItems.some((item, index) => item !== targetOrder[index])
   );
+  const [wrong, setWrong] = useState(false);
+  const feedbackRef = useRef<WrongAnswerFeedbackHandle>(null);
+  const canReplay = Boolean(activity.audioUrl);
 
   const handleSelectItem = (item: string, index: number) => {
     const newSelected = [...selectedItems, item];
@@ -39,6 +46,8 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
 
     if (newSelected.length === targetOrder.length) {
       const isCorrect = newSelected.every((val, i) => val === targetOrder[i]);
+      setWrong(!isCorrect);
+      if (!isCorrect && canReplay) feedbackRef.current?.replay();
       onComplete(isCorrect, newSelected);
     }
   };
@@ -46,6 +55,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
   const handleReset = () => {
     setSelectedItems([]);
     setAvailableItems([...targetOrder].reverse());
+    setWrong(false);
   };
 
   return (
@@ -53,6 +63,8 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
+
+      <WrongAnswerFeedback ref={feedbackRef} show={wrong} activity={activity} canReplay={canReplay} />
 
       {/* Assembly line / Result boxes. Tiles grow with the word and wrap long text so nothing is clipped. */}
       <div className="w-full flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white border-4 border-accent-light rounded-3xl p-4 sm:p-6 shadow-sm min-h-[100px] mb-8">
