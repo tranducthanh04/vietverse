@@ -184,8 +184,8 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
 
         {/* Audio Narration Button */}
         <div className="flex items-center space-x-2">
-          {narration.mode === "tts" && narration.canPlay && (
-            <span className="text-[11px] font-bold text-stone-600">
+          {narration.isPlaying && narration.mode === "tts" && (
+            <span className="text-[11px] font-bold text-stone-500">
               ({t("storyDetail.deviceVoice")})
             </span>
           )}
@@ -218,7 +218,7 @@ const CultureView: React.FC<{ id?: string; childId?: string; userId?: string }> 
             </span>
           )}
           {narration.error && (
-            <span role="status" className="text-xs text-amber-800">
+            <span role="status" className="text-xs text-stone-600 max-w-[16rem]">
               {narration.error}
             </span>
           )}

@@ -97,6 +97,15 @@ describe('direct recording workflow', () => {
     expect(provider).toHaveLength(1);
     expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent','/recordings/finalize']);
   });
+  it('codes a first-attempt provider network failure so the child sees the offline message', async () => {
+    // RECORDING_UPLOAD_NETWORK is what RecordVoiceActivity maps to lesson.uploadOffline;
+    // the first attempt must carry it (no finalize is tried before any upload succeeded).
+    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); throw new TypeError('Failed to fetch'); }));
+    const task = make();
+    await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_UPLOAD_NETWORK' });
+    expect(provider).toHaveLength(1);
+    expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
+  });
   it('times out a stalled provider upload and checks finalize first on the next submit', async () => {
     vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => {
       provider.push(config);
@@ -168,6 +177,18 @@ describe('direct recording workflow', () => {
     await make().submit(); await make().submit();
     const ids = calls.filter(c => c.path.endsWith('upload-intent')).map(c => c.body.requestId);
     expect(ids[0]).not.toBe(ids[1]);
+  });
+  it('surfaces a friendly coded error and never finalizes when the provider rejects the upload', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.stubGlobal('fetch', vi.fn(async (_url, config: RequestInit) => { provider.push(config); return { ok: false, status: 400, text: async () => 'Invalid Signature' }; }));
+    try {
+      const task = make();
+      await expect(task.submit()).rejects.toMatchObject({ code: 'RECORDING_PROVIDER_REJECTED', providerStatus: 400, message: expect.stringContaining('thu lại') });
+      expect(provider).toHaveLength(1);
+      // The asset was not stored, so finalize is never attempted for a missing asset.
+      expect(calls.map(c => c.path)).toEqual(['/recordings/upload-intent']);
+      expect(warn).toHaveBeenCalledWith('[recording] Cloudinary rejected the direct upload', 400, 'Invalid Signature');
+    } finally { warn.mockRestore(); }
   });
   it.each(['http://api.cloudinary.com/v1_1/test/video/upload','https://attacker.test/upload','https://api.cloudinary.com/v1_1/test/image/upload'])('does not send audio to an unsafe destination %s', async url => {
     api.defaults.adapter = async config => ({ data: { data: { ...intent, upload: { ...intent.upload,url } } }, status:201,statusText:'Created',headers:{},config });

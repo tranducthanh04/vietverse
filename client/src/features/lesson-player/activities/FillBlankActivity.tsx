@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { cn } from '../../../lib/utils.js';
+import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
 
 export interface FillBlankActivityProps {
   activity: {
     id: string;
     prompt: string;
+    audioUrl?: string;
     blanks?: Array<{ sentence: string; missing: string }>;
     options?: Array<{ id: string; text: string }>;
     correctAnswer: string;
+    wrongHint?: string;
+    wrongHintTranslations?: Partial<Record<string, { wrongHint?: string }>>;
   };
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
 }
@@ -18,12 +22,17 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
 }) => {
   const blank = activity.blanks?.[0] || { sentence: '__úp bê', missing: 'B' };
   const [filledLetter, setFilledLetter] = useState<string | null>(null);
+  const [wrong, setWrong] = useState(false);
+  const feedbackRef = useRef<WrongAnswerFeedbackHandle>(null);
+  const canReplay = Boolean(activity.audioUrl);
 
   const handleSelect = (letter: string, optionId: string) => {
     setFilledLetter(letter);
     const isCorrect =
       letter.toLowerCase() === blank.missing.toLowerCase() ||
       optionId.toLowerCase() === activity.correctAnswer.toLowerCase();
+    setWrong(!isCorrect);
+    if (!isCorrect && canReplay) feedbackRef.current?.replay();
     onComplete(isCorrect, letter);
   };
 
@@ -34,6 +43,8 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
+
+      <WrongAnswerFeedback ref={feedbackRef} show={wrong} activity={activity} canReplay={canReplay} />
 
       {/* Word / Sentence display with dashed blank box */}
       <div className="w-full bg-white border-4 border-accent rounded-3xl px-5 py-6 sm:p-8 shadow-kid flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-8 sm:mb-10">

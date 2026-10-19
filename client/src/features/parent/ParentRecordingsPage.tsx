@@ -6,6 +6,7 @@ import {
   Pause,
   Calendar,
   Clock,
+  CircleAlert,
 } from '../../components/ui/icons.js';
 import { api } from '../../lib/api.js';
 import { useChildStore } from '../../store/childStore.js';
@@ -17,6 +18,9 @@ export const ParentRecordingsPage: React.FC = () => {
   const { activeChild } = useChildStore();
   const t = useT();
   const [playingId, setPlayingId] = useState<string | null>(null);
+  // Holds the id of a recording the browser could not decode (e.g. a Chrome WebM/Opus
+  // take opened in Safari/iOS), so the parent gets a clear reason instead of silence.
+  const [playbackErrorId, setPlaybackErrorId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Stable identity: registered as the single active player shared with narration.
@@ -48,6 +52,7 @@ export const ParentRecordingsPage: React.FC = () => {
       return;
     }
     stopPlayback();
+    setPlaybackErrorId(null);
     claimPlayback(stopPlayback); // Stops narration or any other active reader.
     const audio = new Audio(url);
     audioRef.current = audio;
@@ -55,12 +60,18 @@ export const ParentRecordingsPage: React.FC = () => {
     const ended = () => {
       if (audioRef.current === audio) stopPlayback();
     };
+    // A decode/network failure is distinct from reaching the end: tell the parent why.
+    const failed = () => {
+      const active = audioRef.current === audio;
+      if (active) stopPlayback();
+      if (active) setPlaybackErrorId(id);
+    };
     audio.onended = ended;
-    audio.onerror = ended;
+    audio.onerror = failed;
     try {
-      void audio.play().catch(ended);
+      void audio.play().catch(failed);
     } catch {
-      ended();
+      failed();
     }
   };
 
@@ -102,8 +113,9 @@ export const ParentRecordingsPage: React.FC = () => {
             return (
               <Card
                 key={rec._id}
-                className="p-4 bg-white border border-cream-border flex items-center justify-between hover:border-primary/50 transition-colors"
+                className="p-4 bg-white border border-cream-border hover:border-primary/50 transition-colors"
               >
+                <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleTogglePlay(rec._id, rec.url)}
@@ -140,6 +152,13 @@ export const ParentRecordingsPage: React.FC = () => {
                   <span className="text-xs font-bold px-3 py-1 bg-cream-muted border border-cream-border rounded-full text-stone-600">
                     {rec.lessonId.title || t('parentPortal.lessonFallback')}
                   </span>
+                )}
+                </div>
+                {playbackErrorId === rec._id && (
+                  <div className="mt-3 flex items-center space-x-2 bg-red-50 text-red-700 border border-red-200 rounded-xl p-2.5 text-xs" role="alert">
+                    <CircleAlert className="w-4 h-4 shrink-0" />
+                    <span>{t('parentPortal.playbackError')}</span>
+                  </div>
                 )}
               </Card>
             );

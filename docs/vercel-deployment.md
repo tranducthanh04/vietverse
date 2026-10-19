@@ -192,6 +192,13 @@ Phạm vi và lý do ở [06 — Audio sau chuyển BE sang Vercel](./06-review-
 - TTS: iOS Safari (nút đọc lần đầu sau tải trang, đọc sau khi asset lỗi), Android có giọng `vi_VN`; watchdog không được dừng nhầm khi máy đang đọc.
 - Mạng yếu (throttle): nút gửi nhả sau tối đa 60 giây, "Thử gửi lại" không upload lại khi file đã lên provider.
 
+### Audit luồng thu âm — 2026-10-18 (local, self-host production đã nạp `CLOUDINARY_*` ngày 17/10)
+
+- **Rủi ro #1 (metadata WebM) là gate nghiệm thu quan trọng nhất.** `inspect` chỉ coi WebM/Opus của Chrome là audio-only khi Cloudinary trả `video` vắng mặt, hoặc `video: {}` rỗng, hoặc `video` có nội dung nhưng kèm `is_audio: true` và không có kích thước/frame. Không xác nhận được bằng tài liệu Cloudinary rằng Chrome WebM/Opus luôn rơi vào các nhánh này (**suy luận từ tài liệu**, chưa có bằng chứng upload thật). Nếu Cloudinary trả `video` không rỗng mà thiếu `is_audio` thì finalize trả `422 UPLOAD_AUDIO_INVALID` dù file hợp lệ. **Bắt buộc** chạy mục "Cần test trên thiết bị/provider thật" ở trên và ghi lại JSON resource thật của một bản Chrome và một bản iOS Safari trước khi tuyên bố luồng chạy được.
+- **Đã sửa (local, có test):** finalize đồng thời không còn trả nhầm `404` cho một trong các request khi request khác vừa commit receipt (đọc lại receipt sau khi thấy intent `completed`). Hành vi API không đổi: mọi finalize hợp lệ trả cùng receipt `201`.
+- **Đã sửa (local, có test):** khi Cloudinary từ chối upload trực tiếp (`response.ok === false`, ví dụ sai chữ ký/định dạng/preset), client không còn hiện chuỗi kỹ thuật tiếng Anh "Provider rejected upload" mà hiện thông báo thân thiện vi/en và ghi `console.warn` kèm HTTP status của provider để chẩn đoán. Trang bản thu của phụ huynh báo rõ khi trình duyệt không giải mã được bản thu (WebM/Opus mở trên Safari/iOS) thay vì im lặng.
+- Thông báo `UPLOAD_STORAGE_UNAVAILABLE` ("Lưu trữ thu âm chưa sẵn sàng. Vui lòng thử lại.") chính là màn khách gặp khi `CLOUDINARY_*` còn thiếu (ném từ bước ký intent). Sau khi đã nạp đủ 5 biến, thông báo này chỉ nên xuất hiện khi Admin API lỗi tạm thời; nếu còn lặp lại, kiểm tra lại giá trị biến và quyền Admin API.
+
 ## Region và hiệu năng — sửa local 2026-10-13, chưa deploy
 
 ### Region function (P1)

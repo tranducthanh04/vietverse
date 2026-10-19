@@ -11,6 +11,10 @@ import { GroupSortEditor } from './GroupSortEditor.js';
 import { FillBlanksEditor } from './FillBlanksEditor.js';
 import { FollowStepsEditor } from './FollowStepsEditor.js';
 import { ConfirmationDialog } from './ConfirmationDialog.js';
+import { TranslationEditor, type Translations } from './TranslationEditor.js';
+
+// Activity types that grade an answer immediately, so a "when wrong" hint and audio replay apply.
+const WRONG_FEEDBACK_TYPES: ActivityType[] = ['listen_choose', 'review', 'fill_blank', 'sort_order'];
 export function ActivityEditor({
   value,
   onChange,
@@ -43,7 +47,8 @@ export function ActivityEditor({
         <div className="cms-actions"><button type="button" onClick={()=>setPendingType(null)}>Hủy</button>
           <button type="button" onClick={()=>{
             onChange({id:value.id,type:pendingType,prompt:value.prompt,subPrompt:value.subPrompt,
-              audioUrl:value.audioUrl,imageUrl:value.imageUrl,hints:value.hints,pointsWeight:value.pointsWeight});
+              audioUrl:value.audioUrl,imageUrl:value.imageUrl,hints:value.hints,
+              wrongHint:value.wrongHint,wrongHintTranslations:value.wrongHintTranslations,pointsWeight:value.pointsWeight});
             setPendingType(null);
           }}>Đổi loại</button>
         </div>
@@ -255,6 +260,29 @@ export function ActivityEditor({
         value={value.hints ?? []}
         onChange={(hints) => patch({ hints })}
       />
+      {WRONG_FEEDBACK_TYPES.includes(value.type) && (
+        <fieldset>
+          <legend>Gợi ý khi trả lời sai {n}</legend>
+          <p className="cms-meta">
+            Hiện ngay dưới câu hỏi khi bé chọn sai. Với hoạt động có audio, audio nguồn sẽ tự phát lại.
+            Để trống thì dùng lời động viên chung. Ví dụ: “mèo” với bản dịch cat / 고양이 / 猫 / chat / 猫.
+          </p>
+          <TextField
+            label={`Gợi ý khi sai ${n}`}
+            name={`${path}.wrongHint`}
+            value={value.wrongHint ?? ''}
+            onChange={(wrongHint) => patch({ wrongHint })}
+            multiline
+          />
+          <TranslationEditor
+            translations={(value.wrongHintTranslations ?? {}) as Translations}
+            onChange={(next) =>
+              patch({ wrongHintTranslations: Object.keys(next).length ? next : undefined })
+            }
+            sections={[{ kind: 'text', key: 'wrongHint', label: 'Gợi ý khi sai' }]}
+          />
+        </fieldset>
+      )}
     </div>
   );
 }

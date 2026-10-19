@@ -66,6 +66,27 @@ it.each([{ duration: undefined }, { duration: null }, { duration: 0 }, { duratio
     expect(await directAudioStorage.inspect('random-asset')).toMatchObject({ format: 'mp4', hasVideo: false });
     await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 422, code: 'UPLOAD_AUDIO_INVALID' });
   });
+  // Shapes captured 2026-10-18 from the real Admin API (`api.resource(..., { media_metadata: true })`)
+  // for Chrome MediaRecorder takes uploaded through the recording preset (non-media fields trimmed).
+  const adminBase = { public_id: 'random-asset', resource_type: 'video', type: 'upload', secure_url: 'https://res.cloudinary.com/test-cloud/video/upload/v1/random-asset.webm', width: 0, height: 0, has_audio: true, audio_codec: 'opus', pages: 0 };
+  const chromeAudioWebm = { ...adminBase, format: 'mka', bytes: 41932, duration: 2.94,
+    video_metadata: { width: 0, height: 0, has_audio: true, format: 'mka', duration: 2.94, audio: { codec: 'opus', frequency: 48000, channels: 1 }, video: {}, is_audio: true } };
+  const chromeAudioMp4 = { ...adminBase, format: 'mp4', bytes: 49091, duration: 2.961,
+    video_metadata: { width: 0, height: 0, has_audio: true, format: 'mp4', duration: 2.961, audio: { codec: 'opus', frequency: 48000, channels: 1 }, video: { metadata: { encoded_date: 'UTC 2026-10-18 16:13:52' } }, is_audio: false } };
+  const chromeVideoWebm = { ...adminBase, format: 'webm', bytes: 54717, duration: 2.947962, width: 64, height: 64, frame_rate: 1000,
+    video_metadata: { width: 64, height: 64, has_video: true, has_audio: true, format: 'webm', duration: 2.947962, audio: { codec: 'opus' }, video: { pix_format: 'yuv420p', codec: 'vp8' }, is_audio: false } };
+  it.each([['Chrome audio/webm (reported as mka)', chromeAudioWebm, 'mka'], ['Chrome audio/mp4', chromeAudioMp4, 'mp4']])('accepts the real Admin API shape for %s', async (_label, resource, format) => {
+    vi.spyOn(cloudinary.api, 'resource').mockResolvedValue(resource as never);
+    expect(await directAudioStorage.inspect('random-asset')).toMatchObject({ format, hasAudio: true, hasVideo: false });
+  });
+  it('rejects a real Admin API shape that carries a video stream', async () => {
+    vi.spyOn(cloudinary.api, 'resource').mockResolvedValue(chromeVideoWebm as never);
+    await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 422, code: 'UPLOAD_AUDIO_INVALID' });
+  });
+  it('rejects a flattened Admin API shape that reports a video track without stream details', async () => {
+    vi.spyOn(cloudinary.api, 'resource').mockResolvedValue({ ...chromeAudioWebm, video_metadata: { ...chromeAudioWebm.video_metadata, video: undefined, has_video: true, is_audio: false } } as never);
+    await expect(directAudioStorage.inspect('random-asset')).rejects.toMatchObject({ statusCode: 422 });
+  });
   it.each([420, 429])('maps provider rate limiting %s to a distinct retryable code', async http_code => {
     vi.spyOn(cloudinary.api, 'resource').mockRejectedValue({ error: { http_code, message: 'private-provider-details' }, request_options: { auth: 'private-provider-credentials' } });
     const failure = await directAudioStorage.inspect('random-asset').catch(error => error);

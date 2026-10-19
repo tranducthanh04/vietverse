@@ -101,6 +101,12 @@ F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-sour
 - Story/đồng dao có fallback đọc từng dòng; culture đọc title/intro/funFacts. Ưu tiên asset thật, phân biệt giọng thiết bị, dừng khi đổi nguồn/nội dung/unmount; TTS không có timeline giả.
 - Chưa có UI song ngữ hoặc bản dịch ngoại ngữ trong catalog. `lang` của bộ đọc là chuẩn bị kỹ thuật, không đồng nghĩa đã triển khai nội dung đa ngôn ngữ. Xem [đầu vào cần khách hàng cung cấp](./customer-audio-translations.md).
 
+## Phản hồi khi trả lời sai — triển khai local 2026-10-19
+
+- Hoạt động chấm ngay (`listen_choose`, `review`, `fill_blank`, `sort_order`): khi bé chọn sai, hiện gợi ý ngắn ngay dưới câu hỏi (vùng `role="status"`/`aria-live`) và — với hoạt động có audio nguồn — tự phát lại audio một lần kèm nút "Nghe lại". Dùng lại engine `useNarration`/`AudioButton` (một-chủ-phát, không chồng, không lặp vô hạn; thiết bị thiếu giọng đọc hiện thông báo thân thiện). Đúng thì không phát lại/không gợi ý.
+- Gợi ý ưu tiên nội dung `wrongHint` của hoạt động + bản dịch theo `companionLanguages` (dùng `SupportTranslation`); thiếu nội dung thì dùng câu động viên chung theo i18n (vi/en). Model `Lesson.activity` thêm `wrongHint`/`wrongHintTranslations` tùy chọn, tương thích ngược; CMS `ActivityEditor` có khối nhập. **Không** đổi chấm điểm/sao/tim/số lần thử; server vẫn chấm độc lập.
+- Seed demo gắn gợi ý mẫu cho bài "Con vật quanh em" ("cá = fish…", "mèo = cat…") — bản nháp minh hoạ chờ content owner duyệt. Chưa push/deploy; kiểm tra ở 390/1366px, VI/EN với API/DB local.
+
 | Nhóm | Tính năng | UI | API/server | Dữ liệu chính | Trạng thái |
 | --- | --- | --- | --- | --- | --- |
 | Auth | Đăng ký/đăng nhập | Có | Có JWT + refresh cookie | User, Subscription | Hoàn thiện |
