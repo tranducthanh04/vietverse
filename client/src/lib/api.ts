@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosHeaders } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -168,8 +168,13 @@ api.interceptors.response.use(
       typeof (error.response?.data as any)?.error?.code === 'string' &&
       (error.response?.data as any).error.code.startsWith('PARENT_GATE_')
     ) {
-      sessionStorage.removeItem('vietverse_parent_gate_token');
-      sessionStorage.removeItem('vietverse_parent_gate_unlocked');
+      const rejectedGate = AxiosHeaders.from(error.config?.headers).get('X-Parent-Gate-Token');
+      const currentGate = sessionStorage.getItem('vietverse_parent_gate_token');
+      // A delayed denial belongs to its request, not a gate renewed in the meantime.
+      if (typeof rejectedGate === 'string' && rejectedGate.length > 0 && rejectedGate === currentGate) {
+        sessionStorage.removeItem('vietverse_parent_gate_token');
+        sessionStorage.removeItem('vietverse_parent_gate_unlocked');
+      }
     }
 
     return Promise.reject(error);
