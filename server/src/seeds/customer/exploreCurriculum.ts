@@ -636,7 +636,7 @@ const B15: ExploreLesson = {
 
 const B16: ExploreLesson = {
   order: 16, stageOrder: 4, title: 'Bài 16: Nhập vai nhân vật',
-  description: 'Bé trò chuyện cùng Sao Lí Lắc, tự giới thiệu và trả lời những câu hỏi quen thuộc hằng ngày.',
+  description: 'Bé nhập vai một nhân vật, trò chuyện cùng Sao Lí Lắc: tự giới thiệu, nói về sở thích và trả lời những câu hỏi quen thuộc.',
   vocabulary: [
     { word: 'bạn', meaning: 'Người cùng chơi và cùng học với con.' },
     { word: 'truyện', meaning: 'Sách kể chuyện có tranh và lời.' },
