@@ -14,12 +14,12 @@ const V0_DESCRIPTION = 'Older v0 description that the publisher must not reuse';
 // A live story per catalog entry, carrying the real lyrics but none of the enrichment yet, plus a
 // v0 revision that holds a cover image (and a different description) so we can prove the publisher
 // restores the cover from v0 while using the authored Vietnamese description.
-async function seedLiveStories() {
+async function seedLiveStories({ description = '', nfdLyrics = false } = {}) {
   for (const story of stories) {
     const enrich = storyEnrichment[story.seedKey];
     const doc = await Story.create({
-      seedKey: story.seedKey, title: story.title, type: story.type, description: '', coverImage: '',
-      lyrics: enrich.sourceLyrics.map((text, index) => ({ timeSec: index, text })),
+      seedKey: story.seedKey, title: story.title, type: story.type, description, coverImage: '',
+      lyrics: enrich.sourceLyrics.map((text, index) => ({ timeSec: index, text: nfdLyrics ? text.normalize('NFD') : text })),
       audioUrl: '', durationSec: 0, ageGroups: ['5-6', '6-8'], vocab: [], quiz: [],
     });
     await ContentRevision.create({
@@ -54,6 +54,13 @@ describe('publish story enrichment', () => {
     expect(await ContentRevision.countDocuments()).toBe(21);
     expect(await Story.countDocuments({ 'vocab.0': { $exists: true } })).toBe(0);
     expect(await Story.countDocuments({ coverImage: { $nin: ['', null] } })).toBe(0);
+  });
+
+  it('replaces the seeded boilerplate description and still matches NFD-encoded lyrics', async () => {
+    await seedLiveStories({ description: 'Bài đọc minh họa do Vietverse biên soạn theo chủ đề nhan đề.', nfdLyrics: true });
+    const report = await publishStoryEnrichment();
+    expect(report.entries.map((entry) => entry.status)).toEqual(Array(21).fill('planned'));
+    expect(report.entries.every((entry) => entry.filledDescription)).toBe(true);
   });
 
   it('applies enrichment while preserving lyrics, audio and timing, and restoring the cover from v0', async () => {

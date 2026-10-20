@@ -46,6 +46,9 @@ export interface EnrichmentReport {
 }
 
 const isBlank = (value?: string) => !(typeof value === 'string' && value.trim());
+// Same normalisation as contentIdentity, so NFD or inner-spacing differences never misreport changed lyrics.
+const normalizeLine = (value: string) => value.normalize('NFC').replace(/\s+/g, ' ').trim();
+const STALE_DESCRIPTION = /biên soạn|minh họa|minh hoạ|bài mẫu/i;
 
 // Deterministic serialisation (object keys sorted) so the idempotency check does not depend on the
 // key order Mongoose or Zod happen to produce.
@@ -100,8 +103,8 @@ export async function publishStoryEnrichment({ dryRun = true, adminId }: { dryRu
 
       // Translations are aligned line by line to the recorded source lyrics. If production lyrics no
       // longer match that source, publishing would misalign them, so skip and surface it instead.
-      const liveLines = livePayload.lyrics.map((line) => line.text.trim());
-      const sourceLines = enrich.sourceLyrics.map((line) => line.trim());
+      const liveLines = livePayload.lyrics.map((line) => normalizeLine(line.text));
+      const sourceLines = enrich.sourceLyrics.map(normalizeLine);
       if (liveLines.length !== sourceLines.length || liveLines.some((line, index) => line !== sourceLines[index])) {
         entries.push({ ...base, status: 'lyrics-changed', contentId: id, message: 'Live lyrics differ from the translated source; skipped to avoid misaligned translations.' });
         continue;
@@ -111,7 +114,9 @@ export async function publishStoryEnrichment({ dryRun = true, adminId }: { dryRu
       const v0Cover = (v0?.payload as { coverImage?: string } | undefined)?.coverImage;
       const restoredCover = isBlank(livePayload.coverImage) && !isBlank(v0Cover);
       const coverImage = restoredCover ? (v0Cover as string) : livePayload.coverImage;
-      const filledDescription = isBlank(livePayload.description);
+      // The seeded v0 description is editorial boilerplate ("Bài đọc minh họa do Vietverse biên soạn…"),
+      // not child-facing copy, so it is replaced just like a blank one.
+      const filledDescription = isBlank(livePayload.description) || STALE_DESCRIPTION.test(livePayload.description);
       const description = filledDescription ? enrich.description : livePayload.description;
 
       const desired = { ...livePayload, vocab: enrich.vocab, quiz: enrich.quiz, translations: enrich.translations, coverImage, description };

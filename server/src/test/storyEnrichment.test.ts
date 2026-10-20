@@ -9,7 +9,7 @@ import { SUPPORT_LANGUAGES } from '../models/contentTranslations.js';
 // French "animaux" or the Vietnamese "màu" / "gia đình" is not caught by a bare substring.
 const fold = (value: string) =>
   value.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
-const FORBIDDEN = /\b(mau|demo|nhap|tu soan|bien soan|gia dinh)\b/;
+const FORBIDDEN = /\b(mau|demo|nhap|tu soan|bien soan|gia dinh|minh hoa|illustrative|unreviewed|sample|placeholder)\b/;
 
 // Every authored string in the entry, excluding `sourceLyrics` (verbatim production source, which
 // may legitimately contain folk words such as "ăn mau chóng lớn").
