@@ -332,9 +332,14 @@ const B4: ExploreLesson = {
 };
 
 const B5: ExploreLesson = {
-  order: 5, stageOrder: 2, title: 'Bài 5: Khu chữ cái',
+  order: 5, stageOrder: 2, title: 'Bài 5: Khu rừng chữ cái',
   description: 'Bé bước vào khu chữ cái, nhận mặt chữ và nối chữ với âm đầu quen thuộc.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'A', meaning: 'Chữ A, có trong các tiếng ba, cá.' },
+    { word: 'B', meaning: 'Chữ B, có trong các tiếng bà, bé.' },
+    { word: 'M', meaning: 'Chữ M, có trong các tiếng mẹ, mèo.' },
+    { word: 'C', meaning: 'Chữ C, có trong các tiếng cá, cơm.' },
+  ],
   activities: [
     choose(P('b05.activity-1.prompt'),
       Ha('Chữ M có trong tiếng mẹ.', tr('The letter M is in the word “mẹ”.', '文字 M は「mẹ」という言葉の中にあるよ。',
@@ -364,7 +369,14 @@ const B5: ExploreLesson = {
 const B6: ExploreLesson = {
   order: 6, stageOrder: 2, title: 'Bài 6: Âm đầu',
   description: 'Bé lắng nghe và nhận ra những tiếng có cùng âm đầu, tập phân nhóm theo âm.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'mèo', meaning: 'Con vật nuôi trong nhà, kêu meo meo.' },
+    { word: 'mũ', meaning: 'Vật đội trên đầu để che nắng, che mưa.' },
+    { word: 'bà', meaning: 'Mẹ của bố hoặc của mẹ.' },
+    { word: 'bé', meaning: 'Em nhỏ, chính là con.' },
+    { word: 'bóng', meaning: 'Quả tròn để chơi, lăn và nảy được.' },
+  ],
   activities: [
     choose(P('b06.activity-1.prompt'),
       Ha('Mẹ, mèo, mũ đều bắt đầu bằng âm /m/.',
@@ -393,7 +405,14 @@ const B6: ExploreLesson = {
 const B7: ExploreLesson = {
   order: 7, stageOrder: 2, title: 'Bài 7: Sáu thanh điệu',
   description: 'Bé nghe và phân biệt sáu thanh điệu của tiếng Việt qua các tiếng gần giống nhau.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'ba', meaning: 'Tiếng ba, thanh ngang (không dấu).' },
+    { word: 'bà', meaning: 'Tiếng bà, thanh huyền; cũng là bà của bé.' },
+    { word: 'bá', meaning: 'Tiếng bá, thanh sắc.' },
+    { word: 'bả', meaning: 'Tiếng bả, thanh hỏi.' },
+    { word: 'bã', meaning: 'Tiếng bã, thanh ngã.' },
+    { word: 'bạ', meaning: 'Tiếng bạ, thanh nặng.' },
+  ],
   activities: [
     choose(P('b07.activity-1.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá']),
     choose(P('b07.activity-2.prompt'),
@@ -411,7 +430,12 @@ const B7: ExploreLesson = {
 const B8: ExploreLesson = {
   order: 8, stageOrder: 2, title: 'Bài 8: Đồng dao cùng Lí Lắc',
   description: 'Bé nghe đồng dao cùng Sao Lí Lắc, tìm vần và đọc theo nhịp vui tai.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'cá', meaning: 'Con vật sống dưới nước, bơi bằng vây.' },
+    { word: 'lan', meaning: 'Hoa lan, một loài hoa đẹp và thơm.' },
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'nhà', meaning: 'Nơi gia đình cùng chung sống.' },
+  ],
   activities: [
     cardWord(P('b08.activity-1.prompt'), Ha('Hãy đọc chậm từng câu đồng dao nhé.', HINT_READ), 'Nu na nu nống'),
     fill(P('b08.activity-2.prompt'),
@@ -435,7 +459,13 @@ const B8: ExploreLesson = {
 const B9: ExploreLesson = {
   order: 9, stageOrder: 3, title: 'Bài 9: Ghép chữ thành tiếng',
   description: 'Bé ghép chữ cái lại thành tiếng và nối chữ viết với âm thanh vừa nghe.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'ba', meaning: 'Tiếng ba, nghĩa là bố.' },
+    { word: 'me', meaning: 'Quả me, có vị chua.' },
+    { word: 'ca', meaning: 'Cái ca dùng để uống nước.' },
+    { word: 'b', meaning: 'Chữ b, có trong các tiếng ba, bà.' },
+    { word: 'a', meaning: 'Chữ a, có trong các tiếng ba, ca.' },
+  ],
   activities: [
     order(P('b09.activity-1.prompt'), Ha('Chữ đầu đứng trước, chữ sau đứng sau để tạo thành tiếng.', HINT_SYLLABLE), ['b', 'a']),
     choose(P('b09.activity-2.prompt'),
@@ -451,7 +481,13 @@ const B9: ExploreLesson = {
 const B10: ExploreLesson = {
   order: 10, stageOrder: 3, title: 'Bài 10: Ghép tiếng thành từ',
   description: 'Bé ghép các tiếng thành từ, thành cụm từ và dùng chúng trong câu ngắn.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'cá', meaning: 'Con vật sống dưới nước, bơi bằng vây.' },
+    { word: 'bàn', meaning: 'Đồ dùng có mặt phẳng để ngồi học hoặc ăn.' },
+    { word: 'bút', meaning: 'Đồ dùng để viết chữ.' },
+    { word: 'con cá', meaning: 'Cách gọi đầy đủ của con vật bơi dưới nước.' },
+    { word: 'cái bàn', meaning: 'Chiếc bàn để ngồi học hoặc để ăn.' },
+  ],
   activities: [
     order(P('b10.activity-1.prompt'), Ha('Ghép các tiếng theo đúng thứ tự để tạo thành cụm từ nhé.', HINT_SYLLABLE), ['con', 'cá']),
     choose(P('b10.activity-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'cái bàn', 'mẹ bé']),
@@ -462,7 +498,12 @@ const B10: ExploreLesson = {
 const B11: ExploreLesson = {
   order: 11, stageOrder: 3, title: 'Bài 11: Chữ nào đang trốn?',
   description: 'Bé tìm chữ còn thiếu để hoàn thiện các từ quen thuộc như cá và mẹ.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'c', meaning: 'Chữ c, có trong các tiếng cá, cơm.' },
+    { word: 'b', meaning: 'Chữ b, có trong các tiếng bà, bé.' },
+    { word: 'm', meaning: 'Chữ m, có trong các tiếng mẹ, mèo.' },
+    { word: 'á', meaning: 'Chữ a có dấu sắc, như trong tiếng cá.' },
+  ],
   activities: [
     fill(P('b11.activity-1.prompt'), Ha('Thêm chữ c để tạo thành từ cá.', G_ca), '__á', 'c', ['c', 'b', 'm']),
     fill(P('b11.activity-2.prompt'), Ha('Thêm chữ m để tạo thành từ mẹ.', G_me), '__ẹ', 'm', ['m', 'b', 'c']),
@@ -474,7 +515,12 @@ const B11: ExploreLesson = {
 const B12: ExploreLesson = {
   order: 12, stageOrder: 3, title: 'Bài 12: Đọc cùng Lí Lắc',
   description: 'Bé đọc cùng Sao Lí Lắc từ từng từ, từng cụm đến câu ngắn rồi thu âm giọng đọc của mình.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'cá', meaning: 'Con vật sống dưới nước, bơi bằng vây.' },
+    { word: 'bà', meaning: 'Mẹ của bố hoặc của mẹ.' },
+    { word: 'bé', meaning: 'Em nhỏ, chính là con.' },
+  ],
   activities: [
     choose(P('b12.step-1.prompt'), Ha('Chọn từ đúng với âm thanh con vừa nghe nhé.', HINT_LISTEN), ['mẹ', 'cá', 'bà']),
     choose(P('b12.step-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'mẹ của bé', 'cái bàn']),
@@ -496,7 +542,14 @@ const B12: ExploreLesson = {
 const B13: ExploreLesson = {
   order: 13, stageOrder: 4, title: 'Bài 13: Ai đang làm gì?',
   description: 'Bé ghép người với hành động để tạo thành câu và kể ai đang làm gì.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'bé', meaning: 'Em nhỏ, chính là con.' },
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'bố', meaning: 'Người đàn ông sinh ra và chăm sóc bé.' },
+    { word: 'đọc sách', meaning: 'Nhìn chữ trong sách và đọc thành tiếng.' },
+    { word: 'nấu cơm', meaning: 'Làm chín gạo thành cơm để ăn.' },
+    { word: 'uống nước', meaning: 'Đưa nước vào miệng khi khát.' },
+  ],
   activities: [
     match(P('b13.activity-1.prompt'),
       Ha('Ghép người thực hiện với hành động của họ nhé.',
@@ -515,9 +568,14 @@ const B13: ExploreLesson = {
 };
 
 const B14: ExploreLesson = {
-  order: 14, stageOrder: 4, title: 'Bài 14: Kể chuyện theo thứ tự',
+  order: 14, stageOrder: 4, title: 'Bài 14: Nhìn tranh kể chuyện',
   description: 'Bé sắp xếp các việc trong ngày theo đúng thứ tự và tập kể lại câu chuyện quen thuộc.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'thức dậy', meaning: 'Ngủ xong, mở mắt dậy.' },
+    { word: 'đánh răng', meaning: 'Dùng bàn chải làm sạch răng.' },
+    { word: 'ăn sáng', meaning: 'Bữa ăn vào buổi sáng.' },
+    { word: 'đi học', meaning: 'Đến trường để học bài.' },
+  ],
   activities: [
     order(P('b14.activity-1.prompt'), Ha('Hãy nghĩ xem việc nào xảy ra trước, việc nào xảy ra sau nhé.', HINT_ORDER),
       ['Bé thức dậy', 'Bé đánh răng', 'Bé ăn sáng', 'Bé đi học']),
@@ -529,9 +587,14 @@ const B14: ExploreLesson = {
 };
 
 const B15: ExploreLesson = {
-  order: 15, stageOrder: 4, title: 'Bài 15: Nghe truyện',
+  order: 15, stageOrder: 4, title: 'Bài 15: Sự tích Bánh Chưng, Bánh Giầy',
   description: 'Bé nghe câu chuyện Sự tích Bánh Chưng, Bánh Giầy, nhận ra nhân vật, bối cảnh và trình tự sự việc.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'bánh chưng', meaning: 'Bánh vuông gói lá, làm từ gạo nếp, đậu xanh và thịt; ăn vào ngày Tết.' },
+    { word: 'bánh giầy', meaning: 'Bánh tròn, màu trắng, làm từ gạo nếp giã nhuyễn.' },
+    { word: 'Lang Liêu', meaning: 'Hoàng tử đã làm bánh chưng, bánh giầy dâng vua.' },
+    { word: 'Vua Hùng', meaning: 'Vị vua thời xưa, người đứng đầu nước ta.' },
+  ],
   activities: [
     cardWord(P('b15.activity-1.prompt'), Ha('Hãy nghe và đọc chậm từng câu của truyện nhé.', HINT_READ),
       'Ngày xưa, vua Hùng muốn chọn người nối ngôi. Hoàng tử Lang Liêu làm bánh chưng vuông và bánh giầy tròn dâng vua. Vua quý tấm lòng của chàng nên truyền ngôi cho Lang Liêu.'),
@@ -572,9 +635,14 @@ const B15: ExploreLesson = {
 };
 
 const B16: ExploreLesson = {
-  order: 16, stageOrder: 4, title: 'Bài 16: Nói chuyện cùng Lí Lắc',
+  order: 16, stageOrder: 4, title: 'Bài 16: Nhập vai nhân vật',
   description: 'Bé trò chuyện cùng Sao Lí Lắc, tự giới thiệu và trả lời những câu hỏi quen thuộc hằng ngày.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'bạn', meaning: 'Người cùng chơi và cùng học với con.' },
+    { word: 'truyện', meaning: 'Sách kể chuyện có tranh và lời.' },
+    { word: 'cái bàn', meaning: 'Đồ dùng có mặt phẳng để ngồi học hoặc ăn.' },
+    { word: 'đi học', meaning: 'Đến trường để học bài.' },
+  ],
   activities: [
     voice(P('b16.activity-1.prompt'), Ha('Khi được hỏi tên, con nói: Con tên là…', G_tenLa), 'Con tên là Khánh.'),
     voice(P('b16.activity-2.prompt'), Ha('Thích là khi con yêu và muốn làm điều gì đó.', G_thich), 'Con thích đọc truyện.'),
@@ -591,7 +659,13 @@ const B16: ExploreLesson = {
 const B17: ExploreLesson = {
   order: 17, stageOrder: 5, title: 'Bài 17: Đọc và tìm thông tin',
   description: 'Bé đọc một đoạn văn ngắn và tìm các thông tin quan trọng trong bài.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'Lan', meaning: 'Tên bạn nhỏ trong đoạn văn.' },
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'chợ', meaning: 'Nơi mọi người mua và bán đồ.' },
+    { word: 'mèo', meaning: 'Con vật nuôi trong nhà, kêu meo meo.' },
+    { word: 'cửa hàng', meaning: 'Nơi bày bán đồ cho khách mua.' },
+  ],
   activities: [
     cardWord(P('b17.activity-1.prompt'), Ha('Hãy đọc chậm từng câu để hiểu nội dung nhé.', HINT_READ),
       'Sáng nay, bé Lan cùng mẹ đi chợ. Lan nhìn thấy một chú mèo nhỏ bên cửa hàng.'),
@@ -608,7 +682,13 @@ const B17: ExploreLesson = {
 const B18: ExploreLesson = {
   order: 18, stageOrder: 5, title: 'Bài 18: Đọc và hoàn thành câu',
   description: 'Bé chọn từ phù hợp để hoàn thành câu và sắp xếp từ thành câu đúng.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'nước', meaning: 'Thứ để uống, trong và mát.' },
+    { word: 'sách', meaning: 'Tập giấy có chữ và hình để đọc.' },
+    { word: 'cơm', meaning: 'Gạo nấu chín để ăn hằng ngày.' },
+    { word: 'nấu', meaning: 'Làm chín thức ăn.' },
+    { word: 'đọc', meaning: 'Nhìn chữ và phát thành tiếng.' },
+  ],
   activities: [
     fill(P('b18.activity-1.prompt'), Ha('Bé uống nước cho đỡ khát.', G_nuoc), 'Bé uống __.', 'nước', ['nước', 'sách', 'chạy']),
     fill(P('b18.activity-2.prompt'), Ha('Mẹ đang nấu cơm.', G_nau), 'Mẹ đang __ cơm.', 'nấu', ['nấu', 'đọc', 'chạy']),
@@ -620,7 +700,14 @@ const B18: ExploreLesson = {
 const B19: ExploreLesson = {
   order: 19, stageOrder: 5, title: 'Bài 19: Câu đố dân gian',
   description: 'Bé nghe các câu đố dân gian vui nhộn và đoán ra con vật, đồ vật hay sự vật quanh mình.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'mèo', meaning: 'Con vật nuôi trong nhà, kêu meo meo.' },
+    { word: 'sách', meaning: 'Tập giấy có chữ và hình để đọc.' },
+    { word: 'chim', meaning: 'Con vật có cánh, biết bay và hót.' },
+    { word: 'mưa', meaning: 'Nước rơi từ trên trời xuống.' },
+    { word: 'nắng', meaning: 'Ánh sáng ấm của mặt trời.' },
+    { word: 'gió', meaning: 'Luồng không khí chuyển động, làm mát.' },
+  ],
   activities: [
     choose(P('b19.activity-1.prompt'), Ha('Con mèo là con vật kêu meo meo.', G_meo), ['mèo', 'chó', 'gà']),
     choose(Pa('Vật gì có nhiều trang, bé mở ra để đọc?',
@@ -648,7 +735,13 @@ const B19: ExploreLesson = {
 const B20: ExploreLesson = {
   order: 20, stageOrder: 5, title: 'Bài 20: Báu vật Nước Nam',
   description: 'Bé vượt qua năm thử thách nghe, âm, đọc, nói và vận dụng để tìm ra Báu vật Nước Nam.',
-  vocabulary: [],
+  vocabulary: [
+    { word: 'mẹ', meaning: 'Người sinh ra và chăm sóc bé.' },
+    { word: 'bố', meaning: 'Người đàn ông sinh ra và chăm sóc bé.' },
+    { word: 'bà', meaning: 'Mẹ của bố hoặc của mẹ.' },
+    { word: 'uống', meaning: 'Đưa nước vào miệng khi khát.' },
+    { word: 'nước', meaning: 'Thứ để uống, trong và mát.' },
+  ],
   activities: [
     choose(P('b20.challenge-1.prompt'), Ha('Hãy nghe thật kỹ xem con vừa nghe thấy ai nhé.', HINT_LISTEN), ['mẹ', 'bố', 'bà']),
     choose(P('b20.challenge-2.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá']),

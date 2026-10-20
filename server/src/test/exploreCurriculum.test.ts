@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { exploreCurriculum, buildExploreLessonPayload } from '../seeds/customer/exploreCurriculum.js';
 import { listExploreImageTexts, imageUrlFor, normalizeImageKey } from '../seeds/customer/exploreCurriculumImages.js';
@@ -16,7 +17,55 @@ const everyString = (value: unknown, out: string[] = []): string[] => {
 // Case-insensitive scan for the banned terms. Diacritic-sensitive on purpose: stripping diacritics
 // makes the legitimate word "gia đình" (family) — which the customer source itself uses — collide
 // with the banned "giả định", so a diacritic-blind scan would reject the customer's own text.
-const BANNED = ['mẫu', 'demo', 'nháp', 'tự soạn', 'biên soạn', 'giả định'];
+// "minh họa"/"minh hoạ" (illustration) are both tone-placement spellings of the same word.
+const BANNED = ['mẫu', 'demo', 'nháp', 'tự soạn', 'biên soạn', 'giả định', 'minh họa', 'minh hoạ'];
+
+// The verbatim Khám phá source document. Read here (not via the translations parser, which only
+// reads the detailed H3 headings) so the overview-diagram titles and each lesson's "Ngữ liệu" line
+// can be checked against the payload.
+const SOURCE = readFileSync(new URL('../../../docs/customer-source/2026-10-18/explore.md', import.meta.url), 'utf8');
+const SOURCE_LINES = SOURCE.split(/\r?\n/);
+const normVi = (value: string) => value.normalize('NFC').toLowerCase();
+const stripMd = (raw: string) => raw.replace(/\\([\\`*{}[\]()#+.!_=>~-])/g, '$1').replace(/[*#]/g, '').trim();
+
+/** The 20 lesson titles exactly as the overview diagram at the top of the source spells them. */
+function overviewTitles(): Map<number, string> {
+  const head = SOURCE.split('Màn hình chính')[0];
+  const titles = new Map<number, string>();
+  for (const line of head.split(/\r?\n/)) {
+    const match = line.match(/Bài (\d+):\s*(.+?)\s*\*\*\s*$/);
+    if (match) titles.set(Number(match[1]), `Bài ${match[1]}: ${match[2].trim()}`);
+  }
+  return titles;
+}
+
+/** The "Ngữ liệu" (language material) text listed under each lesson's detailed section. */
+function nguLieuByLesson(): Map<number, string> {
+  const material = new Map<number, string>();
+  let current: number | undefined;
+  for (const raw of SOURCE_LINES) {
+    const line = stripMd(raw);
+    const heading = line.match(/^Bài (\d+)\.\s/);
+    if (heading) { current = Number(heading[1]); continue; }
+    if (/^CHẶNG\s+\d/.test(line)) { current = undefined; continue; }
+    if (current && /^Ngữ liệu/.test(line)) material.set(current, `${material.get(current) ?? ''} ${line}`);
+  }
+  return material;
+}
+
+type Activity = ReturnType<typeof payloadOf>['activities'][number];
+/** The learner-facing content strings of an activity (options, target, items…), excluding prompt/hint. */
+function activityContent(activity: Activity): string {
+  const parts: string[] = [];
+  for (const option of activity.options ?? []) if (option.text) parts.push(option.text);
+  if (activity.targetWord) parts.push(activity.targetWord);
+  for (const item of activity.orderedItems ?? []) parts.push(item);
+  for (const pair of activity.pairs ?? []) parts.push(pair.left, pair.right);
+  for (const blank of activity.blanks ?? []) parts.push(blank.sentence, blank.missing);
+  for (const step of activity.steps ?? []) parts.push(step.text);
+  for (const group of activity.groups ?? []) parts.push(group.label);
+  return parts.join(' | ');
+}
 
 describe('Explore curriculum data', () => {
   it('has 20 lessons in stage/order 1..20 with the documented activity counts', () => {
@@ -27,6 +76,15 @@ describe('Explore curriculum data', () => {
     // Every lesson covers its source "mục"; B3 (A5 splits into two questions) and B17 (A2 splits
     // into three) expand so no source question/translation is dropped.
     expect(counts).toMatchObject({ 1: 5, 2: 5, 3: 6, 4: 5, 5: 5, 6: 4, 7: 4, 8: 5, 9: 3, 10: 3, 11: 3, 12: 4, 13: 5, 14: 3, 15: 7, 16: 5, 17: 5, 18: 3, 19: 5, 20: 5 });
+    expect(Object.values(counts).reduce((sum, n) => sum + n, 0)).toBe(90); // 90 activities kept after splitting multi-question items
+  });
+
+  it('titles all 20 lessons exactly as the overview diagram at the top of the source', () => {
+    const overview = overviewTitles();
+    expect(overview.size).toBe(20);
+    for (const lesson of exploreCurriculum) {
+      expect(lesson.title, `B${lesson.order}`).toBe(overview.get(lesson.order));
+    }
   });
 
   it('builds a payload that passes parseDraft and the real publish rules for all 20 lessons', () => {
@@ -50,16 +108,33 @@ describe('Explore curriculum data', () => {
     }
   });
 
-  it('gives every option a text, every vocabulary word a meaning, and uses the documented Từ vựng for chặng 1', () => {
+  it('gives every lesson vocabulary with a meaning, every option a text, and uses the documented Từ vựng for chặng 1', () => {
     for (const lesson of exploreCurriculum) {
       const payload = payloadOf(lesson.order);
+      expect(payload.vocabulary.length, `B${lesson.order} vocabulary`).toBeGreaterThanOrEqual(1);
       for (const word of payload.vocabulary) { expect(word.word.trim()).not.toBe(''); expect(word.meaning.trim()).not.toBe(''); }
-      for (const activity of payload.activities) for (const option of activity.options ?? []) expect(option.text.trim()).not.toBe('');
+      for (const activity of payload.activities) for (const option of activity.options ?? []) expect(option.text?.trim()).not.toBe('');
     }
     expect(payloadOf(1).vocabulary.map((w) => w.word)).toEqual(['mẹ', 'bố', 'ông', 'bà', 'anh', 'chị', 'em', 'bạn']);
     expect(payloadOf(2).vocabulary.map((w) => w.word)).toEqual(['sách', 'vở', 'bút', 'cặp', 'bàn', 'ghế']);
     expect(payloadOf(3).vocabulary.map((w) => w.word)).toEqual(['chó', 'mèo', 'gà', 'cá', 'trâu', 'chim']);
     expect(payloadOf(4).vocabulary.map((w) => w.word)).toEqual(['ăn', 'uống', 'ngủ', 'chơi', 'đọc', 'chạy', 'đi', 'ngồi']);
+  });
+
+  it('sources each B5–B20 vocabulary word (4–8 per lesson) from that lesson Ngữ liệu or its activities', () => {
+    const material = nguLieuByLesson();
+    for (const lesson of exploreCurriculum) {
+      if (lesson.order < 5) continue;
+      const payload = payloadOf(lesson.order);
+      expect(payload.vocabulary.length, `B${lesson.order} vocabulary count`).toBeGreaterThanOrEqual(4);
+      expect(payload.vocabulary.length, `B${lesson.order} vocabulary count`).toBeLessThanOrEqual(8);
+      const haystack = normVi(
+        `${payload.activities.map(activityContent).join(' || ')} || ${material.get(lesson.order) ?? ''}`,
+      );
+      for (const word of payload.vocabulary) {
+        expect(haystack.includes(normVi(word.word)), `B${lesson.order} từ "${word.word}"`).toBe(true);
+      }
+    }
   });
 
   it('contains none of the banned words in any payload string', () => {
@@ -121,9 +196,13 @@ describe('Explore curriculum data', () => {
     }
     expect(imageUrlFor('mẹ')).toBe('');
     const texts = listExploreImageTexts();
-    expect(texts.length).toBeGreaterThan(0);
+    expect(texts.length).toBe(120); // 105 before + 15 new unique vocabulary keys from B5–B20
     expect(texts).toContain(normalizeImageKey('mẹ'));
     expect(texts).toContain(normalizeImageKey('M'));
+    // Newly added vocabulary words are picked up automatically by listExploreImageTexts().
+    for (const word of ['bánh chưng', 'bánh giầy', 'mèo', 'mưa', 'cửa hàng', 'đi học']) {
+      expect(texts, word).toContain(normalizeImageKey(word));
+    }
     // Only option and vocabulary texts carry images (no word_card targetWord passages).
     expect(texts.some((t) => t.includes('Sáng nay'))).toBe(false);
   });
