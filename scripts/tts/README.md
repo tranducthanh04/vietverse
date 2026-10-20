@@ -50,6 +50,23 @@ python tts.py apply --manifest out/manifest.json              # dry-run: chỉ i
 python tts.py apply --manifest out/manifest.json --apply --i-have-backup   # ghi thật
 ```
 
+### Sửa audio đã sinh sai trước đó (`--replace-from`)
+
+Khi một lần chạy cũ đã ghi `audioUrl` bằng text sai (vd `word_card` từng đọc `prompt`), truyền
+manifest của **lần cũ** cho `export` và `apply` để thay đúng những ô đó, vẫn chừa audio người khác
+tải lên:
+
+```bash
+python tts.py export --replace-from out/manifest-cu.json      # xuất thêm ô cần sửa
+python tts.py generate --manifest out/manifest.json --out out
+python tts.py upload   --manifest out/manifest.json --out out
+python tts.py apply    --manifest out/manifest.json --replace-from out/manifest-cu.json              # dry-run
+python tts.py apply    --manifest out/manifest.json --replace-from out/manifest-cu.json --apply --i-have-backup
+```
+
+Chỉ thay khi live đang khớp đúng url lần cũ **và** text mới đã khác; chi tiết ở
+`docs/content-audio-tts.md`.
+
 ### Đổi giọng / tốc độ
 
 ```bash

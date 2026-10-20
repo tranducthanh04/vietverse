@@ -29,7 +29,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 # Nối các dòng lyrics bằng xuống dòng để edge-tts ngắt nghỉ giữa các dòng.
 LYRIC_JOINER = "\n"
@@ -68,46 +68,121 @@ def is_blank(value: Any) -> bool:
     return not (isinstance(value, str) and value.strip())
 
 
-def extract_clips(kind: str, payload: dict[str, Any]) -> list[dict[str, Any]]:
-    """Trích danh sách clip cần sinh audio cho một nội dung (chỉ các ô audioUrl đang trống).
+def _new_activity_instructions(activity: dict[str, Any], *, include_steps: bool = False) -> str:
+    """Phản chiếu NewActivityFrame.tsx: nối [prompt, subPrompt, (text từng bước nếu follow_steps)]
+    sau khi bỏ phần rỗng, bằng '. ' — đúng chuỗi mà nút nghe của khung đọc khi không có audioUrl."""
+    parts: list[Any] = [activity.get("prompt"), activity.get("subPrompt")]
+    if include_steps:
+        parts.extend(
+            step.get("text") for step in (activity.get("steps") or []) if isinstance(step, dict)
+        )
+    return ". ".join(part for part in parts if isinstance(part, str) and part)
 
-    - lesson: prompt của mỗi activity, text của mỗi option có chữ, mỗi từ vựng.
+
+# Với mỗi activity.type, text mà component ở client đọc cho activities[].audioUrl KHI KHÔNG có
+# audioUrl (fallback textToSpeak). Khoá theo type, mỗi entry chú thích component nó phản chiếu.
+# Loại KHÔNG có trong bảng (drag_match, record_voice) không bao giờ phát activities[].audioUrl
+# nên không sinh clip cho ô đó — tránh sinh audio không ai nghe.
+LESSON_ACTIVITY_AUDIO_TEXT: dict[str, Callable[[dict[str, Any]], str]] = {
+    # WordCardActivity.tsx: nút nghe lớn phát audioUrl, fallback đọc targetWord (thẻ to, thường
+    # là CẢ đoạn đọc) — KHÔNG phải prompt. Chính chỗ này sinh sai audioUrl trên prod.
+    "word_card": lambda a: str(a.get("targetWord") or ""),
+    # ListenChooseActivity.tsx: nút loa đọc prompt.
+    "listen_choose": lambda a: str(a.get("prompt") or ""),
+    # FillBlankActivity.tsx -> WrongAnswerFeedback: đọc prompt (replay khi chọn sai).
+    "fill_blank": lambda a: str(a.get("prompt") or ""),
+    # SortOrderActivity.tsx -> WrongAnswerFeedback: đọc prompt.
+    "sort_order": lambda a: str(a.get("prompt") or ""),
+    # ReviewActivity.tsx -> WrongAnswerFeedback: đọc prompt.
+    "review": lambda a: str(a.get("prompt") or ""),
+    # MultiSelectActivity.tsx -> NewActivityFrame: đọc prompt + subPrompt.
+    "multi_select": _new_activity_instructions,
+    # GroupSortActivity.tsx -> NewActivityFrame: đọc prompt + subPrompt.
+    "group_sort": _new_activity_instructions,
+    # FillBlanksActivity.tsx -> NewActivityFrame: đọc prompt + subPrompt.
+    "fill_blanks": _new_activity_instructions,
+    # FollowStepsActivity.tsx -> NewActivityFrame: đọc prompt + subPrompt + text từng bước.
+    "follow_steps": lambda a: _new_activity_instructions(a, include_steps=True),
+}
+
+
+def replace_allowed(old_clip: dict[str, Any] | None, current_value: Any, new_text: str) -> bool:
+    """True nếu được phép THAY giá trị hiện có của một ô audio (replace-from): ô đang giữ đúng URL
+    mà lần chạy cũ (`old_clip`) đã ghi cho CHÍNH ô này, VÀ text mới khác text cũ.
+
+    Nhờ vậy chỉ sửa audio do script tự sinh sai trước đó; audio người khác tải lên (URL khác)
+    hoặc ô mà lần cũ không ghi (không có `old_clip`) hoặc text không đổi đều được giữ nguyên.
+    """
+    return bool(
+        old_clip
+        and old_clip.get("url")
+        and isinstance(current_value, str)
+        and current_value == old_clip["url"]
+        and new_text != str(old_clip.get("text") or "")
+    )
+
+
+def index_clips_by_field(manifest: dict[str, Any] | None) -> dict[tuple[str, str], dict[str, dict[str, Any]]]:
+    """Lập chỉ mục (kind, contentId) -> {field: clip} từ một manifest cũ, dùng cho replace-from."""
+    index: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
+    for content in (manifest or {}).get("contents", []) or []:
+        key = (content.get("kind"), str(content.get("contentId")))
+        index[key] = {c["field"]: c for c in (content.get("clips") or []) if c.get("field")}
+    return index
+
+
+def extract_clips(
+    kind: str,
+    payload: dict[str, Any],
+    *,
+    old_clips: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Trích danh sách clip cần sinh audio cho một nội dung.
+
+    Mặc định chỉ lấy các ô audioUrl ĐANG TRỐNG. Nếu truyền `old_clips` (bản đồ field -> clip của
+    một manifest cũ cho chính nội dung này) thì còn lấy thêm các ô ĐÃ CÓ giá trị nhưng đúng là
+    audio do lần chạy cũ tự ghi (giá trị khớp url cũ) và text mới đã khác (replace-from).
+
+    - lesson: text của mỗi activity theo đúng loại (bảng LESSON_ACTIVITY_AUDIO_TEXT; loại không
+      phát activities[].audioUrl thì bỏ qua), text của mỗi option có chữ, mỗi từ vựng.
     - story: một clip audio cho CẢ truyện (đọc toàn bộ lyrics), kèm lyricLines để tính mốc.
     - culture: đọc phần giới thiệu (intro).
     """
     clips: list[dict[str, Any]] = []
+    old_clips = old_clips or {}
 
-    def add(field: str, text: str, **extra: Any) -> None:
+    def add(field: str, current_value: Any, text: str, **extra: Any) -> None:
+        text = text or ""
         if is_blank(text):
             return
+        if not is_blank(current_value) and not replace_allowed(old_clips.get(field), current_value, text):
+            return  # ô đã có audio và không thuộc diện replace-from -> giữ nguyên
         clip = {"field": field, "text": text, "file": None, "url": None}
         clip.update(extra)
         clips.append(clip)
 
     if kind == "lesson":
         for i, activity in enumerate(payload.get("activities", []) or []):
-            if is_blank(activity.get("audioUrl")):
-                add(f"activities.{i}.audioUrl", activity.get("prompt", ""))
+            text_fn = LESSON_ACTIVITY_AUDIO_TEXT.get(activity.get("type"))
+            if text_fn is not None:
+                add(f"activities.{i}.audioUrl", activity.get("audioUrl"), text_fn(activity))
             for j, option in enumerate(activity.get("options", []) or []):
-                if is_blank(option.get("audioUrl")):
-                    add(f"activities.{i}.options.{j}.audioUrl", option.get("text", "") or "")
+                add(f"activities.{i}.options.{j}.audioUrl", option.get("audioUrl"), option.get("text", "") or "")
         for k, word in enumerate(payload.get("vocabulary", []) or []):
-            if is_blank(word.get("audioUrl")):
-                add(f"vocabulary.{k}.audioUrl", word.get("word", "") or "")
+            add(f"vocabulary.{k}.audioUrl", word.get("audioUrl"), word.get("word", "") or "")
     elif kind == "story":
-        if is_blank(payload.get("audioUrl")):
-            lines = [str(line.get("text", "")) for line in payload.get("lyrics", []) or []]
-            if any(line.strip() for line in lines):
-                add(
-                    "audioUrl",
-                    LYRIC_JOINER.join(lines),
-                    lyricLines=lines,
-                    durationSec=None,
-                    lineTimes=None,
-                )
+        lines = [str(line.get("text", "")) for line in payload.get("lyrics", []) or []]
+        if any(line.strip() for line in lines):
+            add(
+                "audioUrl",
+                payload.get("audioUrl"),
+                LYRIC_JOINER.join(lines),
+                lyricLines=lines,
+                durationSec=None,
+                lineTimes=None,
+            )
     elif kind == "culture":
-        if is_blank(payload.get("audioUrl")):
-            add("audioUrl", payload.get("intro", "") or "")
+        add("audioUrl", payload.get("audioUrl"), payload.get("intro", "") or "")
     else:
         raise ValueError(f"kind không hợp lệ: {kind!r}")
 

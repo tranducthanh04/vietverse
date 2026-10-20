@@ -4,6 +4,9 @@ MẶC ĐỊNH là dry-run: chỉ in ra những gì sẽ đổi, không gọi API
 
 Quy tắc an toàn (theo file phase + review):
 - Chỉ điền ô audioUrl đang trống; không ghi đè audio có sẵn (kiểm cả ở live và ở draft).
+- Riêng chế độ replace-from (truyền `replace_from` = manifest cũ): còn được THAY một ô đã có giá
+  trị, nhưng CHỈ khi giá trị đó đúng là url mà lần chạy cũ tự ghi cho ô đó VÀ text mới đã khác.
+  Audio người khác tải lên, ô text không đổi, hay ô lần cũ không ghi đều được giữ nguyên.
 - Nếu nội dung đang có draft dở của người khác (state == 'editing') thì bỏ qua, báo lại.
 - Chỉ xử lý clip đã upload (có 'url').
 - Xử lý lỗi theo TỪNG nội dung: một nội dung lỗi không làm dừng cả mẻ; nháp vừa mở được dọn
@@ -20,7 +23,7 @@ import copy
 from typing import Any, Callable
 
 from .api import ApiError
-from .manifest import get_by_path, set_by_path, is_blank
+from .manifest import get_by_path, set_by_path, is_blank, index_clips_by_field, replace_allowed
 
 # Các lỗi "từng-nội-dung" được bắt để cô lập một nội dung lỗi khỏi phần còn lại của mẻ.
 # KeyError/IndexError đến từ set_by_path khi đường dẫn trường không tồn tại trên payload (M-2).
@@ -108,6 +111,14 @@ def _discard_quietly(
            f"(draftVersion={draft_version}): {first_error}")
 
 
+def _should_fill(old_clips: dict[str, dict[str, Any]], field: str, current_value: Any, new_text: str) -> bool:
+    """Có nên ghi audio vào ô này không: ô trống thì điền; ô đã có thì chỉ khi đúng là audio
+    script cũ tự ghi và text đã đổi (replace-from). `old_clips` rỗng -> chỉ điền ô trống (như cũ)."""
+    if is_blank(current_value):
+        return True
+    return replace_allowed(old_clips.get(field), current_value, new_text)
+
+
 def _result(content: dict[str, Any], status: str, detail: str, fields: list[str] | None = None) -> dict[str, Any]:
     return {
         "kind": content["kind"], "contentId": content["contentId"],
@@ -123,8 +134,10 @@ def _apply_one(
     dry_run: bool,
     logger: Callable[[str], None],
     actor_id: str | None,
+    old_clips: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Xử lý một nội dung; tự cô lập lỗi và trả kết quả (không ném lên trên)."""
+    old_clips = old_clips or {}
     kind = content["kind"]
     content_id = content["contentId"]
     title = content.get("title", "")
@@ -148,7 +161,10 @@ def _apply_one(
         return _result(content, "skipped", "chưa có bản live để gắn audio")
 
     live_payload = live.get("payload", {})
-    pending = [clip for clip in uploaded if is_blank(get_by_path(live_payload, clip["field"]))]
+    pending = [
+        clip for clip in uploaded
+        if _should_fill(old_clips, clip["field"], get_by_path(live_payload, clip["field"]), clip.get("text", ""))
+    ]
     if not pending:
         return _result(content, "skipped", "mọi ô đích đã có audio")
 
@@ -191,8 +207,10 @@ def _apply_one(
         applied_fields: list[str] = []
         for clip in pending:
             field = clip["field"]
-            if not is_blank(get_by_path(draft_payload, field)):
-                continue  # kiểm lại trên draft: nếu đã có thì vẫn không ghi đè
+            # Kiểm lại trên draft: chỉ ghi nếu ô vẫn đáng ghi (trống, hoặc đúng audio script cũ
+            # tự ghi và text đã đổi với replace-from); audio người khác thêm vào thì không đụng.
+            if not _should_fill(old_clips, field, get_by_path(draft_payload, field), clip.get("text", "")):
+                continue
             set_by_path(draft_payload, field, clip["url"])
             if clip.get("lineTimes") is not None:
                 _apply_lyric_times(draft_payload, clip)
@@ -224,13 +242,20 @@ def apply_manifest(
     dry_run: bool = True,
     logger: Callable[[str], None] = print,
     actor_id: str | None = None,
+    replace_from: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Duyệt manifest, gắn audio vào các ô trống. Trả danh sách kết quả theo từng nội dung.
 
     Lỗi của một nội dung được cô lập (status='error') và không làm dừng các nội dung còn lại.
     `actor_id` là id admin đang đăng nhập (client.user_id), dùng để xác nhận nháp là của script.
+    `replace_from` là manifest của lần chạy cũ: khi có, cho phép THAY audio script cũ tự ghi (giá
+    trị live khớp url cũ và text đã đổi); không có thì chỉ điền ô trống như trước.
     """
+    old_index = index_clips_by_field(replace_from)
     return [
-        _apply_one(client, content, dry_run=dry_run, logger=logger, actor_id=actor_id)
+        _apply_one(
+            client, content, dry_run=dry_run, logger=logger, actor_id=actor_id,
+            old_clips=old_index.get((content["kind"], str(content["contentId"])), {}),
+        )
         for content in manifest.get("contents", [])
     ]
