@@ -2,12 +2,14 @@ import React from 'react';
 import { AudioButton } from '../../../components/ui/AudioButton.js';
 import { Lightbulb } from '../../../components/ui/icons.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface WordCardActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     subPrompt?: string;
     targetWord?: string;
     targetPhonetic?: string;
@@ -40,6 +42,7 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
       <h2 className="max-w-full break-words text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-2">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       {activity.subPrompt && (
         <div className="w-full min-w-0 mb-6 space-y-3">

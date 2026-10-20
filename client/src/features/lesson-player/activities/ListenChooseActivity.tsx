@@ -4,12 +4,14 @@ import { CircleCheck, CircleX, Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
 import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface ListenChooseActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
     options?: Array<{
       id: string;
@@ -48,6 +50,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-4">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       {/* Audio speaker prompt */}
       <div className="mb-6">

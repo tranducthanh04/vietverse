@@ -4,12 +4,14 @@ import {
   CircleCheck,
   CircleX,
 } from '../../../components/ui/icons.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface DragMatchActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     pairs?: Array<{ left: string; right: string }>;
   };
   onComplete: (isCorrect: boolean, userAnswer?: any) => void;
@@ -63,6 +65,7 @@ export const DragMatchActivity: React.FC<DragMatchActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-6">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-8 w-full max-w-lg">
         {/* Left Column */}

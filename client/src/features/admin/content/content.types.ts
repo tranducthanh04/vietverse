@@ -24,6 +24,7 @@ export type Activity = {
   hints?: string[];
   wrongHint?: string;
   wrongHintTranslations?: ActivityTranslations;
+  promptTranslations?: ActivityPromptTranslations;
   targetWord?: string;
   targetPhonetic?: string;
   pairs?: { left: string; right: string }[];
@@ -64,6 +65,8 @@ export type ActivityTranslation = {
 export type ActivityTranslations = Partial<
   Record<SupportLanguage, ActivityTranslation>
 >;
+/** Reviewed translations of an activity's question (`prompt`): one string per support language. */
+export type ActivityPromptTranslations = Partial<Record<SupportLanguage, string>>;
 export type CultureTranslation = {
   title?: string;
   intro?: string;

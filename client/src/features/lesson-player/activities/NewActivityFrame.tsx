@@ -1,6 +1,7 @@
 import React from "react";
 import type { NewLearnerActivity } from "./newActivity.types.js";
 import { AudioButton } from "../../../components/ui/AudioButton.js";
+import { PromptTranslation } from "./PromptTranslation.js";
 import { useT } from "../../../i18n/index.js";
 
 export function NewActivityFrame({
@@ -26,6 +27,7 @@ export function NewActivityFrame({
         <h2 className="text-kid-lg md:text-kid-xl font-display font-bold break-words text-balance">
           {activity.prompt}
         </h2>
+        <PromptTranslation translations={activity.promptTranslations} className="block text-kid-sm font-medium text-stone-500" />
         {activity.subPrompt && <p className="text-kid-sm text-stone-600">{activity.subPrompt}</p>}
         <AudioButton
           contentKey={activity.id}

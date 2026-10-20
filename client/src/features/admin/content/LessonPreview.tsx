@@ -25,7 +25,7 @@ function PureActivity({
   const [value,setValue]=useState<NewActivityInput>(['multi_select','follow_steps'].includes(activity.type)?[]:{});
   const [submitted,setSubmitted]=useState(false);
   if(isNewActivityType(activity.type)) {
-    const common={id:activity.id,prompt:activity.prompt,subPrompt:activity.subPrompt,audioUrl:activity.audioUrl};
+    const common={id:activity.id,prompt:activity.prompt,promptTranslations:activity.promptTranslations,subPrompt:activity.subPrompt,audioUrl:activity.audioUrl};
     let visible:NewLearnerActivity;
     let Component:React.FC<NewActivityProps>;
     switch(activity.type){

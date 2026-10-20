@@ -1,6 +1,11 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { contentMetadataFields, type ContentMetadata } from './contentMetadata.js';
-import { activityTranslationFields, type ActivityTranslations } from './contentTranslations.js';
+import {
+  activityTranslationFields,
+  activityPromptTranslationFields,
+  type ActivityTranslations,
+  type ActivityPromptTranslations,
+} from './contentTranslations.js';
 
 export type ActivityType =
   | 'listen_choose'
@@ -26,6 +31,8 @@ export interface IActivity {
   id: string;
   type: ActivityType;
   prompt: string;
+  /** Reviewed translations of `prompt`, keyed by support language. Optional, backward compatible. */
+  promptTranslations?: ActivityPromptTranslations;
   subPrompt?: string;
   audioUrl?: string;
   imageUrl?: string;
@@ -83,6 +90,7 @@ const activitySchema = new Schema<IActivity>(
       ],
     },
     prompt: { type: String, required: true },
+    promptTranslations: activityPromptTranslationFields,
     subPrompt: String,
     audioUrl: String,
     imageUrl: String,

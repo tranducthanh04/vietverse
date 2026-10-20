@@ -2,7 +2,7 @@ export type NewActivityType = 'multi_select' | 'group_sort' | 'fill_blanks' | 'f
 export type NewActivityInput = string[] | Record<string, string>;
 export interface NewActivitySubmission { status: 'submitted' | 'self_reported'; userAnswer: NewActivityInput }
 export interface ActivityOption { id: string; text?: string; imageUrl?: string; audioUrl?: string }
-type Common = { id: string; prompt: string; audioUrl?: string; subPrompt?: string };
+type Common = { id: string; prompt: string; promptTranslations?: Partial<Record<string, string>>; audioUrl?: string; subPrompt?: string };
 export type NewLearnerActivity = Common & (
   | { type: 'multi_select'; options: ActivityOption[] }
   | { type: 'group_sort'; options: ActivityOption[]; groups: { id: string; label: string }[] }

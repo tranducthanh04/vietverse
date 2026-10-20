@@ -1,11 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { cn } from '../../../lib/utils.js';
 import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
+import { PromptTranslation } from './PromptTranslation.js';
 
 export interface FillBlankActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
     blanks?: Array<{ sentence: string; missing: string }>;
     options?: Array<{ id: string; text: string }>;
@@ -43,6 +45,7 @@ export const FillBlankActivity: React.FC<FillBlankActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       <WrongAnswerFeedback ref={feedbackRef} show={wrong} activity={activity} canReplay={canReplay} />
 
