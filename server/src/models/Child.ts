@@ -1,8 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export type AgeGroup = '5-6' | '6-8';
-export type CompanionLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'fr' | 'other';
-export const companionLanguages = ['en', 'ja', 'ko', 'zh', 'fr', 'other'] as const;
+export type CompanionLanguage = 'vi' | 'en' | 'ja' | 'ko' | 'zh' | 'fr' | 'other';
+export const companionLanguages = ['vi', 'en', 'ja', 'ko', 'zh', 'fr', 'other'] as const;
 
 export interface IChild extends Document {
   parentId: Types.ObjectId;

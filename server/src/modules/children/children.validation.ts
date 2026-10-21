@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const language = z.enum(['en', 'ja', 'ko', 'zh', 'fr', 'other']);
+const language = z.enum(['vi', 'en', 'ja', 'ko', 'zh', 'fr', 'other']);
 const languageFields = {
   companionLanguage: language.optional(),
   companionLanguages: z.array(language).min(1).max(6).superRefine((values, ctx) => {

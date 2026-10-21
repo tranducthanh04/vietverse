@@ -88,7 +88,7 @@ Google payload: `/start` nhận `{}`; `/google` nhận strict `{credential, nonc
 
 ## Learning và child
 
-Quyết định tương thích 2026-10-11: `POST/PUT /children` nhận `companionLanguages` gồm 1–6 giá trị duy nhất thuộc `en/ja/ko/zh/fr/other`. Nếu gửi cả trường singular thì phải trùng phần tử đầu, không đúng trả 400. Chỉ gửi singular vẫn được chuẩn hóa thành mảng một phần tử; update không gửi hai trường thì giữ nguyên. Response đọc document legacy bổ sung mảng trong JSON, không ghi DB khi GET. Quyền/subscription/điểm không đổi.
+Quyết định tương thích 2026-10-11 (cập nhật 2026-10-21 thêm `vi` đứng đầu): `POST/PUT /children` nhận `companionLanguages` gồm 1–6 giá trị duy nhất thuộc `vi/en/ja/ko/zh/fr/other`. Nếu gửi cả trường singular thì phải trùng phần tử đầu, không đúng trả 400. Chỉ gửi singular vẫn được chuẩn hóa thành mảng một phần tử; update không gửi hai trường thì giữ nguyên. Response đọc document legacy bổ sung mảng trong JSON, không ghi DB khi GET. Quyền/subscription/điểm không đổi.
 
 | Method | Path | Auth | Ownership/role |
 | --- | --- | --- | --- |
@@ -265,10 +265,10 @@ Revenue response: `{ currency: 'VND', timezone: 'Asia/Ho_Chi_Minh', from: string
 
 ### Bản dịch nội dung theo ngôn ngữ hỗ trợ — 2026-10-17
 
-- Model `Story` và `CultureArticle` có thêm trường `translations` tùy chọn: một object khóa theo ngôn ngữ hỗ trợ (`en`, `ja`, `ko`, `zh`, `fr` — đúng tập `companionLanguages` trừ `other`). Culture mỗi ngôn ngữ chứa `{ title?, intro?, funFacts?[] }`; story chứa `{ title?, description?, lyrics?[], vocab?[] }`. Các mảng song song theo index với bản tiếng Việt; phần tử trống hoặc thiếu thì ẩn. Document legacy không có trường này thì trường vắng mặt trong payload (không phải `{}`), nên **không cần migration bắt buộc** và dữ liệu cũ vẫn chạy.
+- Model `Story` và `CultureArticle` có thêm trường `translations` tùy chọn: một object khóa theo ngôn ngữ hỗ trợ (`en`, `ja`, `ko`, `zh`, `fr` — đúng tập `companionLanguages` trừ `vi` và `other`; nội dung nguồn vốn là tiếng Việt nên `vi` không bao giờ là khóa bản dịch). Culture mỗi ngôn ngữ chứa `{ title?, intro?, funFacts?[] }`; story chứa `{ title?, description?, lyrics?[], vocab?[] }`. Các mảng song song theo index với bản tiếng Việt; phần tử trống hoặc thiếu thì ẩn. Document legacy không có trường này thì trường vắng mặt trong payload (không phải `{}`), nên **không cần migration bắt buộc** và dữ liệu cũ vẫn chạy.
 - API đọc công khai `GET /stories/:id`, `GET /culture/:id` (và danh sách) trả kèm `translations`. Tiếng Việt vẫn là nội dung chính; bản dịch không thay đổi quiz, chấm điểm, exploration hay thưởng. Draft schema chấp nhận `translations`, giới hạn kích thước mảng như nguồn (`funFacts` ≤ 50, `lyrics` ≤ 500, `vocab` ≤ 100) và văn bản ≤ 5000 ký tự; khóa ngôn ngữ ngoài tập hỗ trợ (kể cả `other`) bị từ chối. `validatePublish` **không** bắt buộc phải có bản dịch — nội dung thiếu bản dịch vẫn xuất bản bình thường.
 - CMS `/admin/truyen` và `/admin/van-hoa` có khối "Bản dịch theo ngôn ngữ hỗ trợ" thu gọn/mở rộng theo từng ngôn ngữ (`<details>`); lưu nháp và xem trước được, không khối nào chặn publish.
-- Khu bé hiển thị bản dịch ngay dưới đoạn tiếng Việt theo ngôn ngữ hỗ trợ **đầu tiên có bản dịch** trong `companionLanguages` của hồ sơ bé đang chọn (`other` bị bỏ qua), chữ nhỏ hơn, màu phụ, kèm thuộc tính `lang` đúng. Không có hồ sơ bé hoặc không ngôn ngữ nào có bản dịch thì ẩn hoàn toàn.
+- Khu bé hiển thị bản dịch ngay dưới đoạn tiếng Việt theo ngôn ngữ hỗ trợ **đầu tiên có bản dịch** trong `companionLanguages` của hồ sơ bé đang chọn (`vi` và `other` bị bỏ qua), chữ nhỏ hơn, màu phụ, kèm thuộc tính `lang` đúng. Không có hồ sơ bé, bé chỉ chọn `vi`, hoặc không ngôn ngữ nào có bản dịch thì ẩn hoàn toàn.
 - *Giả định chờ duyệt (ghi cho owner/content owner)*: bản dịch tiếng Anh trong seed demo là **bản nháp chưa duyệt**, chỉ phục vụ xem thử; content owner cần duyệt văn bản và bản quyền trước khi phát hành. Không có migration ghi bản dịch lên production trong thay đổi này.
 
 ### Gợi ý và phát lại audio khi trả lời sai — 2026-10-19

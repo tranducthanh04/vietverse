@@ -20,12 +20,15 @@ export function isUiLanguage(value: unknown): value is UiLanguage {
 /**
  * Map a child's companion (home) language to the interface language.
  *
+ * [Quyết định nghiệp vụ 2026-10-21] `vi` là một ngôn ngữ đồng hành hợp lệ: bé có
+ * `companionLanguages[0] === 'vi'` thì giao diện mặc định là tiếng Việt.
  * [Quyết định] Chỉ `vi` và `en` có bản dịch giao diện.
  * [Giả định] Các ngôn ngữ đồng hành khác (`ja/ko/zh/fr/other`) chưa có bản dịch
- * giao diện nên tạm dùng `en`; không có lựa chọn `vi` trong ngôn ngữ đồng hành.
+ * giao diện nên tạm dùng `en`.
  */
 export function companionToUiLanguage(companion?: string | null): UiLanguage | null {
   if (!companion) return null;
+  if (companion === 'vi') return 'vi';
   // Only `en` has its own UI; every other supported companion language falls back to `en`.
   return 'en';
 }

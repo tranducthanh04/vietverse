@@ -164,6 +164,7 @@ export const en: Dictionary = {
     step3Badge: 'Step 3 / 4',
     languageTitle: "What language does your child use day to day?",
     languageSubtitle: 'You can pick more than one language your child uses every day.',
+    langViSub: 'Vietnamese',
     langEnSub: 'English',
     langJaSub: 'Japanese',
     langKoSub: 'Korean',

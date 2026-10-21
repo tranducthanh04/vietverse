@@ -24,6 +24,10 @@ const enChild: ChildProfile = {
   viviPoints: 30, level: 1, badges: [], ownedItemIds: [], screenTimeLimit: 20,
 };
 
+const viChild: ChildProfile = {
+  ...enChild, _id: 'child-vi', companionLanguage: 'vi', companionLanguages: ['vi', 'en'],
+};
+
 let queryClient: QueryClient;
 
 beforeEach(() => {
@@ -69,7 +73,8 @@ describe('i18n dictionaries', () => {
 });
 
 describe('companion language mapping', () => {
-  it('maps any companion language to English and nothing to Vietnamese', () => {
+  it('maps vi to Vietnamese, every other companion language to English, and nothing to null', () => {
+    expect(companionToUiLanguage('vi')).toBe('vi');
     expect(companionToUiLanguage('en')).toBe('en');
     expect(companionToUiLanguage('ja')).toBe('en');
     expect(companionToUiLanguage(undefined)).toBeNull();
@@ -129,11 +134,22 @@ describe('default language from the active child', () => {
     expect(screen.queryByText('Góc Phụ Huynh')).not.toBeInTheDocument();
   });
 
-  it('lets a manual choice override the child-derived default', () => {
-    useUiLanguageStore.setState({ manualLanguage: 'vi' });
-    useChildStore.setState({ activeChild: enChild, children: [enChild] });
+  it('shows the kids area in Vietnamese when the child companion language is vi', () => {
+    // No manual choice: a child whose first companion language is `vi` defaults to the Vietnamese UI.
+    useUiLanguageStore.setState({ manualLanguage: null });
+    useChildStore.setState({ activeChild: viChild, children: [viChild] });
     showKids();
     expect(screen.getByLabelText('Chọn hồ sơ bé')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Enter the Parent Corner (unlock required)' })).not.toBeInTheDocument();
+  });
+
+  it('lets a manual choice override the child-derived default', () => {
+    // A vi child would default to Vietnamese; an explicit EN choice must still win.
+    useUiLanguageStore.setState({ manualLanguage: 'en' });
+    useChildStore.setState({ activeChild: viChild, children: [viChild] });
+    showKids();
+    expect(screen.getByRole('button', { name: 'Enter the Parent Corner (unlock required)' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Chọn hồ sơ bé')).not.toBeInTheDocument();
   });
 });
 

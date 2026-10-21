@@ -26,7 +26,7 @@ export const OnboardingWizard: React.FC = () => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [ageGroup, setAgeGroup] = useState<'5-6' | '6-8'>('5-6');
-  const [companionLanguages, setCompanionLanguages] = useState<string[]>(['en']);
+  const [companionLanguages, setCompanionLanguages] = useState<string[]>(['vi']);
   const [avatarId, setAvatarId] = useState('mascot-star-1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -339,6 +339,7 @@ export const OnboardingWizard: React.FC = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto w-full mb-8">
                 {[
+                  { code: 'vi', badge: 'VI', label: 'Tiếng Việt', sub: t('onboarding.langViSub') },
                   { code: 'en', badge: 'EN', label: 'English', sub: t('onboarding.langEnSub') },
                   { code: 'ja', badge: 'JA', label: '日本語', sub: t('onboarding.langJaSub') },
                   { code: 'ko', badge: 'KO', label: '한국어', sub: t('onboarding.langKoSub') },
@@ -352,9 +353,12 @@ export const OnboardingWizard: React.FC = () => {
                       key={item.code}
                       type="button"
                       aria-pressed={isSelected}
-                      onClick={() => setCompanionLanguages((current) => current.includes(item.code)
-                        ? current.filter((code) => code !== item.code)
-                        : [...current, item.code])}
+                      onClick={() => setCompanionLanguages((current) => {
+                        if (!current.includes(item.code)) return [...current, item.code];
+                        // Keep at least one language: refuse to clear the last selection.
+                        if (current.length === 1) return current;
+                        return current.filter((code) => code !== item.code);
+                      })}
                       className={`p-4 rounded-2xl border-2 text-center transition-[background-color,border-color,box-shadow] cursor-pointer ${
                         isSelected
                           ? 'border-primary bg-primary-fixed/40 shadow-md ring-2 ring-primary'
