@@ -79,7 +79,8 @@ export const QuestMapPage: React.FC = () => {
 
   // Stage-intro animation. `lessonId` set means the intro gates entry to that lesson (closing
   // navigates in); `null` means it was re-opened from the map for a replay (closing just closes).
-  const [intro, setIntro] = useState<{ stageOrder: number; lessonId: string | null } | null>(null);
+  // The child is captured on open so a profile switch while the overlay is up can't mark the wrong child.
+  const [intro, setIntro] = useState<{ stageOrder: number; lessonId: string | null; childId: string } | null>(null);
 
   const openLesson = (stageOrder: number, lessonId: string) => {
     if (
@@ -87,7 +88,7 @@ export const QuestMapPage: React.FC = () => {
       getStageIntroScript(stageOrder) &&
       !hasSeenStageIntro(activeChild._id, stageOrder)
     ) {
-      setIntro({ stageOrder, lessonId });
+      setIntro({ stageOrder, lessonId, childId: activeChild._id });
     } else {
       navigate(`/hoc/${lessonId}`);
     }
@@ -96,8 +97,8 @@ export const QuestMapPage: React.FC = () => {
   const closeIntro = () => {
     const current = intro;
     setIntro(null);
-    if (current?.lessonId && activeChild) {
-      markStageIntroSeen(activeChild._id, current.stageOrder);
+    if (current?.lessonId) {
+      markStageIntroSeen(current.childId, current.stageOrder);
       navigate(`/hoc/${current.lessonId}`);
     }
   };
@@ -226,10 +227,10 @@ export const QuestMapPage: React.FC = () => {
                   : !activeStage.isUnlocked ? (activeStage.requiresSubscription ? 'parentPortal.stageSubscription' : 'parentPortal.stagePreviousStage')
                   : activeStage.isCompleted ? 'parentPortal.stageDone' : 'parentPortal.stageOpen')}
               </p>
-              {getStageIntroScript(activeStage.order) && (
+              {activeChild && activeStage.isUnlocked && getStageIntroScript(activeStage.order) && (
                 <button
                   type="button"
-                  onClick={() => setIntro({ stageOrder: activeStage.order, lessonId: null })}
+                  onClick={() => setIntro({ stageOrder: activeStage.order, lessonId: null, childId: activeChild._id })}
                   className="mt-3 inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-sm font-bold text-primary bg-primary-container/40 hover:bg-primary-container/70 border border-primary/20"
                 >
                   <Sparkles className="w-4 h-4" aria-hidden="true" />
