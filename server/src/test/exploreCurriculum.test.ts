@@ -188,13 +188,16 @@ describe('Explore curriculum data', () => {
     }
   });
 
-  it('leaves option/vocabulary images empty until Phase 04 fills the map and lists every image text', () => {
+  it('gives every option/vocabulary text a Cloudinary image and lists every image text', () => {
+    const cloudinary = /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/v\d+\/vietverse\/lesson-images\/explore\/[a-z0-9-]+\.webp$/;
     for (const lesson of exploreCurriculum) {
       const payload = payloadOf(lesson.order);
-      for (const word of payload.vocabulary) expect(word.imageUrl ?? '').toBe('');
-      for (const activity of payload.activities) for (const option of activity.options ?? []) expect(option.imageUrl ?? '').toBe('');
+      for (const word of payload.vocabulary) expect(word.imageUrl, `B${lesson.order} ${word.word}`).toMatch(cloudinary);
+      for (const activity of payload.activities) for (const option of activity.options ?? []) expect(option.imageUrl, `B${lesson.order} ${option.text}`).toMatch(cloudinary);
     }
-    expect(imageUrlFor('mẹ')).toBe('');
+    // "bà" is the grandmother picture, except B7 where it is the falling-tone syllable card.
+    expect(imageUrlFor('bà', 1)).toMatch(/\/grandma\.webp$/);
+    expect(imageUrlFor('bà', 7)).toMatch(/\/tone-ba-huyen\.webp$/);
     const texts = listExploreImageTexts();
     expect(texts.length).toBe(120); // 105 before + 15 new unique vocabulary keys from B5–B20
     expect(texts).toContain(normalizeImageKey('mẹ'));
