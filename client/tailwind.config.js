@@ -161,6 +161,11 @@ export default {
           '0%': { transform: 'scale(0.8)', opacity: '0' },
           '70%': { transform: 'scale(1.1)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        // Pulsing equalizer bars that signal "audio is playing" on the speaker button.
+        soundwave: {
+          '0%, 100%': { transform: 'scaleY(0.4)' },
+          '50%': { transform: 'scaleY(1)' },
         }
       },
       animation: {
@@ -168,6 +173,7 @@ export default {
         'wiggle': 'wiggle 1s ease-in-out infinite',
         'fade-in': 'fadeIn 0.2s ease-out both',
         'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+        'soundwave': 'soundwave 0.9s ease-in-out infinite',
       }
     },
   },

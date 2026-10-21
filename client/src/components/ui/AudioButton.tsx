@@ -1,11 +1,34 @@
 import React from "react";
 import {
+  Volume,
   Volume2,
-  Square,
 } from './icons.js';
 import { cn } from "../../lib/utils.js";
 import { useNarration } from "../../hooks/useNarration.js";
 import { useT } from "../../i18n/index.js";
+
+/**
+ * "Now playing" indicator: a speaker glyph beside three sound-wave bars that pulse while audio
+ * plays. It replaces the old `Square` stop glyph, which rendered like a missing-font box on some
+ * devices (Log Bug v2, Bug 2, 21/10/2026). The bars keep distinct resting heights, so under
+ * `prefers-reduced-motion` — where the pulse is suppressed — the icon still reads as "playing" and
+ * stays visibly different from the idle speaker. Decorative: the button's `aria-label` carries the
+ * stop/pause meaning.
+ */
+const PlayingWaveIcon: React.FC = () => (
+  <span
+    data-testid="audio-playing-wave"
+    aria-hidden="true"
+    className="inline-flex items-center gap-[2px] text-primary"
+  >
+    <Volume className="w-5 h-5" aria-hidden="true" />
+    <span className="flex items-end gap-[2px] h-4">
+      <span className="w-[3px] h-1.5 origin-bottom rounded-full bg-current animate-soundwave motion-reduce:animate-none [animation-delay:-0.2s]" />
+      <span className="w-[3px] h-4 origin-bottom rounded-full bg-current animate-soundwave motion-reduce:animate-none [animation-delay:-0.45s]" />
+      <span className="w-[3px] h-2.5 origin-bottom rounded-full bg-current animate-soundwave motion-reduce:animate-none" />
+    </span>
+  </span>
+);
 
 export interface AudioButtonProps {
   audioUrl?: string;
@@ -83,7 +106,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         aria-pressed={isPlaying}
       >
         {isPlaying ? (
-          <Square className="w-6 h-6 text-primary" />
+          <PlayingWaveIcon />
         ) : (
           <Volume2 className="w-6 h-6 text-stone-800" />
         )}
