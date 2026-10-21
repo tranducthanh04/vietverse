@@ -104,7 +104,6 @@ const G_dauTien = tr('first', '最初', '처음', '首先', 'en premier');
 const G_diCho = tr('go to the market', '市場に行く', '시장에 가다', '去市场', 'aller au marché');
 const G_tenLa = tr('My name is…', '私の名前は…です', '제 이름은 …이에요', '我的名字是……', 'Je m’appelle…');
 const G_taiSao = tr('why', 'なぜ', '왜', '为什么', 'pourquoi');
-const G_mua = tr('rain', '雨', '비', '雨', 'pluie');
 
 const HINT_ORDER = tr(
   'Read again and put the words in the correct order.',
@@ -196,6 +195,14 @@ const opts = (texts: string[]): ExploreOption[] => texts.map((text, i) => ({ id:
 /** listen_choose / review: first text is the correct answer unless `correct` says otherwise. */
 const choose = (p: Prompt, h: Hint, texts: string[], correct = 0, type: 'listen_choose' | 'review' = 'listen_choose'): ExploreActivity =>
   ({ ...p, ...h, type, options: opts(texts), correctAnswer: `opt-${correct}` });
+/**
+ * A listen_choose whose speaker must play the actual clip the child listens to, not the question.
+ * `audio` is stored in `targetWord` (the field the renderer reads before falling back to `prompt`),
+ * so the audio says the answer's word/sentence — never a distractor. Taken verbatim from the source
+ * "Audio:" line where the document gives one, otherwise a short utterance that matches the answer.
+ */
+const listen = (p: Prompt, h: Hint, texts: string[], audio: string, correct = 0): ExploreActivity =>
+  ({ ...choose(p, h, texts, correct), targetWord: audio });
 /** fill_blank: a sentence with one "__" marker; the correct option text equals `missing`. */
 const fill = (p: Prompt, h: Hint, sentence: string, missing: string, texts: string[], correct = 0): ExploreActivity =>
   ({ ...p, ...h, type: 'fill_blank', options: opts(texts), correctAnswer: `opt-${correct}`, blanks: [{ sentence, missing }] });
@@ -241,12 +248,12 @@ const B1: ExploreLesson = {
     { word: 'bạn', meaning: 'Người cùng chơi và cùng học với bé.' },
   ],
   activities: [
-    choose(P('b01.activity-1.prompt'), H('b01.activity-1.hint'), ['mẹ', 'bố', 'bà']),
+    listen(P('b01.activity-1.prompt'), H('b01.activity-1.hint'), ['mẹ', 'bố', 'bà'], 'Đây là mẹ.'),
     cardWord(P('b01.activity-2.prompt'), Ha('Mẹ là người sinh ra và chăm sóc bé.', G_me), 'MẸ'),
     match(P('b01.activity-3.prompt'), Ha('Hãy nối mỗi từ với đúng người thân trong nhà nhé.', HINT_MATCH),
       [['MẸ', 'người chăm sóc bé'], ['BỐ', 'bố của bé'], ['BÀ', 'bà của bé']]),
-    choose(P('b01.activity-4.prompt'), Ha('Mẹ đang nấu cơm nghĩa là mẹ đang chuẩn bị bữa ăn.', G_nauCom),
-      ['Mẹ đang nấu cơm.', 'Bố đang ngủ.', 'Bé đang chơi.']),
+    listen(P('b01.activity-4.prompt'), Ha('Mẹ đang nấu cơm nghĩa là mẹ đang chuẩn bị bữa ăn.', G_nauCom),
+      ['Mẹ đang nấu cơm.', 'Bố đang ngủ.', 'Bé đang chơi.'], 'Mẹ đang nấu cơm.'),
     choose(Pa('Ai là người chăm sóc và yêu thương bé trong nhà?',
       tr('Who in the family takes care of you and loves you?', '家族の中で、あなたを世話して大切にしてくれるのは誰ですか？',
         '가족 중에서 누가 너를 돌보고 사랑해 주나요?', '家里谁照顾你、爱护你？', 'Qui, dans la famille, prend soin de toi et t’aime ?')),
@@ -266,8 +273,8 @@ const B2: ExploreLesson = {
     { word: 'ghế', meaning: 'Đồ dùng để ngồi.' },
   ],
   activities: [
-    choose(P('b02.activity-1.prompt'), H('b02.activity-1.hint'), ['sách', 'bút', 'cặp'], 1),
-    choose(P('b02.activity-2.prompt'), Ha('Sách là đồ dùng có nhiều trang để đọc.', G_sach), ['sách', 'bút', 'cặp']),
+    listen(P('b02.activity-1.prompt'), H('b02.activity-1.hint'), ['sách', 'bút', 'cặp'], 'bút', 1),
+    listen(P('b02.activity-2.prompt'), Ha('Sách là đồ dùng có nhiều trang để đọc.', G_sach), ['sách', 'bút', 'cặp'], 'Bé lấy quyển sách.'),
     match(Pt('Nối mỗi đồ vật với công dụng của nó nhé!', 'b02.activity-3.prompt'),
       Ha('Hãy nối mỗi đồ vật với việc ta dùng nó để làm.', HINT_MATCH),
       [['sách', 'đồ dùng để đọc'], ['bút', 'đồ dùng để viết'], ['cặp', 'đồ dùng để đựng sách vở']]),
@@ -289,8 +296,8 @@ const B3: ExploreLesson = {
     { word: 'chim', meaning: 'Con vật có cánh, biết bay và hót.' },
   ],
   activities: [
-    choose(P('b03.activity-1.prompt'), Ha('Mèo là con vật kêu meo meo.', G_meo), ['mèo', 'chó', 'gà']),
-    choose(P('b03.activity-2.prompt'), Ha('Mèo là con vật nuôi trong nhà, kêu meo meo.', G_meo), ['mèo', 'cá', 'gà']),
+    listen(P('b03.activity-1.prompt'), Ha('Mèo là con vật kêu meo meo.', G_meo), ['mèo', 'chó', 'gà'], 'mèo'),
+    listen(P('b03.activity-2.prompt'), Ha('Mèo là con vật nuôi trong nhà, kêu meo meo.', G_meo), ['mèo', 'cá', 'gà'], 'mèo'),
     match(Pt('Nối mỗi cụm từ với từ đúng nhé!', 'b03.activity-3.prompt'),
       Ha('Hãy nối mỗi cụm từ với từ gọi tên con vật.', HINT_MATCH),
       [['con mèo', 'mèo'], ['con cá', 'cá'], ['con chim', 'chim']]),
@@ -314,8 +321,8 @@ const B4: ExploreLesson = {
     { word: 'ngồi', meaning: 'Đặt mình xuống ghế hoặc sàn.' },
   ],
   activities: [
-    choose(P('b04.activity-1.prompt'), Ha('Đọc là nhìn chữ và phát thành tiếng.', G_doc), ['đọc', 'chạy', 'ngồi']),
-    choose(P('b04.activity-2.prompt'), Ha('Bé đang đọc sách.', G_docSach), ['đọc', 'ngủ', 'chạy']),
+    listen(P('b04.activity-1.prompt'), Ha('Đọc là nhìn chữ và phát thành tiếng.', G_doc), ['đọc', 'chạy', 'ngồi'], 'đọc'),
+    listen(P('b04.activity-2.prompt'), Ha('Bé đang đọc sách.', G_docSach), ['đọc', 'ngủ', 'chạy'], 'Bé đang đọc sách.'),
     fill(P('b04.activity-3.prompt'), Ha('Bé đang đọc sách — sách có nhiều trang để đọc.', G_sach),
       'Bé đang __ sách.', 'đọc', ['đọc', 'ăn', 'chạy']),
     order(P('b04.activity-4.prompt'),
@@ -345,12 +352,12 @@ const B5: ExploreLesson = {
       Ha('Chữ M có trong tiếng mẹ.', tr('The letter M is in the word “mẹ”.', '文字 M は「mẹ」という言葉の中にあるよ。',
         '글자 M은 ‘mẹ’라는 낱말에 들어 있어요.', '字母 M 在“mẹ”这个词里。', 'La lettre M se trouve dans le mot « mẹ ».')),
       ['A', 'B', 'M'], 2),
-    choose(P('b05.activity-2.prompt'),
+    listen(P('b05.activity-2.prompt'),
       Ha('Nghe lại âm /m/ và liên hệ với từ mẹ nhé.',
         tr('Listen to the sound /m/ again and link it to the word “mẹ”.', 'もう一度 /m/ の音を聞いて、「mẹ」という言葉と結びつけてね。',
           '/m/ 소리를 다시 듣고 ‘mẹ’라는 낱말과 연결해 보세요.', '再听一次 /m/ 的音，把它和“mẹ”这个词联系起来。',
           'Écoute à nouveau le son /m/ et relie-le au mot « mẹ ».')),
-      ['M', 'B', 'A']),
+      ['M', 'B', 'A'], 'mẹ'),
     multi(P('b05.activity-3.prompt'), Ha('Chữ M xuất hiện ở ba vị trí, con tìm cho đủ nhé.', HINT_FIND_M),
       [['letter-1', 'A'], ['letter-2', 'M'], ['letter-3', 'B'], ['letter-4', 'M'], ['letter-5', 'C'], ['letter-6', 'M']],
       ['letter-2', 'letter-4', 'letter-6']),
@@ -378,12 +385,12 @@ const B6: ExploreLesson = {
     { word: 'bóng', meaning: 'Quả tròn để chơi, lăn và nảy được.' },
   ],
   activities: [
-    choose(P('b06.activity-1.prompt'),
+    listen(P('b06.activity-1.prompt'),
       Ha('Mẹ, mèo, mũ đều bắt đầu bằng âm /m/.',
         tr('The words “mẹ”, “mèo”, “mũ” all begin with the sound /m/.', '「mẹ」「mèo」「mũ」はどれも /m/ の音で始まるよ。',
           '‘mẹ’, ‘mèo’, ‘mũ’는 모두 /m/ 소리로 시작해요.', '“mẹ”“mèo”“mũ”都以 /m/ 的音开头。',
           'Les mots « mẹ », « mèo », « mũ » commencent tous par le son /m/.')),
-      ['Có', 'Không']),
+      ['Có', 'Không'], 'mẹ, mèo, mũ'),
     choose(P('b06.activity-2.prompt'),
       Ha('Mẹ và mèo đều bắt đầu bằng âm /m/.',
         tr('Both “mẹ” (mom) and “mèo” (cat) begin with the sound /m/.', '「mẹ」(お母さん)も「mèo」(猫)も /m/ の音で始まるよ。',
@@ -394,11 +401,11 @@ const B6: ExploreLesson = {
       [['group-m', 'Âm /m/'], ['group-b', 'Âm /b/']],
       [['item-me', 'mẹ', 'group-m'], ['item-meo', 'mèo', 'group-m'], ['item-mu', 'mũ', 'group-m'],
         ['item-ba', 'bà', 'group-b'], ['item-be', 'bé', 'group-b'], ['item-bong', 'bóng', 'group-b']]),
-    choose(P('b06.activity-4.prompt'),
+    listen(P('b06.activity-4.prompt'),
       Ha('Nghe lại từ và chú ý âm đầu tiên nhé.',
         tr('Listen again and notice the first sound.', 'もう一度聞いて、最初の音に注目してね。',
           '다시 듣고 첫소리에 집중해 보세요.', '再听一遍，注意开头的音。', 'Écoute à nouveau et repère le premier son.')),
-      ['m', 'c', 'b']),
+      ['m', 'c', 'b'], 'mèo'),
   ],
 };
 
@@ -414,13 +421,13 @@ const B7: ExploreLesson = {
     { word: 'bạ', meaning: 'Tiếng bạ, thanh nặng.' },
   ],
   activities: [
-    choose(P('b07.activity-1.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá']),
-    choose(P('b07.activity-2.prompt'),
+    listen(P('b07.activity-1.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá'], 'ba'),
+    listen(P('b07.activity-2.prompt'),
       Ha('Tiếng bà mang thanh huyền.',
         tr('The syllable “bà” has the falling (huyền) tone.', '「bà」は「フエン（huyền）」の声調だよ。',
           '‘bà’는 ‘후옌(huyền)’ 성조예요.', '“bà”带有“huyền（玄声）”声调。',
           'La syllabe « bà » porte le ton descendant (huyền).')),
-      ['ngang', 'huyền', 'sắc'], 1),
+      ['ngang', 'huyền', 'sắc'], 'bà', 1),
     match(P('b07.activity-3.prompt'), Ha('Hãy nối mỗi tiếng với đúng thanh điệu của nó.', HINT_TONE),
       [['ba', 'thanh ngang'], ['bà', 'thanh huyền'], ['bá', 'thanh sắc']]),
     voice(P('b07.activity-4.prompt'), Ha('Con cứ đọc theo thật thoải mái nhé.', HINT_SPEAK), 'ba, bà, bá, bả, bã, bạ'),
@@ -468,13 +475,13 @@ const B9: ExploreLesson = {
   ],
   activities: [
     order(P('b09.activity-1.prompt'), Ha('Chữ đầu đứng trước, chữ sau đứng sau để tạo thành tiếng.', HINT_SYLLABLE), ['b', 'a']),
-    choose(P('b09.activity-2.prompt'),
+    listen(P('b09.activity-2.prompt'),
       Ha('Tiếng ba được ghép từ chữ b và chữ a.',
         tr('The syllable “ba” is made from the letters b and a.', '音節「ba」は文字 b と a でできているよ。',
           '음절 ‘ba’는 글자 b와 a로 만들어져요.', '音节“ba”由字母 b 和 a 组成。',
           'La syllabe « ba » est formée des lettres b et a.')),
-      ['ba', 'me', 'ca']),
-    choose(P('b09.activity-3.prompt'), Ha('Chọn tổ hợp chữ hợp với âm con vừa nghe nhé.', HINT_SYLLABLE), ['ch', 'tr', 'nh']),
+      ['ba', 'me', 'ca'], 'ba'),
+    listen(P('b09.activity-3.prompt'), Ha('Chọn tổ hợp chữ hợp với âm con vừa nghe nhé.', HINT_SYLLABLE), ['ch', 'tr', 'nh'], 'cha'),
   ],
 };
 
@@ -490,7 +497,7 @@ const B10: ExploreLesson = {
   ],
   activities: [
     order(P('b10.activity-1.prompt'), Ha('Ghép các tiếng theo đúng thứ tự để tạo thành cụm từ nhé.', HINT_SYLLABLE), ['con', 'cá']),
-    choose(P('b10.activity-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'cái bàn', 'mẹ bé']),
+    listen(P('b10.activity-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'cái bàn', 'mẹ bé'], 'con cá'),
     fill(P('b10.activity-3.prompt'), Ha('Con cá đang bơi dưới nước.', G_boi), 'Con __ đang bơi.', 'cá', ['cá', 'bàn', 'bút']),
   ],
 };
@@ -522,14 +529,14 @@ const B12: ExploreLesson = {
     { word: 'bé', meaning: 'Em nhỏ, chính là con.' },
   ],
   activities: [
-    choose(P('b12.step-1.prompt'), Ha('Chọn từ đúng với âm thanh con vừa nghe nhé.', HINT_LISTEN), ['mẹ', 'cá', 'bà']),
-    choose(P('b12.step-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'mẹ của bé', 'cái bàn']),
-    choose(P('b12.step-3.prompt'),
+    listen(P('b12.step-1.prompt'), Ha('Chọn từ đúng với âm thanh con vừa nghe nhé.', HINT_LISTEN), ['mẹ', 'cá', 'bà'], 'mẹ'),
+    listen(P('b12.step-2.prompt'), Ha('Con cá là con vật bơi dưới nước.', G_ca), ['con cá', 'mẹ của bé', 'cái bàn'], 'con cá'),
+    listen(P('b12.step-3.prompt'),
       Ha('Nghe lại câu và chú ý ai đang làm gì nhé.',
         tr('Listen again and notice who is doing what.', 'もう一度聞いて、誰が何をしているかに注目してね。',
           '다시 듣고 누가 무엇을 하는지 살펴보세요.', '再听一遍，注意谁在做什么。',
           'Écoute à nouveau et remarque qui fait quoi.')),
-      ['Bé đang đọc sách.', 'Mẹ đang nấu cơm.']),
+      ['Bé đang đọc sách.', 'Mẹ đang nấu cơm.'], 'Bé đang đọc sách.'),
     voice(Pa('Con nhìn câu, đọc cùng Sao Lí Lắc rồi thu âm nhé!',
       tr('Look at the sentence, read it with Sao Lí Lắc, then record your voice!',
         '文を見て、サオ・リーラックと一緒に読んで、録音してみよう！',
@@ -557,7 +564,7 @@ const B13: ExploreLesson = {
           '각 사람을 그 사람의 동작과 연결해 보세요.', '把每个人和他的动作连起来。', 'Associe chaque personne à son action.')),
       [['Bé', 'đọc sách'], ['Mẹ', 'nấu cơm'], ['Bố', 'uống nước']]),
     choose(P('b13.activity-2.prompt'), Ha('Mẹ là người đang nấu cơm.', G_nauCom), ['Mẹ', 'Bé', 'Bố']),
-    choose(P('b13.activity-3.prompt'), Ha('Bé đang đọc sách.', G_docSach), ['đọc sách', 'nấu cơm', 'uống nước']),
+    listen(P('b13.activity-3.prompt'), Ha('Bé đang đọc sách.', G_docSach), ['đọc sách', 'nấu cơm', 'uống nước'], 'Bé đang đọc sách.'),
     fill(Pt('Từ chỉ hành động nào hoàn thành câu?', 'b13.activity-4.prompt'),
       Ha('Bé đang đọc — đọc là nhìn chữ và phát thành tiếng.', G_doc), 'Bé đang __.', 'đọc', ['đọc', 'ngủ', 'chạy']),
     voice(Pa('Con nghe rồi nói lại câu nhé!',
@@ -714,17 +721,29 @@ const B19: ExploreLesson = {
       tr('What has many pages that you open to read?', '何枚ものページがあって、開いて読むものは何かな？',
         '여러 장이 있어서 펼쳐 읽는 것은 무엇일까요?', '什么东西有很多页，打开来阅读？',
         'Qu’est-ce qui a beaucoup de pages et qu’on ouvre pour lire ?')),
-      Ha('Sách là vật có nhiều trang để bé mở ra đọc.', G_sach), ['sách', 'bút', 'cặp']),
+      Ha('Thứ này có nhiều trang, con mở ra để xem chữ và hình nhé.',
+        tr('It has many pages that you open to look at the words and pictures.',
+          'たくさんのページがあって、開くと字や絵が見られるよ。', '여러 장이 있어서 펼치면 글자와 그림을 볼 수 있어요.',
+          '它有很多页，翻开能看到字和图画。', 'Cela a beaucoup de pages, tu l’ouvres pour regarder les mots et les images.')),
+      ['sách', 'bút', 'cặp']),
     choose(Pa('Con gì có cánh, biết bay và hót líu lo?',
       tr('Which animal has wings, can fly and sings?', '羽があって、飛べて、さえずる動物は何かな？',
         '날개가 있고 날 수 있으며 지저귀는 동물은 무엇일까요?', '哪种动物有翅膀，会飞又会唱歌？',
         'Quel animal a des ailes, peut voler et chante ?')),
-      Ha('Chim là con vật có cánh, biết bay và hót.', G_chim), ['chim', 'cá', 'trâu']),
+      Ha('Con vật này có cánh, biết bay cao và cất tiếng hót líu lo.',
+        tr('This animal has wings, can fly high and sings sweetly.',
+          'この動物は羽があって、空を高く飛び、きれいにさえずるよ。', '이 동물은 날개가 있고 높이 날며 예쁘게 지저귀어요.',
+          '这种动物有翅膀，能高高飞起，还会婉转地唱歌。', 'Cet animal a des ailes, peut voler haut et chante joliment.')),
+      ['chim', 'cá', 'trâu']),
     choose(Pa('Thứ gì rơi từ trên trời, giúp cây cối tươi tốt?',
       tr('What falls from the sky and helps plants grow green?', '空から降ってきて、草木を元気にするものは何かな？',
         '하늘에서 내려와 나무와 풀을 잘 자라게 하는 것은 무엇일까요?', '什么从天上落下来，让花草树木长得茂盛？',
         'Qu’est-ce qui tombe du ciel et aide les plantes à pousser ?')),
-      Ha('Mưa là nước rơi từ trên trời xuống.', G_mua), ['mưa', 'nắng', 'gió']),
+      Ha('Thứ này rơi từ trên trời xuống, làm ướt đất và giúp cây cối lớn lên.',
+        tr('It falls from the sky, wets the ground and helps plants grow.',
+          'これは空から降ってきて、地面をぬらし、草木を育てるよ。', '이것은 하늘에서 내려와 땅을 적시고 식물이 자라게 해 줘요.',
+          '它从天上落下来，打湿地面，帮助植物生长。', 'Cela tombe du ciel, mouille le sol et aide les plantes à pousser.')),
+      ['mưa', 'nắng', 'gió']),
     choose(Pa('Con mèo thường kêu thế nào?',
       tr('What sound does a cat usually make?', '猫はふつうどんな鳴き声を出すかな？', '고양이는 보통 어떻게 울까요?',
         '猫通常怎么叫？', 'Quel cri fait d’habitude le chat ?')),
@@ -743,8 +762,8 @@ const B20: ExploreLesson = {
     { word: 'nước', meaning: 'Thứ để uống, trong và mát.' },
   ],
   activities: [
-    choose(P('b20.challenge-1.prompt'), Ha('Hãy nghe thật kỹ xem con vừa nghe thấy ai nhé.', HINT_LISTEN), ['mẹ', 'bố', 'bà']),
-    choose(P('b20.challenge-2.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá']),
+    listen(P('b20.challenge-1.prompt'), Ha('Hãy nghe thật kỹ xem con vừa nghe thấy ai nhé.', HINT_LISTEN), ['mẹ', 'bố', 'bà'], 'Đây là mẹ.'),
+    listen(P('b20.challenge-2.prompt'), Ha('Hãy nghe thật kỹ thanh điệu của tiếng nhé.', HINT_TONE), ['ba', 'bà', 'bá'], 'ba'),
     order(P('b20.challenge-3.prompt'), Ha('Ghép chữ đứng trước với chữ đứng sau để tạo thành từ.', HINT_SYLLABLE), ['c', 'á']),
     voice(P('b20.challenge-4.prompt'), Ha('Con cứ kể thật thoải mái nhé.', HINT_SPEAK),
       'Con kể lại câu chuyện theo thứ tự: đầu tiên, sau đó, cuối cùng.'),
@@ -759,7 +778,30 @@ export const exploreCurriculum: ExploreLesson[] = [
 // ---------------------------------------------------------------------------
 // Payload builder
 // ---------------------------------------------------------------------------
-function finalizeActivity(activity: ExploreActivity, id: string): Record<string, unknown> {
+/** The single-answer choice types whose option order is rotated so the answer is not always first. */
+const ROTATABLE_TYPES = new Set<ActivityType>(['listen_choose', 'review', 'fill_blank']);
+
+/**
+ * Rotate an activity's options so the correct answer lands at `position` (mod the option count),
+ * then re-number the option IDs (`opt-0…`) and point `correctAnswer` at the new slot. The learner
+ * player does not shuffle choices, so without this the answer sat at `opt-0` on almost every
+ * listen_choose/review/fill_blank. Rotation is a pure cyclic shift keyed by the activity's position,
+ * so the same source always yields the same layout and the publish CLI stays idempotent. Option
+ * texts, and therefore `blanks.missing` matching and image keys, are unchanged — only order moves.
+ */
+function rotateChoices(activity: ExploreActivity, position: number): ExploreActivity {
+  const { options, correctAnswer } = activity;
+  if (!options || typeof correctAnswer !== 'string') return activity;
+  const n = options.length;
+  const current = options.findIndex((option) => option.id === correctAnswer);
+  if (n < 2 || current < 0) return activity;
+  const target = ((position % n) + n) % n;
+  const shift = (((current - target) % n) + n) % n;
+  const rotated = Array.from({ length: n }, (_, i) => options[(i + shift) % n]);
+  return { ...activity, options: rotated.map((option, i) => ({ ...option, id: `opt-${i}` })), correctAnswer: `opt-${target}` };
+}
+
+function finalizeActivity(activity: ExploreActivity, id: string, lessonOrder: number): Record<string, unknown> {
   const payload: Record<string, unknown> = {
     id, type: activity.type, prompt: activity.prompt,
     promptTranslations: activity.promptTranslations,
@@ -767,7 +809,7 @@ function finalizeActivity(activity: ExploreActivity, id: string): Record<string,
     audioUrl: '', imageUrl: '',
   };
   if (activity.options) {
-    payload.options = activity.options.map((option) => ({ id: option.id, text: option.text, imageUrl: imageUrlFor(option.text), audioUrl: '' }));
+    payload.options = activity.options.map((option) => ({ id: option.id, text: option.text, imageUrl: imageUrlFor(option.text, lessonOrder), audioUrl: '' }));
   }
   if (activity.correctAnswer !== undefined) payload.correctAnswer = activity.correctAnswer;
   if (activity.pairs) payload.pairs = activity.pairs;
@@ -798,8 +840,21 @@ export function buildExploreLessonPayload(
     title: lesson.title,
     description: lesson.description,
     freeInStarterPlan: options.freeInStarterPlan ?? lesson.order <= 4,
-    vocabulary: lesson.vocabulary.map((word) => ({ word: word.word, meaning: word.meaning, imageUrl: imageUrlFor(word.word), audioUrl: '' })),
-    activities: lesson.activities.map((activity, index) => finalizeActivity(activity, `explore-${lesson.order}-${index + 1}`)),
+    vocabulary: lesson.vocabulary.map((word) => ({ word: word.word, meaning: word.meaning, imageUrl: imageUrlFor(word.word, lesson.order), audioUrl: '' })),
+    // Rotate the answer position of single-choice activities. The target slot is (order + k + 3) mod
+    // optionCount, where k counts only rotatable activities within the lesson, so slots cycle, no three
+    // in a row share one, and across the catalog each slot (including binary ones) carries well under
+    // 40% of the answers. The offsets are tuned for an even spread; it is deterministic in the lesson
+    // alone (no caller state), so the publish CLI keeps producing the same layout and stays idempotent.
+    activities: (() => {
+      let rotatableSeen = 0;
+      return lesson.activities.map((activity, index) => {
+        const positioned = ROTATABLE_TYPES.has(activity.type)
+          ? rotateChoices(activity, lesson.order + rotatableSeen++ + 3)
+          : activity;
+        return finalizeActivity(positioned, `explore-${lesson.order}-${index + 1}`, lesson.order);
+      });
+    })(),
   });
 }
 

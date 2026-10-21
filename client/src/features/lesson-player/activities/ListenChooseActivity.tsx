@@ -13,6 +13,9 @@ export interface ListenChooseActivityProps {
     prompt: string;
     promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
+    // The clip the child should hear (e.g. "Đây là mẹ."). When there is no audioUrl, device speech
+    // reads this so the listen task plays the sentence to identify, not the question. Falls back to prompt.
+    targetWord?: string;
     options?: Array<{
       id: string;
       text?: string;
@@ -57,7 +60,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
         <AudioButton
           contentKey={activity.id}
           audioUrl={activity.audioUrl}
-          textToSpeak={activity.prompt}
+          textToSpeak={activity.targetWord || activity.prompt}
           size="lg"
           label={activity.audioUrl ? t('lesson.listenAudio') : t('lesson.listenQuestion')}
         />

@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { User, Lesson, Stage, Child, ContentDraft, ContentRevision, LessonProgress } from '../models/index.js';
 import { runSeed } from '../seeds/seed.js';
 import { env } from '../config/env.js';
 import { publishExploreCurriculum } from '../seeds/customer/publishExploreCurriculum.js';
+import { ContentService } from '../modules/admin/content/content.service.js';
 import { LessonsService } from '../modules/lessons/lessons.service.js';
 
 async function setup() {
@@ -79,6 +80,33 @@ describe('publish Explore curriculum', () => {
     expect(report.entries.filter((entry) => entry.order !== 1).every((entry) => entry.action === 'update')).toBe(true);
     expect((await Lesson.findOne({ order: 1 }).orFail()).contentVersion ?? 0).toBe(0); // untouched
     expect((await Lesson.findOne({ order: 2 }).orFail()).contentVersion).toBe(1); // published
+  });
+
+  it('records a lesson whose precheck get() fails as action:error and still publishes the rest', { timeout: 120_000 }, async () => {
+    const adminId = await setup();
+    const lesson1 = await Lesson.findOne({ order: 1 }).orFail();
+    const realGet = ContentService.get.bind(ContentService);
+    const spy = vi.spyOn(ContentService, 'get').mockImplementation(((kind: 'lesson' | 'story' | 'culture', id: string) => {
+      if (String(id) === String(lesson1._id)) throw new Error('transient get failure');
+      return realGet(kind, id);
+    }) as typeof ContentService.get);
+    try {
+      const report = await apply(adminId);
+      const first = report.entries.find((entry) => entry.order === 1);
+      expect(first?.action).toBe('error');
+      expect(first?.reason).toContain('transient get failure');
+      expect(report.entries.filter((entry) => entry.order !== 1).every((entry) => entry.action === 'update')).toBe(true);
+      expect((await Lesson.findOne({ order: 1 }).orFail()).contentVersion ?? 0).toBe(0); // the failed lesson is untouched
+      expect((await Lesson.findOne({ order: 2 }).orFail()).contentVersion).toBe(1); // the others still publish
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('rejects a malformed --admin id with a clear message instead of a CastError', async () => {
+    await setup();
+    await expect(publishExploreCurriculum({ dryRun: false, adminId: 'not-a-valid-objectid' }))
+      .rejects.toThrow('An existing admin actor is required');
   });
 
   it('lets a child resume a replaced lesson from the first activity even with a stale lastActivityId', { timeout: 120_000 }, async () => {

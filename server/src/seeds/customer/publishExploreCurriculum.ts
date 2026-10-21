@@ -67,7 +67,9 @@ export async function publishExploreCurriculum(
   const ownsConnection = mongoose.connection.readyState === 0;
   if (ownsConnection) await mongoose.connect(env.MONGODB_URI, { autoIndex: false, autoCreate: false });
   try {
-    if (!dryRun && (!adminId || !(await User.exists({ _id: adminId, role: 'admin' })))) {
+    // Validate the id shape before querying so a malformed --admin fails with this clear message
+    // instead of a Mongoose CastError from `User.exists`.
+    if (!dryRun && (!adminId || !mongoose.Types.ObjectId.isValid(adminId) || !(await User.exists({ _id: adminId, role: 'admin' })))) {
       throw new Error('An existing admin actor is required to publish the Explore curriculum');
     }
     const [lessons, stages] = await Promise.all([Lesson.find(), Stage.find()]);
@@ -101,27 +103,30 @@ export async function publishExploreCurriculum(
         entries.push(entry); continue;
       }
 
-      const current = await ContentService.get('lesson', live.id);
-      const openDraft = current.draft?.state === 'editing' ? current.draft : null;
-      if (openDraft && openDraft.updatedBy !== adminId) {
-        entry.action = 'skip-draft';
-        entry.reason = 'Another editor has an open draft for this lesson; not overwriting it.';
-        entries.push(entry); continue;
-      }
-      // get() is typed by ContentKind, so narrow the union back to a lesson payload for this 'lesson' call.
-      const sameContent = current.live != null && checksumOf(current.live.payload as LessonContent) === entry.checksum;
-      if (sameContent && !openDraft) {
-        entry.action = 'skip-same';
-        entry.reason = 'Live content already matches the new payload; nothing to publish.';
-        entries.push(entry); continue;
-      }
-      if (dryRun) {
-        entry.action = 'update';
-        entry.reason = openDraft ? 'Resume this admin\'s open draft and publish.' : 'Will replace the live lesson content.';
-        entries.push(entry); continue;
-      }
-
+      // The precheck get() and everything after it run inside this try so a failure for one lesson
+      // (e.g. a transient DB/5xx error) is recorded as `action: 'error'` for that lesson alone and the
+      // batch keeps going, instead of rejecting the whole run and abandoning the remaining lessons.
       try {
+        const current = await ContentService.get('lesson', live.id);
+        const openDraft = current.draft?.state === 'editing' ? current.draft : null;
+        if (openDraft && openDraft.updatedBy !== adminId) {
+          entry.action = 'skip-draft';
+          entry.reason = 'Another editor has an open draft for this lesson; not overwriting it.';
+          entries.push(entry); continue;
+        }
+        // get() is typed by ContentKind, so narrow the union back to a lesson payload for this 'lesson' call.
+        const sameContent = current.live != null && checksumOf(current.live.payload as LessonContent) === entry.checksum;
+        if (sameContent && !openDraft) {
+          entry.action = 'skip-same';
+          entry.reason = 'Live content already matches the new payload; nothing to publish.';
+          entries.push(entry); continue;
+        }
+        if (dryRun) {
+          entry.action = 'update';
+          entry.reason = openDraft ? 'Resume this admin\'s open draft and publish.' : 'Will replace the live lesson content.';
+          entries.push(entry); continue;
+        }
+
         const started = await ContentService.startDraft('lesson', live.id, adminId!, current.draft?.draftVersion);
         if (started.updatedBy !== adminId) {
           entry.action = 'skip-draft';

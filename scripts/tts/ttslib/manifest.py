@@ -87,8 +87,8 @@ LESSON_ACTIVITY_AUDIO_TEXT: dict[str, Callable[[dict[str, Any]], str]] = {
     # WordCardActivity.tsx: nút nghe lớn phát audioUrl, fallback đọc targetWord (thẻ to, thường
     # là CẢ đoạn đọc) — KHÔNG phải prompt. Chính chỗ này sinh sai audioUrl trên prod.
     "word_card": lambda a: str(a.get("targetWord") or ""),
-    # ListenChooseActivity.tsx: nút loa đọc prompt.
-    "listen_choose": lambda a: str(a.get("prompt") or ""),
+    # ListenChooseActivity.tsx: nút loa đọc targetWord (đoạn audio cần nghe) nếu có, không thì prompt.
+    "listen_choose": lambda a: str(a.get("targetWord") or a.get("prompt") or ""),
     # FillBlankActivity.tsx -> WrongAnswerFeedback: đọc prompt (replay khi chọn sai).
     "fill_blank": lambda a: str(a.get("prompt") or ""),
     # SortOrderActivity.tsx -> WrongAnswerFeedback: đọc prompt.

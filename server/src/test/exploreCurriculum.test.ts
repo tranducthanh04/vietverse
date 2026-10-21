@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { exploreCurriculum, buildExploreLessonPayload } from '../seeds/customer/exploreCurriculum.js';
-import { listExploreImageTexts, imageUrlFor, normalizeImageKey } from '../seeds/customer/exploreCurriculumImages.js';
+import { listExploreImageTexts, listExploreImageTextsByLesson, imageUrlFor, lessonImageKey, normalizeImageKey, exploreCurriculumImages } from '../seeds/customer/exploreCurriculumImages.js';
 import { loadCustomerTranslationsSource } from '../seeds/customer/customerTranslationsSource.js';
 import { parseDraft, validatePublish } from '../modules/content/content.validation.js';
 import { SUPPORT_LANGUAGES } from '../models/contentTranslations.js';
@@ -205,5 +205,139 @@ describe('Explore curriculum data', () => {
     }
     // Only option and vocabulary texts carry images (no word_card targetWord passages).
     expect(texts.some((t) => t.includes('Sáng nay'))).toBe(false);
+  });
+
+  // The choose-word / choose-syllable listen tasks whose audio clip (targetWord) must speak the answer.
+  const CHOOSE_WORD_LISTEN = new Set([
+    '1:0', '1:3', '2:0', '2:1', '3:0', '3:1', '4:0', '4:1', '9:1', '10:1', '12:0', '12:1', '12:2', '13:2', '20:0', '20:1',
+  ]);
+  it('gives every listen task an audio clip in targetWord that says the answer, never a distractor', () => {
+    for (const lesson of exploreCurriculum) {
+      payloadOf(lesson.order).activities.forEach((a, i) => {
+        if (a.type !== 'listen_choose') return;
+        const where = `B${lesson.order} #${i + 1} "${a.prompt}"`;
+        // A "listen…" question with no clip would read the question aloud and leave nothing to hear.
+        if (/nghe/i.test(a.prompt)) expect(a.targetWord?.trim(), `${where} needs a listen clip`).toBeTruthy();
+        if (!a.targetWord) return;
+        const clip = normVi(a.targetWord);
+        for (const option of a.options ?? []) {
+          if (option.id === a.correctAnswer) continue;
+          const distractor = normVi(option.text ?? '');
+          if (distractor.length >= 2) expect(clip.includes(distractor), `${where} clip speaks distractor "${option.text}"`).toBe(false);
+        }
+        if (CHOOSE_WORD_LISTEN.has(`${lesson.order}:${i}`)) {
+          const correct = normVi(a.options?.find((o) => o.id === a.correctAnswer)?.text ?? '');
+          expect(clip.includes(correct), `${where} clip must say the answer "${correct}"`).toBe(true);
+        }
+      });
+    }
+  });
+
+  it('reading-comprehension listen_choose keep targetWord empty so the speaker reads the question', () => {
+    const comprehension: Array<[number, number]> = [[3, 4], [3, 5], [15, 1], [15, 2], [15, 3], [15, 4], [15, 5], [17, 1], [17, 2], [17, 3], [19, 0]];
+    for (const [order, index] of comprehension) {
+      const activity = payloadOf(order).activities[index];
+      expect(activity.type, `B${order} #${index + 1}`).toBe('listen_choose');
+      expect(activity.targetWord ?? '', `B${order} #${index + 1} should not pre-empt its question`).toBe('');
+    }
+  });
+
+  it('spreads the correct-answer position so it is not always the first option', () => {
+    const byType: Record<string, number[]> = { listen_choose: [], review: [], fill_blank: [] };
+    for (const lesson of exploreCurriculum) {
+      const lessonPositions: number[] = [];
+      for (const a of payloadOf(lesson.order).activities) {
+        if (!(a.type in byType)) continue;
+        const pos = (a.options ?? []).findIndex((o) => o.id === a.correctAnswer);
+        expect(pos, `B${lesson.order} ${a.type} correctAnswer must point at an option`).toBeGreaterThanOrEqual(0);
+        byType[a.type].push(pos);
+        lessonPositions.push(pos);
+      }
+      for (let i = 2; i < lessonPositions.length; i++) {
+        const run = lessonPositions[i] === lessonPositions[i - 1] && lessonPositions[i - 1] === lessonPositions[i - 2];
+        expect(run, `B${lesson.order}: three answers in a row at slot ${lessonPositions[i]}`).toBe(false);
+      }
+    }
+    for (const type of Object.keys(byType)) {
+      const positions = byType[type];
+      const atFirst = positions.filter((p) => p === 0).length / positions.length;
+      expect(atFirst, `${type}: ${(atFirst * 100).toFixed(0)}% of answers sit at slot 0`).toBeLessThanOrEqual(0.4);
+    }
+  });
+
+  it('is deterministic: the same lesson builds the identical answer layout every time', () => {
+    for (const lesson of exploreCurriculum) {
+      const once = payloadOf(lesson.order).activities.map((a) => [a.correctAnswer, (a.options ?? []).map((o) => o.text)]);
+      const twice = payloadOf(lesson.order).activities.map((a) => [a.correctAnswer, (a.options ?? []).map((o) => o.text)]);
+      expect(twice).toEqual(once);
+    }
+  });
+
+  // The documented "Đáp án:" answers (source lines noted). The correct option's text must still be
+  // this answer after the deterministic rotation — a semantic check the structural tests cannot give.
+  it('keeps the correct option matching the documented answer for every "Đáp án:" line', () => {
+    const expected: Array<[number, number, string]> = [
+      [1, 0, 'mẹ'], [1, 3, 'Mẹ đang nấu cơm'],            // L94, L145
+      [2, 1, 'sách'], [2, 3, 'bút'],                        // L194, L222
+      [3, 3, 'cá'], [3, 4, 'cá'], [3, 5, 'chim'],           // L296, L318
+      [4, 1, 'đọc'],                                        // L350
+      [5, 1, 'M'],                                          // L432 (B5 HĐ2)
+      [6, 1, 'mèo'],                                        // L494 (B6 HĐ2)
+      [7, 1, 'huyền'],                                      // L544/L554 (B7 HĐ2)
+      [17, 1, 'Đi chợ'], [17, 2, 'Mẹ'], [17, 3, 'Mèo'],    // L1101, L1113, L1125
+      [18, 0, 'nước'], [18, 1, 'nấu'], [18, 2, 'Bé đang đọc sách'], // L1151, L1167, L1183
+      [19, 0, 'mèo'],                                       // L1203 (B19 HĐ1)
+    ];
+    const answerText = (a: Activity): string =>
+      a.type === 'sort_order' ? (a.orderedItems ?? []).join(' ') : a.options?.find((o) => o.id === a.correctAnswer)?.text ?? '';
+    const strip = (value: string) => normVi(value).replace(/[.?!]+$/u, '').trim();
+    for (const [order, index, answer] of expected) {
+      const activity = payloadOf(order).activities[index];
+      expect(strip(answerText(activity)), `B${order} #${index + 1}`).toBe(strip(answer));
+    }
+  });
+
+  it('B19 riddle hints describe the answer without naming it, in Vietnamese and all five languages', () => {
+    const glosses: Record<number, Record<string, string>> = {
+      1: { vi: 'sách', en: 'book', ja: '本', ko: '책', zh: '书', fr: 'livre' },   // HĐ2 → sách
+      2: { vi: 'chim', en: 'bird', ja: '鳥', ko: '새', zh: '鸟', fr: 'oiseau' },   // HĐ3 → chim
+      3: { vi: 'mưa', en: 'rain', ja: '雨', ko: '비', zh: '雨', fr: 'pluie' },     // HĐ4 → mưa
+    };
+    const b19 = payloadOf(19).activities;
+    for (const [index, gloss] of Object.entries(glosses)) {
+      const activity = b19[Number(index)];
+      expect(normVi(activity.wrongHint ?? '')).not.toContain(gloss.vi);
+      for (const lang of SUPPORT_LANGUAGES) {
+        const hint = (activity.wrongHintTranslations as Record<string, { wrongHint: string }>)[lang].wrongHint.toLowerCase();
+        expect(hint, `B19 #${Number(index) + 1} ${lang} names the answer`).not.toContain(gloss[lang].toLowerCase());
+      }
+    }
+  });
+
+  it('maps support images per lesson, preferring the lesson-scoped key over the shared one', () => {
+    exploreCurriculumImages['bà'] = 'https://img.test/shared-ba.png';
+    exploreCurriculumImages[lessonImageKey('bà', 7)] = 'https://img.test/b7-tone-ba.png';
+    try {
+      expect(imageUrlFor('bà', 7)).toBe('https://img.test/b7-tone-ba.png'); // tone card in B7
+      expect(imageUrlFor('bà', 1)).toBe('https://img.test/shared-ba.png');  // grandmother elsewhere
+      expect(imageUrlFor('bà')).toBe('https://img.test/shared-ba.png');     // no lesson → shared
+    } finally {
+      delete exploreCurriculumImages['bà'];
+      delete exploreCurriculumImages[lessonImageKey('bà', 7)];
+    }
+    expect(imageUrlFor('bà')).toBe(''); // map restored to empty
+  });
+
+  it('lists each image text with the lessons it appears in, flagging cross-lesson words', () => {
+    const byLesson = listExploreImageTextsByLesson();
+    const lessonsOf = new Map(byLesson.map((entry) => [entry.text, entry.lessons]));
+    expect(lessonsOf.get(normalizeImageKey('bà'))).toContain(1); // grandmother in B1
+    expect(lessonsOf.get(normalizeImageKey('bà'))).toContain(7); // tone syllable card in B7
+    expect(new Set(byLesson.map((entry) => entry.text))).toEqual(new Set(listExploreImageTexts()));
+    for (const { text, lessons } of byLesson) {
+      expect(lessons.length, text).toBeGreaterThanOrEqual(1);
+      expect(lessons, text).toEqual([...lessons].sort((a, b) => a - b));
+      expect(new Set(lessons).size, text).toBe(lessons.length);
+    }
   });
 });
