@@ -69,6 +69,7 @@ export const WordCardActivity: React.FC<WordCardActivityProps> = ({
             textToSpeak={activity.targetWord}
             size="lg"
             label={t('lesson.listenRead')}
+            autoPlay
           />
         </div>
       </div>

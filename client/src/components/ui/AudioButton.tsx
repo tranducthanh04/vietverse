@@ -15,6 +15,9 @@ export interface AudioButtonProps {
   label?: string;
   lang?: string;
   contentKey?: string;
+  // Auto-read this source once when it first mounts or its contentKey changes. The speaker stays
+  // tappable; blocked autoplay (e.g. no prior gesture) is silent. Off by default.
+  autoPlay?: boolean;
 }
 
 export const AudioButton: React.FC<AudioButtonProps> = ({
@@ -25,6 +28,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
   label,
   lang = "vi-VN",
   contentKey,
+  autoPlay = false,
 }) => {
   const t = useT();
   const narration = useNarration({
@@ -32,6 +36,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
     text: textToSpeak,
     lang,
     contentKey,
+    autoPlay,
   });
   const { isPlaying } = narration;
 
