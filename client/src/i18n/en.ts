@@ -203,6 +203,12 @@ export const en: Dictionary = {
     extend: 'Parents add more time',
     rest: "Let's take a break",
     childFallback: 'friend',
+    restTitle: 'Time for a little eye break!',
+    restBody: 'Close your eyes to relax, look far into the distance, and take a deep breath. You can keep learning as soon as the break is over!',
+    restTimeLeftLabel: 'Break time left',
+    restAnnounce: 'Rest your eyes! You can keep learning in about {minutes} more minutes.',
+    restAnnounceFinal: 'Rest your eyes! The break is almost over, get ready to keep learning.',
+    restDialogAria: 'Eye-break screen, counting down.',
   },
   lesson: {
     continueBtn: 'Next',
