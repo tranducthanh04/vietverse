@@ -1,0 +1,7 @@
+# Keep complete local runs; publish selected receipts and screenshots explicitly.
+/footer-*/
+/browser-3/
+/browser-4/
+/client-*/
+/checks-2/
+/checks-3/

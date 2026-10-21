@@ -1,0 +1,321 @@
+{
+  "results": [
+    {
+      "id": "vi320-admin-values",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-admin-real-404",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-admin-injected-error-real-retry",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-admin-injected-empty",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-full-player-layout",
+      "status": "PASS"
+    },
+    {
+      "id": "vi320-full-player-wrong-reset-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-admin-values",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-admin-real-404",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-admin-injected-error-real-retry",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-admin-injected-empty",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-full-player-layout",
+      "status": "PASS"
+    },
+    {
+      "id": "en1366-full-player-wrong-reset-correct",
+      "status": "PASS"
+    },
+    {
+      "id": "no-page-errors-or-forbidden-requests",
+      "status": "PASS"
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a90",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a92",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a92",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a94",
+      "status": 500
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a94",
+      "status": 500
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a94",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad59494cd55b25b26d81a96",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad59493cd55b25b26d81a86",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad59493cd55b25b26d81a86/complete",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81aff",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b01",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b01",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b03",
+      "status": 500
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b03",
+      "status": 500
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b03",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/learners/6ad594a1cd55b25b26d81b05",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lessons/6ad59493cd55b25b26d81a86",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/6ad59493cd55b25b26d81a86/complete",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "observations": [
+    {
+      "runtime": "155.0.8059.84",
+      "dbName": "nonaudio_623163146f55",
+      "synthetic": true,
+      "frontendPort": 61076,
+      "apiPort": 61702
+    },
+    {
+      "id": "vi320-admin",
+      "viewport": 320,
+      "width": 320
+    },
+    {
+      "id": "vi320-sort",
+      "viewport": 320,
+      "width": 320
+    },
+    {
+      "id": "vi320-completion",
+      "status": 200,
+      "data": {
+        "progress": {
+          "_id": "6ad594a1dadf29b0437fcee0",
+          "childId": "6ad5949dcd55b25b26d81ac9",
+          "lessonId": "6ad59493cd55b25b26d81a86",
+          "__v": 0,
+          "attempts": 1,
+          "completedAt": "2026-10-19T03:55:13.660Z",
+          "createdAt": "2026-10-19T03:55:13.660Z",
+          "scorePercent": 100,
+          "stars": 3,
+          "status": "completed",
+          "updatedAt": "2026-10-19T03:55:13.660Z"
+        },
+        "stars": 3,
+        "scorePercent": 100,
+        "pointsEarned": 11,
+        "totalPoints": 11,
+        "isFirstTimeCompleted": true,
+        "passed": true
+      },
+      "heartsBeforeCompletion": 2
+    },
+    {
+      "id": "en1366-admin",
+      "viewport": 1366,
+      "width": 1366
+    },
+    {
+      "id": "en1366-sort",
+      "viewport": 1366,
+      "width": 1366
+    },
+    {
+      "id": "en1366-completion",
+      "status": 200,
+      "data": {
+        "progress": {
+          "_id": "6ad594afdadf29b0437fcee1",
+          "childId": "6ad594aacd55b25b26d81b38",
+          "lessonId": "6ad59493cd55b25b26d81a86",
+          "__v": 0,
+          "attempts": 1,
+          "completedAt": "2026-10-19T03:55:27.029Z",
+          "createdAt": "2026-10-19T03:55:27.030Z",
+          "scorePercent": 100,
+          "stars": 3,
+          "status": "completed",
+          "updatedAt": "2026-10-19T03:55:27.030Z"
+        },
+        "stars": 3,
+        "scorePercent": 100,
+        "pointsEarned": 11,
+        "totalPoints": 11,
+        "isFirstTimeCompleted": true,
+        "passed": true
+      },
+      "heartsBeforeCompletion": 2
+    },
+    {
+      "cleanup": "browser, vite, API, mongoose and temporary replica set stopped"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "before": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "4a6b0a14ed18ff4b9f5be6f33e4889b4c5b3ab66",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "phase": "full",
+  "node": "v22.15.0",
+  "startedAt": "2026-10-19T03:16:00.883Z",
+  "tasks": [
+    {
+      "name": "server",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test",
+        "-w",
+        "server",
+        "--",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\full-1\\server.json"
+      ],
+      "startedAt": "2026-10-19T03:16:00.968Z",
+      "finishedAt": "2026-10-19T03:18:40.685Z",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "name": "client",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test",
+        "-w",
+        "client",
+        "--",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\full-1\\client.json"
+      ],
+      "startedAt": "2026-10-19T03:18:40.856Z",
+      "finishedAt": "2026-10-19T03:20:47.927Z",
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "after": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "2a8cd86badacb5206202d2a5d41de82d74ffac53",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "finishedAt": "2026-10-19T03:20:48.014Z"
+}

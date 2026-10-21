@@ -29,6 +29,10 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
     return [...targetOrder].reverse();
   });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const canReset = selectedItems.length > 0 && (
+    selectedItems.length < targetOrder.length ||
+    selectedItems.some((item, index) => item !== targetOrder[index])
+  );
   const [wrong, setWrong] = useState(false);
   const feedbackRef = useRef<WrongAnswerFeedbackHandle>(null);
   const canReplay = Boolean(activity.audioUrl);
@@ -88,8 +92,9 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
         ))}
       </div>
 
-      {selectedItems.length > 0 && selectedItems.length < targetOrder.length && (
+      {canReset && (
         <button
+          type="button"
           onClick={handleReset}
           className="flex items-center gap-1 text-sm font-bold text-stone-500 hover:text-stone-800 min-h-[44px] px-3"
         >

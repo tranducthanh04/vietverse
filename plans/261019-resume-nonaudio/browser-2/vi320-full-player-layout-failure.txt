@@ -1,0 +1,9 @@
+QA Sort
+1/1
+2
+QA arrange repeated words
+Bé
+yêu
+Bé
+Tuyệt vời! Bé giỏi lắm!
+Hoàn thành bài

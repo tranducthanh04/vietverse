@@ -1,5 +1,38 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## NONAUDIO PR18 integration — 2026-10-19, Draft/HOLD
+
+- Current local integration: approved main `9b809bd` via normal merge `adc4705`.
+  Picker and non-audio documentation are both retained. Fresh frontend505/505,
+  focused57/57, browser13/13, footer57/57 and root types/build/lint pass (99warnings,
+  0errors). Server554 evidence is reused only with identical source/config/lock
+  proof; no new audio acceptance. Current evidence:
+  `plans/261019-resume-nonaudio/integration-evidence.md`. Draft until final-head
+  CI/previews and coordinator review; earlier pins below are historical.
+- Integrated main `4a6b0a1` without changing its auth/audio/feedback behavior.
+  Original five-file scope: virtual redemption, legacy grading, paid eligibility,
+  admin learner detail and incorrect-sort reset. The approved footer addendum
+  adds CSS-only responsive layout in the existing lesson player.
+- Added a deterministic real-HTTP ownership-read barrier test. Authenticated
+  browser verification now covers admin and text-only full-player reset through
+  server completion at VI320/EN1366; this replaces the earlier browser gap only
+  for these bounded flows, not whole-product/device/audio acceptance.
+- Initial browser layout failed at VI320 (332px) and the expanded matrix also
+  caught EN320 (363px). The scoped footer repair passes57/57 matrix checks and
+  original admin/player flows pass13/13. See [footer contract](./lesson-player-footer.md).
+  Keep Draft pending exact-head CI/coordinating review. Results and historical F04 separation are in
+  `plans/261019-resume-nonaudio/plan.md` and the accompanying evidence report.
+  The dated sections below remain historical, not current merge authorization.
+
+## Audit khách hàng không âm thanh — 2026-10-18, local
+
+- F05: chặn trừ điểm lặp cho cùng quà ảo bằng điều kiện ownership trong atomic write; giữ compensation hiện tại.
+- F06/F11: grading legacy không tin cờ đúng của client; canonical thiếu/rỗng không được cấp điểm. Gói paid cần active đúng, loại gói hợp lệ và expiry hữu hạn còn hạn; không đổi điểm, ngưỡng đỗ hoặc quyền replay.
+- F08 và phần admin của F12: giữ đúng 0 điểm/0 sao/status/giới hạn phiên; phân biệt thiếu dữ liệu, tải lỗi có retry và không tìm thấy hồ sơ. Xem [admin-learner-progress.md](./admin-learner-progress.md).
+- F01 một phần: nút "Xếp lại" còn hiện sau lượt đủ thẻ nhưng sai, giữ đủ thẻ trùng chữ; reset không chấm lại/cấp điểm/hoàn tim. Phần bắt buộc retry/gợi ý và F13 song ngữ vẫn mở.
+- **Phạm vi owner chốt:** một PR thay thế không âm thanh, gồm cả admin; không tạo PR admin song song cho cùng phần merge. Audio mới vẫn giữ ở PR #12, chưa merge/phát hành; không rollback audio baseline, không sửa auth, không thay header/offline đã có trên main.
+- Kiểm chứng fresh sau khi gộp main có PR #16: server 517/517, client 335/335; typecheck/build qua, lint 0 lỗi/103 cảnh báo. Journal phạm vi này: `plans/journals/2026-10-18-customer-non-audio.md`. CI của PR mới là gate riêng; lỗi finalize baseline đã được ghi nhận ở PR khác vẫn chưa được sửa. Chưa merge/deploy, toàn bộ yêu cầu khách hàng chưa hoàn tất.
+
 ## Tên dài trong danh sách chọn bé — 2026-10-19, local
 
 - **Resume PR29 (2026-10-19):** fresh integration `4b0071d`/main `4a6b0a1` passes94 focused,482 full frontend, root types/build and lint (0 errors/99 warnings). Fresh real-CSS/font picker32+4 passes, including last profile/Add Child hit-testing and keyboard above fixed navigation. Only three product class lines change. This supersedes the historical local-only/quota restriction below; existing PR29 stays Draft pending exact-head CI/previews and coordinator review. No author merge/deploy or audio/R01 acceptance. See the owning document/journal for raw results and boundaries.

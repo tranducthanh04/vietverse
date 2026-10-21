@@ -1,0 +1,113 @@
+# Customer audit: non-audio replacement PR
+
+Date: 2026-10-18.
+
+## Owner decision and isolation
+
+- Owner requested splitting the completed non-audio work from held PR #12.
+  New audio code exists but remains unmerged/held; no audio release is authorized
+  by this subset. Existing audio on main is not rolled back.
+- Branch: `codex/customer-audit-no-audio`.
+- Base: `main@c7519c0d8dfe609eee9ac3551dff9aeb29fab64f`.
+- Worktree: `C:/Users/Asus/.codex/worktrees/customer-audit-no-audio/codeDuAN`.
+- One replacement PR includes integrity, admin and sort reset. No parallel admin
+  PR is intended for the same merge. No auth changes belong to this PR.
+- Preserve current main header/offline implementation and documentation. Do not
+  copy the mixed audit report, old mixed journals or mixed plan into this branch.
+
+## Included changes and boundaries
+
+| Finding | Included implementation | Boundary |
+| --- | --- | --- |
+| F05 | Atomic virtual-item debit requires item not already owned | Existing compensation retained; no transaction rewrite |
+| F06 | Legacy grading never grants credit from client isCorrect; missing/empty canonical answers fail closed | Existing word_card and recording receipt service lookup unchanged; no legacy data rewrite |
+| F11 | Paid access requires active true, valid paid plan and finite future expiry | Replay/starter policy unchanged; no subscription repair |
+| F08 / F12 admin | Preserve zero/status/screen-time values; explicit missing/error/retry states | Read-only UI; no API, permission or data changes |
+| F01 reset only | Reset remains available after selecting all cards incorrectly, including repeated tokens | Reset does not complete, refund hearts or grant points; grading callback unchanged |
+
+Source files were selected from PR #12 by the coordinator; this journal does not
+claim audio/finalize changes are present. F04, F09 and F12 parent-recording fixes
+remain outside this PR. Audio docs, recorder/player changes and audio i18n keys
+are not part of this subset.
+
+## Decisions still open
+
+- F01 mandatory retry/hints and F13 bilingual activity behavior remain open.
+  The newer customer document requests per-question feedback, while the approved
+  09 October contract grades the new activity types at final submission. Do not
+  change that contract without the owner's decision.
+- Voice provider/rights, curriculum completeness and real-device/production
+  acceptance remain separate gates. This subset does not complete the full plan.
+- Legacy content missing canonical answers and old paid records missing valid
+  expiry need owner review before rollout; do not invent answers or entitlements.
+
+## Verification and handoff
+
+- Fresh tester evidence: focused 20 server/19 client cases passed; single full
+  `npm test` run passed 517 server tests across 53 files and 330 client tests
+  across 37 files. Typecheck/build/lint exited 0; lint has 103 existing warnings,
+  no errors. Baseline audioPlayback tests still emit React act warnings.
+- Dependencies installed with `npm ci` and Mongo download disabled only at
+  postinstall; tests use existing MongoDB 7.0.24 and a temporary replica set.
+  No production .env copied. Install reports 10 existing development-inclusive
+  advisories; dependency files are unchanged.
+- Reviewer found no actionable code/docs findings. All nine extracted files
+  match PR12 head `8bdc6b9`; excluded audio/finalize/i18n paths and recording
+  receipt service/validation match main. Whitespace checks pass.
+- Known baseline risk from coordinator: PR15 head
+  `0f7ae4120021354b487da165a8b4ccb4abe0e6ea`, CI `39141626708`, failed
+  recordingFinalize.test.ts:148 with [201,201,404,201], 496/497 server tests
+  passing. Its server/lockfile match main. Our single local finalize run passed
+  23/23, which does not disprove the race. F04 remains held; no repair, skipping
+  or rerunning merely to obtain green is authorized. Check exact new-head CI
+  separately and stop the merge gate if this baseline failure recurs.
+- Owning docs updated: business rules, feature inventory, API/data contracts,
+  review findings and `docs/admin-learner-progress.md`. Their existing main
+  header/offline sections are preserved.
+- This documentation handoff performs no stage/commit/push/merge/deployment or
+  production-data write. Coordinator owns the PR and final merge gates.
+- AgentKit CLI is unavailable; evidence is local Markdown, not a manually edited
+  plan/index status. Whole-plan completion is not claimed. AgentWiki publish skipped.
+
+## Latest-main integration before PR creation
+
+- Main advanced to `a8014eec01182ea85dd999253b9ced3b91165bd3` (PR16) during
+  verification. Normal merge `f7108863b2f88328c23d1bfc564c0b9fcaee8b4a` retained
+  both sets of docs without conflicts. PR diff remains the same 15 non-audio
+  files; all nine code/test files are unchanged. New main's header/points/i18n
+  changes are baseline, not changes introduced by this PR.
+- One fresh run after the base change: 517/517 server tests (53 files) and
+  335/335 client tests (38 files) passed, including five new main navigation
+  tests. Typecheck/build/lint exited 0; lint 0 errors, 103 warnings. This is
+  verification of a changed base, not a rerun of a failed suite.
+- Reviewer rechecked the combined tree: no actionable findings, excluded audio
+  paths and lesson receipt validation still match main, whitespace check passes.
+  Documentation-only evidence updates follow this run; no product/test change.
+- The known external finalize CI failure and F04 hold remain as recorded above.
+  New-head GitHub checks are still a separate gate; no self-merge or auto-merge.
+
+## PR14/PR17 baseline integration for coordinating review
+
+- Normal merge `a480b8534360ed9f35a49ee48daedba1bc365bb9` incorporates main
+  `142209912c4711f1d50eeb44ae2dbfb316217eba`, including parent settings and guest
+  Landing CTA fixes. No conflicts, no rewriting history.
+- Independent incremental review: exactly 15 non-audio files against that main;
+  all nine implementation/test files unchanged from `e924877`. Main's settings
+  and CTA docs retained. No auth/audio/F04/i18n or receipt-validation delta.
+- Fresh focused checks: 52 server cases across virtual redemption, legacy
+  grading/policy and admin suites; 19 client admin-detail/sort-reset cases pass.
+  Typecheck/build/lint exit 0; lint zero errors and 103 existing warnings.
+- Full `npm test` at `a480b8534360ed9f35a49ee48daedba1bc365bb9` FAILED:
+  516/517 server tests pass, 52/53 files pass, duration 179.14s, exit 1.
+  `server/src/test/recordingFinalize.test.ts:148:50`, test
+  "returns one receipt to many overlapping finalize calls without a 503",
+  expected `[201,201,201,201]`, received `[201,201,201,404]`.
+  Full client suite did not run because the root command short-circuited.
+- This reproduces held baseline F04. Recording source/tests and lockfile remain
+  unchanged; no retry-for-green, skipped/weakened test or audio repair.
+  Merge gate is HOLD. Coordinator explicitly requested preserving and pushing
+  this normal merge plus failure evidence, with PR #18 converted to draft.
+  Any automatically triggered CI result does not erase this local failure.
+- Earlier CI `39143231119` remains historical evidence for `e924877`, not a pass
+  for this integrated revision. No self-merge/auto-merge. The unresolved F04 gate,
+  audio hold and other scope boundaries remain regardless of a later green run.

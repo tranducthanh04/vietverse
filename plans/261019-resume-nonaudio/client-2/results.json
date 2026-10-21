@@ -1,0 +1,39 @@
+{
+  "before": {
+    "head": "adc4705270d6a50e7f0a3276afd7a358467846b7",
+    "main": "9b809bd3b27ea69cad2da2413825ffb8912d3f98",
+    "diffHash": "58b162b843b869675559ea6609cdcdac4055f26c0c77e9ae5bc0bb3680bca007"
+  },
+  "phase": "client",
+  "node": "v22.15.0",
+  "startedAt": "2026-10-19T03:51:35.146Z",
+  "tasks": [
+    {
+      "name": "client",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test",
+        "-w",
+        "client",
+        "--",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=C:\\Users\\Asus\\.codex\\worktrees\\resume-nonaudio-pr18\\codeDuAN\\plans\\261019-resume-nonaudio\\client-2\\client.json"
+      ],
+      "startedAt": "2026-10-19T03:51:35.240Z",
+      "finishedAt": "2026-10-19T03:53:46.062Z",
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "after": {
+    "head": "adc4705270d6a50e7f0a3276afd7a358467846b7",
+    "main": "9b809bd3b27ea69cad2da2413825ffb8912d3f98",
+    "diffHash": "58b162b843b869675559ea6609cdcdac4055f26c0c77e9ae5bc0bb3680bca007"
+  },
+  "finishedAt": "2026-10-19T03:53:46.146Z"
+}

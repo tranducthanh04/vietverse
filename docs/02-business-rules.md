@@ -1,5 +1,14 @@
 # 02 — Quy tắc nghiệp vụ
 
+## Siết thực thi audit không âm thanh — 2026-10-18, local
+
+- **Quyết định nghiệp vụ giữ nguyên:** điểm/sao/ngưỡng đỗ do server quyết định; quà ảo không được đổi lại khi đã sở hữu; quyền paid cần active, đúng loại gói và còn hạn. Không đổi mức thưởng, ngưỡng đỗ 50%, quyền replay hoặc luật chặng 1.
+- **Thực thi F06/F11:** grading legacy không dùng `isCorrect` của client để cấp điểm khi thiếu đáp án canonical; sort/matching thiếu hoặc rỗng và type lạ không đạt. `word_card` vẫn là thẻ giới thiệu; lookup receipt `record_voice` tại service giữ baseline, không thuộc bản sửa audio mới. Paid chỉ hợp lệ khi `active === true`, plan monthly/yearly và expiry hữu hạn lớn hơn thời điểm hiện tại; record thiếu/sai ngày bị từ chối, không tự gia hạn.
+- **Thực thi F05:** điều kiện chưa sở hữu quà ảo nằm trong cùng atomic write trừ điểm/thêm sở hữu. Hai yêu cầu đồng thời không được cùng trừ điểm cho một vật phẩm; giữ bù trừ lỗi hiện có, không tuyên bố chuyển toàn bộ flow sang transaction.
+- **Trình bày F08/F12 admin:** 0 điểm/0 sao là dữ liệu hợp lệ; `screenTimeLimit: 0` là không giới hạn; status hiển thị theo server. Giả định trình bày: dữ liệu thiếu ghi "Chưa có dữ liệu", status lạ ghi "Chưa rõ trạng thái", `updatedAt` ghi "Cập nhật"; lỗi tải có retry, hồ sơ không tồn tại có thông báo riêng. Không thay dữ liệu hoặc quyền.
+- **F01 chỉ reset:** được xếp lại sau khi chọn đủ thẻ sai; reset không gọi `onComplete`, hoàn tim hoặc cộng điểm. Giữ nguyên phản hồi/chấm hiện có; bắt buộc retry và F13 song ngữ vẫn chờ owner chốt do xung đột với contract chấm cuối bài ngày 09/10.
+- **Quyết định phạm vi của owner:** tách một PR không âm thanh thay phần tương ứng của PR #12; audio đã code nhưng giữ lại, chưa merge/phát hành. Không rollback audio baseline trên main, không đổi auth. Dữ liệu legacy thiếu đáp án/gói thiếu hạn cần owner đối soát trước rollout; không tự migrate hoặc publish.
+
 ## 1. Tài khoản và subscription
 
 - Email tài khoản là duy nhất và được chuẩn hóa lowercase.

@@ -1,5 +1,45 @@
 # 06 — Kết quả review senior BA/code
 
+## NONAUDIO PR18 integration — 2026-10-19, Draft/HOLD
+
+- Approved main `9b809bd` is integrated at `adc4705` with both additive docs
+  sections preserved and no new product fix. Fresh frontend505/505, focused57/57,
+  browser13/13 and footer57/57 pass; root types/build/lint exit0. Original554BE
+  remains its original run with identical-server/config/lock continuity proof,
+  not a new execution or F04 closure. See the separate current
+  `plans/261019-resume-nonaudio/integration-evidence.md`; exact-head CI and
+  independent coordinating review remain required before merge.
+- F05 now has a real authenticated HTTP regression synchronizing both database
+  ownership reads before either debit: one HTTP200, one400, balance90 from100,
+  one owned item, one redeem ledger and one redemption. Compensation, physical
+  purchases and free equip are covered by unchanged neighboring tests.
+- Admin browser cases preserve zero/missing/status/unlimited values and support
+  actual404, injected500 followed by actual200 retry, and injected200/null.
+  Full-player text-only wrong/reset/correct reaches real server completion in
+  VI320/EN1366, preserving two hearts through reset and granting no reset points.
+- **Footer finding, fixed locally by approved scope addendum:** initial VI320
+  footer extended to332px; the expanded matrix also reproduced EN320 at363px.
+  Three CSS class changes in `LessonPlayerPage.tsx` stack status/action below640px
+  while retaining the desktop row. Text,44px targets, handlers, disabled state,
+  sessions/rewards and audio are unchanged. Historical RED55/57 is retained;
+  GREEN57/57 covers VI/EN320/390/640/1366, Next/Finish, unanswered/wrong/correct,
+  bounds, overlap, hit testing and keyboard. Original admin/player flows now
+  pass13/13. [Contract and limits](./lesson-player-footer.md); not yet merged.
+- Main `4a6b0a1` contains prior audio/auth/feedback changes, all preserved. This
+  PR introduces no audio change. New suite results do not retroactively close
+  historical F04 failures or constitute provider/device acceptance. See
+  `plans/261019-resume-nonaudio/plan.md`; older dated evidence below is retained.
+
+## Audit khách hàng không âm thanh — 2026-10-18, sửa local
+
+- **F05 — đổi quà ảo đồng thời:** ownership được kiểm lại trong atomic debit, chặn cùng item bị trừ hai lần; giữ lỗi đã sở hữu và cơ chế compensation. Test riêng bao phủ cạnh tranh và rollback/retry.
+- **F06 — grading legacy:** bỏ fallback `isCorrect`, thiếu/rỗng canonical không cấp điểm, type lạ không đạt. Không tự sửa dữ liệu cũ; `word_card` và receipt lookup `record_voice` ở service không đổi.
+- **F11 — paid policy:** cần active true, monthly/yearly và expiry hữu hạn còn hạn; không tự sửa record thiếu ngày hoặc thay quyền replay/chặng 1.
+- **F08/F12 admin — đã sửa local:** không biến 0 điểm/0 sao thành thành tích tối đa, hiển thị đúng status/giới hạn 0; lỗi tải chi tiết có retry và hồ sơ không tồn tại có thông báo riêng. Giả định trình bày/tiêu chí nghiệm thu tại [admin-learner-progress.md](./admin-learner-progress.md).
+- **F01 một phần — reset:** giữ "Xếp lại" sau lượt đủ thẻ sai, bảo toàn thẻ trùng; reset không gọi callback chấm hoặc hoàn tim/cấp điểm. Phần bắt buộc retry/gợi ý và **F13 vẫn mở**, không đổi contract chấm cuối bài.
+- **Audio ngoài phạm vi:** owner giữ audio mới ở PR #12, đã code nhưng chưa merge/phát hành; F04 finalize, F09 nghe mẫu và F12 phần kho bản thu không được đóng bằng PR không âm thanh. Không rollback audio baseline trên main; không thay auth. Những ghi nhận audio lịch sử bên dưới vẫn là lịch sử baseline, không phải kết quả đợt này.
+- Một PR thay thế chứa toàn bộ phần không âm thanh, gồm admin; không có PR admin song song cho cùng phần merge. Kiểm chứng fresh sau khi gộp main có PR #16: server 517/517, client 335/335, typecheck/build qua, lint 0 lỗi/103 cảnh báo. Journal riêng `plans/journals/2026-10-18-customer-non-audio.md` giữ evidence và rủi ro finalize baseline: PR15 CI `39141626708` lỗi 404 ở một request đồng thời; local xanh không chứng minh lỗi này đã hết. CI trên head mới là gate riêng, không rerun chỉ để lấy xanh hoặc thêm F04 khi owner chưa cho phép. Chưa merge/deploy; giữ tài liệu header/offline đã có trên main.
+
 ## Tên bé hợp lệ tràn option trong picker — 2026-10-19, sửa local
 
 - **Resume PR29 (2026-10-19):** fresh integration `4b0071d`/main `4a6b0a1`:94 focused/482 full FE pass, root types/build pass, lint0 errors/99 warnings. Fresh picker32+4 passes with real CSS/font; names/points fit and last/Add remain clickable and keyboard-reachable above bottom nav. Initial lint environment failure is retained in the journal; no product/test weakening. This supersedes the historical local-only/quota restriction below, not audio/F04 or R01 holds. Exact-head CI/previews and independent coordinator review remain required; no author merge/deploy.

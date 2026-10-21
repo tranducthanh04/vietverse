@@ -1,0 +1,57 @@
+{
+  "before": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "2a8cd86badacb5206202d2a5d41de82d74ffac53",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "phase": "checks",
+  "node": "v22.15.0",
+  "startedAt": "2026-10-19T03:21:21.438Z",
+  "tasks": [
+    {
+      "name": "typecheck",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-19T03:21:21.517Z",
+      "finishedAt": "2026-10-19T03:21:35.326Z",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "name": "build",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build"
+      ],
+      "startedAt": "2026-10-19T03:21:35.503Z",
+      "finishedAt": "2026-10-19T03:21:55.029Z",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "lint"
+      ],
+      "startedAt": "2026-10-19T03:21:55.207Z",
+      "finishedAt": "2026-10-19T03:22:02.940Z",
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "after": {
+    "head": "b096d6d874dcea6431526471dfc33032341ba9e1",
+    "main": "2a8cd86badacb5206202d2a5d41de82d74ffac53",
+    "diffHash": "971a6e56d11385e01b4f7a835dddcfe56c65ecfde02bd6d3ed8206d1cbe2b356"
+  },
+  "finishedAt": "2026-10-19T03:22:03.048Z"
+}
