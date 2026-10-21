@@ -1,0 +1,62 @@
+{
+  "voice": "vi-VN-HoaiMyNeural",
+  "rate": "-10%",
+  "note": "Single source of truth for the Sao Lí Lắc stage-intro lines. Read by the client (stageIntroScripts.ts) and by scripts/tts/gen_stage_intro.py so the wording lives in one place. The Vietnamese `vi` lines are the user-approved copy from plans/261021-1558-stage-intro-mascot/plan.md.",
+  "stages": [
+    {
+      "order": 1,
+      "vi": "Xin chào bé! Tớ là Sao Lí Lắc đây! Cùng tớ lắng nghe và khám phá kho báu tiếng Việt nhé, mình bắt đầu thôi!",
+      "translations": {
+        "en": "Hello there! I'm Sao Lí Lắc! Let's listen and explore the treasure of Vietnamese together — let's begin!",
+        "ja": "こんにちは！ぼくはサオ・リ・ラックだよ！いっしょにベトナム語のたからものを聞いて、さがしてみよう。さあ、はじめよう！",
+        "ko": "안녕! 나는 사오 리 락이야! 함께 베트남어 보물을 듣고 찾아보자. 자, 시작해 볼까!",
+        "zh": "你好呀！我是 Sao Lí Lắc！我们一起来听一听、找一找越南语的宝藏，现在就出发吧！",
+        "fr": "Coucou ! Je suis Sao Lí Lắc ! Écoutons et explorons le trésor du vietnamien ensemble. C'est parti !"
+      }
+    },
+    {
+      "order": 2,
+      "vi": "Wow, bé giỏi quá! Chặng này mình cùng khám phá âm thanh, chữ cái và dấu thanh của tiếng Việt nhé!",
+      "translations": {
+        "en": "Wow, you did great! In this stage, let's explore the sounds, letters, and tones of Vietnamese together!",
+        "ja": "わあ、すごいね！このステージでは、ベトナム語の音と文字と声調をいっしょにさがしてみよう！",
+        "ko": "와, 정말 잘했어! 이번 단계에서는 베트남어의 소리와 글자, 성조를 함께 알아보자!",
+        "zh": "哇，你真棒！这一关我们一起来探索越南语的声音、字母和声调吧！",
+        "fr": "Waouh, tu as été super ! Dans cette étape, découvrons ensemble les sons, les lettres et les tons du vietnamien !"
+      }
+    },
+    {
+      "order": 3,
+      "vi": "Bé lại gặp tớ rồi! Chặng này mình cùng ghép tiếng và tạo ra thật nhiều từ hay nhé!",
+      "translations": {
+        "en": "You've found me again! In this stage, let's blend sounds and make lots of lovely words together!",
+        "ja": "また会えたね！このステージでは、音をつなげて、すてきなことばをたくさん作ってみよう！",
+        "ko": "또 만났네! 이번 단계에서는 소리를 이어서 멋진 낱말을 많이 만들어 보자!",
+        "zh": "又见到我啦！这一关我们一起来拼读，造出好多好听的词语吧！",
+        "fr": "Tu me retrouves ! Dans cette étape, assemblons les sons et créons plein de jolis mots ensemble !"
+      }
+    },
+    {
+      "order": 4,
+      "vi": "Xin chào nhà thám hiểm nhí! Chặng này tớ muốn nghe bé gọi tên sự vật, nói thành câu và kể chuyện đấy!",
+      "translations": {
+        "en": "Hello, little explorer! In this stage, I'd love to hear you name things, make sentences, and tell stories!",
+        "ja": "こんにちは、小さなたんけんか！このステージでは、ものの名前を言ったり、文を作ったり、お話をしてくれるとうれしいな！",
+        "ko": "안녕, 꼬마 탐험가야! 이번 단계에서는 사물의 이름을 말하고, 문장을 만들고, 이야기를 들려줬으면 좋겠어!",
+        "zh": "你好，小探险家！这一关我想听你说出事物的名字、连成句子，还有讲故事哦！",
+        "fr": "Bonjour, petit explorateur ! Dans cette étape, j'aimerais t'entendre nommer des objets, faire des phrases et raconter des histoires !"
+      }
+    },
+    {
+      "order": 5,
+      "vi": "Wowww! Bé đến chặng cuối rồi! Mình cùng đọc, hiểu và dùng tiếng Việt để chinh phục kho báu nhé!",
+      "translations": {
+        "en": "Wowww! You've reached the final stage! Let's read, understand, and use Vietnamese to win the treasure together!",
+        "ja": "わあああ！さいごのステージだよ！いっしょに読んで、意味をわかって、ベトナム語をつかって、たからものを手に入れよう！",
+        "ko": "와아아! 마지막 단계에 왔어! 함께 읽고, 이해하고, 베트남어를 사용해서 보물을 차지해 보자!",
+        "zh": "哇哦！你来到最后一关啦！我们一起来读一读、懂一懂，用越南语去赢得宝藏吧！",
+        "fr": "Waouh ! Tu es arrivé à la dernière étape ! Lisons, comprenons et utilisons le vietnamien pour gagner le trésor ensemble !"
+      }
+    }
+  ]
+}

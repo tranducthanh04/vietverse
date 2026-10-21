@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -16,6 +16,12 @@ import { useChildStore } from '../../store/childStore.js';
 import { useT, useUiLanguage } from '../../i18n/index.js';
 import { PendingSubmissions } from '../lesson-player/PendingSubmissions.js';
 import { QueryErrorState } from '../../components/ui/QueryErrorState.js';
+import { StageIntro } from './StageIntro.js';
+import {
+  getStageIntroScript,
+  hasSeenStageIntro,
+  markStageIntroSeen,
+} from './stageIntroScripts.js';
 
 interface MapStage {
   _id: string;
@@ -69,6 +75,31 @@ export const QuestMapPage: React.FC = () => {
     next.set('stage', stageId);
     if (activeChild) next.set('childId', activeChild._id);
     setSearchParams(next);
+  };
+
+  // Stage-intro animation. `lessonId` set means the intro gates entry to that lesson (closing
+  // navigates in); `null` means it was re-opened from the map for a replay (closing just closes).
+  const [intro, setIntro] = useState<{ stageOrder: number; lessonId: string | null } | null>(null);
+
+  const openLesson = (stageOrder: number, lessonId: string) => {
+    if (
+      activeChild &&
+      getStageIntroScript(stageOrder) &&
+      !hasSeenStageIntro(activeChild._id, stageOrder)
+    ) {
+      setIntro({ stageOrder, lessonId });
+    } else {
+      navigate(`/hoc/${lessonId}`);
+    }
+  };
+
+  const closeIntro = () => {
+    const current = intro;
+    setIntro(null);
+    if (current?.lessonId && activeChild) {
+      markStageIntroSeen(activeChild._id, current.stageOrder);
+      navigate(`/hoc/${current.lessonId}`);
+    }
   };
 
   if (childMismatch) {
@@ -195,6 +226,16 @@ export const QuestMapPage: React.FC = () => {
                   : !activeStage.isUnlocked ? (activeStage.requiresSubscription ? 'parentPortal.stageSubscription' : 'parentPortal.stagePreviousStage')
                   : activeStage.isCompleted ? 'parentPortal.stageDone' : 'parentPortal.stageOpen')}
               </p>
+              {getStageIntroScript(activeStage.order) && (
+                <button
+                  type="button"
+                  onClick={() => setIntro({ stageOrder: activeStage.order, lessonId: null })}
+                  className="mt-3 inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-sm font-bold text-primary bg-primary-container/40 hover:bg-primary-container/70 border border-primary/20"
+                >
+                  <Sparkles className="w-4 h-4" aria-hidden="true" />
+                  <span>{t('stageIntro.replay')}</span>
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-4 bg-surface-container rounded-2xl px-6 py-4 border border-outline-variant/30 shrink-0">
@@ -219,7 +260,7 @@ export const QuestMapPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {activeStage?.lessons?.map(lesson => {
+          {activeStage && activeStage.lessons?.map(lesson => {
             const isUnlocked = lesson.isUnlocked;
             const isCompleted = lesson.status === 'completed';
 
@@ -269,7 +310,7 @@ export const QuestMapPage: React.FC = () => {
 
                   {isUnlocked ? (
                     <button
-                      onClick={() => navigate(`/hoc/${lesson._id}`)}
+                      onClick={() => openLesson(activeStage.order, lesson._id)}
                       className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm cursor-pointer select-none ${
                         isCompleted
                           ? 'btn-3d-accent'
@@ -290,6 +331,14 @@ export const QuestMapPage: React.FC = () => {
             );
           })}
         </div>
+      )}
+
+      {intro && (
+        <StageIntro
+          stageOrder={intro.stageOrder}
+          ctaMode={intro.lessonId ? 'start' : 'replay'}
+          onClose={closeIntro}
+        />
       )}
     </div>
   );

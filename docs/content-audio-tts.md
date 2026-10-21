@@ -156,6 +156,31 @@ nếu không có mốc nào thì vẫn sinh audio cả truyện và điền mố
   trước khi cho ghi.
 - Gắn audio qua API draft → publish nên giữ đúng versioning và lịch sử nội dung; không ghi thẳng DB.
 
+## Hoạt cảnh mở đầu chặng (`gen_stage_intro.py`)
+
+Khác với bốn lệnh CMS ở trên (gắn `audioUrl` vào DB qua draft → publish), lời chào mở đầu chặng của
+Sao Lí Lắc là **file tĩnh trong client**, không đụng DB/CMS. Công cụ riêng:
+[`scripts/tts/gen_stage_intro.py`](../scripts/tts/README.md).
+
+- **Nguồn lời (một nơi duy nhất):** `client/src/features/quest-map/stageIntroScripts.json` chứa lời
+  5 chặng đã duyệt (trường `vi`) kèm bản dịch `en/ja/ko/zh/fr`, và cả `voice`/`rate`. Cả client
+  (`stageIntroScripts.ts`) và script sinh audio đều đọc file này, nên lời không lệch hai nơi. Sửa
+  lời thì sửa ở đây rồi sinh lại audio. Lời gốc khách: `docs/customer-source/2026-10-21/stage-intro.md`.
+- **Sinh audio (ở máy dev, cần mạng):**
+  ```bash
+  cd scripts/tts
+  python -m venv .venv                                        # nếu chưa có
+  .venv/Scripts/python.exe -m pip install edge-tts mutagen    # Windows; mutagen chỉ để đo thời lượng khi thiếu ffprobe
+  .venv/Scripts/python.exe gen_stage_intro.py
+  ```
+- **Kết quả:** 5 file `client/public/audio/stage-intro/stage-<n>.mp3`, giọng `vi-VN-HoaiMyNeural`,
+  rate `-10%` (cùng giọng với bài học). Script in thời lượng từng file và **cảnh báo nếu vượt 16 giây**
+  (mục tiêu 8–16 giây); trả mã khác 0 khi có cảnh báo để người chạy xem lại.
+- **Triển khai:** file nằm trong `client/public` nên deploy cùng frontend, không cần `upload`/`apply`,
+  không cần endpoint BE. Client phát qua thẻ `<audio>` riêng, không đụng luồng narration của bài học.
+- Vượt 16 giây thì rút ngắn lời trong JSON rồi chạy lại; đây là audio tạm edge-tts như phần trên, nên
+  thay bằng giọng thu thật khi có điều kiện.
+
 ## Giới hạn và giả định
 
 - **Chưa chạy thật trên production trong thay đổi này.** Theo plan, chỉ chạy `generate` thử ở máy dev;
