@@ -105,6 +105,27 @@ describe('ScreenTimeGuard rest countdown', () => {
     expect(Number(sessionStorage.getItem(SESSION_KEY))).toBe(baseline + 5 * 60000);
   });
 
+  it('does not reopen the time-up prompt right after the break ends', () => {
+    exceedSession();
+    renderGuard();
+    clickTakeBreak();
+
+    act(() => {
+      vi.advanceTimersByTime(5 * 60000);
+    });
+    // Break is over: the child is learning again.
+    expect(screen.getByText('Learning content')).toBeTruthy();
+
+    // The fresh session starts from zero, so the next guard poll (every 10s) must not re-trigger
+    // the limit and flash the time-up modal back up.
+    act(() => {
+      vi.advanceTimersByTime(11000);
+    });
+    expect(screen.getByText('Learning content')).toBeTruthy();
+    expect(screen.queryByText('Time to rest your eyes!')).toBeNull();
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+  });
+
   it('stays on the break with the right time left after a remount while the break is active', () => {
     exceedSession();
     const first = renderGuard();
