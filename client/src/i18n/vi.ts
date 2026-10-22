@@ -205,6 +205,12 @@ export const vi = {
     extend: 'Ba mẹ mở thêm giờ',
     rest: 'Bé đi nghỉ ngơi thôi',
     childFallback: 'Bé',
+    restTitle: 'Nghỉ mắt một chút nhé!',
+    restBody: 'Bé nhắm mắt thư giãn, nhìn ra thật xa và hít thở sâu nào. Hết giờ nghỉ là bé học tiếp được ngay!',
+    restTimeLeftLabel: 'Thời gian nghỉ còn lại',
+    restAnnounce: 'Nghỉ mắt nhé! Bé có thể học tiếp sau khoảng {minutes} phút nữa.',
+    restAnnounceFinal: 'Nghỉ mắt nhé! Sắp hết giờ nghỉ rồi, bé chuẩn bị học tiếp nào.',
+    restDialogAria: 'Màn hình nghỉ cho mắt, đang đếm ngược.',
   },
   lesson: {
     continueBtn: VI_LOCALES.lesson.continueBtn,

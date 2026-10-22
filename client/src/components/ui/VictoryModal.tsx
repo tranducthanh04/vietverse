@@ -101,7 +101,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
               <Star
                 className={`w-14 h-14 ${
                   isFilled
-                    ? 'fill-secondary text-secondary animate-pop drop-shadow-md'
+                    ? 'fill-secondary-container text-accent-hover animate-pop drop-shadow-md'
                     : 'text-outline-variant/40'
                 }`}
               />
