@@ -310,6 +310,14 @@ export const en: Dictionary = {
     rewardHint: '+10 ViVi Points',
     locked: 'Locked',
   },
+  stageIntro: {
+    dialogLabel: 'Sao Lí Lắc\'s greeting',
+    mascotLabel: 'Sao Lí Lắc',
+    skip: 'Skip',
+    start: 'Start',
+    continue: 'Continue',
+    replay: 'Hear the greeting',
+  },
   treasure: {
     backToMap: 'Back to stage map',
     title: "{name}'s Treasure Room",

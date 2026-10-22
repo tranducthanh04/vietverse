@@ -30,6 +30,9 @@ beforeEach(() => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   requestedChildren = [];
   respond = () => mapStages();
+  // These tests cover stage links and lesson eligibility, not the stage-intro animation. Mark the
+  // intro already seen for both children so it never intercepts a lesson click here.
+  localStorage.setItem('vietverse_stage_intro_seen_v1', JSON.stringify({ 'child-a': [1, 2, 3, 4, 5], 'child-b': [1, 2, 3, 4, 5] }));
   useChildStore.setState({ children: [child], activeChild: child, isLoading: false });
   api.defaults.adapter = async config => {
     expect(config.url).toBe('/stages');

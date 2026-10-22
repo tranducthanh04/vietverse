@@ -1,5 +1,31 @@
 # 03 — Feature inventory và trạng thái baseline
 
+## Hoạt cảnh Sao Lí Lắc mở đầu chặng — 2026-10-21, local
+
+- **STAGE-INTRO:** lần đầu một bé mở một bài thuộc chặng N, hiện overlay `StageIntro`
+  (`client/src/features/quest-map/StageIntro.tsx`): mascot Sao Lí Lắc (`Mascot` cỡ `xl`,
+  `mood="talking"` khi phát, `happy` khi xong), nền theo chặng, bong bóng phụ đề tiếng Việt kèm
+  bản dịch theo ngôn ngữ hỗ trợ của bé, nút "Bỏ qua" và "Bắt đầu". Bỏ qua hoặc xem hết thì mới vào
+  `/hoc/<id>`. Trên thẻ chặng đang chọn có nút "Xem lời chào" để xem lại mà **không** điều hướng.
+- **Dữ liệu lời:** `client/src/features/quest-map/stageIntroScripts.json` là nguồn chuẩn duy nhất
+  (lời 5 chặng đã duyệt + bản dịch en/ja/ko/zh/fr), dùng chung cho client và script sinh audio nên
+  lời không lệch hai nơi. Lời gốc khách ở `docs/customer-source/2026-10-21/stage-intro.md`.
+- **Audio:** 5 file tĩnh `client/public/audio/stage-intro/stage-<n>.mp3` sinh trước bằng edge-tts
+  (`scripts/tts/gen_stage_intro.py`, giọng `vi-VN-HoaiMyNeural`, rate `-10%`), deploy cùng
+  frontend, không cần DB/CMS. Phát qua thẻ `<audio>` riêng dưới quy tắc một-chủ-phát
+  (`claimPlayback`/`releasePlayback`); audio lỗi thì vẫn hiện phụ đề đủ, mascot "nói" theo thời
+  gian ước tính, nút vẫn bấm được. Bỏ qua hoặc đóng thì dừng tiếng ngay.
+- **Quyết định nghiệp vụ (user chốt 2026-10-21):** chỉ là hoạt cảnh giới thiệu, **không** cộng/trừ
+  điểm, **không** mở khóa hay đổi tiến độ; "đã xem" lưu trên thiết bị (localStorage, theo `childId`
+  và `stage.order`), lỗi localStorage thì coi như chưa xem và không chặn vào bài. Chi tiết luật
+  hiển thị ở [`02-business-rules.md`](./02-business-rules.md).
+- **Giả định trình bày:** nền gradient theo chặng, mốc thời lượng clip 8–16 giây, ước lượng thời
+  gian "nói" khi audio lỗi (~0,45 giây/từ) đều là giả định trình bày, không đổi nghiệp vụ. Dùng lại
+  `Modal` (focus trap, Esc, khóa cuộn) và `SupportTranslation` (không sửa hai component này).
+  `prefers-reduced-motion` do CSS toàn cục tắt animation đảm nhiệm.
+- **Kiểm chứng:** xem báo cáo worker. Chưa nghiệm thu trình duyệt/thiết bị thật, chưa deploy. Audio
+  thật cần chạy `gen_stage_intro.py` ở máy có mạng (edge-tts).
+
 ## Tên dài trong danh sách chọn bé — 2026-10-19, local
 
 - **Resume PR29 (2026-10-19):** fresh integration `4b0071d`/main `4a6b0a1` passes94 focused,482 full frontend, root types/build and lint (0 errors/99 warnings). Fresh real-CSS/font picker32+4 passes, including last profile/Add Child hit-testing and keyboard above fixed navigation. Only three product class lines change. This supersedes the historical local-only/quota restriction below; existing PR29 stays Draft pending exact-head CI/previews and coordinator review. No author merge/deploy or audio/R01 acceptance. See the owning document/journal for raw results and boundaries.

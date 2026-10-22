@@ -311,6 +311,14 @@ export const vi = {
     rewardHint: '+10 ViVi Points',
     locked: 'Chưa mở',
   },
+  stageIntro: {
+    dialogLabel: 'Lời chào của Sao Lí Lắc',
+    mascotLabel: 'Sao Lí Lắc',
+    skip: 'Bỏ qua',
+    start: 'Bắt đầu',
+    continue: 'Tiếp tục',
+    replay: 'Xem lời chào',
+  },
   treasure: {
     backToMap: 'Về bản đồ chặng',
     title: 'Phòng Báu Vật Của {name}',
