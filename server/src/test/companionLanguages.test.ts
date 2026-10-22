@@ -22,6 +22,25 @@ describe('companion languages compatibility', () => {
     expect((await Child.findById(response.body.data._id))!.companionLanguage).toBe('fr');
   });
 
+  it('accepts Vietnamese as a companion language and keeps it first', async () => {
+    const parent = await AuthService.register({ email: 'vi-language@example.test', password: 'Password123!', displayName: 'Owner' });
+    const response = await request(app).post('/api/v1/children')
+      .set('Authorization', `Bearer ${parent.accessToken}`)
+      .send({ name: 'Bi', ageGroup: '5-6', companionLanguages: ['vi', 'en'] });
+    expect(response.status).toBe(201);
+    expect(response.body.data.companionLanguages).toEqual(['vi', 'en']);
+    expect(response.body.data.companionLanguage).toBe('vi');
+    expect((await Child.findById(response.body.data._id))!.companionLanguage).toBe('vi');
+  });
+
+  it('rejects an unknown companion language with 400', async () => {
+    const parent = await AuthService.register({ email: 'bad-language@example.test', password: 'Password123!', displayName: 'Owner' });
+    const response = await request(app).post('/api/v1/children')
+      .set('Authorization', `Bearer ${parent.accessToken}`)
+      .send({ name: 'Bi', ageGroup: '5-6', companionLanguages: ['xx'] });
+    expect(response.status).toBe(400);
+  });
+
   it('reads legacy documents without writing or changing their other fields', async () => {
     const id = new Types.ObjectId();
     const parentId = new Types.ObjectId();
@@ -41,6 +60,7 @@ describe('companion languages compatibility', () => {
     }
     expect(createChildSchema.safeParse({ name: 'An', ageGroup: '5-6', companionLanguage: 'en' }).success).toBe(true);
     expect(createChildSchema.safeParse({ name: 'An', ageGroup: '5-6', companionLanguages: ['en', 'ja'] }).success).toBe(true);
+    expect(createChildSchema.safeParse({ name: 'An', ageGroup: '5-6', companionLanguages: ['vi', 'en'] }).success).toBe(true);
     for (const companionLanguages of [[], ['en', 'en'], ['xx']]) {
       const invalid = new Child({ parentId: new Types.ObjectId(), name: 'An', companionLanguages });
       await expect(invalid.validate()).rejects.toThrow();

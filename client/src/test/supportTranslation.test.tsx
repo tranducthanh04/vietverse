@@ -87,6 +87,29 @@ describe("SupportTranslation (child view)", () => {
     );
     expect(screen.getByText("English intro")).toHaveAttribute("lang", "en");
   });
+
+  it("skips 'vi' and uses the next companion language that has a translation", () => {
+    // Content is already Vietnamese, so `vi` never carries a support translation.
+    setActiveChild(["vi", "ja"]);
+    render(
+      <SupportTranslation
+        translations={cultureTranslations}
+        select={(t: { intro?: string }) => t.intro}
+      />,
+    );
+    expect(screen.getByText("日本語の紹介")).toHaveAttribute("lang", "ja");
+  });
+
+  it("renders nothing when the child only has 'vi'", () => {
+    setActiveChild(["vi"]);
+    const { container } = render(
+      <SupportTranslation
+        translations={cultureTranslations}
+        select={(t: { intro?: string }) => t.intro}
+      />,
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
 });
 
 describe("TranslationEditor (CMS)", () => {

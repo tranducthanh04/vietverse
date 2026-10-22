@@ -45,24 +45,31 @@ beforeEach(() => {
 afterEach(() => { cleanup(); queryClient.clear(); api.defaults.adapter = originalAdapter; document.cookie = 'vv_has_session=; Max-Age=0; path=/'; vi.restoreAllMocks(); vi.useRealTimers(); });
 
 describe('multilingual onboarding', () => {
-  it('keeps multiple selections, prevents empty selection, and sends all languages', async () => {
+  it('puts Vietnamese first and pre-selected, keeps at least one language, and sends every selection', async () => {
     let body: Record<string, unknown> | undefined;
     request = (config) => { body = JSON.parse(config.data as string); return { ...child, ...body }; };
     show(<OnboardingWizard />);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'An' } });
     fireEvent.click(screen.getByRole('button', { name: /Tiếp tục cùng/ }));
     fireEvent.click(screen.getByRole('button', { name: /Tiếp tục bước/ }));
+
+    // The language options are exactly the buttons carrying aria-pressed on this step.
+    const options = screen.getAllByRole('button').filter((button) => button.hasAttribute('aria-pressed'));
+    expect(options[0]).toHaveAccessibleName(/Tiếng Việt/);
+    expect(options[0]).toHaveAttribute('aria-pressed', 'true');
+
+    // The last remaining language cannot be cleared.
+    fireEvent.click(screen.getByRole('button', { name: /Tiếng Việt/ }));
+    expect(screen.getByRole('button', { name: /Tiếng Việt/ })).toHaveAttribute('aria-pressed', 'true');
+
+    // Multi-select still works alongside the default Vietnamese selection.
     fireEvent.click(screen.getByRole('button', { name: /English/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Hoàn tất thiết lập/ }));
-    expect(screen.queryByRole('button', { name: /BẮT ĐẦU/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /English/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Tiếng Nhật/ }));
     expect(screen.getByRole('button', { name: /English/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /Tiếng Nhật/ })).toHaveAttribute('aria-pressed', 'true');
+
     fireEvent.click(screen.getByRole('button', { name: /Hoàn tất thiết lập/ }));
     fireEvent.click(screen.getByRole('button', { name: /BẮT ĐẦU/ }));
-    await waitFor(() => expect(body).toMatchObject({ companionLanguages: ['en', 'ja'], companionLanguage: 'en' }));
-    expect(useChildStore.getState().activeChild?.companionLanguages).toEqual(['en', 'ja']);
+    await waitFor(() => expect(body).toMatchObject({ companionLanguages: ['vi', 'en'], companionLanguage: 'vi' }));
+    expect(useChildStore.getState().activeChild?.companionLanguages).toEqual(['vi', 'en']);
   });
 });
 

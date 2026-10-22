@@ -16,7 +16,8 @@ export interface SupportTranslationProps<T> {
 
 /**
  * Renders the reviewed translation of one piece of Vietnamese text in the first of the active
- * child's `companionLanguages` (priority order, `other` skipped) that actually has a translation.
+ * child's `companionLanguages` (priority order, `other` and `vi` skipped) that actually has a
+ * translation.
  * When no child is selected or no companion language has one, it renders nothing — Vietnamese stays
  * the primary text. The output carries the correct `lang` attribute for assistive technology.
  */
@@ -33,7 +34,8 @@ export function SupportTranslation<T>({
       ? [activeChild.companionLanguage]
       : [];
   for (const lang of preferred) {
-    if (lang === "other") continue;
+    // `other` has no reviewed translation; `vi` is the source content itself, so both are skipped.
+    if (lang === "other" || lang === "vi") continue;
     const entry = translations[lang];
     const text = entry ? select(entry as T)?.trim() : undefined;
     if (text) {

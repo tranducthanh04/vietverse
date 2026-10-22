@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
-const language = z.enum(['en', 'ja', 'ko', 'zh', 'fr', 'other']);
+const language = z.enum(['vi', 'en', 'ja', 'ko', 'zh', 'fr', 'other']);
 const languageFields = {
   companionLanguage: language.optional(),
-  companionLanguages: z.array(language).min(1).max(6).superRefine((values, ctx) => {
+  companionLanguages: z.array(language).min(1).max(7).superRefine((values, ctx) => {
     if (new Set(values).size !== values.length) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Ngôn ngữ không được trùng' });
   }).optional(),
 };

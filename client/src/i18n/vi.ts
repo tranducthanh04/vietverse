@@ -165,6 +165,7 @@ export const vi = {
     step3Badge: 'Bước 3 / 4',
     languageTitle: 'Ngôn ngữ thường ngày của bé là gì?',
     languageSubtitle: 'Ba mẹ có thể chọn nhiều ngôn ngữ bé sử dụng thường ngày.',
+    langViSub: 'Tiếng Việt',
     langEnSub: 'Tiếng Anh',
     langJaSub: 'Tiếng Nhật',
     langKoSub: 'Tiếng Hàn',
