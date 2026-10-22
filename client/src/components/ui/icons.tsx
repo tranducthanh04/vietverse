@@ -104,6 +104,7 @@ import {
   UserRound as LUserRound,
   Users as LUsers,
   UtensilsCrossed as LUtensilsCrossed,
+  Volume as LVolume,
   Volume2 as LVolume2,
   Wallet as LWallet,
   WifiOff as LWifiOff,
@@ -221,6 +222,7 @@ export const Truck = withDefaults(LTruck, 'Truck');
 export const UserRound = withDefaults(LUserRound, 'UserRound');
 export const Users = withDefaults(LUsers, 'Users');
 export const UtensilsCrossed = withDefaults(LUtensilsCrossed, 'UtensilsCrossed');
+export const Volume = withDefaults(LVolume, 'Volume');
 export const Volume2 = withDefaults(LVolume2, 'Volume2');
 export const Wallet = withDefaults(LWallet, 'Wallet');
 export const WifiOff = withDefaults(LWifiOff, 'WifiOff');

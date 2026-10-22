@@ -27,11 +27,15 @@ export function useNarration({
   text = "",
   lang = "vi-VN",
   contentKey = "",
+  autoPlay = false,
 }: {
   audioUrl?: string;
   text?: string | string[];
   lang?: string;
   contentKey?: string;
+  // When true, auto-read the primary source once each time the content identity changes. Blocked
+  // playback stays silent (no error, speaker still tappable); it never fires from an asset error.
+  autoPlay?: boolean;
 }) {
   const t = useT();
   // DB stores app-relative media URLs ("/api/..."); rebase them onto the API origin so the <audio>
@@ -43,6 +47,11 @@ export function useNarration({
   const running = useRef(false);
   const failedAsset = useRef(false);
   const usingSpeech = useRef(false);
+  // Set while an autoplay attempt is in flight so blocked/failed playback never surfaces an error
+  // or a speech fallback. Reset by every manual start, so tapping the speaker reports errors again.
+  const suppressErrors = useRef(false);
+  // Holds the latest start() so the autoplay effect can call it without re-subscribing every render.
+  const startRef = useRef<(options?: { silent?: boolean }) => void>(() => {});
   const cancelVoiceWait = useRef<(() => void) | undefined>(undefined);
   const speechWatchdog = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -59,6 +68,8 @@ export function useNarration({
   const hasText = (Array.isArray(text) ? text : [text]).some((part) =>
     part.trim(),
   );
+  // Opening an activity auto-reads its primary source once, but only when there is something to read.
+  const autoPlayable = !!resolvedAudioUrl || (speechAvailable && hasText);
 
   const stop = useCallback(() => {
     session.current += 1;
@@ -102,7 +113,8 @@ export function useNarration({
     const fail = (message: string) => {
       if (token !== session.current) return;
       stop();
-      setError(message);
+      // A silently-blocked autoplay must not greet the child with an error.
+      if (!suppressErrors.current) setError(message);
     };
     if (!speechAvailable || !hasText) {
       fail(t("audio.cantRead"));
@@ -203,14 +215,22 @@ export function useNarration({
   const onError = () => {
     failedAsset.current = true;
     setMode("tts");
+    // Autoplay must never turn a blocked or failed asset into speech or an error: no autoplay from a
+    // preload error, no fallback loop. Stay silent and leave the speaker ready for a tap.
+    if (suppressErrors.current) {
+      stop();
+      return;
+    }
     if (running.current) speak(session.current);
     else setError(t("audio.assetFailed"));
   };
   // Begin playback from the current position. Must run synchronously inside a user gesture so that
   // later speak() calls (voice discovery, asset fallback) are allowed by iOS Safari.
-  const start = () => {
+  const start = ({ silent = false }: { silent?: boolean } = {}) => {
+    // Silent = autoplay with no user gesture: swallow blocked/failed playback instead of warning.
+    suppressErrors.current = silent;
     claimPlayback(stop);
-    if (!speechUnlocked && speechAvailable && hasText && isIOS()) {
+    if (!silent && !speechUnlocked && speechAvailable && hasText && isIOS()) {
       speechUnlocked = true;
       try {
         const unlock = new SpeechSynthesisUtterance("");
@@ -239,6 +259,14 @@ export function useNarration({
       speak(token);
     }
   };
+  startRef.current = start;
+  // Auto-read the primary source once whenever the content identity changes. Rerenders with the same
+  // content do not re-run this effect, so it never loops; the reset effect above already stops the
+  // previous activity's audio on change or unmount, so no cleanup is needed here.
+  useEffect(() => {
+    if (!autoPlay || !autoPlayable) return;
+    startRef.current({ silent: true });
+  }, [autoPlay, autoPlayable, resolvedAudioUrl, textKey, lang, contentKey]);
   const toggle = () => {
     if (running.current) {
       stop();

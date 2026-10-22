@@ -65,13 +65,15 @@ it('replays the source audio once and shows a friendly hint when the child answe
   const onComplete = vi.fn();
   render(<ListenChooseActivity activity={baseActivity} onComplete={onComplete} />);
 
-  // No feedback before answering.
+  // Opening the question autoplays its audio once; no feedback appears before answering.
+  expect(play).toHaveBeenCalledTimes(1);
+  play.mockClear();
   expect(screen.queryByRole('status')).not.toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: 'Gà' }));
 
   expect(onComplete).toHaveBeenCalledWith(false, 'gà');
-  // The question audio asset was played exactly once by the replay.
+  // The wrong-answer replay plays the question audio exactly once.
   expect(play).toHaveBeenCalledTimes(1);
   // A friendly generic hint appears in a polite live region, plus a "Nghe lại" button.
   const status = screen.getByRole('status');
@@ -84,6 +86,9 @@ it('does not replay or show a hint when the child answers correctly', () => {
   const onComplete = vi.fn();
   render(<ListenChooseActivity activity={baseActivity} onComplete={onComplete} />);
 
+  // Opening the question autoplays its audio once; a correct answer must not replay it.
+  expect(play).toHaveBeenCalledTimes(1);
+  play.mockClear();
   fireEvent.click(screen.getByRole('button', { name: 'Cá' }));
 
   expect(onComplete).toHaveBeenCalledWith(true, 'cá');
@@ -94,6 +99,10 @@ it('does not replay or show a hint when the child answers correctly', () => {
 it('replays again on each wrong answer, cancelling the previous play so nothing overlaps or loops', () => {
   stubSpeech();
   render(<ListenChooseActivity activity={baseActivity} onComplete={() => {}} />);
+
+  // Opening the question autoplays its audio once; discount that before counting the replays.
+  expect(play).toHaveBeenCalledTimes(1);
+  play.mockClear();
 
   // The same option button persists across renders (stable key); selecting it adds an sr-only
   // "Chưa đúng" label, so capture it once and tap it twice.

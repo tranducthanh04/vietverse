@@ -35,6 +35,7 @@ export function NewActivityFrame({
           textToSpeak={instructions}
           label={t('lesson.listenInstructions')}
           size="sm"
+          autoPlay
         />
         {!activity.audioUrl && activity.type === "follow_steps" && (
           <MissingSourceAudioNotice hint={t('lesson.hintReadBelow')} />

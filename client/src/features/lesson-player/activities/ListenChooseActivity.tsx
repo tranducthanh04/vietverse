@@ -63,6 +63,7 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
           textToSpeak={activity.targetWord || activity.prompt}
           size="lg"
           label={activity.audioUrl ? t('lesson.listenAudio') : t('lesson.listenQuestion')}
+          autoPlay
         />
         {/* Without source audio, device speech can only read the prompt; do not imply a listening clip exists. */}
         {!activity.audioUrl && <MissingSourceAudioNotice hint={t('lesson.hintReadAbove')} />}

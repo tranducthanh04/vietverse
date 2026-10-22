@@ -366,8 +366,12 @@ describe("narration in learning journeys", () => {
         onComplete={() => {}}
       />,
     );
+    // Opening the card autoplays the short target-word asset once.
+    expect(play).toHaveBeenCalledTimes(1);
+    play.mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Đọc đoạn văn" }));
     expect(spoken.map((item) => item.text)).toEqual(["A full passage."]);
+    // The passage reader uses device speech, never the short target-word asset.
     expect(play).not.toHaveBeenCalled();
   });
 
@@ -381,9 +385,10 @@ describe("narration in learning journeys", () => {
       />,
     );
     expect(screen.getByText(passage)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Nghe đọc" }));
+    // Opening the card auto-reads the target-word passage via device speech.
     expect(spoken.map((item) => item.text)).toEqual([passage]);
     act(() => spoken[0].onend?.call(spoken[0], new Event("end") as SpeechSynthesisEvent));
+    // Reading the passage never auto-completes or grades the activity.
     expect(complete).not.toHaveBeenCalled();
   });
 
@@ -402,7 +407,7 @@ describe("narration in learning journeys", () => {
         onSubmit={submit}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Nghe hướng dẫn" }));
+    // Opening the activity auto-reads the instructions (prompt + ordered steps).
     expect(spoken[0].text).toContain("Step one");
     expect(submit).not.toHaveBeenCalled();
   });

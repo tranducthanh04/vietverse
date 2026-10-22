@@ -108,6 +108,11 @@ F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-sour
 - Gợi ý ưu tiên nội dung `wrongHint` của hoạt động + bản dịch theo `companionLanguages` (dùng `SupportTranslation`); thiếu nội dung thì dùng câu động viên chung theo i18n (vi/en). Model `Lesson.activity` thêm `wrongHint`/`wrongHintTranslations` tùy chọn, tương thích ngược; CMS `ActivityEditor` có khối nhập. **Không** đổi chấm điểm/sao/tim/số lần thử; server vẫn chấm độc lập.
 - Seed demo gắn gợi ý mẫu cho bài "Con vật quanh em" ("cá = fish…", "mèo = cat…") — bản nháp minh hoạ chờ content owner duyệt. Chưa push/deploy; kiểm tra ở 390/1366px, VI/EN với API/DB local.
 
+## Tự phát âm thanh khi vào hoạt động — triển khai local 2026-10-21
+
+- Mở một hoạt động có nút loa thì nguồn chính tự đọc một lần (quyết định nghiệp vụ 2026-10-21, xem `02-business-rules.md`): `listen_choose` nút loa chính, `word_card` nút đọc `targetWord`, các loại dùng `NewActivityFrame` phần hướng dẫn. Nút loa vẫn bấm nghe lại.
+- Dùng cờ `autoPlay` của `AudioButton`/`useNarration` qua engine một-chủ-phát: không chồng tiếng, đổi hoạt động/rời trang dừng tiếng cũ, render lại cùng `activity.id` không phát lại. Trình duyệt chặn tự phát thì im lặng, nút vẫn sẵn sàng; lỗi tải asset không gây tự phát. Không đổi chấm điểm/điểm/quyền/API. Chưa push/deploy, chưa nghiệm thu trình duyệt/thiết bị thật.
+
 | Nhóm | Tính năng | UI | API/server | Dữ liệu chính | Trạng thái |
 | --- | --- | --- | --- | --- | --- |
 | Auth | Đăng ký/đăng nhập | Có | Có JWT + refresh cookie | User, Subscription | Hoàn thiện |
