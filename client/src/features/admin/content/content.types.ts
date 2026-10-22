@@ -48,7 +48,7 @@ export type Quiz = {
   correctAnswer: number;
   explanation?: string;
 };
-/** Companion languages that can carry a reviewed translation: companionLanguages minus `other`. */
+/** Companion languages that can carry a reviewed translation: companionLanguages minus `vi` (content is already Vietnamese) and `other`. */
 export const supportLanguages = ["en", "ja", "ko", "zh", "fr"] as const;
 export type SupportLanguage = (typeof supportLanguages)[number];
 export const supportLanguageLabels: Record<SupportLanguage, string> = {

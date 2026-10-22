@@ -88,12 +88,12 @@ Google payload: `/start` nhận `{}`; `/google` nhận strict `{credential, nonc
 
 ## Learning và child
 
-Quyết định tương thích 2026-10-11 (cập nhật 2026-10-21 thêm `vi` đứng đầu): `POST/PUT /children` nhận `companionLanguages` gồm 1–6 giá trị duy nhất thuộc `vi/en/ja/ko/zh/fr/other`. Nếu gửi cả trường singular thì phải trùng phần tử đầu, không đúng trả 400. Chỉ gửi singular vẫn được chuẩn hóa thành mảng một phần tử; update không gửi hai trường thì giữ nguyên. Response đọc document legacy bổ sung mảng trong JSON, không ghi DB khi GET. Quyền/subscription/điểm không đổi.
+Quyết định tương thích 2026-10-11 (cập nhật 2026-10-21 thêm `vi` đứng đầu): `POST/PUT /children` nhận `companionLanguages` gồm 1–7 giá trị duy nhất thuộc `vi/en/ja/ko/zh/fr/other`. Nếu gửi cả trường singular thì phải trùng phần tử đầu, không đúng trả 400. Chỉ gửi singular vẫn được chuẩn hóa thành mảng một phần tử; update không gửi hai trường thì giữ nguyên. Response đọc document legacy bổ sung mảng trong JSON, không ghi DB khi GET. Quyền/subscription/điểm không đổi.
 
 | Method | Path | Auth | Ownership/role |
 | --- | --- | --- | --- |
 | GET | `/children` | Auth | Chỉ children của user |
-| POST | `/children` | Auth | Body nhận `companionLanguages` (1–6 giá trị duy nhất) hoặc legacy `companionLanguage`; server lưu cả danh sách và giá trị đầu tiên để tương thích; kiểm tra subscription limit (free/monthly: 1, yearly: 3) |
+| POST | `/children` | Auth | Body nhận `companionLanguages` (1–7 giá trị duy nhất) hoặc legacy `companionLanguage`; server lưu cả danh sách và giá trị đầu tiên để tương thích; kiểm tra subscription limit (free/monthly: 1, yearly: 3) |
 | GET/PUT | `/children/:id` | Auth | `child.parentId === req.user.id` |
 | DELETE | `/children/:id` | Auth | `child.parentId === req.user.id` — **Cascade Deletion**: Xóa đồng thời toàn bộ `LessonProgress`, `Recording`, `ExplorationLog`, `PointTransaction`, và `Redemption` của bé |
 | PATCH | `/children/:id/select` | Auth | Ownership check |
