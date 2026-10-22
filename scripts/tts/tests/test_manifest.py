@@ -48,6 +48,20 @@ def test_word_card_uses_target_word_not_prompt():
     assert by_field["activities.0.audioUrl"] != "Cùng đọc và tìm hiểu."
 
 
+def test_listen_choose_uses_target_word_when_present():
+    """listen_choose: nút loa đọc targetWord (đoạn audio cần nghe) nếu có; không có thì prompt.
+    Phản chiếu ListenChooseActivity.tsx `textToSpeak={targetWord || prompt}`. Khẳng định text =
+    targetWord và KHÁC prompt -> FAIL trên code cũ (code cũ luôn dùng prompt cho listen_choose)."""
+    payload = {"activities": [
+        {"type": "listen_choose", "prompt": "Con nghe thấy ai?", "targetWord": "Đây là mẹ.", "audioUrl": ""},
+        {"type": "listen_choose", "prompt": "Bé đang làm gì?", "audioUrl": ""},  # không có targetWord
+    ]}
+    by_field = {c["field"]: c["text"] for c in extract_clips("lesson", payload)}
+    assert by_field["activities.0.audioUrl"] == "Đây là mẹ."
+    assert by_field["activities.0.audioUrl"] != "Con nghe thấy ai?"
+    assert by_field["activities.1.audioUrl"] == "Bé đang làm gì?"  # fallback prompt
+
+
 def test_each_mapped_activity_type_uses_expected_text():
     """Một khẳng định cho mỗi loại được ánh xạ trong LESSON_ACTIVITY_AUDIO_TEXT."""
     payload = {"activities": [

@@ -38,6 +38,9 @@ export const activityDraftSchema = rawActivity.pipe(z.object({
   options: z.array(optionSchema).max(12).optional(), correctAnswer: answer,
   hints: z.array(text).max(20).optional(), wrongHint: text.optional(),
   wrongHintTranslations: z.record(z.enum(SUPPORT_LANGUAGES), z.object({ wrongHint: text.optional() })).optional(),
+  // Reviewed prompt translations: one trimmed string (≤ 300 chars) per support language. An unknown
+  // language key (or `other`) is rejected, matching wrongHintTranslations; absent stays absent.
+  promptTranslations: z.record(z.enum(SUPPORT_LANGUAGES), z.string().trim().max(300)).optional(),
   targetWord: text.optional(), targetPhonetic: text.optional(),
   pairs: z.array(z.object({ left: text, right: text })).max(12).optional(),
   blanks: z.array(z.object({ sentence: text, missing: text })).max(1).optional(),

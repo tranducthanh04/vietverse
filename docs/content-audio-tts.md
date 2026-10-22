@@ -63,7 +63,7 @@ không phải suy đoán):
 | `type` | Text đọc (trường trong payload) | Component phản chiếu |
 | --- | --- | --- |
 | `word_card` | `targetWord` | `WordCardActivity.tsx` — nút "Nghe đọc"; thẻ to thường là **cả đoạn đọc** |
-| `listen_choose` | `prompt` | `ListenChooseActivity.tsx` |
+| `listen_choose` | `targetWord` nếu có, **không thì** `prompt` | `ListenChooseActivity.tsx` — nút loa đọc `targetWord \|\| prompt` |
 | `fill_blank` | `prompt` | `WrongAnswerFeedback` (trong `FillBlankActivity.tsx`) |
 | `sort_order` | `prompt` | `WrongAnswerFeedback` (trong `SortOrderActivity.tsx`) |
 | `review` | `prompt` | `WrongAnswerFeedback` (trong `ReviewActivity.tsx`) |
@@ -78,6 +78,11 @@ không phải suy đoán):
   trong `NewActivityFrame.tsx`).
 - **Sửa lỗi production**: trước đây công cụ dùng `prompt` cho **mọi** loại, nên `word_card` đọc
   câu hướng dẫn ("Cùng đọc và tìm hiểu.") thay vì đoạn đọc trong `targetWord`. Nay đã theo bảng này.
+- **`listen_choose` (bài nghe-rồi-chọn)**: nút loa phải phát **đoạn audio cần nghe**, không phải
+  câu hỏi. Đoạn audio được lưu ở `targetWord` (ví dụ B1 HĐ1 lưu "Đây là mẹ."), nên công cụ đọc
+  `targetWord` khi có, không thì `prompt`. Dữ liệu cũ trên prod đặt cả đoạn đọc vào `prompt` và
+  không có `targetWord`, nên vẫn rơi về `prompt` — hành vi cũ không đổi. Các bài đọc hiểu
+  (`targetWord` trống, ví dụ "Con nào sống dưới nước?") vẫn đọc `prompt` như trước.
 - **Loại không phát `activities[].audioUrl`** (`drag_match`, `record_voice`) **không sinh clip**
   cho ô đó — tránh sinh audio không ai nghe. Bảng phủ đủ 11 loại trong enum server
   (`content.validation.ts`).

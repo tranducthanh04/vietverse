@@ -15,6 +15,7 @@
     "seed": "tsx src/seeds/seed.ts",
     "cms:metadata": "tsx src/seeds/migrateContentMetadata.ts",
     "cms:import-customer": "tsx src/seeds/customer/importCustomerContent.ts",
+    "cms:publish-explore": "tsx src/seeds/customer/publishExploreCurriculum.ts",
     "migrate:shop-category": "tsx src/seeds/migrateShopItemCategory.ts",
     "deploy:indexes": "tsx src/seeds/prepareDeploymentIndexes.ts"
   },

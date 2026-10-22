@@ -15,6 +15,7 @@ const activity = z.object({
   correctAnswer: z.union([text, strings, z.number(), z.boolean(), z.record(text)]).optional(),
   hints: strings.optional(), wrongHint: optionalText,
   wrongHintTranslations: z.record(supportLanguage, z.object({ wrongHint: optionalText })).optional(),
+  promptTranslations: z.record(supportLanguage, text).optional(),
   targetWord: optionalText, targetPhonetic: optionalText,
   pairs: z.array(z.object({ left: text, right: text })).optional(),
   blanks: z.array(z.object({ sentence: text, missing: text })).optional(),

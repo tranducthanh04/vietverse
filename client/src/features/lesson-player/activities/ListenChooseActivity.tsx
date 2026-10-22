@@ -4,13 +4,18 @@ import { CircleCheck, CircleX, Star } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { MissingSourceAudioNotice } from './NewActivityFrame.js';
 import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface ListenChooseActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
+    // The clip the child should hear (e.g. "Đây là mẹ."). When there is no audioUrl, device speech
+    // reads this so the listen task plays the sentence to identify, not the question. Falls back to prompt.
+    targetWord?: string;
     options?: Array<{
       id: string;
       text?: string;
@@ -48,13 +53,14 @@ export const ListenChooseActivity: React.FC<ListenChooseActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-4">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       {/* Audio speaker prompt */}
       <div className="mb-6">
         <AudioButton
           contentKey={activity.id}
           audioUrl={activity.audioUrl}
-          textToSpeak={activity.prompt}
+          textToSpeak={activity.targetWord || activity.prompt}
           size="lg"
           label={activity.audioUrl ? t('lesson.listenAudio') : t('lesson.listenQuestion')}
         />

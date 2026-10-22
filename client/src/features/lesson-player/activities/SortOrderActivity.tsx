@@ -3,12 +3,14 @@ import {
   RotateCcw,
 } from '../../../components/ui/icons.js';
 import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface SortOrderActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
     orderedItems?: string[];
     correctAnswer?: string[];
@@ -59,6 +61,7 @@ export const SortOrderActivity: React.FC<SortOrderActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       <WrongAnswerFeedback ref={feedbackRef} show={wrong} activity={activity} canReplay={canReplay} />
 

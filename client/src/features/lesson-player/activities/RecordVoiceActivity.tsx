@@ -13,12 +13,14 @@ import { useAudioRecorder } from '../../../lib/audioRecorder.js';
 import { Button } from '../../../components/ui/Button.js';
 import { Mascot } from '../../../components/ui/Mascot.js';
 import { targetTextSize } from './targetTextSize.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface RecordVoiceActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     subPrompt?: string;
     targetWord?: string;
     hints?: string[];
@@ -113,6 +115,7 @@ export const RecordVoiceActivity: React.FC<RecordVoiceActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-2">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       {activity.targetWord && (
         <div className="max-w-full bg-white border-4 border-primary/30 rounded-2xl px-5 sm:px-8 py-3 my-4 inline-block shadow-sm">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Activity } from "./content.types.js";
+import type { Activity, ActivityPromptTranslations, SupportLanguage } from "./content.types.js";
 import { activityTypeLabels, type ActivityType } from './content.types.js';
 import { TextField, StringRows } from "./FormFields.js";
 import { MediaFields } from "./MediaFields.js";
@@ -15,6 +15,23 @@ import { TranslationEditor, type Translations } from './TranslationEditor.js';
 
 // Activity types that grade an answer immediately, so a "when wrong" hint and audio replay apply.
 const WRONG_FEEDBACK_TYPES: ActivityType[] = ['listen_choose', 'review', 'fill_blank', 'sort_order'];
+
+// `promptTranslations` is a flat { lang: string } map, but TranslationEditor edits nested entries.
+// Wrap each language's prompt into a one-key entry for editing and unwrap on save (dropping blanks),
+// so the saved payload matches the model: absent when empty, a plain trimmed string per language.
+function promptTranslationsToEditor(value?: ActivityPromptTranslations): Translations {
+  return Object.fromEntries(
+    Object.entries(value ?? {}).map(([lang, prompt]) => [lang, { prompt }]),
+  ) as Translations;
+}
+function editorToPromptTranslations(next: Translations): ActivityPromptTranslations | undefined {
+  const out: ActivityPromptTranslations = {};
+  for (const [lang, entry] of Object.entries(next)) {
+    const prompt = typeof entry?.prompt === 'string' ? entry.prompt.trim() : '';
+    if (prompt) out[lang as SupportLanguage] = prompt;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
 export function ActivityEditor({
   value,
   onChange,
@@ -46,7 +63,7 @@ export function ActivityEditor({
         <p>Đổi loại sẽ bỏ dữ liệu riêng của loại cũ (lựa chọn, đáp án, nhóm, ô hoặc bước). Giữ hướng dẫn, media và gợi ý.</p>
         <div className="cms-actions"><button type="button" onClick={()=>setPendingType(null)}>Hủy</button>
           <button type="button" onClick={()=>{
-            onChange({id:value.id,type:pendingType,prompt:value.prompt,subPrompt:value.subPrompt,
+            onChange({id:value.id,type:pendingType,prompt:value.prompt,promptTranslations:value.promptTranslations,subPrompt:value.subPrompt,
               audioUrl:value.audioUrl,imageUrl:value.imageUrl,hints:value.hints,
               wrongHint:value.wrongHint,wrongHintTranslations:value.wrongHintTranslations,pointsWeight:value.pointsWeight});
             setPendingType(null);
@@ -66,6 +83,19 @@ export function ActivityEditor({
         value={value.subPrompt ?? ""}
         onChange={(subPrompt) => patch({ subPrompt })}
       />
+      <fieldset>
+        <legend>Bản dịch câu hỏi {n}</legend>
+        <p className="cms-meta">
+          Bản dịch câu hỏi (hướng dẫn) cho từng ngôn ngữ hỗ trợ, tối đa 300 ký tự mỗi ngôn ngữ. Hiện
+          ngay dưới câu hỏi tiếng Việt cho bé theo ngôn ngữ đã chọn; tiếng Việt vẫn là chính và audio
+          vẫn đọc tiếng Việt. Để trống nếu chưa có bản dịch được duyệt.
+        </p>
+        <TranslationEditor
+          translations={promptTranslationsToEditor(value.promptTranslations)}
+          onChange={(next) => patch({ promptTranslations: editorToPromptTranslations(next) })}
+          sections={[{ kind: 'text', key: 'prompt', label: 'Câu hỏi', multiline: true }]}
+        />
+      </fieldset>
       <MediaFields value={value} prefix={`${path}.`} onChange={patch} />
       {value.type==='multi_select' && <MultiSelectEditor activity={value} onChange={onChange} index={index}/>}
       {value.type==='group_sort' && <GroupSortEditor activity={value} onChange={onChange} index={index}/>}

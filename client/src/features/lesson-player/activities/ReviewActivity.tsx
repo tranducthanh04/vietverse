@@ -2,12 +2,14 @@ import React, { useRef, useState } from 'react';
 import { CircleCheck, CircleX } from '../../../components/ui/icons.js';
 import { cn } from '../../../lib/utils.js';
 import { WrongAnswerFeedback, type WrongAnswerFeedbackHandle } from './WrongAnswerFeedback.js';
+import { PromptTranslation } from './PromptTranslation.js';
 import { useT } from '../../../i18n/index.js';
 
 export interface ReviewActivityProps {
   activity: {
     id: string;
     prompt: string;
+    promptTranslations?: Partial<Record<string, string>>;
     audioUrl?: string;
     options?: Array<{ id: string; text?: string }>;
     correctAnswer: string;
@@ -39,6 +41,7 @@ export const ReviewActivity: React.FC<ReviewActivityProps> = ({
       <h2 className="text-kid-lg md:text-kid-xl font-display font-bold text-stone-800 mb-8">
         {activity.prompt}
       </h2>
+      <PromptTranslation translations={activity.promptTranslations} />
 
       <WrongAnswerFeedback ref={feedbackRef} show={isWrongSelected} activity={activity} canReplay={canReplay} />
 
