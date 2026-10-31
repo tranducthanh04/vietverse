@@ -14,7 +14,8 @@
     "test": "npm run test -w server && npm run test -w client",
     "lint": "npm run lint -w server --if-present && npm run lint -w client",
     "seed": "npm run seed -w server",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w client"
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
+    "simulate:traffic": "node scripts/simulate-traffic.js"
   },
   "devDependencies": {
     "concurrently": "^9.2.5",
