@@ -1,0 +1,33 @@
+name: Daily Analytics Traffic Simulation
+
+on:
+  schedule:
+    # Chạy 3 khung giờ mỗi ngày (UTC+7):
+    # - 02:00 UTC = 09:00 sáng VN (4 users)
+    # - 07:00 UTC = 14:00 chiều VN (4 users)
+    # - 13:00 UTC = 20:00 tối VN (4 users)
+    # Tổng cộng: 12 users/ngày trải đều tự nhiên, biểu đồ GA4 cực đẹp
+    - cron: '0 2,7,13 * * *'
+  workflow_dispatch:
+    inputs:
+      users:
+        description: 'Số lượng user muốn tạo'
+        required: false
+        default: '12'
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run traffic simulation
+        run: |
+          USERS="${{ github.event.inputs.users || '4' }}"
+          node scripts/simulate-traffic.js --users $USERS

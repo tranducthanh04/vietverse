@@ -174,7 +174,7 @@ F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-sour
 | Admin | CMS lesson/story/culture | List/filter, form đầy đủ, nháp, preview độc lập, signed cover upload, tải audio lên cho mọi ô `audioUrl` (activity/option/vocab/story/culture) có trạng thái tải + báo lỗi + nghe thử, vẫn cho dán URL tay, publish/ẩn có xác nhận | `/admin/content/:kind`, `/admin/content-images/*`, `POST /admin/content/audio`, phát `GET /api/v1/media/audio/:name` | ContentDraft, ContentRevision, live, AdminAuditLog, Cloudinary image, ổ đĩa BE audio | Đã triển khai local 2026-10-12; audio upload (nhánh `feat/audio-local-fe`) lưu theo sha256 trên ổ đĩa BE, endpoint ở phase song song; cover upload cần preset/env/deploy; publish mặc định tắt, chưa import production |
 | Admin | Redemptions | Có | GET/PATCH admin | Redemption | Hoàn thiện (P1.7 Zod validation, P2.5 limit 100) |
 | Platform | Health/deploy | FE Vercel giữ proxy hiện hữu; BE có native Express config | `/health`, `/ready`, Mongo rate limit chung; Render giữ rollback | Env, RateLimitBucket | Triển khai local 2026-10-09; chưa chuyển traffic production. Xem runbook Vercel |
-| Platform | Analytics | Google tag (gtag.js) GA4 | Measurement ID `G-7L6JG4EL65` tại client/index.html; script giả lập traffic 12 user/ngày `scripts/simulate-traffic.js` | — | Hoàn thiện local 2026-10-31 |
+| Platform | Analytics | Google tag (gtag.js) GA4 | Measurement ID `G-7L6JG4EL65` tại client/index.html; script giả lập traffic `scripts/simulate-traffic.js`; tự động hóa 12 user/ngày qua GitHub Actions `.github/workflows/daily-traffic.yml` | — | Hoàn thiện local 2026-10-31 |
 
 ## Mức hoàn thiện nội dung seed (đối chiếu 2026-10-08)
 
