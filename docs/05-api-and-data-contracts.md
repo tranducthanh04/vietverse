@@ -200,7 +200,7 @@ Bổ sung review2026-10-10 (quyết định kỹ thuật, không đổi điểm/
 | PATCH | `/admin/inventory/:id` | Admin | Sửa tồn kho/trạng thái và `category`, `description`, `assetUrl`; audit `update_inventory` |
 | GET | `/admin/point-rules` | Admin | 5 quy tắc `LESSON_COMPLETE, ACTIVITY_COMPLETE, CULTURE_QUIZ, STAGE_COMPLETE, LESSON_20_TREASURE` với `{ key, amount, active, defaultAmount, customized, updatedAt }` |
 | PATCH | `/admin/point-rules/:key` | Admin | Body strict `{ amount?: 0..1000, active?: boolean }` (ít nhất 1 trường). 404 `POINT_RULE_NOT_FOUND`, 400 dữ liệu sai; audit `update_point_rule` (previous/next) |
-| GET | `/admin/revenue` | Admin | Báo cáo chỉ đọc doanh thu gói học từ `PaymentOrder.status=completed`; query tùy chọn `from/to=YYYY-MM-DD` theo múi giờ Việt Nam, loại `PaymentTestOrder`, trả tổng kỳ, tháng hiện tại, theo gói và theo tháng |
+| GET | `/admin/revenue` | Admin | Báo cáo chỉ đọc doanh thu gói học từ `PaymentOrder.status=completed`; query tùy chọn `from/to=YYYY-MM-DD` theo múi giờ Việt Nam, không tính đơn test cũ trong collection `paymenttestorders`, trả tổng kỳ, tháng hiện tại, theo gói và theo tháng |
 | GET | `/admin/lessons` | Admin | Danh sách tất cả bài học kèm populate stage |
 | POST | `/admin/lessons` | Admin | Ngừng ghi live; payload hợp lệ trả 409 `CONTENT_CMS_REQUIRED` |
 | PUT | `/admin/lessons/:id` | Admin | Ngừng ghi live; dùng luồng draft/publish CMS |

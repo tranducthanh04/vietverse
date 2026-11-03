@@ -254,15 +254,6 @@ export async function runLearnerJourney({ browser, baseURL, screenshotDir, check
       await page.waitForURL('**/kham-pha');
       assert.equal(await page.getByRole('button', { name: 'Đăng xuất khỏi tài khoản quản trị', exact: true }).count(), 0);
     });
-    await check('payment test: blank local gateway credentials show a recoverable configuration error', async () => {
-      await page.goto(`${baseURL}/thanh-toan-thu`);
-      await visible('Đây là thanh toán production bằng tiền thật');
-      const response = await actionResponse('/api/v1/payments/test-checkout', () => click('Thanh toán thử 10.000đ'), 'POST');
-      assert.equal(response.status, 503);
-      await page.getByRole('alert').filter({ hasText: 'Thanh toán PayOS chưa được cấu hình' }).waitFor();
-      assert.equal(await page.getByRole('button', { name: 'Thanh toán thử 10.000đ', exact: true }).isEnabled(), true);
-      assert.equal(await page.getByRole('link', { name: 'Mở trang thanh toán PayOS' }).count(), 0);
-    });
     await check('learner browser journey: no uncaught application exceptions', async () => {
       assert.deepEqual(pageErrors, []);
     });
