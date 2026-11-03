@@ -464,7 +464,6 @@ export const vi = {
     btnSaveSettings: VI_LOCALES.parentPortal.btnSaveSettings,
     saveSuccess: VI_LOCALES.parentPortal.saveSuccess,
     saveSettingsError: 'Chưa xác nhận được việc lưu cài đặt. Lựa chọn của bạn được giữ lại; hãy thử lưu lại.',
-    tabPaymentTest: 'Thanh toán thử',
     backToKids: 'Về màn hình bé',
     backToKidsAria: 'Quay lại màn hình học của bé',
     trackingPrefix: 'Theo dõi:',

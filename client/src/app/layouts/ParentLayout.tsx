@@ -33,7 +33,6 @@ export const ParentLayout: React.FC = () => {
     { to: '/phu-huynh/tien-do', label: t('parentPortal.tabProgress'), icon: <DomainIcon.progress className="w-5 h-5" /> },
     { to: '/phu-huynh/ban-thu-am', label: t('parentPortal.tabRecordings'), icon: <DomainIcon.recordings className="w-5 h-5" /> },
     { to: '/phu-huynh/cai-dat', label: t('parentPortal.tabSettings'), icon: <DomainIcon.settings className="w-5 h-5" /> },
-    { to: '/phu-huynh/thanh-toan-thu', label: t('parentPortal.tabPaymentTest'), icon: <DomainIcon.paymentTest className="w-5 h-5" /> },
   ];
 
   return (

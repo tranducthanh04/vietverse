@@ -40,7 +40,7 @@ async function getPayOS(): Promise<PayOS | null> {
 }
 
 export class PaymentsService {
-  /** Creates a fixed-value production gateway test for an authenticated parent/admin; no subscription is changed. */
+  /** Creates a fixed-value production gateway test for an admin; no subscription is changed. */
   static async createTestCheckout(userId: string) {
     const payos = await getPayOS();
     if (!payos) {
@@ -84,8 +84,8 @@ export class PaymentsService {
         amount: 10000,
         description: 'Vietverse test 10000',
         items: [{ name: 'Thanh toan thu Vietverse', quantity: 1, price: 10000 }],
-        cancelUrl: `${env.CLIENT_ORIGIN}/thanh-toan-thu?orderCode=${orderCode}&payment=returned`,
-        returnUrl: `${env.CLIENT_ORIGIN}/thanh-toan-thu?orderCode=${orderCode}&payment=returned`,
+        cancelUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
+        returnUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
       });
       order.checkoutUrl = paymentLink.checkoutUrl;
       order.paymentLinkId = paymentLink.paymentLinkId;

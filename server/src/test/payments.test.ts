@@ -25,10 +25,14 @@ import { PayOS } from '@payos/node';
 import { Subscription } from '../models/Subscription.js';
 import { PaymentOrder } from '../models/PaymentOrder.js';
 import { PaymentTestOrder } from '../models/PaymentTestOrder.js';
+import { User } from '../models/User.js';
+import { AuthService } from '../modules/auth/auth.service.js';
+import { ROLES } from '../constants/roles.js';
 
 describe('Payments & Subscription Webhook API', () => {
   let parentToken: string;
   let parentId: string;
+  let adminToken: string;
 
   beforeEach(async () => {
     gatewayCreate.mockClear();
@@ -41,6 +45,15 @@ describe('Payments & Subscription Webhook API', () => {
 
     parentToken = parentRes.body.data.accessToken;
     parentId = parentRes.body.data.user.id;
+
+    // 2. Create an admin — only admins may use the test-payment endpoints (decision 2026-11-03).
+    const adminUser = await User.create({
+      email: 'admin_payment_test@vietverse.edu.vn',
+      passwordHash: 'hashed_pw',
+      displayName: 'Admin Payment Test',
+      role: ROLES.ADMIN,
+    });
+    adminToken = (await AuthService.generateTokens(adminUser)).accessToken;
   });
 
   it('1. POST /api/v1/payments/create-checkout - Khởi tạo đơn hàng thanh toán thành công', async () => {
@@ -257,9 +270,44 @@ describe('Payments & Subscription Webhook API', () => {
     expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
   });
 
+  it('locks both test-payment endpoints to admins and sends admins back to the admin test page', async () => {
+    // A parent is forbidden on both test-payment endpoints (decision 2026-11-03).
+    const parentCheckout = await request(app).post('/api/v1/payments/test-checkout')
+      .set('Authorization', `Bearer ${parentToken}`).send({});
+    expect(parentCheckout.status).toBe(403);
+    expect(parentCheckout.body.error.code).toBe('FORBIDDEN');
+
+    const parentLookup = await request(app).get('/api/v1/payments/test-orders/VT123456789')
+      .set('Authorization', `Bearer ${parentToken}`);
+    expect(parentLookup.status).toBe(403);
+    expect(parentLookup.body.error.code).toBe('FORBIDDEN');
+
+    // No test order was created by the forbidden parent request.
+    expect(await PaymentTestOrder.countDocuments()).toBe(0);
+
+    // An admin can create a test checkout; the gateway return/cancel URLs point to the admin page.
+    const adminCheckout = await request(app).post('/api/v1/payments/test-checkout')
+      .set('Authorization', `Bearer ${adminToken}`).send({});
+    expect(adminCheckout.status).toBe(201);
+    expect(adminCheckout.body.data.amount).toBe(10000);
+    const gatewayRequest = gatewayCreate.mock.calls.at(-1)![0];
+    for (const target of [gatewayRequest.returnUrl, gatewayRequest.cancelUrl]) {
+      const url = new URL(target);
+      expect(url.pathname).toBe('/admin/test-thanh-toan');
+      expect(url.searchParams.get('payment')).toBe('returned');
+      expect(url.searchParams.get('orderCode')).toBe(adminCheckout.body.data.orderCode);
+    }
+
+    // The admin can read back the order they created.
+    const adminLookup = await request(app).get(`/api/v1/payments/test-orders/${adminCheckout.body.data.orderCode}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(adminLookup.status).toBe(200);
+    expect(adminLookup.body.data.status).toBe('pending');
+  });
+
   it('still completes a matching test order once without granting a subscription', async () => {
     const checkout = await request(app).post('/api/v1/payments/test-checkout')
-      .set('Authorization', `Bearer ${parentToken}`).send({});
+      .set('Authorization', `Bearer ${adminToken}`).send({});
     expect(checkout.status).toBe(201);
     const subscriptions = await Subscription.find().lean();
     const payload = {

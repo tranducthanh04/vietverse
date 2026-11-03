@@ -85,15 +85,6 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  {
-    path: '/thanh-toan-thu',
-    element: (
-      <ProtectedRoute>
-        {withSuspense(<PaymentTestPage />)}
-      </ProtectedRoute>
-    ),
-  },
-
   // Onboarding Wizard (protected — must be logged in to add a child)
   {
     path: '/bat-dau',
@@ -141,7 +132,6 @@ export const router = createBrowserRouter([
       { path: 'tien-do', element: withSuspense(<ParentDashboardPage />) },
       { path: 'ban-thu-am', element: withSuspense(<ParentRecordingsPage />) },
       { path: 'cai-dat', element: withSuspense(<ParentSettingsPage />) },
-      { path: 'thanh-toan-thu', element: withSuspense(<PaymentTestPage />) },
     ],
   },
 

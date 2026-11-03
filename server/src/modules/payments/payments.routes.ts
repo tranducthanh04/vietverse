@@ -6,8 +6,9 @@ import { ROLES } from '../../constants/roles.js';
 
 const router = Router();
 
-router.post('/test-checkout', authMiddleware, requireRole(ROLES.ADMIN, ROLES.PARENT), PaymentsController.createTestCheckout);
-router.get('/test-orders/:orderCode', authMiddleware, requireRole(ROLES.ADMIN, ROLES.PARENT), PaymentsController.getTestOrderDetails);
+// Quyết định nghiệp vụ (2026-11-03): thanh toán thử chỉ dành cho admin; phụ huynh gọi nhận 403.
+router.post('/test-checkout', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.createTestCheckout);
+router.get('/test-orders/:orderCode', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.getTestOrderDetails);
 
 /**
  * @route   POST /api/v1/payments/create-checkout
