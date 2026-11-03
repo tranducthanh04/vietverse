@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import { PaymentsController } from './payments.controller.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
-import { requireRole } from '../../middlewares/role.middleware.js';
-import { ROLES } from '../../constants/roles.js';
 
 const router = Router();
 
-// Quyết định nghiệp vụ (2026-11-03): thanh toán thử chỉ dành cho admin; phụ huynh gọi nhận 403.
-router.post('/test-checkout', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.createTestCheckout);
-router.get('/test-orders/:orderCode', authMiddleware, requireRole(ROLES.ADMIN), PaymentsController.getTestOrderDetails);
+// Quyết định nghiệp vụ (2026-11-03): tính năng thanh toán thử PayOS 10.000đ đã được gỡ bỏ hoàn
+// toàn (cả phụ huynh lẫn admin). Không còn route `/test-checkout` hay `/test-orders`; gọi tới sẽ
+// nhận 404. Dữ liệu đơn test cũ trong DB được giữ nguyên, webhook của đơn cũ được ACK an toàn.
 
 /**
  * @route   POST /api/v1/payments/create-checkout

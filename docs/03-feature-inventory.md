@@ -111,7 +111,7 @@ F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-sour
 ## PayOS — xác nhận webhook 2026-10-14, local
 
 - Đã tái hiện request theo mẫu PayOS, ký bằng key test: mã đơn chưa có trong DB bị trả 404, chặn xác nhận webhook cần 2xx.
-- Webhook đúng schema và chữ ký nhưng không tìm thấy ở cả `PaymentTestOrder`/`PaymentOrder` nay được ACK 200 với `ignored: true`, không ghi DB hoặc mở gói. Có warning để đối soát đơn lạ; không coi ACK là thanh toán thành công.
+- Webhook đúng schema và chữ ký nhưng không tìm thấy đơn trong `PaymentOrder` nay được ACK 200 với `ignored: true`, không ghi DB hoặc mở gói. Có warning để đối soát đơn lạ; không coi ACK là thanh toán thành công. (Từ 2026-11-03 webhook không còn nhánh đơn test; webhook của đơn test cũ cũng đi theo nhánh "đơn lạ" này.)
 - Sai chữ ký/số tiền vẫn trả 400, thêm mã `PAYOS_INVALID_SIGNATURE`/`PAYOS_AMOUNT_MISMATCH` để phân biệt nguyên nhân. Không nới schema hoặc bỏ xác minh SDK.
 - Chưa deploy hoặc xác nhận portal hết lỗi 400; cần bản sửa chạy trên backend và key cùng kênh PayOS. Lần Actions đã kiểm tra trước đó thất bại `missing server host`, không phải bằng chứng deploy thành công.
 
@@ -145,7 +145,7 @@ F13 prerequisite (2026-10-18): [nguồn bản dịch Khám phá](./customer-sour
 | Auth | Refresh/logout | Có Axios interceptor | Rotation/revoke cùng transaction và khóa tài khoản | RefreshToken, User.__v | P1.1 có bản sửa concurrency local 2026-10-18; xem giới hạn ở đầu tài liệu |
 | Auth | Google SSO | Nút UI ở đăng nhập/đăng ký, liên kết email cũ bằng mật khẩu Vietverse | Google Identity Services ID token + nonce một lần, JWT/refresh hiện tại | User.googleId, GoogleAuthFlow | Đã triển khai code; cần `GOOGLE_CLIENT_ID`, Authorized JS origins và nghiệm thu browser Google thật |
 | Subscription | Xem gói và tạo checkout | Bảng giá gọi checkout; trang cài đặt hiển thị gói hiện tại/trạng thái quay về | Tạo payment link PayOS; xác minh chữ ký + amount trên webhook; cập nhật subscription trong transaction | PaymentOrder, Subscription | Đã triển khai code; cần cấu hình credentials/webhook URL và kiểm thử giao dịch PayOS trước khi mở production |
-| Admin | Thanh toán thử PayOS | `/admin/test-thanh-toan`, nút tạo link cố định 10.000đ và theo dõi webhook (cổng phụ huynh đã bỏ tab/trang này từ 2026-11-03) | API `test-checkout`/`test-orders` chỉ cho `ROLES.ADMIN` (phụ huynh 403); ghi riêng `PaymentTestOrder`; webhook xác minh chữ ký và amount, không tác động subscription | PaymentTestOrder | Đã triển khai; khoản tiền là thật trên production, chỉ xác nhận end-to-end sau khi admin tự chuyển khoản |
+| ~~Thanh toán thử PayOS~~ | ĐÃ GỠ BỎ (2026-11-03) | Trang `/admin/test-thanh-toan` và `/phu-huynh/thanh-toan-thu` đã xoá; không còn UI thanh toán thử | Hai API `test-checkout`/`test-orders` đã xoá (gọi tới nhận 404); webhook không còn nhánh đơn test | — (model `PaymentTestOrder` đã xoá; collection `paymenttestorders` giữ dữ liệu cũ, không drop) | Gỡ bỏ theo quyết định 2026-11-03. Thanh toán thật (gói tháng/năm) không đổi |
 | Onboarding | Tạo hồ sơ bé | Wizard 4 bước, chọn nhiều ngôn ngữ | `POST /children` giữ tương thích trường singular | Child | Đã deploy FE/BE 2026-10-11; local tests qua, chưa tạo hồ sơ production để nghiệm thu |
 | Child | Chuyển/Xóa hồ sơ | Có dropdown & nút xóa | `PATCH /children/:id/select`, `DELETE /children/:id` | Child, Progress, Recording | Hoàn thiện (P1.6 cascade delete) |
 | Map | Bản đồ 5 chặng | Có | `GET /stages` | Stage, LessonProgress | Hoàn thiện (P1.2 unlock policy) |

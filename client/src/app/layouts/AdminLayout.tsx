@@ -31,7 +31,6 @@ export const AdminLayout: React.FC = () => {
     { to: '/admin/hoc-vien', label: VI_LOCALES.admin.tabLearners, icon: <DomainIcon.learners className="w-5 h-5" /> },
     { to: '/admin/doi-qua', label: VI_LOCALES.admin.tabRedemptions, icon: <DomainIcon.rewardsShop className="w-5 h-5" /> },
     { to: '/admin/quy-tac-diem', label: 'Quy tắc điểm', icon: <DomainIcon.pointRules className="w-5 h-5" /> },
-    { to: '/admin/test-thanh-toan', label: 'Test thanh toán', icon: <DomainIcon.paymentTest className="w-5 h-5" /> },
   ];
 
   if (user?.role !== 'admin') return null;

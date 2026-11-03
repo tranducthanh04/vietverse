@@ -37,7 +37,6 @@ const ParentDashboardPage = lazy(() => import('../features/parent/ParentDashboar
 const ParentRecordingsPage = lazy(() => import('../features/parent/ParentRecordingsPage.js').then((m) => ({ default: m.ParentRecordingsPage })));
 const ParentSettingsPage = lazy(() => import('../features/parent/ParentSettingsPage.js').then((m) => ({ default: m.ParentSettingsPage })));
 const PaymentResultPage = lazy(() => import('../features/parent/PaymentResultPage.js').then((m) => ({ default: m.PaymentResultPage })));
-const PaymentTestPage = lazy(() => import('../features/parent/PaymentTestPage.js').then((m) => ({ default: m.PaymentTestPage })));
 const AdminDashboardPage = lazy(() => import('../features/admin/AdminDashboardPage.js').then((m) => ({ default: m.AdminDashboardPage })));
 const AdminRevenuePage = lazy(() => import('../features/admin/AdminRevenuePage.js').then((m) => ({ default: m.AdminRevenuePage })));
 const AdminLessonsPage = lazy(() => import('../features/admin/AdminLessonsPage.js').then((m) => ({ default: m.AdminLessonsPage })));
@@ -160,7 +159,6 @@ export const router = createBrowserRouter([
       { path: 'hoc-vien', element: withSuspense(<AdminLearnersPage />) },
       { path: 'doi-qua', element: withSuspense(<AdminRedemptionsPage />) },
       { path: 'quy-tac-diem', element: withSuspense(<AdminPointRulesPage />) },
-      { path: 'test-thanh-toan', element: withSuspense(<PaymentTestPage />) },
     ],
   },
 

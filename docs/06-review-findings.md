@@ -524,7 +524,7 @@ Phần này ghi nhận các việc phát hiện khi review lại `client/src` tr
 
 **Cập nhật 2026-10-13 — rà UI và làm lại hệ thống icon:**
 
-- **Icon [ĐÃ SỬA]:** mọi icon đi qua `client/src/components/ui/icons.tsx` (bọc `lucide-react`). Icon mặc định `aria-hidden`; icon có `aria-label` tự có `role="img"`. ESLint `no-restricted-imports` chặn import `lucide-react` ngoài file này. `DomainIcon` gán một icon cho mỗi khái niệm nghiệp vụ (truyện `BookOpenText`, văn hóa `Landmark`, bài học `GraduationCap`, điểm ViVi `Sparkles`, cài đặt `Settings`, thanh toán thử `CreditCard`, quy tắc điểm `SlidersHorizontal`…). Trước đây admin dùng `BookOpen` cho ba mục khác nhau, phụ huynh dùng `Clock` cho Cài đặt, ô điểm của bé dùng `Award`. Tên lucide deprecated (`AlertCircle`, `CheckCircle2`, `Loader2`, `BarChart2`…) đã đổi sang tên mới.
+- **Icon [ĐÃ SỬA]:** mọi icon đi qua `client/src/components/ui/icons.tsx` (bọc `lucide-react`). Icon mặc định `aria-hidden`; icon có `aria-label` tự có `role="img"`. ESLint `no-restricted-imports` chặn import `lucide-react` ngoài file này. `DomainIcon` gán một icon cho mỗi khái niệm nghiệp vụ (truyện `BookOpenText`, văn hóa `Landmark`, bài học `GraduationCap`, điểm ViVi `Sparkles`, cài đặt `Settings`, quy tắc điểm `SlidersHorizontal`…). *(Icon `CreditCard` cho thanh toán thử đã gỡ cùng tính năng ngày 2026-11-03.)* Trước đây admin dùng `BookOpen` cho ba mục khác nhau, phụ huynh dùng `Clock` cho Cài đặt, ô điểm của bé dùng `Award`. Tên lucide deprecated (`AlertCircle`, `CheckCircle2`, `Loader2`, `BarChart2`…) đã đổi sang tên mới.
 - **Emoji làm icon [ĐÃ SỬA]:** thay 33 emoji ở 14 file bằng SVG. Cờ quốc gia ở bước chọn ngôn ngữ (hiển thị thành chữ "GB"/"JP" trên Windows) thay bằng huy hiệu mã EN/JA/KO/ZH/FR. Huy hiệu Phòng báu vật dùng component icon; trạng thái khóa có thêm icon khóa, không chỉ dựa vào độ mờ.
 - **Utility Tailwind thiếu [ĐÃ SỬA]:** thêm `border-3`, `w-18`/`h-18`, `scale-102`, `animate-fade-in` vào config; `animate-fadeIn` và `animate-in fade-in …` (plugin chưa cài) đổi sang `animate-fade-in`. `ring-6` không còn trong code.
 - **Modal/dialog [ĐÃ SỬA]:** `Modal` có `role="dialog"`, `aria-modal`, `aria-labelledby`, đưa focus vào dialog khi mở, giữ Tab trong dialog, trả focus khi đóng. Hồ sơ học viên, xử lý đơn đổi quà và màn giới hạn thời gian (`alertdialog`) có role tương ứng; nút đóng hồ sơ học viên có nhãn và vùng chạm 44px.
@@ -609,6 +609,8 @@ Mỗi thay đổi làm ảnh hưởng behavior, quyền, API hoặc dữ liệu 
 - Follow-up vận hành: dọn/đánh dấu đơn pending hết hạn, job đối soát webhook bị trễ, và cảnh báo đơn tiền đã vào nhưng transaction DB thất bại. Không có webhook thật thì app không tự bật subscription.
 
 ## Trang nghiệm thu giao dịch PayOS — 2026-10-05
+
+> **ĐÃ GỠ BỎ (2026-11-03):** toàn bộ tính năng thanh toán thử PayOS 10.000đ (cổng phụ huynh và admin) đã bị xoá — trang, hai API `test-checkout`/`test-orders`, model `PaymentTestOrder` và nhánh webhook đơn test. Dữ liệu đơn test cũ trong collection `paymenttestorders` được giữ nguyên (không drop). Các mục dưới đây giữ lại làm hồ sơ lịch sử của tính năng đã gỡ.
 
 - Phụ huynh/admin đã đăng nhập có thể mở trang thanh toán thử; nút tạo giao dịch 10.000đ mở thẳng link PayOS, còn trang theo dõi trạng thái riêng.
 - Hai API tạo/tra cứu yêu cầu role parent/admin; truy vấn đơn giới hạn đúng người tạo.

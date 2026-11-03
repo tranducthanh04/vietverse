@@ -1,7 +1,6 @@
 import { randomInt } from 'node:crypto';
 import type { PayOS, Webhook } from '@payos/node';
 import { PaymentOrder, type PaidPlanType } from '../../models/PaymentOrder.js';
-import { PaymentTestOrder } from '../../models/PaymentTestOrder.js';
 import { Subscription } from '../../models/Subscription.js';
 import { User } from '../../models/User.js';
 import { env } from '../../config/env.js';
@@ -40,79 +39,6 @@ async function getPayOS(): Promise<PayOS | null> {
 }
 
 export class PaymentsService {
-  /** Creates a fixed-value production gateway test for an admin; no subscription is changed. */
-  static async createTestCheckout(userId: string) {
-    const payos = await getPayOS();
-    if (!payos) {
-      throw { statusCode: 503, message: 'Thanh toán PayOS chưa được cấu hình trên hệ thống' };
-    }
-
-    const pendingOrder = await PaymentTestOrder.findOne({
-      userId: new Types.ObjectId(userId),
-      status: 'pending',
-      checkoutUrl: { $exists: true, $ne: '' },
-    }).sort({ createdAt: -1 });
-    if (pendingOrder) {
-      return {
-        orderCode: pendingOrder.orderCode,
-        amount: pendingOrder.amount,
-        status: pendingOrder.status,
-        checkoutUrl: pendingOrder.checkoutUrl,
-        createdAt: pendingOrder.createdAt,
-      };
-    }
-
-    let numericOrderCode: number;
-    let orderCode: string;
-    do {
-      numericOrderCode = randomInt(100_000_000, 1_000_000_000);
-      orderCode = `VT${numericOrderCode}`;
-    } while (
-      await PaymentTestOrder.exists({ orderCode }) ||
-      await PaymentOrder.exists({ orderCode: `VV${numericOrderCode}` })
-    );
-    const order = await PaymentTestOrder.create({
-      userId: new Types.ObjectId(userId),
-      orderCode,
-      amount: 10000,
-      status: 'pending',
-    });
-
-    try {
-      const paymentLink = await payos.paymentRequests.create({
-        orderCode: numericOrderCode,
-        amount: 10000,
-        description: 'Vietverse test 10000',
-        items: [{ name: 'Thanh toan thu Vietverse', quantity: 1, price: 10000 }],
-        cancelUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
-        returnUrl: `${env.CLIENT_ORIGIN}/admin/test-thanh-toan?orderCode=${orderCode}&payment=returned`,
-      });
-      order.checkoutUrl = paymentLink.checkoutUrl;
-      order.paymentLinkId = paymentLink.paymentLinkId;
-      await order.save();
-    } catch (err) {
-      order.status = 'failed';
-      await order.save();
-      const message = err instanceof Error ? err.message : 'Lỗi không xác định';
-      throw { statusCode: 502, message: `Không thể tạo liên kết PayOS: ${message}` };
-    }
-
-    return {
-      orderCode: order.orderCode,
-      amount: order.amount,
-      status: order.status,
-      checkoutUrl: order.checkoutUrl,
-      createdAt: order.createdAt,
-    };
-  }
-
-  static async getTestOrderDetails(orderCode: string, userId: string) {
-    const order = await PaymentTestOrder.findOne({ orderCode, userId: new Types.ObjectId(userId) })
-      .select('orderCode amount status checkoutUrl paidAt transactionRef createdAt updatedAt');
-    if (!order) throw { statusCode: 404, message: 'Không tìm thấy giao dịch test' };
-    return order;
-  }
-
   /**
    * Tạo đơn nội bộ trước, sau đó yêu cầu PayOS tạo payment link.
    */
@@ -196,45 +122,13 @@ export class PaymentsService {
     }
 
     const orderCode = `VV${verifiedData.orderCode}`;
-    const testOrderCode = `VT${verifiedData.orderCode}`;
-    const testOrder = await PaymentTestOrder.findOne({ orderCode: testOrderCode });
-    if (testOrder) {
-      if (verifiedData.amount !== testOrder.amount) {
-        throw { statusCode: 400, code: 'PAYOS_AMOUNT_MISMATCH', message: 'Số tiền webhook không khớp với giao dịch test' };
-      }
-
-      const session = await mongoose.startSession();
-      let result: { order: typeof testOrder; subscription: null; idempotencyHandled: boolean } | null = null;
-      try {
-        await session.withTransaction(async () => {
-          const currentTestOrder = await PaymentTestOrder.findOne({ orderCode: testOrderCode }).session(session);
-          if (!currentTestOrder) throw { statusCode: 404, message: `Không tìm thấy giao dịch ${testOrderCode}` };
-          if (currentTestOrder.status !== 'pending') {
-            result = { order: currentTestOrder, subscription: null, idempotencyHandled: true };
-            return;
-          }
-
-          if (verifiedData.code === '00') {
-            currentTestOrder.status = 'completed';
-            currentTestOrder.paidAt = new Date();
-            currentTestOrder.transactionRef = verifiedData.reference;
-          } else {
-            currentTestOrder.status = 'failed';
-          }
-          await currentTestOrder.save({ session });
-          result = { order: currentTestOrder, subscription: null, idempotencyHandled: false };
-        });
-      } finally {
-        await session.endSession();
-      }
-      if (!result) throw { statusCode: 500, message: 'Không thể ghi nhận giao dịch test' };
-      return result;
-    }
 
     const order = await PaymentOrder.findOne({ orderCode });
     if (!order) {
-      // Registration sends a signed sample transaction with no local order.
-      // Acknowledge delivery only; never create an order or grant a subscription.
+      // No local subscription order. This covers PayOS registration sample transactions and any
+      // late webhook for a legacy test order (the removed test-payment feature used `VT…` codes
+      // in a separate collection, never queried here). Acknowledge delivery only; never create an
+      // order or grant a subscription.
       logger.warn({ event: 'payos_webhook_ignored', reason: 'ORDER_NOT_FOUND', orderCode }, 'Authenticated PayOS webhook has no local order');
       return { ignored: true, reason: 'ORDER_NOT_FOUND' };
     }

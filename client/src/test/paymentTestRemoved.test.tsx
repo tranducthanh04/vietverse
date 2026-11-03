@@ -40,19 +40,22 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('payment test is admin-only (decision 2026-11-03)', () => {
-  it('removes the parent payment-test routes and keeps the admin one', () => {
+describe('PayOS test payment is fully removed (decision 2026-11-03)', () => {
+  it('declares no payment-test route anywhere in the router', () => {
     const paths = allRoutePaths(router.routes as RouteObject[]);
     expect(paths).not.toContain('thanh-toan-thu');
     expect(paths).not.toContain('/thanh-toan-thu');
-    expect(paths).toContain('test-thanh-toan');
+    expect(paths).not.toContain('test-thanh-toan');
   });
 
-  it('gives the removed parent routes the not-found title while the admin page keeps its title', () => {
+  it('drops the dedicated payment-test tab titles', () => {
     const notFound = pageTitleFor('/khong-ton-tai');
+    // The standalone parent routes are gone entirely, so their paths get the not-found title.
     expect(pageTitleFor('/thanh-toan-thu')).toBe(notFound);
     expect(pageTitleFor('/phu-huynh/thanh-toan-thu')).toBe(notFound);
-    expect(pageTitleFor('/admin/test-thanh-toan')).toContain('Test thanh toán');
+    // `/admin/test-thanh-toan` no longer has its own title entry; it falls back to the generic
+    // admin overview prefix (the route itself is gone, so the page renders NotFound).
+    expect(pageTitleFor('/admin/test-thanh-toan')).not.toContain('Test thanh toán');
   });
 
   describe('ParentLayout tabs', () => {
@@ -69,7 +72,7 @@ describe('payment test is admin-only (decision 2026-11-03)', () => {
       expect(screen.getByRole('link', { name: /Tiến độ/ })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Bản thu âm/ })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Cài đặt/ })).toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: /Thanh toán thử/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /thanh toán/i })).not.toBeInTheDocument();
     });
   });
 
@@ -78,11 +81,10 @@ describe('payment test is admin-only (decision 2026-11-03)', () => {
       useAuthStore.setState({ user: adminUser, isLoading: false });
     });
 
-    it('still offers the admin test-payment destination', () => {
+    it('no longer offers any test-payment destination', () => {
       renderAt('/admin', <AdminLayout />);
-      const links = screen.getAllByRole('link', { name: /Test thanh toán/ });
-      expect(links.length).toBeGreaterThan(0);
-      for (const link of links) expect(link).toHaveAttribute('href', '/admin/test-thanh-toan');
+      expect(screen.queryByRole('link', { name: /thanh toán/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /test-thanh-toan/i })).not.toBeInTheDocument();
     });
   });
 });

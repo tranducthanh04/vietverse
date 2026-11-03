@@ -33,7 +33,6 @@ import {
   CloudOff as LCloudOff,
   Coins as LCoins,
   Compass as LCompass,
-  CreditCard as LCreditCard,
   Crown as LCrown,
   Drum as LDrum,
   Earth as LEarth,
@@ -151,7 +150,6 @@ export const Clock = withDefaults(LClock, 'Clock');
 export const CloudOff = withDefaults(LCloudOff, 'CloudOff');
 export const Coins = withDefaults(LCoins, 'Coins');
 export const Compass = withDefaults(LCompass, 'Compass');
-export const CreditCard = withDefaults(LCreditCard, 'CreditCard');
 export const Crown = withDefaults(LCrown, 'Crown');
 export const Drum = withDefaults(LDrum, 'Drum');
 export const Earth = withDefaults(LEarth, 'Earth');
@@ -246,7 +244,6 @@ export const DomainIcon = {
   dashboard: LayoutDashboard,
   learners: Users,
   revenue: Wallet,
-  paymentTest: CreditCard,
   pointRules: SlidersHorizontal,
   parentArea: ShieldCheck,
   hint: Lightbulb,

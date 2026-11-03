@@ -20,23 +20,19 @@ vi.mock('@payos/node', async (importOriginal) => {
   };
 });
 
+import mongoose from 'mongoose';
 import { app } from '../app.js';
 import { PayOS } from '@payos/node';
 import { Subscription } from '../models/Subscription.js';
 import { PaymentOrder } from '../models/PaymentOrder.js';
-import { PaymentTestOrder } from '../models/PaymentTestOrder.js';
-import { User } from '../models/User.js';
-import { AuthService } from '../modules/auth/auth.service.js';
-import { ROLES } from '../constants/roles.js';
 
 describe('Payments & Subscription Webhook API', () => {
   let parentToken: string;
   let parentId: string;
-  let adminToken: string;
 
   beforeEach(async () => {
     gatewayCreate.mockClear();
-    // 1. Register a test parent
+    // Register a test parent
     const parentRes = await request(app).post('/api/v1/auth/register').send({
       email: 'parent_payment_test@vietverse.edu.vn',
       password: 'ParentPass123!',
@@ -45,15 +41,6 @@ describe('Payments & Subscription Webhook API', () => {
 
     parentToken = parentRes.body.data.accessToken;
     parentId = parentRes.body.data.user.id;
-
-    // 2. Create an admin — only admins may use the test-payment endpoints (decision 2026-11-03).
-    const adminUser = await User.create({
-      email: 'admin_payment_test@vietverse.edu.vn',
-      passwordHash: 'hashed_pw',
-      displayName: 'Admin Payment Test',
-      role: ROLES.ADMIN,
-    });
-    adminToken = (await AuthService.generateTokens(adminUser)).accessToken;
   });
 
   it('1. POST /api/v1/payments/create-checkout - Khởi tạo đơn hàng thanh toán thành công', async () => {
@@ -212,10 +199,8 @@ describe('Payments & Subscription Webhook API', () => {
       signature: '',
     };
     await PaymentOrder.create({ userId: parentId, orderCode: 'VV456789123', amount: 250000, planType: 'monthly', status: 'pending' });
-    await PaymentTestOrder.create({ userId: parentId, orderCode: 'VT456789124', amount: 10000, status: 'pending' });
     const before = {
       orders: await PaymentOrder.find().lean(),
-      testOrders: await PaymentTestOrder.find().lean(),
       subscriptions: await Subscription.find().lean(),
     };
     const signer = new PayOS({ clientId: 'test', apiKey: 'test', checksumKey: 'test-checksum-key' });
@@ -226,7 +211,6 @@ describe('Payments & Subscription Webhook API', () => {
       expect(res.body).toEqual({ success: true, data: { ignored: true, reason: 'ORDER_NOT_FOUND' } });
     }
     expect(await PaymentOrder.find().lean()).toEqual(before.orders);
-    expect(await PaymentTestOrder.find().lean()).toEqual(before.testOrders);
     expect(await Subscription.find().lean()).toEqual(before.subscriptions);
 
     // Even an unknown/sample order must authenticate before being acknowledged.
@@ -266,78 +250,58 @@ describe('Payments & Subscription Webhook API', () => {
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
     expect(await PaymentOrder.countDocuments()).toBe(0);
-    expect(await PaymentTestOrder.countDocuments()).toBe(0);
     expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
   });
 
-  it('locks both test-payment endpoints to admins and sends admins back to the admin test page', async () => {
-    // A parent is forbidden on both test-payment endpoints (decision 2026-11-03).
-    const parentCheckout = await request(app).post('/api/v1/payments/test-checkout')
+  it('returns 404 for the removed test-payment endpoints', async () => {
+    // The whole PayOS test-payment feature was removed (decision 2026-11-03); both routes are gone.
+    const checkout = await request(app).post('/api/v1/payments/test-checkout')
       .set('Authorization', `Bearer ${parentToken}`).send({});
-    expect(parentCheckout.status).toBe(403);
-    expect(parentCheckout.body.error.code).toBe('FORBIDDEN');
+    expect(checkout.status).toBe(404);
+    expect(checkout.body.error.code).toBe('NOT_FOUND');
 
-    const parentLookup = await request(app).get('/api/v1/payments/test-orders/VT123456789')
+    const lookup = await request(app).get('/api/v1/payments/test-orders/VT123456789')
       .set('Authorization', `Bearer ${parentToken}`);
-    expect(parentLookup.status).toBe(403);
-    expect(parentLookup.body.error.code).toBe('FORBIDDEN');
-
-    // No test order was created by the forbidden parent request.
-    expect(await PaymentTestOrder.countDocuments()).toBe(0);
-
-    // An admin can create a test checkout; the gateway return/cancel URLs point to the admin page.
-    const adminCheckout = await request(app).post('/api/v1/payments/test-checkout')
-      .set('Authorization', `Bearer ${adminToken}`).send({});
-    expect(adminCheckout.status).toBe(201);
-    expect(adminCheckout.body.data.amount).toBe(10000);
-    const gatewayRequest = gatewayCreate.mock.calls.at(-1)![0];
-    for (const target of [gatewayRequest.returnUrl, gatewayRequest.cancelUrl]) {
-      const url = new URL(target);
-      expect(url.pathname).toBe('/admin/test-thanh-toan');
-      expect(url.searchParams.get('payment')).toBe('returned');
-      expect(url.searchParams.get('orderCode')).toBe(adminCheckout.body.data.orderCode);
-    }
-
-    // The admin can read back the order they created.
-    const adminLookup = await request(app).get(`/api/v1/payments/test-orders/${adminCheckout.body.data.orderCode}`)
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(adminLookup.status).toBe(200);
-    expect(adminLookup.body.data.status).toBe('pending');
+    expect(lookup.status).toBe(404);
+    expect(lookup.body.error.code).toBe('NOT_FOUND');
   });
 
-  it('still completes a matching test order once without granting a subscription', async () => {
-    const checkout = await request(app).post('/api/v1/payments/test-checkout')
-      .set('Authorization', `Bearer ${adminToken}`).send({});
-    expect(checkout.status).toBe(201);
-    const subscriptions = await Subscription.find().lean();
+  it('acknowledges a late webhook for a legacy test order without touching it or any subscription', async () => {
+    // Old test-order rows stay in the DB after the feature was removed (data is kept, only code
+    // is gone). The webhook no longer has a test-order branch, so a late PayOS callback for such
+    // an order is treated as an unknown order: ACK 200 ignored, and no subscription is created.
+    const legacy = mongoose.connection.collection('paymenttestorders');
+    const numericOrderCode = 456789321;
+    await legacy.insertOne({
+      userId: new mongoose.Types.ObjectId(parentId),
+      orderCode: `VT${numericOrderCode}`,
+      amount: 10000,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const before = await legacy.find().toArray();
+
     const payload = {
       code: '00', desc: 'success', success: true,
       data: {
-        orderCode: Number(checkout.body.data.orderCode.slice(2)), amount: 9999,
-        code: '00', desc: 'success', reference: 'TEST-REF',
+        orderCode: numericOrderCode, amount: 10000, description: 'Vietverse test 10000',
+        accountNumber: '12345678', reference: 'LEGACY-REF', transactionDateTime: '2026-10-03 12:00:00',
+        currency: 'VND', paymentLinkId: 'legacy-link', code: '00', desc: 'Thành công',
       },
       signature: '',
     };
     const signer = new PayOS({ clientId: 'test', apiKey: 'test', checksumKey: 'test-checksum-key' });
     payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
-    const mismatch = await request(app).post('/api/v1/payments/webhook').send(payload);
-    expect(mismatch.status).toBe(400);
-    expect(mismatch.body.error.code).toBe('PAYOS_AMOUNT_MISMATCH');
-    expect(await PaymentTestOrder.findOne({ orderCode: checkout.body.data.orderCode }).then((order) => order?.status)).toBe('pending');
 
-    payload.data.amount = 10000;
-    payload.signature = (await signer.crypto.createSignatureFromObj(payload.data, 'test-checksum-key')) || '';
-    for (const retry of [false, true]) {
-      const res = await request(app).post('/api/v1/payments/webhook').send(payload);
-      expect(res.status).toBe(200);
-      expect(res.body.data.order.status).toBe('completed');
-      expect(res.body.data.order.transactionRef).toBe('TEST-REF');
-      expect(res.body.data.subscription).toBeNull();
-      expect(res.body.data.idempotencyHandled).toBe(retry);
-    }
+    const res = await request(app).post('/api/v1/payments/webhook').send(payload);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: { ignored: true, reason: 'ORDER_NOT_FOUND' } });
+
+    // The legacy row is untouched and no subscription was created for anyone.
+    expect(await legacy.find().toArray()).toEqual(before);
     expect(await PaymentOrder.countDocuments()).toBe(0);
-    expect(await PaymentTestOrder.countDocuments()).toBe(1);
-    expect(await Subscription.find().lean()).toEqual(subscriptions);
+    expect(await Subscription.findOne({ userId: parentId }).then((sub) => sub?.plan)).toBe('free');
   });
 
   it('4. GET /api/v1/payments/history - Lấy lịch sử giao dịch thanh toán', async () => {

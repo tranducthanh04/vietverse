@@ -23,7 +23,6 @@ const TITLES: Array<[prefix: string, title: string]> = [
   ['/admin/hoc-vien', 'Admin · Học viên'],
   ['/admin/doi-qua', 'Admin · Đổi quà'],
   ['/admin/quy-tac-diem', 'Admin · Quy tắc điểm'],
-  ['/admin/test-thanh-toan', 'Admin · Test thanh toán'],
   ['/admin', 'Admin · Tổng quan'],
 ];
 

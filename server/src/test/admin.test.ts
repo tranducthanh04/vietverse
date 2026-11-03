@@ -9,7 +9,6 @@ import { ShopItem } from '../models/ShopItem.js';
 import { Redemption } from '../models/Redemption.js';
 import { PointTransaction } from '../models/PointTransaction.js';
 import { PaymentOrder } from '../models/PaymentOrder.js';
-import { PaymentTestOrder } from '../models/PaymentTestOrder.js';
 import { AuthService } from '../modules/auth/auth.service.js';
 import { ROLES } from '../constants/roles.js';
 
@@ -109,7 +108,9 @@ describe('Admin API & Schema Validation (P1.7)', () => {
         { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-FAILED', planType: 'monthly', amount: 250000, status: 'failed', paidAt },
         { userId: new mongoose.Types.ObjectId(), orderCode: 'VV-CANCELLED', planType: 'yearly', amount: 990000, status: 'cancelled', paidAt },
       ]);
-      await PaymentTestOrder.create({ userId: new mongoose.Types.ObjectId(), orderCode: 'VT-TEST', amount: 10000, status: 'completed', paidAt });
+      // Legacy test-order data (feature removed 2026-11-03; model gone, DB rows kept) must never
+      // count toward revenue. Insert straight into the collection since the model no longer exists.
+      await mongoose.connection.collection('paymenttestorders').insertOne({ userId: new mongoose.Types.ObjectId(), orderCode: 'VT-TEST', amount: 10000, status: 'completed', paidAt });
 
       const res = await request(app)
         .get('/api/v1/admin/revenue')
